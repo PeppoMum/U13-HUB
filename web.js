@@ -10,7 +10,9 @@ const XIDS=["full","anon","plan","demo"];
 window.__WEB=true;
 window.__WEB_BASE=location.origin+location.pathname.replace(/index\.html$/,"");
 const H=location.hash;
-const isViewerHash=/^#[A-Za-z0-9]+\.[A-Za-z0-9_-]{16,}$/.test(H)&&!/^#co[A-Za-z0-9]+\./.test(H);
+const isScout=/^#scout\.[A-Za-z0-9_-]{16,}$/.test(H);
+window.__SCOUTKEY=isScout?H.slice(7):"";
+const isViewerHash=/^#[A-Za-z0-9]+\.[A-Za-z0-9_-]{16,}$/.test(H)&&!/^#co[A-Za-z0-9]+\./.test(H)&&!isScout;
 const cfgOk=()=>!!(CFG.apiKey&&CFG.projectId&&CFG.authDomain&&!/DEIN|EINTRAGEN|XXXX/i.test(CFG.apiKey+CFG.projectId));
 const E=(s)=>String(s==null?"":s).replace(/[&<>"]/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const clean=(o)=>o==null?o:JSON.parse(JSON.stringify(o));
@@ -39,6 +41,15 @@ async function restBlob(id){
   let b=m.b;for(let i=1;i<(m.n||1);i++){const c=await restDoc(id+"~"+i);if(!c)return null;b+=c.b}
   return b;
 }
+/* ---------- Scouting-Eingabe ohne Anmeldung: nur Schreiben in den Posteingang, abgesichert durch den geheimen Schlüssel im Link ---------- */
+const FSB=()=>"https://firestore.googleapis.com/v1/projects/"+encodeURIComponent(CFG.projectId)+"/databases/(default)/documents/";
+function toFs(v){if(v==null)return{nullValue:null};if(typeof v==="boolean")return{booleanValue:v};if(typeof v==="number")return Number.isInteger(v)?{integerValue:String(v)}:{doubleValue:v};if(Array.isArray(v))return{arrayValue:{values:v.map(toFs)}};if(typeof v==="object"){const f={};Object.keys(v).forEach((k)=>{f[k]=toFs(v[k])});return{mapValue:{fields:f}}}return{stringValue:String(v)}}
+const scoutGet=async()=>{let aus=false;try{const m=await restDoc("scout");aus=!!(m&&m.aus)}catch(e){}return{exists:true,data:()=>({kaderAus:aus})}};
+const scoutDb={doc:()=>({get:scoutGet}),collection:(c)=>({doc:(id)=>({get:scoutGet,set:async(o)=>{
+  if(c!=="kinbox")throw{code:"unsupported"};
+  const f={};Object.keys(o).forEach((k)=>{f[k]=toFs(o[k])});
+  const r=await fetch(FSB()+"kinbox?documentId="+encodeURIComponent(id)+"&key="+encodeURIComponent(CFG.apiKey),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({fields:f})});
+  if(!r.ok)throw{code:r.status===403?"permission-denied":"http-"+r.status}}})})};
 window.__webSnap=async function(pid){
   if(!cfgOk())throw new Error("config");
   const x=XIDS.indexOf(pid)>=0,b=await restBlob((x?"x_":"p_")+pid),bg=await restDoc("bg"),s={p:{},x:{}};
@@ -71,7 +82,7 @@ function overlay(html){
 const hideOverlay=()=>{if(ov){ov.remove();ov=null}};
 function showSetup(){overlay('<div class="ms er" style="font-size:15px">Die Verbindung zu Firebase ist noch nicht eingerichtet.</div><p class="sb">Bitte die Datei <b>firebase-config.js</b> mit den Werten aus dem Firebase-Projekt ausfüllen (siehe Anleitung) und die Dateien erneut hochladen.</p>')}
 function showDenied(email){
-  const o=overlay('<div class="ms er" style="font-size:15px">Dieses Konto ist nicht freigegeben.</div><p class="sb">Angemeldet als <b>'+E(email)+'</b>. Zugriff haben nur die im Projekt hinterlegten Trainer-Adressen.</p><button id="u13so">Abmelden</button>');
+  const o=overlay('<div class="ms er" style="font-size:15px">Dieses Konto ist nicht freigegeben.</div><p class="sb">Angemeldet als <b>'+E(email)+'</b>. Zugriff haben nur Personen, die der Besitzer unter Einstellungen → Mannschaft → „Zugang zur App“ freigegeben hat.</p><button id="u13so">Abmelden</button>');
   o.querySelector("#u13so").onclick=()=>auth.signOut().then(()=>location.reload());
 }
 function showVerify(user){
@@ -123,7 +134,53 @@ async function start(){
     /* offline: weiter, die Daten kommen aus dem Gerätespeicher */
   }
   hideOverlay();addSignOut();window.__webFs=fs;
+  await afterLogin();
   return wrap();
+}
+/* ---------- Nach der Anmeldung: Rolle, Scouting-Schlüssel, Zugangsliste ---------- */
+let scoutKey="";
+const rndKey=()=>{const a=new Uint8Array(18);crypto.getRandomValues(a);return btoa(String.fromCharCode.apply(null,a)).replace(/\+/g,"-").replace(/\//g,"_").replace(/=/g,"")};
+const denied=(e)=>!!(e&&/permission|denied|insufficient/i.test(String(e.code)+" "+String(e.message)));
+async function afterLogin(){
+  let owner=null;
+  try{await fs.doc("ownercheck/x").get();owner=true}catch(e){if(denied(e))owner=false}
+  try{if(owner===null)owner=localStorage.getItem("u13role")!=="co";else localStorage.setItem("u13role",owner?"owner":"co")}catch(e){if(owner===null)owner=true}
+  window.__webOwner=owner;
+  if(!owner)document.body.classList.add("co");
+  try{const r=await fs.doc("config/scout").get();let k=r.exists&&r.data()&&r.data().k;if(!k){k=rndKey();await fs.doc("config/scout").set({k})}scoutKey=k}catch(e){}
+  window.__scoutLink=()=>scoutKey?window.__WEB_BASE+"#scout."+scoutKey:"";window.__scoutNew=true;
+  let last=null;
+  fs.doc("config/main").onSnapshot((d)=>{const aus=!!(d.exists&&d.data()&&d.data().kaderAus);if(aus===last)return;const first=last===null;last=aus;
+    const w=()=>fs.doc("pub/scout").set({aus}).catch(()=>{});
+    if(first)fs.doc("pub/scout").get().then((x)=>{if(!x.exists||!!(x.data()&&x.data().aus)!==aus)w()}).catch(()=>{});else w()},()=>{});
+  document.addEventListener("click",async(ev)=>{const b=ev.target.closest&&ev.target.closest("[data-scn]");if(!b)return;
+    if(!b.dataset.arm){b.dataset.arm="1";b.textContent="Wirklich neu erzeugen?";return}
+    const k=rndKey();try{await fs.doc("config/scout").set({k});scoutKey=k;const i=document.getElementById("sclink");if(i)i.value=window.__scoutLink();b.dataset.arm="";b.textContent="Neu erzeugen"}catch(e){b.textContent="Hat nicht geklappt"}});
+  if(owner)cards();
+}
+function cards(){
+  const put=()=>{
+    const m=document.getElementById("etp-m"),sv=document.getElementById("etp-s");if(!m||!sv){setTimeout(put,500);return}
+    if(!document.getElementById("u13acc")){
+      const c=document.createElement("div");c.className="card";c.id="u13acc";
+      c.innerHTML='<h3>Zugang zur App</h3><p class="note" style="margin-top:0">Wer die App nach der Anmeldung (Google oder E-Mail) öffnen darf. Du und Mathis sind fest eingetragen. Weitere Personen trägst du hier ein. Sie müssen sich mit genau dieser E-Mail-Adresse anmelden und sehen die Mannschafts- und Sicherungs-Einstellungen nicht.</p><div id="u13accl"></div><div class="bar" style="margin:8px 0 0"><input id="u13acce" type="email" placeholder="E-Mail-Adresse" autocomplete="off" style="flex:1;min-width:200px"><button class="btn" id="u13acca">Hinzufügen</button></div><div class="note" id="u13accm"></div>';
+      m.appendChild(c);
+      const L=c.querySelector("#u13accl"),M=c.querySelector("#u13accm");
+      fs.collection("trainer").onSnapshot((q)=>{const rows=q.docs.map((d)=>d.id).sort();
+        L.innerHTML=rows.length?rows.map((id)=>'<div class="bar" style="margin:4px 0"><span style="flex:1;min-width:0;overflow-wrap:anywhere">'+E(id)+'</span><button class="btn" data-acd="'+E(id)+'">Entfernen</button></div>').join(""):'<div class="note">Noch keine weiteren Personen.</div>'},()=>{L.innerHTML='<div class="note">Liste konnte nicht geladen werden.</div>'});
+      c.addEventListener("click",async(ev)=>{
+        const d=ev.target.closest("[data-acd]");
+        if(d){if(!d.dataset.arm){d.dataset.arm="1";d.textContent="Wirklich entfernen?";return}try{await fs.doc("trainer/"+d.dataset.acd).delete();M.className="note";M.textContent="Entfernt. Die Person kommt ab sofort nicht mehr hinein."}catch(e){M.className="note warn";M.textContent="Das konnte nicht gespeichert werden (nur der Besitzer darf das)."}return}
+        if(ev.target.id==="u13acca"){const i=c.querySelector("#u13acce"),mail=i.value.trim().toLowerCase();
+          if(!/^[^\s@\/]+@[^\s@\/]+\.[^\s@\/]+$/.test(mail)){M.className="note warn";M.textContent="Bitte eine gültige E-Mail-Adresse eintragen.";return}
+          try{await fs.doc("trainer/"+mail).set({email:mail,am:new Date().toISOString()});i.value="";M.className="note";M.textContent="Hinzugefügt. Die Person kann sich jetzt anmelden."}catch(e){M.className="note warn";M.textContent="Das konnte nicht gespeichert werden (nur der Besitzer darf das)."}}});
+    }
+    if(!document.getElementById("u13upd")){
+      const c=document.createElement("div");c.className="card";c.id="u13upd";
+      c.innerHTML='<h3>Update der App einspielen (GitHub)</h3><p class="note" style="margin-top:0">Nur nötig, wenn Claude dir eine neue ZIP-Datei gibt. Löschen musst du nichts: Gleichnamige Dateien werden beim Hochladen ersetzt.</p><ol style="margin:6px 0 6px 20px;padding:0"><li>Neue ZIP-Datei auf dem Computer entpacken.</li><li>Auf github.com das Repository öffnen → <b>Add file</b> → <b>Upload files</b>.</li><li>Alle Dateien aus dem entpackten Ordner in das Fenster ziehen (den <b>Inhalt</b>, nicht den Ordner selbst; <b>index.html</b> muss ganz oben im Repository liegen, nicht in einem Unterordner).</li><li>Unten <b>Commit changes</b> klicken.</li><li>1–3 Minuten warten (Reiter <b>Actions</b>: grüner Haken). Dann die App neu laden, am iPad und Handy gegebenenfalls zweimal.</li><li>Nur wenn Claude es ausdrücklich sagt: <b>firestore.rules</b> in Firebase unter Firestore → Regeln einfügen und <b>Veröffentlichen</b>.</li></ol><p class="note" style="margin-bottom:0">Deine Daten bleiben bei einem Update unverändert.</p>';
+      const sw=document.getElementById("swc");if(sw&&sw.parentNode===sv)sv.insertBefore(c,sw);else sv.appendChild(c);
+    }
+  };put();
 }
 function addSignOut(){
   const put=()=>{const t=document.querySelector(".top");if(!t||document.getElementById("u13out"))return;const b=document.createElement("button");b.id="u13out";b.type="button";b.textContent="Abmelden";b.title=(auth.currentUser&&auth.currentUser.email)||"";b.onclick=()=>auth.signOut().then(()=>location.reload());t.appendChild(b)};
@@ -139,9 +196,10 @@ async function publishSnap(snap){
   for(const pid of Object.keys(snap.p||{}))await put("p_"+pid,snap.p[pid]);
   for(const k of Object.keys(snap.x||{}))await put("x_"+k,snap.x[k]);
   if(snap.bg){let bg=clean(snap.bg);if(JSON.stringify(bg).length>900000)bg={L:bg.L||"",D:bg.D||"",i:""};keep.add("bg");await fs.doc("pub/bg").set(bg)}
+  keep.add("scout");
   const all=await fs.collection("pub").get();
   for(const d of all.docs){if(!keep.has(d.id))await fs.doc("pub/"+d.id).delete()}
-  await fs.doc("linkmeta/main").set({u:snap.u,k:snap.k||{},xk:snap.xk||{},fp:snap.fp||""});
+  await fs.doc("linkmeta/main").set({u:snap.u,k:snap.k||{},xk:snap.xk||{},fp:snap.fp||"",fa:snap.fa||"",fs:snap.fs||""});
 }
 /* Trainer-Ansicht: Stand der veröffentlichten Links (für Statusanzeige und Prüfung) */
 window.__webOwnerSnap=function(cb){
@@ -151,7 +209,7 @@ window.__webOwnerSnap=function(cb){
     if(docs==null||meta==null)return;
     const raw={};docs.forEach((d)=>{raw[d.id]=d.data()});
     const join=(id)=>{const m=raw[id];if(!m||typeof m.b!=="string")return null;let b=m.b;for(let i=1;i<(m.n||1);i++){const c=raw[id+"~"+i];if(!c)return null;b+=c.b}return b};
-    const s={u:meta.u||"",k:meta.k||{},xk:meta.xk||{},fp:meta.fp||"",p:{},x:{}};
+    const s={u:meta.u||"",k:meta.k||{},xk:meta.xk||{},fp:meta.fp||"",fa:meta.fa||"",fs:meta.fs||"",p:{},x:{}};
     Object.keys(raw).forEach((id)=>{if(id.indexOf("~")>=0)return;if(id.slice(0,2)==="p_"){const b=join(id);if(b)s.p[id.slice(2)]=b}else if(id.slice(0,2)==="x_"){const b=join(id);if(b)s.x[id.slice(2)]=b}});
     window.__webSnapReady=true;cb(s);
   };
@@ -163,7 +221,7 @@ window.__webOwnerSnap=function(cb){
 /* ---------- Schnittstelle zur App ---------- */
 let dbP=null;
 window.claude={use:async function(name){
-  if(name==="db")return isViewerHash?null:(dbP||(dbP=start()));
+  if(name==="db")return isScout?scoutDb:isViewerHash?null:(dbP||(dbP=start()));
   if(name==="downloads")return isViewerHash?null:{save:nativeSave};
   if(name==="artifact")return isViewerHash?null:{publish:async(snap)=>{await (dbP||(dbP=start()));return publishSnap(snap)}};
   return null;

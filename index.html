@@ -83,7 +83,7 @@ body.bgimg main>section>.kpis{background:none}body.bgimg .hl{display:none}body.b
 @media(max-width:760px){nav{-webkit-overflow-scrolling:touch;scrollbar-width:none}nav::-webkit-scrollbar{display:none}nav button[data-s="h"]{position:sticky;left:0;z-index:3;background:var(--card);box-shadow:8px 0 8px -6px rgba(0,0,0,.25)}}
 .etb{margin:0 0 14px}.etb button{flex:1;min-width:0}.etp>.card{margin:0 0 12px!important}.etp>.gr{margin:0 0 12px}.coonly{display:none}body.co .coonly{display:inline}body.co .ownonly{display:none}
 body.co #etb,body.co #etp-m,body.co #etp-s{display:none!important}body.co #etp-l{display:block!important}body.co #etp-l>.card:not(#lkh):not(#ktc){display:none}
-body.kaus nav button[data-s="k"],body.kaus #hn [data-go="k"],body.kaus #k{display:none!important}</style>
+body.kaus nav button[data-s="k"],body.kaus #hn [data-go="k"],body.kaus #k{display:none!important}#lkco{display:none!important}</style>
 <div class="app">
 <nav><h1>U13 · <span id="sais">2026/27</span></h1><small>Teamzentrale</small>
 <button data-s="h" class="on">🏠 Start</button><button data-s="a">📊 Saison</button><button data-s="q">📈 Statistik</button><button data-s="p">👤 Profil</button><button data-s="n">📝 Notizen</button><button data-s="t">🏃 Training</button><button data-s="g">⚽ Spiele</button><button data-s="m">📅 Termine</button><button data-s="w">🎯 Schwerpunkte</button><button data-s="s">🗂 Stammdaten</button><button data-s="k">🧩 Kader</button><button data-s="e">⚙️ Einstellungen</button></nav>
@@ -150,23 +150,23 @@ body.kaus nav button[data-s="k"],body.kaus #hn [data-go="k"],body.kaus #k{displa
 <div class="bar" style="margin:12px 0 0"><label>Name <input id="ean" style="width:170px" autocomplete="off"></label><label><input type="checkbox" id="eag" checked> gewertet</label><button class="btn" id="eaa">＋ Spielart hinzufügen</button><span class="note" id="eam"></span></div></div>
 <div class="card" style="margin-top:12px"><h3>Positionen</h3><p class="note" style="margin-top:0">Angehakte Positionen erscheinen in den Stammdaten zur Auswahl. Eine Position, die Spielern zugeordnet ist, lässt sich nur ausblenden, nicht löschen.</p><div class="tw"><table id="eps"></table></div>
 <div class="bar" style="margin:12px 0 0"><label>Kürzel <input id="epk" style="width:90px" autocomplete="off"></label><label>Bezeichnung (optional) <input id="epn" style="width:170px" autocomplete="off"></label><button class="btn" id="epa">＋ Position hinzufügen</button><span class="note" id="epm"></span></div></div>
-<div class="card" style="margin-top:12px"><h3>Hintergrund</h3><p class="note" style="margin-top:0">Gilt auf diesem Gerät; für Spieler- und externe Links wird der Hintergrund beim „Alle Links aktualisieren“ mitgegeben. Farbe für Hell und Dunkel getrennt wählbar, oder ein eigenes Bild.</p><div style="margin:8px 0 2px"><b style="font-size:12px">Hell</b></div><div class="bgsw" id="bgL"></div><div style="margin:8px 0 2px"><b style="font-size:12px">Dunkel</b></div><div class="bgsw" id="bgD"></div><div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><select id="bgsel" hidden aria-label="Bild verwenden"><option value="">Standard-Hintergrund</option><option value="on">Bild verwenden</option></select><button class="btn" id="bgimg" type="button">Eigenes Bild wählen</button><button class="btn" id="bgimgx" type="button" hidden>Bild entfernen</button></div><input type="file" id="bgf" accept="image/*" hidden></div>
+<div class="card" style="margin-top:12px"><h3>Hintergrund</h3><p class="note" style="margin-top:0">Gilt auf diesem Gerät; für Spieler- und externe Links wird der Hintergrund bei der nächsten Aktualisierung der Links mitgegeben. Farbe für Hell und Dunkel getrennt wählbar, oder ein eigenes Bild.</p><div style="margin:8px 0 2px"><b style="font-size:12px">Hell</b></div><div class="bgsw" id="bgL"></div><div style="margin:8px 0 2px"><b style="font-size:12px">Dunkel</b></div><div class="bgsw" id="bgD"></div><div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><select id="bgsel" hidden aria-label="Bild verwenden"><option value="">Standard-Hintergrund</option><option value="on">Bild verwenden</option></select><button class="btn" id="bgimg" type="button">Eigenes Bild wählen</button><button class="btn" id="bgimgx" type="button" hidden>Bild entfernen</button></div><input type="file" id="bgf" accept="image/*" hidden></div>
 
 </div>
 <div class="etp" id="etp-l" hidden>
-<div class="card" id="lkh" style="margin-bottom:12px"><h3>Hinweise in Spielerlinks</h3><p class="note" style="margin-top:0">Farbiger Hinweis oben im Link („Gesamter Link“: in beiden Reitern und im Terminplan-Link) oder nur in den Terminplänen. Ohne Datum bleibt er sichtbar, bis du ihn entfernst. Wirkt erst nach „Alle Links aktualisieren“ (Knopf weiter unten auf dieser Seite).</p><div id="hnl"></div>
+<div class="card" id="lkh" style="margin-bottom:12px"><h3>Hinweise in Spielerlinks</h3><p class="note" style="margin-top:0">Farbiger Hinweis oben im Link („Gesamter Link“: in beiden Reitern und im Terminplan-Link) oder nur in den Terminplänen. Ohne Datum bleibt er sichtbar, bis du ihn entfernst. Wirkt in den Links bei der nächsten Aktualisierung (täglich 23:00 Uhr).</p><div id="hnl"></div>
 <div class="bar" style="margin:12px 0 0;align-items:flex-start"><label class="note" style="flex:1;min-width:240px">Hinweis<br><textarea id="hnt" rows="2" style="width:100%" placeholder="z. B. Training fällt am Freitag aus"></textarea></label><label class="note">Farbe<br><select id="hnf"><option value="blau">Blau – Info</option><option value="gelb">Gelb – Achtung</option><option value="rot">Rot – Wichtig</option><option value="gruen">Grün – Positiv</option></select></label><label class="note">Anzeigen bei<br><select id="hnw"><option value="alle">Gesamter Link</option><option value="plan">Nur Terminpläne</option></select></label></div>
 <div class="bar" style="margin:8px 0 0"><label class="note">Sichtbar ab (optional)<br><input type="date" id="hnv"></label><label class="note">Sichtbar bis (optional)<br><input type="date" id="hnb"></label></div>
 <div id="hnpw" style="display:none;margin:10px 0 0"><div class="note" style="margin-bottom:4px">Nur in diesen Monaten (leer = in allen)</div><div class="chips" id="hnmo" style="flex-wrap:wrap"></div><label class="note" style="display:block;margin-top:8px">Und/oder nur in diesen Kalenderwochen (z. B. 41 oder 43–45, 48)<br><input id="hnkw" style="width:220px" autocomplete="off" placeholder="leer = in allen"></label><p class="note" id="hnph" style="margin:6px 0 0">Der Hinweis erscheint nur, wenn der angezeigte Monat bzw. die angezeigte Woche dazu passt. Beispiel: „November“ → im Novemberplan und in allen Wochen, die in den November fallen.</p></div>
 <div class="bar" style="margin:10px 0 0"><button class="btn" id="hna" style="background:var(--ac);color:#fff;border-color:var(--ac)">＋ Hinweis speichern</button><button class="btn" id="hnc" hidden>Abbrechen</button><span class="note" id="hnm"></span></div></div>
-<div class="card" id="ktc" style="margin-top:12px"><h3>Kontakte (Fußzeile im Wochenplan)</h3><p class="note" style="margin-top:0">Verein, Trainer, Ansprechpartner. Eine Zeile pro Angabe. Im Plan-Link und in den Spielerlinks erscheint eine Änderung erst nach „Alle Links aktualisieren“ (Reiter „Hinweise &amp; Links“).</p><div id="kct"></div></div>
-<div class="card" id="lkp" style="margin-top:12px"><h3>Links veröffentlichen</h3><p class="note" style="margin-top:0">Gilt für alle Links unten (Spieler/Eltern und extern). Änderungen an Links und neue Daten gehen erst nach diesem Klick online.</p><div class="bar" style="margin:0"><button class="btn" id="lku" style="background:var(--ac);color:#fff;border-color:var(--ac)">🔄 Alle Links aktualisieren</button><span class="note" id="lkm"></span></div><p class="note" id="lks" style="margin-bottom:0"></p></div>
-<div class="card" id="lkc" style="margin-top:12px"><h3>Spielerlinks</h3><p class="note" style="margin-top:0">Jeder Spieler bekommt einen persönlichen Link und sieht damit nur sein eigenes Profil – ohne Claude-Konto. Die Links bleiben immer gleich. Aktivieren, Deaktivieren und neue Daten wirken erst nach Klick auf „Alle Links aktualisieren“. Bitte nur mit Einwilligung der Eltern weitergeben.</p>
+<div class="card" id="ktc" style="margin-top:12px"><h3>Kontakte (Fußzeile im Wochenplan)</h3><p class="note" style="margin-top:0">Verein, Trainer, Ansprechpartner. Eine Zeile pro Angabe. Im Plan-Link und in den Spielerlinks erscheint eine Änderung bei der nächsten Aktualisierung (täglich 23:00 Uhr, sofort über „Hinweise &amp; Links“).</p><div id="kct"></div></div>
+<div class="card" id="lkp" style="margin-top:12px"><h3>Links veröffentlichen</h3><p class="note" style="margin-top:0">Die Links werden automatisch aktualisiert: neue Daten jeden Tag um 23:00 Uhr (sobald die App danach geöffnet wird), Änderungen an den Links selbst nach wenigen Sekunden. Der Knopf ist nur für den Fall, dass du sofort etwas veröffentlichen willst.</p><div class="bar" style="margin:0"><button class="btn" id="lku" style="background:var(--ac);color:#fff;border-color:var(--ac)">🔄 Jetzt sofort aktualisieren</button><span class="note" id="lkm"></span></div><p class="note" id="lks" style="margin-bottom:0"></p></div>
+<div class="card" id="lkc" style="margin-top:12px"><h3>Spielerlinks</h3><p class="note" style="margin-top:0">Jeder Spieler bekommt einen persönlichen Link und sieht damit nur sein eigenes Profil – ohne Anmeldung. Die Links bleiben immer gleich. Aktivieren und Deaktivieren gelten nach wenigen Sekunden, neue Daten werden täglich um 23:00 Uhr übernommen. Bitte nur mit Einwilligung der Eltern weitergeben.</p>
 <div class="bar"><button class="btn" data-all="1">Alle aktivieren</button><button class="btn" data-all="0">Alle deaktivieren</button></div>
 <div class="tw"><table id="lkt"></table></div>
 </div>
 <div class="card" id="lkco" style="margin-top:12px"><h3>Trainer-Links (Co-Trainer)</h3><p class="note" style="margin-top:0">Für Trainer und Verantwortliche aus den Stammdaten (außer dem Besitzer). Sie sehen und bearbeiten alles, aber nicht die Einstellungen. <b>Wichtig:</b> Bearbeiten geht nur mit Claude-Konto, und die Person muss unter „Teilen“ der Seite als Mitwirkende eingeladen sein; der Link allein reicht nicht. Ein ausgeschalteter Link sperrt den Zugang über die App sofort (ohne „Aktualisieren“).</p><div class="tw"><table id="lkct"></table></div></div>
-<div class="card" id="lkx" style="margin-top:12px"><h3>Externe Links (nur ansehen)</h3><p class="note" style="margin-top:0">Für Personen außerhalb des Teams. „Vollansicht“ und „Struktur“ zeigen die komplette App (ohne Änderungen). <b>„Nur Terminpläne“</b> zeigt ausschließlich Monats- und Wochenplan und lässt sich ohne Claude-Konto öffnen (nur der A4-Download braucht ein Konto) – Spielerprofile, Notizen und To-Dos sind darin nicht enthalten. <b>„Demo“</b> zeigt die ganze App samt A4-Export-Knöpfen mit komplett zufällig erzeugten Daten (Lorem ipsum) – ohne Claude-Konto, nichts davon ist echt. Ein-/Ausschalten und neue Daten wirken erst nach Klick auf „Alle Links aktualisieren“ (oben).</p><div class="tw"><table id="lkxt"></table></div></div>
+<div class="card" id="lkx" style="margin-top:12px"><h3>Externe Links (nur ansehen)</h3><p class="note" style="margin-top:0">Für Personen außerhalb des Teams. „Vollansicht“ und „Struktur“ zeigen die komplette App (ohne Änderungen). <b>„Nur Terminpläne“</b> zeigt ausschließlich Monats- und Wochenplan und lässt sich ohne Anmeldung öffnen (der A4-Download steht nur den Trainern zur Verfügung) – Spielerprofile, Notizen und To-Dos sind darin nicht enthalten. <b>„Demo“</b> zeigt die ganze App samt A4-Export-Knöpfen mit komplett zufällig erzeugten Daten (Lorem ipsum) – ohne Anmeldung, nichts davon ist echt. Ein-/Ausschalten gilt nach wenigen Sekunden, neue Daten werden täglich um 23:00 Uhr übernommen.</p><div class="tw"><table id="lkxt"></table></div></div>
 
 </div>
 <div class="etp" id="etp-s" hidden>
@@ -174,7 +174,7 @@ body.kaus nav button[data-s="k"],body.kaus #hn [data-go="k"],body.kaus #k{displa
 </div></section>
 </main></div>
 <script type="application/json" id="snap">{}</script><script type="text/plain" id="src"></script>
-<script>window.__SCOUT=location.hash==="#scout";window.__CO=(location.hash.match(/^#co([A-Za-z0-9]+)\.([A-Za-z0-9_-]{16,})$/)||null);window.__VIEWER=!window.__CO&&/^#[A-Za-z0-9]+\.[A-Za-z0-9_-]{16,}$/.test(location.hash);if(window.__CO)document.documentElement.classList.add("cogate")</script>
+<script>window.__SCOUT=/^#scout\.[A-Za-z0-9_-]{16,}$/.test(location.hash);window.__CO=null&&(location.hash.match(/^#co([A-Za-z0-9]+)\.([A-Za-z0-9_-]{16,})$/)||null);window.__VIEWER=!window.__SCOUT&&!window.__CO&&/^#[A-Za-z0-9]+\.[A-Za-z0-9_-]{16,}$/.test(location.hash);if(window.__CO)document.documentElement.classList.add("cogate")</script>
 <script>/* U13 – Berechnungsmodul (reine Funktionen, keine Abhängigkeit zu Oberfläche oder Datenbank).
    Läuft im Browser (window.U13) und in Node (require). Eingabe: Datenmodell aus seed.json. */
 (function (root) {
@@ -718,7 +718,7 @@ function sub(coll,key,map){
   if(window.__VIEWER)return;
   if(!window.__SCOUT)renderAll();
   try{db=await (window.claude&&window.claude.use?window.claude.use("db"):null)}catch(e){db=null}
-  if(!db){setSt("Keine Datenbank: bitte in Claude anmelden und die Seite dort öffnen","err");window.__noDb=true;typeof showAccess==="function"&&showAccess();return}
+  if(!db){setSt("Keine Verbindung: bitte anmelden und die Seite neu laden","err");window.__noDb=true;typeof showAccess==="function"&&showAccess();return}
   try{const c0=await db.doc("config/main").get();if(!c0||c0.exists===false)throw new Error("noaccess")}catch(e){db=null;window.__noDb=true;setSt("Kein Zugriff","err");typeof showAccess==="function"&&showAccess("Kein Zugriff. Diese App ist nur für das Trainerteam.");return}
   window.__dbUp=true;qRestore();if(window.__SCOUT){typeof scoutMode==="function"&&scoutMode(db);return}typeof initLinks==="function"&&initLinks();typeof initKader==="function"&&initKader(db);
   sub("players","spieler",(a,b)=>a.slot-b.slot);sub("games","spiele",(a,b)=>a.nr-b.nr);sub("trainings","trainings",(a,b)=>a.datum.localeCompare(b.datum));sub("events","events");sub("dienste","dienste");sub("todos","todos");db.collection("notes").onSnapshot((x)=>{D.notizen=x.docs.map((d)=>({id:d.id,...d.data()}));renderNotes();renderProfile();typeof renderStart==="function"&&renderStart()},()=>{});
@@ -1019,7 +1019,7 @@ let xBusy=false;
 async function xRun(kind,fmt){
   if(xBusy)return;xBusy=true;
   try{
-    const dl=await claude.use("downloads");if(!dl){setSt((window.__DEMO?"Download nur mit Claude-Konto möglich":"Export ist in dieser Ansicht nicht verfügbar"),"err");return}
+    const dl=await claude.use("downloads");if(!dl){setSt((window.__DEMO?"Download nur für angemeldete Trainer möglich":"Export ist in dieser Ansicht nicht verfügbar"),"err");return}
     if(kind==="p"&&!active().length){setSt("Kein Spieler zum Exportieren","err");return}
     xTheme($(".xth").value==="dark");setSt("Export wird erstellt …","busy");
     if(kind==="a"){const sel=($("#xsp")||{}).value||"all",pgs=[];if(sel!=="sc"&&sel!=="zu")pgs.push(xSaison());if(sel!=="ue"&&sel!=="zu")pgs.push(xScatterPage());if(sel==="z3"||sel==="zu")pgs.push(xZusatz());
@@ -1035,7 +1035,7 @@ $("#xp").onclick=(e)=>{const b=e.target.closest("button");if(b)xRun("p",b.datase
 async function xRunAll(fmt){
   if(xBusy)return;xBusy=true;
   try{
-    const dl=await claude.use("downloads");if(!dl){setSt((window.__DEMO?"Download nur mit Claude-Konto möglich":"Export ist in dieser Ansicht nicht verfügbar"),"err");return}
+    const dl=await claude.use("downloads");if(!dl){setSt((window.__DEMO?"Download nur für angemeldete Trainer möglich":"Export ist in dieser Ansicht nicht verfügbar"),"err");return}
     const P=active();if(!P.length){setSt("Keine Spieler zum Exportieren","err");return}xTheme($(".xth").value==="dark");
     const pages=[],files=[];
     for(let i=0;i<P.length;i++){
@@ -1119,25 +1119,26 @@ async function xSaveFile(name,data){
 async function xBackupJson(){
   const o=bkObj();
   const ok=await xSaveFile("U13_Sicherung_"+today()+".json",new Blob([JSON.stringify(o)],{type:"application/json"}));
-  if(ok){const t=Date.now();try{localStorage.setItem("u13lastfile",String(t))}catch(e){}try{save("config","sicherung",{dl:t})}catch(e){}}
+  if(ok){const t=Date.now();try{localStorage.setItem("u13lastfile",String(t))}catch(e){}try{save("config","sicherung",{...(D.sicherung||{}),dl:t})}catch(e){}}
   typeof bkRender==="function"&&bkRender();typeof bkwRender==="function"&&bkwRender();
 }
 /* ---- Wöchentliche Erinnerung: Sicherungsdatei auf dem Gerät (Start und Einstellungen) ---- */
 const BKW_TAGE=7;
 function bkwLast(){let f=0;try{f=+localStorage.getItem("u13lastfile")||0}catch(e){}return Math.max(f,D.sicherung&&+D.sicherung.dl||0)}
+function bkwSnooze(){let z=0;try{z=+localStorage.getItem("u13bkz")||0}catch(e){}return Math.max(z,D.sicherung&&+D.sicherung.z||0)}
 function bkwRender(){
   const box=document.getElementById("bkw");if(!box)return;
   const aus=()=>{if(!box.hidden){box.hidden=true;box.innerHTML=""}};
   if(window.__RO||window.__VIEWER||window.__DEMO||window.__SCOUT||window.__noDb||!D.ready||!D.sicherungGot||!(D.spieler||[]).length)return aus();
   const on=document.querySelector("nav button.on"),t=on&&on.dataset.s;if(t!=="h"&&t!=="e")return aus();
   const last=bkwLast(),tage=last?Math.floor((Date.now()-last)/864e5):null;
-  let z="";try{z=localStorage.getItem("u13bkz")||""}catch(e){}
+  const z=bkwSnooze();
   if((tage!==null&&tage<BKW_TAGE)||(+z&&Date.now()-(+z)<3*864e5))return aus();
   box.innerHTML="<b>💾 Zeit für eine Sicherungsdatei</b>"+(tage===null?"Es wurde noch keine Sicherungsdatei heruntergeladen.":"Die letzte heruntergeladene Sicherungsdatei ist "+(tage===1?"einen Tag":tage+" Tage")+" alt.")+'<p class="note" style="margin:6px 0">Die automatischen Sicherungen liegen im selben System wie deine Daten. Eine Datei auf deinem Gerät schützt zusätzlich, falls dort etwas schiefgeht. Einmal pro Woche reicht.</p><div class="bar"><button class="btn" data-bkw="dl" style="background:var(--ac);color:#fff;border-color:var(--ac)">⬇ Jetzt Sicherungsdatei herunterladen</button><button class="btn" data-bkw="z">3 Tage nicht erinnern</button></div>';
   box.hidden=false;
 }
 document.addEventListener("click",(e)=>{const b=e.target.closest&&e.target.closest("[data-bkw]");if(!b)return;
-  if(b.dataset.bkw==="dl")xBackupJson();else{try{localStorage.setItem("u13bkz",String(Date.now()))}catch(x){}bkwRender()}});
+  if(b.dataset.bkw==="dl")xBackupJson();else{const n=Date.now();try{localStorage.setItem("u13bkz",String(n))}catch(x){}try{save("config","sicherung",{...(D.sicherung||{}),z:n})}catch(x){}bkwRender()}});
 /* ---- Excel-Datei (.xlsx) ohne Bibliothek ---- */
 const xcol=(i)=>{let s="";i++;while(i>0){const m=(i-1)%26;s=String.fromCharCode(65+m)+s;i=Math.floor((i-1)/26)}return s};
 const xser=(iso)=>{const [y,m,d]=iso.split("-").map(Number);return Math.round(Date.UTC(y,m-1,d)/86400000)+25569};
@@ -1245,7 +1246,7 @@ $("#lkh").addEventListener("change",(e)=>{if(e.target.id==="hnw")hnShow()});
 $("#lkh").addEventListener("click",(e)=>{
   const m=$("#hnm"),de=e.target.closest("[data-hne]"),dd=e.target.closest("[data-hnd]");
   if(de){const n=hnList().find((x)=>x.id===de.dataset.hne);if(!n)return;hnEdit=n.id;$("#hnt").value=n.text;$("#hnf").value=n.farbe||"blau";$("#hnw").value=n.wo==="plan"?"plan":"alle";$("#hnv").value=n.von||"";$("#hnb").value=n.bis||"";hnMo=(n.pm||[]).slice();$("#hnkw").value=n.pw||"";$("#hna").textContent="💾 Änderung speichern";$("#hnc").hidden=false;hnShow();$("#hnt").scrollIntoView({behavior:"smooth",block:"center"});return}
-  if(dd){const id=dd.dataset.hnd;if(hnArm===id){hnArm=null;cfgSave({hinweise:hnList().filter((x)=>x.id!==id)});m.innerHTML='Entfernt. Eltern sehen die Änderung erst nach dem Aktualisieren der Links. <span class="ownonly"><button class="btn" data-lkgo="u" type="button">Jetzt Links aktualisieren</button></span><span class="coonly">Bitte den Besitzer, die Links zu aktualisieren.</span>'}else{hnArm=id;renderHints()}return}
+  if(dd){const id=dd.dataset.hnd;if(hnArm===id){hnArm=null;cfgSave({hinweise:hnList().filter((x)=>x.id!==id)});m.innerHTML='Entfernt. Eltern sehen die Änderung bei der nächsten Aktualisierung (täglich 23:00 Uhr). <span class="ownonly"><button class="btn" data-lkgo="u" type="button">Jetzt Links aktualisieren</button></span><span class="coonly">Bitte den Besitzer, die Links zu aktualisieren.</span>'}else{hnArm=id;renderHints()}return}
   const hm=e.target.closest("[data-hm]");if(hm){const v=hm.dataset.hm,i=hnMo.indexOf(v);i<0?hnMo.push(v):hnMo.splice(i,1);hm.classList.toggle("on");return}
   if(e.target.id==="hnc"){hnReset();m.textContent="";return}
   if(e.target.id==="hna"){
@@ -1253,7 +1254,7 @@ $("#lkh").addEventListener("click",(e)=>{
     const v=$("#hnv").value,b=$("#hnb").value;if(v&&b&&b<v){m.textContent="„Sichtbar bis“ liegt vor „Sichtbar ab“.";m.className="note warn";return}
     const kw=$("#hnkw").value.trim();if($("#hnw").value==="plan"&&kw&&!/^\d{1,2}(\s*[-–]\s*\d{1,2})?(\s*[,;]\s*\d{1,2}(\s*[-–]\s*\d{1,2})?)*$/.test(kw)){m.textContent="Kalenderwochen bitte so eingeben: 41 oder 43–45, 48";m.className="note warn";return}
     const id=hnEdit||"h"+Date.now().toString(36),o={id,text,farbe:$("#hnf").value,wo:$("#hnw").value,von:v||null,bis:b||null,pm:$("#hnw").value==="plan"?hnMo.slice():[],pw:$("#hnw").value==="plan"&&kw?kw:null},L=hnList();
-    cfgSave({hinweise:hnEdit?L.map((x)=>x.id===id?o:x):L.concat([o])});hnReset();m.className="note";m.innerHTML='Gespeichert. Eltern sehen die Änderung erst nach dem Aktualisieren der Links. <span class="ownonly"><button class="btn" data-lkgo="u" type="button">Jetzt Links aktualisieren</button></span><span class="coonly">Bitte den Besitzer, die Links zu aktualisieren.</span>';return}
+    cfgSave({hinweise:hnEdit?L.map((x)=>x.id===id?o:x):L.concat([o])});hnReset();m.className="note";m.innerHTML='Gespeichert. Eltern sehen die Änderung bei der nächsten Aktualisierung (täglich 23:00 Uhr). <span class="ownonly"><button class="btn" data-lkgo="u" type="button">Jetzt Links aktualisieren</button></span><span class="coonly">Bitte den Besitzer, die Links zu aktualisieren.</span>';return}
   if(hnArm){hnArm=null;renderHints()}
 });
 renderHints();
@@ -1520,7 +1521,7 @@ function shell(){const a=document.querySelector(".app");if(a)a.remove();const f=
 function parseCode(s){const m=String(s||"").trim().match(/([A-Za-z0-9]+)\.([A-Za-z0-9_-]{16,})\s*$/);return m?{pid:m[1],key:m[2]}:null}
 function showAccess(msg){
   const v=shell();
-  v.innerHTML='<div class="card" style="max-width:440px;margin:8vh auto 0"><h3>TuS Haltern U13 · Teamzentrale</h3><p style="margin-top:0">'+(msg||"Bitte den persönlichen Link des Trainers öffnen oder hier den Zugangscode einfügen.")+'</p><label class="note">Zugangscode oder kompletter Link<br><input id="vcode" style="width:100%" autocomplete="off"></label><div class="bar" style="margin:10px 0 0"><button class="btn" id="vgo" style="background:var(--ac);color:#fff;border-color:var(--ac)">Öffnen</button></div><p class="note" style="margin-bottom:0">Trainer: bitte in Claude anmelden und die Seite dort öffnen.</p></div>';
+  v.innerHTML='<div class="card" style="max-width:440px;margin:8vh auto 0"><h3>TuS Haltern U13 · Teamzentrale</h3><p style="margin-top:0">'+(msg||"Bitte den persönlichen Link des Trainers öffnen oder hier den Zugangscode einfügen.")+'</p><label class="note">Zugangscode oder kompletter Link<br><input id="vcode" style="width:100%" autocomplete="off"></label><div class="bar" style="margin:10px 0 0"><button class="btn" id="vgo" style="background:var(--ac);color:#fff;border-color:var(--ac)">Öffnen</button></div><p class="note" style="margin-bottom:0">Trainer: bitte die Seite ohne Zusatz in der Adresse öffnen und anmelden.</p></div>';
   document.getElementById("vgo").onclick=()=>{const c=parseCode(document.getElementById("vcode").value);if(!c){showAccess("Der Code ist nicht vollständig.");return}showViewer(c.pid,c.key)};
 }
 
@@ -1564,7 +1565,7 @@ function vPlan(root,T){
     if((T.k||[]).length)h+='<div class="vk">'+T.k.map((k)=>"<div><b>"+esc(k.t)+"</b><br>"+esc(k.z)+"</div>").join("")+"</div>";return h};
   const draw=()=>{const nav=mode==="m"?'<button class="btn" data-n="-1" aria-label="Zurück">◀</button><b style="min-width:150px;text-align:center">'+esc(mname(cm))+'</b><button class="btn" data-n="1" aria-label="Weiter">▶</button>':'<button class="btn" data-n="-1" aria-label="Zurück">◀</button><b style="min-width:150px;text-align:center">'+kw(cw)+'. KW</b><button class="btn" data-n="1" aria-label="Weiter">▶</button>';
     const rng=mode==="m"?[cm+"-01",iso(new Date(+cm.slice(0,4),+cm.slice(5),0))]:[cw,add(cw,6)];
-    root.innerHTML=css+hnHtml(hnItems(T.hn,"plan",rng,parseInt(T.s,10)||2026))+'<div class="bar"><div class="seg" id="vmode"><button data-m="m" class="'+(mode==="m"?"on":"")+'">Monat</button><button data-m="w" class="'+(mode==="w"?"on":"")+'">Woche</button></div><span style="flex:1"></span><span class="vnav">'+nav+'</span></div><div class="bar"><span class="note">A4-Export ('+(mode==="m"?"Monat":"Woche")+')</span><div class="seg" id="vxo"><button data-f="png">PNG</button><button data-f="jpg">JPG</button><button data-f="pdf">PDF</button></div><select id="vxt" aria-label="Modus"><option value="light">Hell</option><option value="dark">Dunkel</option></select><span class="pill" id="st" style="margin-left:auto"></span></div><p class="note" style="margin:-4px 0 10px">Hinweis: Für den Download wird ein Claude-Konto benötigt.</p><div class="tw" style="overflow-x:auto">'+(mode==="m"?month():week())+'</div><p class="note" style="margin-top:10px">Stand Terminplan: '+esc(dfull(T.st))+'</p>'};
+    root.innerHTML=css+hnHtml(hnItems(T.hn,"plan",rng,parseInt(T.s,10)||2026))+'<div class="bar"><div class="seg" id="vmode"><button data-m="m" class="'+(mode==="m"?"on":"")+'">Monat</button><button data-m="w" class="'+(mode==="w"?"on":"")+'">Woche</button></div><span style="flex:1"></span><span class="vnav">'+nav+'</span></div><div class="bar"><span class="note">A4-Export ('+(mode==="m"?"Monat":"Woche")+')</span><div class="seg" id="vxo"><button data-f="png">PNG</button><button data-f="jpg">JPG</button><button data-f="pdf">PDF</button></div><select id="vxt" aria-label="Modus"><option value="light">Hell</option><option value="dark">Dunkel</option></select><span class="pill" id="st" style="margin-left:auto"></span></div><p class="note" style="margin:-4px 0 10px">Hinweis: Der Download ist nur für angemeldete Trainer möglich.</p><div class="tw" style="overflow-x:auto">'+(mode==="m"?month():week())+'</div><p class="note" style="margin-top:10px">Stand Terminplan: '+esc(dfull(T.st))+'</p>'};
   root.onclick=(e)=>{const xb=e.target.closest("#vxo button");if(xb){xrun(xb.dataset.f);return}const m=e.target.closest("#vmode button");if(m){mode=m.dataset.m;if(mode==="m")cm=cw.slice(0,7);else cw=mon(cm===today.slice(0,7)?today:cm+"-01");draw();return}
     const n=e.target.closest("[data-n]");if(n){const k=+n.dataset.n;if(mode==="m"){const d=new Date(+cm.slice(0,4),+cm.slice(5)-1+k,1);cm=iso(d).slice(0,7)}else cw=add(cw,7*k);draw()}};
   draw();
@@ -1600,7 +1601,7 @@ async function showExt(k,blob,key){
   let tm=null;new MutationObserver(()=>{clearTimeout(tm);tm=setTimeout(pass,30)}).observe(document.querySelector("main"),{childList:true,subtree:true});
   if(window.__DEMO&&d.db.kader&&window.__kader){const KK=window.__kader,kd=d.db.kader;if(window.initKader)window.initKader({collection:()=>({onSnapshot:()=>{}})});KK.KD.plans=kd.plans||[];KK.KD.pers=kd.pers||[];KK.KD.obs=kd.obs||[];KK.KD.vereine=kd.vereine||[];KK.KD.inbox=kd.inbox||[];if(kd.plans&&kd.plans[0])KK.ks.pid=kd.plans[0].id;window.__kgplans=true}
   renderAll();if(window.__DEMO)demoSettings();pass();
-  if(window.__DEMO){const h=document.getElementById("hsub");if(h&&!document.getElementById("demohint"))h.insertAdjacentHTML("afterend",'<div class="card" id="demohint" style="margin:0 0 14px;border-color:var(--y);background:var(--ys)"><b>Demo-Ansicht mit Zufallsdaten</b><div class="note" style="color:inherit;margin-top:2px">Alle Namen, Beteiligungen, Spielergebnisse, Notizen und Entwicklungsziele sind zufällig erzeugt (Lorem ipsum) und haben nichts mit echten Personen zu tun. Auch die Kaderplanung und die Einstellungen enthalten nur erfundene Daten und Platzhalter-Links. Die App ist hier nur lesbar. Die A4-Exporte (Knöpfe „PNG/JPG/PDF“) sind sichtbar, der Download funktioniert aber nur mit einem Claude-Konto.</div></div>')}
+  if(window.__DEMO){const h=document.getElementById("hsub");if(h&&!document.getElementById("demohint"))h.insertAdjacentHTML("afterend",'<div class="card" id="demohint" style="margin:0 0 14px;border-color:var(--y);background:var(--ys)"><b>Demo-Ansicht mit Zufallsdaten</b><div class="note" style="color:inherit;margin-top:2px">Alle Namen, Beteiligungen, Spielergebnisse, Notizen und Entwicklungsziele sind zufällig erzeugt (Lorem ipsum) und haben nichts mit echten Personen zu tun. Auch die Kaderplanung und die Einstellungen enthalten nur erfundene Daten und Platzhalter-Links. Die App ist hier nur lesbar. Die A4-Exporte (Knöpfe „PNG/JPG/PDF“) sind sichtbar, der Download funktioniert aber nur für angemeldete Trainer.</div></div>')}
   if(window.__ANON){const h=document.getElementById("hsub");if(h&&!document.getElementById("anonhint"))h.insertAdjacentHTML("afterend",'<div class="card" id="anonhint" style="margin:0 0 14px;border-color:var(--y);background:var(--ys)"><b>Anonymisierte Ansicht</b><div class="note" style="color:inherit;margin-top:2px">Sensible Daten wurden entfernt: Spielernamen (ersetzt durch „Spieler 1…n“), Fotos, Geburtsdaten, Kontakte, Notizen, Entwicklungsziele, To-Dos und interne Termine.</div></div>')}
 }
 async function showViewer(pid,key){
@@ -1760,12 +1761,13 @@ function renderCo(){
     return'<tr data-c="'+s.id+'"><td style="text-align:left"><b>'+esc(s.name)+'</b><div class="note">'+esc(s.rolle||"")+'</div></td><td><input type="checkbox" data-cak '+(l.aktiv?"checked":"")+'></td><td style="text-align:left">'+(l.key?'<input readonly data-cln value="'+esc(linkOf("co"+s.id,l.key))+'" style="width:100%;min-width:230px">':'<span class="note">noch kein Link</span>')+'</td><td style="white-space:nowrap">'+(l.key?'<button class="btn" data-ccp>Kopieren</button> <button class="btn'+(armed==="c"+s.id?" arm":"")+'" data-cnw title="Der bisherige Link wird ungültig">'+(armed==="c"+s.id?"Wirklich neu?":"Neu erzeugen")+"</button>":"")+"</td></tr>"}).join(""):'<tr><td class="note">Noch keine Trainer angelegt. Unter Stammdaten → „Trainer &amp; Verantwortliche“ hinzufügen; den Besitzer dort ankreuzen.</td></tr>';
 }
 /* ---------- Link-Prüfung: Warnung oben, wenn Links nicht (mehr) funktionieren ---------- */
-let lkErr="",lkTok=0;const LK_AUSW_TAGE=3;
+let lkErr="",lkTok=0,lkBusy=false,lkQuiet=0;const LK_AUSW_TAGE=3;
+const lkMark=(t)=>{const d=new Date(t);d.setHours(23,0,0,0);if(d.getTime()>t)d.setDate(d.getDate()-1);return d.getTime()};/* letzter 23:00-Uhr-Zeitpunkt */
 async function lkHealth(){
   const box=document.getElementById("lkw");if(!box||window.__RO||window.__VIEWER||window.__DEMO||!D.ready||(window.__WEB&&!window.__webSnapReady))return;
   const my=++lkTok,E=[],W=[],P=active(),nm=(p)=>p.vorname+" "+p.name,pubIds=Object.keys(SNAP.k||{});
   const test=async(key,blob)=>{try{const o=await unseal(key,blob);return !!o}catch(e){return false}};
-  const nOn=[];
+  const nOn=[];let xMiss=0;
   for(const p of P){const l=L[p.id]||{};if(!l.aktiv||!l.key)continue;
     const want=await sha8(l.key),pub=(SNAP.k||{})[p.id];
     if(!pub||pub!==want||!(SNAP.p||{})[p.id]){nOn.push(nm(p));continue}
@@ -1773,12 +1775,16 @@ async function lkHealth(){
   if(nOn.length)E.push((nOn.length===1?"Der Link von ":nOn.length+" Spielerlinks (")+nOn.slice(0,4).join(", ")+(nOn.length>4?" u. a.":"")+(nOn.length===1?" ist aktiv, aber noch nicht online":") sind aktiv, aber noch nicht online")+" – sie zeigen „Link ungültig“.");
   for(const k of ["full","anon","plan","demo"]){const l=L["x"+k]||{};if(!l.aktiv||!l.key)continue;
     const nmx={full:"Vollansicht",anon:"Anonyme Ansicht",plan:"Terminplan",demo:"Demo"}[k],want=await sha8(l.key),pub=(SNAP.xk||{})[k];
-    if(!pub||pub!==want||!(SNAP.x||{})[k]){E.push("Link „"+nmx+"“ ist aktiv, aber noch nicht online.");continue}
+    if(!pub||pub!==want||!(SNAP.x||{})[k]){xMiss++;E.push("Link „"+nmx+"“ ist aktiv, aber noch nicht online.");continue}
     if(!(await test(l.key,SNAP.x[k])))E.push("Link „"+nmx+"“ lässt sich nicht öffnen (Inhalt beschädigt).")}
   if(my!==lkTok)return;
   const off=pubIds.filter((id)=>{const l=L[id]||{};return P.some((p)=>p.id===id)&&!(l.aktiv&&l.key)}).length+pubIds.filter((id)=>!P.some((p)=>p.id===id)).length;
-  if(off)W.push(off+" Link(s) sind noch online, obwohl sie abgeschaltet oder der Spieler nicht mehr aktiv ist – beim nächsten Aktualisieren werden sie entfernt.");
+  if(off&&!window.__WEB)W.push(off+" Link(s) sind noch online, obwohl sie abgeschaltet oder der Spieler nicht mehr aktiv ist – beim nächsten Aktualisieren werden sie entfernt.");
   const fpp=await fingerprintParts();if(my!==lkTok)return;
+  if(window.__WEB){/* Web-Version: automatisch veröffentlichen (Link-Änderungen sofort, neue Daten täglich nach 23:00 Uhr) */
+    const now=Date.now(),changed=!SNAP.fa||SNAP.fa!==fpp.a||SNAP.fs!==fpp.s,daily=pubIds.length>0&&changed&&(Date.parse(SNAP.u||"")||0)<lkMark(now),struct=nOn.length>0||xMiss>0||off>0;
+    if((struct||daily)&&!lkBusy&&now>lkQuiet&&window.__lkPublish){lkQuiet=now+9e4;window.__lkPublish(true)}
+    for(let i=E.length-1;i>=0;i--)if(/noch nicht online/.test(E[i]))E.splice(i,1);W.length=0}
   /* Warnung nur, wenn Eltern etwas Veraltetes sehen, das wichtig ist: Termine, Hinweise, Kontakte, Notizen sofort;
      eingetragene Anwesenheit/Minuten erst, wenn der Stand in den Links mehrere Tage alt ist. */
   if(pubIds.length){
@@ -1789,7 +1795,7 @@ async function lkHealth(){
   if(!E.length&&!W.length){box.hidden=true;box.innerHTML="";return}
   const li=(a)=>a.slice(0,5).map((x)=>"<li>"+esc(x)+"</li>").join("")+(a.length>5?"<li>… und "+(a.length-5)+" weitere</li>":"");
   box.className="lkw"+(E.length?"":" lkw-y");
-  box.innerHTML="<b>⚠ "+(E.length?"Links funktionieren nicht richtig":"Links nicht ganz aktuell")+"</b><ul>"+li(E.concat(W))+'</ul><div class="bar"><button class="btn" data-lkgo="u">Alle Links aktualisieren</button><button class="btn" data-lkgo="e">Zu den Links</button></div>';
+  box.innerHTML="<b>⚠ "+(E.length?"Links funktionieren nicht richtig":"Links nicht ganz aktuell")+"</b><ul>"+li(E.concat(W))+'</ul><div class="bar"><button class="btn" data-lkgo="u">'+(window.__WEB?"Jetzt erneut versuchen":"Alle Links aktualisieren")+'</button><button class="btn" data-lkgo="e">Zu den Links</button></div>';
   box.hidden=false;
 }
 document.addEventListener("click",(e)=>{const b=e.target.closest&&e.target.closest("[data-lkgo]");if(!b)return;
@@ -1806,7 +1812,7 @@ async function renderLinks(){if(window.__DEMO)return;
   const pubIds=Object.keys(SNAP.k||{}),orphan=pubIds.filter((id)=>!P.some((p)=>p.id===id)).length;
   const xr=await Promise.all(["full","anon","plan","demo"].map(async(k)=>{const l=L["x"+k]||{};return{k,l,want:l.aktiv&&l.key?await sha8(l.key):null,pub:(SNAP.xk||{})[k]||null}}));if(my!==tok)return;
   const pend=cur.filter((r)=>r.want!==r.pub).length+xr.filter((r)=>r.want!==r.pub).length+orphan,stale=!!SNAP.fp&&SNAP.fp!==fp||(!SNAP.fp&&pubIds.length>0),on=cur.filter((r)=>r.want&&r.want===r.pub).length;
-  $("#lks").innerHTML=(SNAP.u?"Letzter Stand online: <b>"+esc(dt(SNAP.u))+"</b> · ":"Noch nichts veröffentlicht · ")+"<b>"+on+"</b> Link(s) online"+(pend||stale?' · <span class="warn">⚠ '+(pend?"Link-Änderungen":"")+(pend&&stale?" und ":"")+(stale?"neuere Daten":"")+" noch nicht online – bitte „Alle Links aktualisieren“ klicken.</span>":' · <span class="up">alles aktuell</span>');
+  $("#lks").innerHTML=(SNAP.u?"Letzter Stand online: <b>"+esc(dt(SNAP.u))+"</b> · ":"Noch nichts veröffentlicht · ")+"<b>"+on+"</b> Link(s) online"+(pend||stale?' · <span class="warn">⚠ '+(pend?"Link-Änderungen":"")+(pend&&stale?" und ":"")+(stale?"neuere Daten":"")+(window.__WEB?" noch nicht online – wird automatisch übernommen.":" noch nicht online – bitte „Alle Links aktualisieren“ klicken.")+"</span>":' · <span class="up">alles aktuell</span>');
   const xe=$("#lkxt");
   if(xe){const XN={full:["Vollansicht","Alles sichtbar, nur lesend (inkl. Namen, Fotos, Notizen, To-Dos, Kontakte)"],plan:["Nur Terminpläne","Monats- und Wochenplan zum Ansehen, ohne Anmeldung – keine Spielerprofile, Notizen oder To-Dos"],demo:["Demo (Zufallsdaten)","Ganze App mit komplett zufällig erzeugten Daten (Namen, Beteiligung, Ergebnisse, Lorem-ipsum-Notizen) – ohne Konto, nur lesend, nichts davon echt"],anon:["Struktur (anonym)","Spieler 1…n mit Rückennummer, ohne Fotos, Geburtstage, Kontakte, Notizen, To-Dos und interne Termine"]};
     if(!(document.activeElement&&document.activeElement.matches&&document.activeElement.matches("[data-xln]")))xe.innerHTML='<tr><th style="text-align:left">Link</th><th>Aktiv</th><th style="text-align:left">Adresse</th><th></th><th style="text-align:left">Stand</th></tr>'+xr.map((r)=>{const st=r.want&&r.want===r.pub?'<span class="pill ok">online</span>':r.want?'<span class="pill busy">geht beim Aktualisieren online</span>':r.pub?'<span class="pill busy">wird beim Aktualisieren abgeschaltet</span>':'<span class="pill">aus</span>';
@@ -1850,7 +1856,8 @@ if(T("lkt")){
     });
   }
   T("lkc").addEventListener("click",(e)=>{const b=e.target.closest("[data-all]");if(!b)return;const on=b.dataset.all==="1";active().forEach((p)=>{const l=L[p.id]||{};if(!!l.aktiv!==on||!l.key)saveLink(p.id,{key:l.key||newKey(),aktiv:on})})});
-  T("lku").onclick=async()=>{
+  const lkPublish=async(auto)=>{
+    if(lkBusy)return;lkBusy=true;
     const m=T("lkm"),b=T("lku");m.className="note";b.disabled=true;
     try{
       m.textContent="Verschlüsselte Profile werden erstellt …";
@@ -1858,14 +1865,15 @@ if(T("lkt")){
       if(!art)throw{code:"not_granted"};
       const snap=await buildSnap(),html=window.__WEB?snap:composeHtml(snap);
       m.textContent="Wird veröffentlicht … ("+Object.keys(snap.p).length+" Links aktiv"+(window.__WEB?"":", "+Math.round(html.length/1024)+" KB")+")";
-      await art.publish(html);lkErr="";
-      m.textContent=window.__WEB?"Veröffentlicht. Die Links zeigen jetzt den aktuellen Stand.":"Veröffentlicht. Die Seite lädt gleich neu.";
+      await art.publish(html);lkErr="";try{setSt("Links aktualisiert","ok")}catch(x){}lkQuiet=Date.now()+9e4;setTimeout(lkHealth,1500);
+      m.textContent=window.__WEB?(auto?"Automatisch aktualisiert ("+new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})+" Uhr).":"Veröffentlicht. Die Links zeigen jetzt den aktuellen Stand."):"Veröffentlicht. Die Seite lädt gleich neu.";
     }catch(e){
       const c=e&&e.code,map={conflict:"Zwischenzeitlich wurde eine neuere Version veröffentlicht. Die Seite lädt neu – bitte danach erneut aktualisieren.",not_writer:"Nur der Eigentümer der Seite kann veröffentlichen.",not_granted:"Veröffentlichen ist in dieser Ansicht nicht freigegeben.",not_declared:"Veröffentlichen ist für diese Seite nicht freigegeben.",capability_disabled:"Veröffentlichen ist für diese Seite nicht möglich (evtl. wegen der öffentlichen Freigabe).",capability_removed:"Veröffentlichen ist in dieser Ansicht nicht verfügbar.",too_large:"Die Seite ist zu groß (Fotos verkleinern?).",rate_limited:"Zu oft veröffentlicht – bitte kurz warten.",invalid_content:"Die Seite wurde vom System nicht als gültig angenommen."};
-      m.className="note warn";lkErr=(map[c]||"Veröffentlichen fehlgeschlagen"+(c?" ("+c+")":""));lkHealth();m.textContent=(map[c]||"Veröffentlichen fehlgeschlagen"+(c?" ("+c+")":"")+".")+(e&&e.message&&!c?" "+e.message:"");
+      lkQuiet=Date.now()+6e5;m.className="note warn";lkErr=(map[c]||"Veröffentlichen fehlgeschlagen"+(c?" ("+c+")":""));lkHealth();m.textContent=(map[c]||"Veröffentlichen fehlgeschlagen"+(c?" ("+c+")":"")+".")+(e&&e.message&&!c?" "+e.message:"");
     }
-    b.disabled=false;
+    b.disabled=false;lkBusy=false;
   };
+  T("lku").onclick=()=>lkPublish(false);window.__lkPublish=lkPublish;
 }
 /* Co-Trainer-Zugang: Vollzugriff, sofern der Link in der Datenbank aktiv ist */
 async function gateCo(){
@@ -2503,7 +2511,7 @@ function xNotizen(wer){
 async function xRunNotes(fmt){
   if(xBusy)return;xBusy=true;
   try{
-    const dl=await claude.use("downloads");if(!dl){setSt((window.__DEMO?"Download nur mit Claude-Konto möglich":"Export ist in dieser Ansicht nicht verfügbar"),"err");return}
+    const dl=await claude.use("downloads");if(!dl){setSt((window.__DEMO?"Download nur für angemeldete Trainer möglich":"Export ist in dieser Ansicht nicht verfügbar"),"err");return}
     xTheme($(".xth").value==="dark");setSt("Notizen werden exportiert …","busy");await new Promise((r)=>setTimeout(r,20));
     const r=xNotizen(($("#xnz")||{}).value||"alle");
     await xSaveMulti(dl,fmt,r.pages,r.name,false);
@@ -2515,7 +2523,7 @@ async function xRunNotes(fmt){
 async function xRunNW(fmt){
   if(xBusy)return;xBusy=true;
   try{
-    const dl=await claude.use("downloads");if(!dl){setSt((window.__DEMO?"Download nur mit Claude-Konto möglich":"Export ist in dieser Ansicht nicht verfügbar"),"err");return}
+    const dl=await claude.use("downloads");if(!dl){setSt((window.__DEMO?"Download nur für angemeldete Trainer möglich":"Export ist in dieser Ansicht nicht verfügbar"),"err");return}
     if(!active().length){setSt("Kein Spieler zum Exportieren","err");return}
     xTheme($(".xth").value==="dark");setSt("Einzelnachweis wird erstellt …","busy");await new Promise((r)=>setTimeout(r,20));
     const r=xNachweis(),pages=[],files=[];
@@ -3055,7 +3063,7 @@ function kaderTab(pl,M){const P=inPlan(pl).filter((p)=>counted(p,pl)),groups=ap(
   return h+"</table></div></div>"}
 /* ---------- Renderer ---------- */
 const TABF={};
-function renderKader(){const kaus=!!(D.config&&D.config.kaderAus);document.body.classList.toggle("kaus",kaus);const cb=document.getElementById("kadon");if(cb)cb.checked=!kaus;const r=$k("#k");if(!r)return;if(!window.__kinit){if(!kaus&&window.__noDb)r.innerHTML='<h2>Kader</h2><p class="sub">Keine Verbindung zur Datenbank. Bitte die Seite in der Claude-App öffnen, angemeldet sein und neu laden.</p>';else if(!kaus&&!r.innerHTML.trim())r.innerHTML='<h2>Kader</h2><p class="sub">Verbinde mit der Datenbank …</p>';return}if(!kaus&&!window.__kgplans){r.innerHTML='<h2>Kader</h2><p class="sub">Lade Daten … Dauert es länger: Seite neu laden und die Internetverbindung prüfen.</p>';return}if(kaus){if(!r.hidden&&typeof go==="function")go("h");return}
+function renderKader(){const kaus=!!(D.config&&D.config.kaderAus);document.body.classList.toggle("kaus",kaus);const cb=document.getElementById("kadon");if(cb)cb.checked=!kaus;const r=$k("#k");if(!r)return;if(!window.__kinit){if(!kaus&&window.__noDb)r.innerHTML='<h2>Kader</h2><p class="sub">Keine Verbindung zur Datenbank. Bitte die Internetverbindung prüfen, anmelden und neu laden.</p>';else if(!kaus&&!r.innerHTML.trim())r.innerHTML='<h2>Kader</h2><p class="sub">Verbinde mit der Datenbank …</p>';return}if(!kaus&&!window.__kgplans){r.innerHTML='<h2>Kader</h2><p class="sub">Lade Daten … Dauert es länger: Seite neu laden und die Internetverbindung prüfen.</p>';return}if(kaus){if(!r.hidden&&typeof go==="function")go("h");return}
   if(!$k("#kcss")){const s=document.createElement("style");s.id="kcss";s.textContent=CSS;document.head.appendChild(s)}
   const pl=plan();if(pl&&!pl.wk)pl.wk=DEF.wk();if(pl&&pl.wk&&!pl.wkm){pl.wk.forEach((w)=>{if(w.a===undefined&&/absage|abgang/i.test(w.name)&&!(+w.p>0)&&!w.z)w.a=1});pl.wkm=1;savePlan(pl)}if(pl&&pl.rollen&&!(pl.rfv>=3)){(pl.phasen||[]).forEach((x)=>{if(x.name==="Entscheidung offen")x.name="Entscheidungsfindung"});pl.rollen.forEach((r)=>{if(r.id==="rp"&&r.c==="y")r.c="p";else if(r.id==="ro"&&(r.c==="gr"||r.c==="y"))r.c="be"});pl.rfv=3;savePlan(pl)}if(pl&&pl.prios&&!(pl.rfv>=4)){const nm={a:["r","n1"],b:["o","n2"],c:["y","n3"],d:["gr","n4"]};pl.prios.forEach((r)=>{const q=nm[r.id];if(q&&r.c===q[0])r.c=q[1]});pl.rfv=4;savePlan(pl)}if(pl&&pl.phasen&&!pl.phv){const P=pl.phasen,ren=(id,from,to)=>{const x=P.find((q)=>q.id===id);if(x&&x.name===from)x.name=to},del=(id)=>{const i=P.findIndex((q)=>q.id===id);if(i>=0)P.splice(i,1)};ren("be","Beobachtet","Im Blick");ren("pe","Probetraining eingeladen","Probetraining");del("in");del("gf");del("pa");pl.phv=1;savePlan(pl)}
   if(pl&&pl.phasen&&pl.phv<2){const P=pl.phasen,x=P.find((q)=>q.id==="ka");if(x&&x.name==="Kontakt aufgenommen")x.name="Kontakt & Gespräch";const i=P.findIndex((q)=>q.id==="gp");if(i>=0&&x)P.splice(i,1);pl.phv=2;savePlan(pl)}
@@ -3278,9 +3286,10 @@ function tabPipe(pl){
      return'<tr data-pid="'+p.id+'"'+K.pbar(pl,m.prio)+'><td data-l="Prio">'+sel('data-pm="prio" data-id="'+p.id+'"',[["","Keine Prio"]].concat(pl.prios.map((x)=>[x.id,x.name])),m.prio)+'</td><td data-l="Wahrscheinlichkeit">'+sel('data-pm="wk" data-id="'+p.id+'"',[["","offen"]].concat(pl.wk.map((x)=>[x.id,x.name])),m.wk)+'</td><td class="kn kname" style="cursor:pointer;'+(m.kontakt?"font-weight:700":"")+'">'+E(pname(p))+'</td><td data-l="Pos." class="kn">'+E(K.kzN(pl,haupt(p))||"")+'</td><td data-l="Bew.">'+K.bewIn(p)+'</td><td data-l="Verein" class="kn">'+E(p.typ==="eigen"?"TuS Haltern":p.verein)+'</td><td data-l="Phase">'+(m.phase?'<div style="margin-bottom:3px">'+chip((lk(pl.phasen,m.phase)||{}).name||"",(lk(pl.phasen,m.phase)||{}).c)+"</div>":"")+sel('data-pm="phase" data-id="'+p.id+'"',[["","–"]].concat(pl.phasen.map((x)=>[x.id,x.name])),m.phase)+'</td><td data-l="Kaderstatus">'+(p.typ==="eigen"?sel('data-pm="status" data-id="'+p.id+'"',[["","–"]].concat(pl.status.map((x)=>[x.id,x.name])),m.status):"")+'</td><td data-l="In Kontakt"><input type="checkbox" data-pm="kontakt" data-id="'+p.id+'"'+(m.kontakt?" checked":"")+'></td><td data-l="Nächster Schritt" class="kn kwide">'+(n.text?E(n.text)+(n.datum?' <span class="'+(n.datum<t?"kbad":"note")+'">'+E(fd(n.datum))+"</span>":""):"")+'</td><td data-l="Probetraining" class="kn kwide">'+(pn?E(fd(pn.datum))+" "+E({zu:"zugesagt",ab:"abgesagt",da:"teilgenommen"}[pn.rueck]||"offen")+' <span class="note">('+pb.filter((x)=>x.rueck==="da").length+"/2 Einheiten)</span>":"")+'</td><td><button class="rm" data-ka="pedit" data-id="'+p.id+'">✎</button></td></tr>'}).join(""):'<tr><td colspan="12" class="note" style="text-align:center;padding:20px">Noch niemand in der Pipeline. Lege Spieler im Reiter „Spieler“ an oder nutze den Scoutingbogen.</td></tr>')+"</table></div>";
   return h}
 /* ---------- Eingang ---------- */
-function tabIn(pl){const L=KD.inbox.slice().sort((a,b)=>(b.at||"").localeCompare(a.at||"")),lnk=(window.__lkbase?window.__lkbase():"")+"#scout";
+const scLink=()=>window.__scoutLink?(window.__scoutLink()||"(Link wird erzeugt …)"):(window.__lkbase?window.__lkbase():"")+"#scout";
+function tabIn(pl){const L=KD.inbox.slice().sort((a,b)=>(b.at||"").localeCompare(a.at||"")),lnk=scLink();
   return (L.length?L.map((x)=>{const dup=KD.pers.find((q)=>q.typ!=="eigen"&&K.normN(q)===K.normN(x));return'<div class="card" style="margin-bottom:8px"><div class="bar" style="margin:0"><b>'+E([x.vorname,x.name].filter(Boolean).join(" ")||"(ohne Namen)")+"</b> · "+E(x.verein||"")+" "+E(x.mannschaft||"")+" · Bew. "+E(x.bew==null?"–":x.bew)+' <span class="note">von '+E(x.von||"?")+", "+E(fd((x.datum||"")))+'</span><span style="flex:1"></span><button class="btn" data-ka="inok" data-id="'+x.id+'" style="background:var(--ac);color:#fff;border-color:var(--ac)">'+(dup?"Trotzdem neu anlegen":"Übernehmen")+'</button><button class="btn" data-ka="inx" data-id="'+x.id+'">Verwerfen</button></div><div class="note" style="margin-top:4px">'+E([x.pos,"Stärken: "+[].concat(x.st||[]).filter(Boolean).join(", "),"Schwächen: "+[].concat(x.sw||[]).filter(Boolean).join(", "),x.notiz].filter(Boolean).join(" · "))+(dup?'<div class="kwarn" style="margin-top:6px">⚠ Gibt es schon in der Liste: '+E(K.pfull(dup))+(dup.verein?" ("+E(dup.verein)+")":"")+". Besser den Eintrag verwerfen und die Angaben dort ergänzen.</div>":"")+"</div>"}).join(""):'<div class="card note">Kein Eintrag im Eingang.</div>')}
-TABF.lnk=function(pl){const lnk=(window.__lkbase?window.__lkbase():"")+"#scout";return'<div class="card" style="margin-top:12px"><h3>Scouting-Link für Externe</h3><p class="note" style="margin-top:0">Dieser Link öffnet nur ein Eingabeformular (keine Datenbank). Die Person braucht ein Claude-Konto und muss unter „Teilen“ der Seite als Mitwirkende eingeladen sein.</p><input readonly value="'+E(lnk)+'" style="width:100%" onfocus="this.select()"></div>'};
+TABF.lnk=function(pl){const lnk=scLink();return'<div class="card" style="margin-top:12px"><h3>Scouting-Link für Externe</h3><p class="note" style="margin-top:0">Dieser Link öffnet nur ein Eingabeformular (keine Datenbank). Die Person braucht keine Anmeldung. Wer den Link kennt, kann Meldungen schicken (nur Schreiben, kein Lesen). Gib ihn nur an Personen weiter, die scouten sollen.</p><input readonly id="sclink" value="'+E(lnk)+'" style="width:100%" onfocus="this.select()">'+(window.__scoutNew?'<div class="bar" style="margin:8px 0 0"><button class="btn" data-scn>Neu erzeugen</button><span class="note">Der bisherige Link wird dann ungültig.</span></div>':"")+'</div>'};
 TABF.obs=tabObs;TABF.pipe=tabPipe;TABF.in=tabIn;
 /* ---------- Kalender-Integration ---------- */
 window.__kobsEv=()=>(D.config&&D.config.kaderAus)?[]:KD.obs.filter((o)=>o.datum&&o.status!=="entfallen").map((o)=>({id:"vk"+o.id,virt:true,kobs:true,datum:o.datum,bis:null,typ:"Sonstiges",titel:"Spielbeobachtung: "+(o.verein||"?")+(o.mannschaft?" ("+o.mannschaft+")":""),beginn:o.zeit||"",treffen:"",ende:"",eltern:false}));
@@ -3386,9 +3395,9 @@ function scoutMode(dbh){if(window.__scin)return;window.__scin=true;
   box.addEventListener("click",async(e)=>{const b=e.target.closest("[data-sb]");if(b){const v=+b.dataset.sb;S.bew=S.bew===v?null:v;box.querySelectorAll("[data-sb]").forEach((x)=>x.classList.toggle("on",+x.dataset.sb===S.bew));document.getElementById("sc_l").textContent=S.bew!=null?"· "+LIGA(S.bew):"";return}
     if(e.target.id==="sc_go"){const g=(i)=>document.getElementById(i).value.trim(),m=document.getElementById("sc_m");if(!(g("sc_vor")||g("sc_name"))){m.textContent="Bitte einen Namen eintragen.";m.className="note kbad";return}
       try{localStorage.setItem("u13scoutname",g("sc_von"))}catch(x){}nm=g("sc_von");
-      const posn=g("sc_pos").split(/[,;\/]/).map((x)=>x.trim()).filter(Boolean),o={id:nid("ki"),at:new Date().toISOString(),von:g("sc_von"),datum:g("sc_datum"),verein:g("sc_verein"),mannschaft:g("sc_mann"),nr:g("sc_nr"),vorname:g("sc_vor"),name:g("sc_name"),pos:g("sc_pos"),posn,geb:g("sc_geb"),bew:S.bew,st:[...box.querySelectorAll(".sc_st")].map((x)=>x.value.trim()).filter(Boolean),sw:[...box.querySelectorAll(".sc_sw")].map((x)=>x.value.trim()).filter(Boolean),notiz:g("sc_notiz")};
+      const posn=g("sc_pos").split(/[,;\/]/).map((x)=>x.trim()).filter(Boolean),o={id:nid("ki"),at:new Date().toISOString(),von:g("sc_von"),datum:g("sc_datum"),verein:g("sc_verein"),mannschaft:g("sc_mann"),nr:g("sc_nr"),vorname:g("sc_vor"),name:g("sc_name"),pos:g("sc_pos"),posn,geb:g("sc_geb"),bew:S.bew,st:[...box.querySelectorAll(".sc_st")].map((x)=>x.value.trim()).filter(Boolean),sw:[...box.querySelectorAll(".sc_sw")].map((x)=>x.value.trim()).filter(Boolean),notiz:g("sc_notiz")};if(window.__SCOUTKEY)o.k=window.__SCOUTKEY;
       m.textContent="Wird gesendet …";m.className="note";
-      try{await dbh.collection("kinbox").doc(o.id).set(o);S.done++;draw()}catch(er){m.textContent="Konnte nicht gespeichert werden ("+(er&&er.code||"Fehler")+"). Bist du angemeldet und als Mitwirkende eingeladen?";m.className="note kbad"}}});
+      try{await dbh.collection("kinbox").doc(o.id).set(o);S.done++;draw()}catch(er){m.textContent="Konnte nicht gespeichert werden ("+(er&&er.code||"Fehler")+"). Bitte beim Trainer einen neuen Link holen (er wurde evtl. erneuert).";m.className="note kbad"}}});
 }
 document.addEventListener("change",(e)=>{if(e.target&&e.target.id==="kadon"){const v=!e.target.checked;D.config={...(D.config||{}),kaderAus:v};cfgSave({kaderAus:v});try{renderPlan()}catch(x){}renderKader()}});
 window.scoutMode=scoutMode;
@@ -3831,7 +3840,7 @@ async function wzRun(){
     jobs.push(save("config","main",{...(D.config||{}),saison:z.saison.trim(),mannschaft:z.mann.trim()}));
     await Promise.all(jobs);
     try{PID=null;cm=null;armed=null;gOpen=null;$("#gd").hidden=true;nEdit=null}catch(e){}
-    BK.wzDone="Fertig. Die Saison "+old+" ist archiviert, die Saison "+z.saison.trim()+" ("+z.mann.trim()+") läuft mit "+(keepIds.size+newC.length)+" Spielern. Bitte jetzt unter „Spielerlinks“ auf „Alle Links aktualisieren“ klicken und in den Stammdaten die neuen Spieler prüfen.";
+    BK.wzDone="Fertig. Die Saison "+old+" ist archiviert, die Saison "+z.saison.trim()+" ("+z.mann.trim()+") läuft mit "+(keepIds.size+newC.length)+" Spielern. Danach unter „Hinweise &amp; Links“ auf „Jetzt sofort aktualisieren“ klicken und in den Stammdaten die neuen Spieler prüfen.";
     BK.wz=null;
   }catch(e){z.run=false;z.arm=false;z.msg="";BK.wz=z;wzRender();const m=$b("#wzm");if(m){m.className="note warn";m.textContent="Der Wechsel ist nicht vollständig durchgelaufen ("+((e&&(e.code||e.message))||"Fehler")+"). Das Archiv und ein Sicherungsstand sind angelegt. Bitte Seite neu laden und prüfen, sonst über „Wiederherstellen“ zurückgehen."}BK.busy=false;return}
   BK.busy=false;wzRender();bkRender();
