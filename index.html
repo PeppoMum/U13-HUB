@@ -84,7 +84,109 @@ body.bgimg main>section>.kpis{background:none}body.bgimg .hl{display:none}body.b
 .etb{margin:0 0 14px}.etb button{flex:1;min-width:0}.etp>.card{margin:0 0 12px!important}.etp>.gr{margin:0 0 12px}.coonly{display:none}body.co .coonly{display:inline}body.co .ownonly{display:none}
 body.co #etb,body.co #etp-m,body.co #etp-s{display:none!important}body.co #etp-l{display:block!important}body.co #etp-l>.card:not(#lkh):not(#ktc){display:none}
 body.scoutonly nav button:not([data-s="k"]){display:none!important}body.scoutonly #lkw,body.scoutonly #bkw,body.scoutonly #ccw{display:none!important}
-body.kaus nav button[data-s="k"],body.kaus #hn [data-go="k"],body.kaus #k{display:none!important}#lkco{display:none!important}</style>
+body.kaus nav button[data-s="k"],body.kaus #hn [data-go="k"],body.kaus #k{display:none!important}
+/* ===== Demo-Designs: nur Optik, Inhalte und Funktionen bleiben unverändert ===== */
+.em{display:inline}
+
+/* ---------- gemeinsame Struktur der beiden neuen Designs ---------- */
+html[data-design="ruhig"],html[data-design="glas"]{--rad:14px;--font:"Inter","SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+html[data-design="ruhig"] body,html[data-design="glas"] body{font-feature-settings:"tnum" 1}
+:is(html[data-design="ruhig"],html[data-design="glas"]) .app{display:block}
+:is(html[data-design="ruhig"],html[data-design="glas"]) nav{position:sticky;top:0;height:auto;z-index:20;display:flex;align-items:center;gap:4px;padding:10px clamp(20px,3vw,48px);border-right:0;overflow-x:auto;scrollbar-width:none;white-space:nowrap}
+:is(html[data-design="ruhig"],html[data-design="glas"]) nav::-webkit-scrollbar{display:none}
+:is(html[data-design="ruhig"],html[data-design="glas"]) nav h1{font-size:17px;margin:0 6px 0 0;letter-spacing:-.01em}
+:is(html[data-design="ruhig"],html[data-design="glas"]) nav small{display:none}
+:is(html[data-design="ruhig"],html[data-design="glas"]) nav button{width:auto;flex:none;padding:7px 14px;border-radius:99px;color:var(--mu);font-size:14px}
+:is(html[data-design="ruhig"],html[data-design="glas"]) nav button .em{display:none}
+:is(html[data-design="ruhig"],html[data-design="glas"]) main{max-width:1840px;margin:0 auto;padding:22px clamp(20px,3vw,48px) 56px}
+@media(min-width:1500px){:is(html[data-design="ruhig"],html[data-design="glas"]) .gm{columns:300px 4}:is(html[data-design="ruhig"],html[data-design="glas"]) #hk.kpis{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}}
+:is(html[data-design="ruhig"],html[data-design="glas"]) h2{font-size:30px;font-weight:650;letter-spacing:-.025em;line-height:1.15;margin-bottom:6px}
+:is(html[data-design="ruhig"],html[data-design="glas"]) h3{text-transform:none;letter-spacing:0;font-size:14px;font-weight:600;color:var(--tx);margin-bottom:12px}
+:is(html[data-design="ruhig"],html[data-design="glas"]) .card{border-radius:var(--rad);padding:18px 20px}
+:is(html[data-design="ruhig"],html[data-design="glas"]) .kpi{padding:16px 18px}
+:is(html[data-design="ruhig"],html[data-design="glas"]) .kpi b{font-size:26px;font-weight:650;letter-spacing:-.03em}
+:is(html[data-design="ruhig"],html[data-design="glas"]) .kpi.c1,:is(html[data-design="ruhig"],html[data-design="glas"]) .kpi.c2,:is(html[data-design="ruhig"],html[data-design="glas"]) .kpi.c3,:is(html[data-design="ruhig"],html[data-design="glas"]) .kpi.c4{border-left-width:1px;border-left-style:solid;border-left-color:var(--ln)}
+html[data-design] .kpi.c1 b{color:var(--r)}html[data-design] .kpi.c2 b{color:var(--o)}html[data-design] .kpi.c3 b{color:var(--y)}html[data-design] .kpi.c4 b{color:var(--g)}
+:is(html[data-design="ruhig"],html[data-design="glas"]) :is(select,input,.btn,textarea){border-radius:10px;padding:7px 12px}
+:is(html[data-design="ruhig"],html[data-design="glas"]) .seg{display:inline-flex;gap:2px;padding:3px;border-radius:12px;background:var(--soft)}
+:is(html[data-design="ruhig"],html[data-design="glas"]) .seg button{border:0!important;background:transparent;color:var(--mu);border-radius:9px!important;padding:6px 14px}
+:is(html[data-design="ruhig"],html[data-design="glas"]) .seg button.on{background:var(--segon);color:var(--segtx);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+:is(html[data-design="ruhig"],html[data-design="glas"]) .tw{border-radius:var(--rad)}
+:is(html[data-design="ruhig"],html[data-design="glas"]) th{font-size:12px;font-weight:600;background:transparent}
+:is(html[data-design="ruhig"],html[data-design="glas"]) th.g{border-bottom-width:1px}
+:is(html[data-design="ruhig"],html[data-design="glas"]) :is(#tb,#tg,#gmt) td:nth-child(2),:is(#tb,#tg) th:nth-child(2),:is(#gmt) td:first-child,#gmt th:first-child{background:var(--cs)}
+:is(html[data-design="ruhig"],html[data-design="glas"]) .ph .av,:is(html[data-design="ruhig"],html[data-design="glas"]) .av{box-shadow:none}
+:is(html[data-design="ruhig"],html[data-design="glas"]) .logo{border-radius:14px}
+:is(html[data-design="ruhig"],html[data-design="glas"]) .sb,:is(html[data-design="ruhig"],html[data-design="glas"]) .tk{border-radius:99px}
+:is(html[data-design="ruhig"],html[data-design="glas"]) .row{padding:9px 0}
+
+/* ---------- Klar & ruhig ---------- */
+html[data-design="ruhig"]{--bg:#f4f5f2;--card:#fff;--cs:#fff;--tx:#14201b;--mu:#6d7872;--ln:#e4e7e2;--soft:#eef0ec;--ac:#0f7a5a;--acs:#e3f2ec;--segon:#fff;--segtx:#14201b;--grs:#eef0ec}
+@media(prefers-color-scheme:dark){html[data-design="ruhig"]:not([data-theme="light"]){--bg:#0f1311;--card:#171c19;--cs:#171c19;--tx:#e9eeeb;--mu:#88948e;--ln:#252c28;--soft:#202723;--ac:#4cc79c;--acs:#16302a;--segon:#2b342f;--segtx:#e9eeeb;--grs:#252c28}}
+html[data-design="ruhig"][data-theme="dark"]{--bg:#0f1311;--card:#171c19;--cs:#171c19;--tx:#e9eeeb;--mu:#88948e;--ln:#252c28;--soft:#202723;--ac:#4cc79c;--acs:#16302a;--segon:#2b342f;--segtx:#e9eeeb;--grs:#252c28}
+html[data-design="ruhig"] nav{background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--ln)}
+html[data-design="ruhig"] nav button.on{background:var(--tx);color:var(--bg);font-weight:600}
+html[data-design="ruhig"] .card{box-shadow:none}
+html[data-design="ruhig"] .btn[style*="background:var(--ac)"]{border-color:var(--ac)}
+
+/* ---------- Liquid Glass ---------- */
+html[data-design="glas"]{--bg:#cfe3ff;--card:rgba(255,255,255,.55);--cs:rgba(244,248,255,.92);--tx:#0d1b2a;--mu:rgba(13,27,42,.62);--ln:rgba(13,27,42,.1);--soft:rgba(13,27,42,.07);--ac:#0a84ff;--acs:rgba(10,132,255,.14);--segon:#0a84ff;--segtx:#fff;--grs:rgba(13,27,42,.08);--edge:rgba(255,255,255,.85);--gsh:0 8px 32px rgba(40,70,120,.14)}
+@media(prefers-color-scheme:dark){html[data-design="glas"]:not([data-theme="light"]){--bg:#101114;--card:rgba(255,255,255,.065);--cs:rgba(30,31,36,.97);--tx:#f3f3f5;--mu:rgba(243,243,245,.62);--ln:rgba(255,255,255,.1);--soft:rgba(255,255,255,.09);--ac:#7fb2ff;--acs:rgba(127,178,255,.18);--segon:#e9ecf2;--segtx:#14161a;--grs:rgba(255,255,255,.12);--edge:rgba(255,255,255,.16);--gsh:0 8px 32px rgba(0,0,0,.45)}}
+html[data-design="glas"][data-theme="dark"]{--bg:#101114;--card:rgba(255,255,255,.065);--cs:rgba(30,31,36,.97);--tx:#f3f3f5;--mu:rgba(243,243,245,.62);--ln:rgba(255,255,255,.1);--soft:rgba(255,255,255,.09);--ac:#7fb2ff;--acs:rgba(127,178,255,.18);--segon:#e9ecf2;--segtx:#14161a;--grs:rgba(255,255,255,.12);--edge:rgba(255,255,255,.16);--gsh:0 8px 32px rgba(0,0,0,.45)}
+html[data-design="glas"] body{background:radial-gradient(60% 50% at 10% 5%,#cfe3ff,transparent 70%),radial-gradient(50% 45% at 92% 18%,#e9d8ff,transparent 70%),radial-gradient(60% 50% at 55% 100%,#c9f2e3,transparent 70%),#d6e6ff;background-attachment:fixed}
+@media(prefers-color-scheme:dark){html[data-design="glas"]:not([data-theme="light"]) body{background:radial-gradient(55% 45% at 8% 4%,#3a3446,transparent 70%),radial-gradient(45% 40% at 94% 16%,#2c3a36,transparent 70%),radial-gradient(55% 45% at 55% 100%,#3a3030,transparent 70%),#0e0f12;background-attachment:fixed}}
+html[data-design="glas"][data-theme="dark"] body{background:radial-gradient(55% 45% at 8% 4%,#3a3446,transparent 70%),radial-gradient(45% 40% at 94% 16%,#2c3a36,transparent 70%),radial-gradient(55% 45% at 55% 100%,#3a3030,transparent 70%),#0e0f12;background-attachment:fixed}
+html[data-design="glas"] :is(.card,.logo,.lkw){backdrop-filter:blur(22px) saturate(1.6);-webkit-backdrop-filter:blur(22px) saturate(1.6);border:1px solid var(--edge);box-shadow:var(--gsh),inset 0 1px 0 rgba(255,255,255,.45);border-radius:24px}
+html[data-design="glas"] .card.tw{overflow-x:auto}
+html[data-design="glas"] nav{margin:12px auto 0;width:max-content;max-width:calc(100% - 24px);padding:5px;border-radius:99px;background:var(--card);backdrop-filter:blur(24px) saturate(1.6);-webkit-backdrop-filter:blur(24px) saturate(1.6);border:1px solid var(--edge);box-shadow:var(--gsh),inset 0 1px 0 rgba(255,255,255,.45)}
+html[data-design="glas"] nav h1{padding-left:14px}
+html[data-design="glas"] nav button.on{background:var(--segon);color:var(--segtx);font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+html[data-design="glas"] :is(select,input,.btn,textarea){background:rgba(255,255,255,.45);border:1px solid var(--edge);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+@media(prefers-color-scheme:dark){html[data-design="glas"]:not([data-theme="light"]) :is(select,input,.btn,textarea){background:rgba(255,255,255,.08)}}
+html[data-design="glas"][data-theme="dark"] :is(select,input,.btn,textarea){background:rgba(255,255,255,.08)}
+html[data-design="glas"] .seg{background:var(--card);border:1px solid var(--edge);border-radius:99px}
+html[data-design="glas"] .seg button{border-radius:99px!important}
+html[data-design="glas"] .kpi.c1,html[data-design="glas"] .kpi.c2,html[data-design="glas"] .kpi.c3,html[data-design="glas"] .kpi.c4{border-left-color:var(--edge)}
+@supports not (backdrop-filter:blur(1px)){html[data-design="glas"]{--card:rgba(255,255,255,.88)}}
+
+/* ---------- Handy: untere Leiste ---------- */
+@media(max-width:760px){
+ :is(html[data-design="ruhig"],html[data-design="glas"]) nav{position:fixed;top:auto;bottom:0;left:0;right:0;width:auto;max-width:none;margin:0;padding:8px 6px calc(9px + env(safe-area-inset-bottom,0px));gap:0;justify-content:flex-start;border-radius:0;border-bottom:0}
+ :is(html[data-design="ruhig"],html[data-design="glas"]) nav button{border-radius:12px;padding:6px 10px;flex-direction:column;align-items:center;gap:2px;font-size:11px}
+ :is(html[data-design="ruhig"],html[data-design="glas"]) nav button .em{display:inline;font-size:17px}
+ :is(html[data-design="ruhig"],html[data-design="glas"]) main{padding:16px 14px 90px}
+ html[data-design="ruhig"] nav{border-top:1px solid var(--ln);background:var(--card);backdrop-filter:none}
+ html[data-design="glas"] nav{left:10px;right:10px;bottom:10px;border-radius:24px;padding:6px}
+ :is(html[data-design="ruhig"],html[data-design="glas"]) h2{font-size:26px}
+}
+@media(min-width:1500px){
+ :is(html[data-design="ruhig"],html[data-design="glas"]) .gm{display:block;columns:3 340px;column-gap:14px}
+ :is(html[data-design="ruhig"],html[data-design="glas"]) .gm .card{margin:0 0 14px;break-inside:avoid}
+ :is(html[data-design="ruhig"],html[data-design="glas"]) .gr.pg{grid-template-columns:2fr 1fr}
+}
+:is(html[data-design="ruhig"],html[data-design="glas"]) #pm svg{max-height:300px;width:100%}
+@media(max-width:760px){
+ :is(html[data-design="ruhig"],html[data-design="glas"]) nav button[data-s="h"]{position:static;box-shadow:none;background:transparent}
+ :is(html[data-design="ruhig"],html[data-design="glas"]) nav button.on[data-s="h"]{background:var(--segon);color:var(--segtx)}
+ html[data-design="ruhig"] nav button.on{background:var(--tx);color:var(--bg)}
+ 
+}
+@media(max-width:760px){html[data-design="ruhig"] nav button.on[data-s="h"]{background:var(--tx);color:var(--bg)}}
+@media(max-width:760px){
+ html[data-design="glas"] nav{background:rgba(255,255,255,.88);backdrop-filter:blur(30px) saturate(1.8);-webkit-backdrop-filter:blur(30px) saturate(1.8)}
+}
+@media(max-width:760px) and (prefers-color-scheme:dark){html[data-design="glas"]:not([data-theme="light"]) nav{background:rgba(28,29,34,.92)}}
+@media(max-width:760px){html[data-design="glas"][data-theme="dark"] nav{background:rgba(28,29,34,.92)}}
+:is(html[data-design="ruhig"],html[data-design="glas"]) .seg.etb{display:flex}
+
+/* Beschriftung auf Akzentflächen */
+html[data-design="ruhig"],html[data-design="glas"]{--onac:#fff}
+@media(prefers-color-scheme:dark){html[data-design="ruhig"]:not([data-theme="light"]){--onac:#0f1311}html[data-design="glas"]:not([data-theme="light"]){--onac:#06182e}}
+html[data-design="ruhig"][data-theme="dark"]{--onac:#0f1311}html[data-design="glas"][data-theme="dark"]{--onac:#06182e}
+:is(html[data-design="ruhig"],html[data-design="glas"]) :is([style*="background:var(--ac)"],.chip.pS,.chips button.on.pS){color:var(--onac)!important}
+
+@media(min-width:761px) and (max-width:1100px){:is(html[data-design="ruhig"],html[data-design="glas"]) nav{padding-left:12px;padding-right:12px;gap:2px}:is(html[data-design="ruhig"],html[data-design="glas"]) nav button{padding:6px 9px;font-size:13px}:is(html[data-design="ruhig"],html[data-design="glas"]) nav h1{font-size:15px}}
+#lkco{display:none!important}</style>
 <div class="app">
 <nav><h1>U13 · <span id="sais">2026/27</span></h1><small>Teamzentrale</small>
 <button data-s="h" class="on">🏠 Start</button><button data-s="a">📊 Saison</button><button data-s="q">📈 Statistik</button><button data-s="p">👤 Profil</button><button data-s="n">📝 Notizen</button><button data-s="t">🏃 Training</button><button data-s="g">⚽ Spiele</button><button data-s="m">📅 Termine</button><button data-s="w">🎯 Schwerpunkte</button><button data-s="s">🗂 Stammdaten</button><button data-s="k">🧩 Kader</button><button data-s="e">⚙️ Einstellungen</button></nav>
@@ -142,6 +244,7 @@ body.kaus nav button[data-s="k"],body.kaus #hn [data-go="k"],body.kaus #k{displa
 <section id="e" hidden><h2>Einstellungen</h2><p class="sub">Änderungen werden sofort gespeichert und gelten in allen Auswertungen</p>
 <div class="seg etb" id="etb" role="group" aria-label="Bereich der Einstellungen"><button data-et="l" class="on">Hinweise &amp; Links</button><button data-et="m">Mannschaft</button><button data-et="s">Sicherung</button></div>
 <div class="etp" id="etp-m">
+<div class="card" id="dzcard" style="margin-bottom:12px"><h3>Design</h3><div class="bar" style="margin:0"><label>Design der App <select id="dzapp"><option value="ruhig">Klar &amp; ruhig</option><option value="glas">Liquid Glass</option><option value="klassisch">Klassisch (bisheriges Design)</option></select></label><label>Standard für externe Links <select id="dzlnk"><option value="ruhig">Klar &amp; ruhig</option><option value="glas">Liquid Glass</option></select></label></div><p class="note" style="margin:8px 0 0">Das Design der App gilt für alle Trainer und Geräte. Für jeden externen Link lässt sich das Design unter „Hinweise &amp; Links“ einzeln ändern. Das Design der A4-Exporte wählst du direkt bei den Export-Knöpfen.</p></div>
 <div class="card" id="kadsw" style="margin-bottom:12px"><h3>Kader-Modul</h3><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="kadon" checked> Kader (Kaderplanung &amp; Scouting) einblenden</label><p class="note" style="margin:6px 0 0">Ausgeblendet ist der Kader für alle weg (auch Co-Trainer, Kalender, Scouting-Link). Die Daten bleiben erhalten.</p></div>
 <div class="gr" style="margin-top:0"><div class="card"><h3>Saison</h3><label class="note">Saison (z. B. 2026/27)<br><input id="esa" style="width:120px" autocomplete="off"></label> <label class="note" style="margin-left:12px">Mannschaft (z. B. U13)<br><input id="emn" style="width:90px" autocomplete="off"></label><p class="note" id="emsg" style="margin:8px 0 0">Die Saison bestimmt die zwölf Monate im Bereich Training (Juli bis Juni).</p></div>
 <div class="card"><h3>Zählende Abwesenheiten</h3><p class="note" style="margin-top:0">Diese Status zählen bei der gewichteten Trainingsbeteiligung als Fehlen. Die übrigen werden nicht gezählt.</p><div id="ezl"></div></div></div>
@@ -725,14 +828,14 @@ function sub(coll,key,map){
   window.__dbUp=true;qRestore();if(window.__SCOUT){typeof scoutMode==="function"&&scoutMode(db);return}window.__ROLE!=="scout"&&window.__ROLE!=="lesen"&&typeof initLinks==="function"&&initLinks();typeof initKader==="function"&&initKader(db);if(window.__ROLE==="scout"){D.ready=true;go("k")}
   sub("players","spieler",(a,b)=>a.slot-b.slot);sub("games","spiele",(a,b)=>a.nr-b.nr);sub("trainings","trainings",(a,b)=>a.datum.localeCompare(b.datum));sub("events","events");sub("dienste","dienste");sub("todos","todos");window.__ROLE!=="scout"&&db.collection("notes").onSnapshot((x)=>{D.notizen=x.docs.map((d)=>({id:d.id,...d.data()}));renderNotes();renderProfile();typeof renderStart==="function"&&renderStart()},()=>{});
   try{db.doc("config/sicherung").onSnapshot((s)=>{D.sicherung=s&&s.exists?s.data():null;D.sicherungGot=true;typeof bkwRender==="function"&&bkwRender()},()=>{D.sicherungGot=true})}catch(e){}
-  db.doc("config/main").onSnapshot((s)=>{D.config=s.exists?s.data():null;renderSaison();renderLogo();renderTrain();typeof renderSettings==="function"&&renderSettings();renderGames();typeof renderQ==="function"&&renderQ();typeof renderLinks==="function"&&renderLinks();typeof renderPlan==="function"&&renderPlan();typeof renderKader==="function"&&renderKader();if(D.ready&&$("#st").className.indexOf("busy")<0&&!window.__renderErr)setSt("Synchron","ok")},()=>{});
+  db.doc("config/main").onSnapshot((s)=>{D.config=s.exists?s.data():null;window.__dzSync&&window.__dzSync();renderSaison();renderLogo();renderTrain();typeof renderSettings==="function"&&renderSettings();renderGames();typeof renderQ==="function"&&renderQ();typeof renderLinks==="function"&&renderLinks();typeof renderPlan==="function"&&renderPlan();typeof renderKader==="function"&&renderKader();if(D.ready&&$("#st").className.indexOf("busy")<0&&!window.__renderErr)setSt("Synchron","ok")},()=>{});
 })();
 </script>
 <script>/* ---------- A4-Export (ohne Fremdbibliotheken: SVG -> Bild -> PNG / JPG / PDF) ---------- */
 const XT={light:{bg:"#ffffff",tx:"#1c1f24",mu:"#6b7280",ln:"#e5e7eb",card:"#f8f9fb",stripe:"#f4f5f7",track:"#e6e8ec",avbg:"#dbe6fd",ac:"#2563eb",nb:"#1e3a8a",bk:"#000000",bgk:"#d8f3e6",bgn:"#fbe6cf",bgv:"#e6e8ec",bgt:"#dbe8fd",bge:"#fbf0c6",bgu:"#fbdcdc"},
   dark:{bg:"#111317",tx:"#eceef2",mu:"#98a0ae",ln:"#2b303a",card:"#1b1e24",stripe:"#171a20",track:"#2b303a",avbg:"#22335c",ac:"#6ea0ff",nb:"#4a78d8",bk:"#eceef2",bgk:"#17382b",bgn:"#43301a",bgv:"#2b303a",bgt:"#1f3355",bge:"#3d3410",bgu:"#432022"}};
 const XC={r:"#d64545",o:"#e07b1a",y:"#d9a400",g:"#22a06b",gr:"#8b93a1",p:"#8b5cf6",be:"#b8975f",n1:"#111827",n2:"#4b5563",n3:"#8a93a1",n4:"#b8bec9"},XA={};
-function xTheme(dark){Object.assign(XC,XT[dark?"dark":"light"]);XA[1]=XC.r;XA[2]=XC.o;XA[3]=XC.y;XA[4]=XC.g}
+function xTheme(dark){Object.assign(XC,XT[dark?"dark":"light"]);XC.dk=!!dark;XA[1]=XC.r;XA[2]=XC.o;XA[3]=XC.y;XA[4]=XC.g}
 xTheme(false);
 const XF="system-ui,-apple-system,Segoe UI,Helvetica,Arial,sans-serif";
 const xctx=document.createElement("canvas").getContext("2d");
@@ -755,7 +858,7 @@ const xdate=()=>{const t=today();return t.slice(8)+"."+t.slice(5,7)+"."+t.slice(
 function xtrend(t){if(t==null)return{s:"–",c:XC.mu,k:0};const v=Math.round(t*100),k=trendCls(t);return{s:(k===4?"▲ +":k===1?"▼ ":v>0?"▬ +":"▬ ")+v+" %",c:k===4?XC.g:k===1?XC.r:XC.mu,k}}
 function xhead(s,W,title,sub,x0,photo,ini){
   let x=x0;const lg=D.config&&D.config.logo;
-  if(photo){s.img(x,22,52,52,photo,true);x+=64}else if(ini){s.c(x+26,48,26,XC.avbg);s.t(x+26,55,ini,18,XC.ac,{b:1,an:"middle"});x+=64}
+  if(photo){s.img(x,22,52,52,photo,true);x+=64}else if(ini){s.c(x+26,48,26,XC.avbg);s.t(x+26,55,ini,18,XC.itx||XC.ac,{b:1,an:"middle"});x+=64}
   s.t(x,44,title,21,XC.tx,{b:1});s.t(x,63,sub,10.5,XC.mu);
   if(lg)s.img(W-x0-56,20,56,56,lg,false);
   s.t(W-x0-(lg?66:0),44,mann()+" · "+((D.config&&D.config.saison)||"2026/27"),11,XC.mu,{an:"end",b:1});s.t(W-x0-(lg?66:0),60,"Stand "+xdate(),10,XC.mu,{an:"end"});
@@ -845,7 +948,7 @@ function xProfil(pid){
   const SIMPLE=(($("#xpv")||{}).value==="s"),W=SIMPLE?600:794,H=SIMPLE?849:1123,M=28,s=XS(W,H),P=active(),p=P.find((x)=>x.id===(pid||PID))||P[0],S=U13.saison(xargs(P)),R=S.rows.find((r)=>r.spieler.id===p.id),sp=R.spiel,q=R.training,tw=!!p.torwart;
   const zl=(D.config&&D.config.zaehlendeAbwesenheiten)||{e:true,u:true,v:false,t:false},cS=tw?0:R.farbeSpielzeit,cT=R.farbeTraining,a=age(p.geburtsdatum);
   xhead(s,W,p.vorname+" "+p.name,"",M,p.foto,((p.vorname[0]||"")+(p.name[0]||"")));
-  {let cx=M+64;const stm=stammOf(p);(p.positionen||[]).slice().sort((a1,b1)=>stm.includes(b1)-stm.includes(a1)).forEach((k)=>{const w=xtw(k,9.5,1)+14,st=stm.includes(k);s.r(cx,51,w,16,st?XC.ac:XC.avbg,8);s.t(cx+w/2,62.5,k,9.5,st?XC.bg:XC.ac,{b:1,an:"middle"});cx+=w+5});
+  {let cx=M+64;const stm=stammOf(p);(p.positionen||[]).slice().sort((a1,b1)=>stm.includes(b1)-stm.includes(a1)).forEach((k)=>{const w=xtw(k,9.5,1)+14,st=stm.includes(k);s.r(cx,51,w,16,st?XC.ac:XC.avbg,8);s.t(cx+w/2,62.5,k,9.5,st?XC.bg:(XC.itx||XC.ac),{b:1,an:"middle"});cx+=w+5});
    const sb=(p.geburtsdatum?"geboren "+dlong(p.geburtsdatum)+(a!==""?" ("+a+" Jahre)":""):"")+(tw?(p.geburtsdatum?" · ":"")+"Torhüter":"");if(sb)s.t(cx+((p.positionen||[]).length?3:0),63,sb,10.5,XC.mu)}
   if(R.warnSpielzeit){const pr=(v)=>v==null?"–":Math.round(v*100)+" %";s.t(W-M,78,"⚠ Spielzeit unter 50 %: Saison "+pr(sp.gewichtet)+" · letzte 60 Tage "+pr(sp.l2mGewichtet),10,XC.r,{an:"end",b:1})}
   /* Kennzahlen */
@@ -1573,7 +1676,7 @@ function vPlan(root,T){
   draw();
 }
 function planOnly(d){
-  useBg();const v=shell(),cur=document.documentElement.getAttribute("data-theme")||"";
+  useBg();window.__dz&&__dz.set(d.dz||SNAP.dz||"ruhig",true);const v=shell(),cur=document.documentElement.getAttribute("data-theme")||"";
   v.innerHTML='<div class="vh">'+(d.l?'<img alt="" src="'+esc(d.l)+'">':"")+'<div><b style="font-size:22px;line-height:1.2">Terminplan '+esc(d.m||"U13")+'</b><div class="note" style="font-size:14px">TuS Haltern am See · Saison '+esc(d.s||"")+'</div></div><span style="flex:1"></span><select id="vth" aria-label="Darstellung"><option value="">Darstellung: Auto</option><option value="light">Hell</option><option value="dark">Dunkel</option></select></div>'+hnHtml(hnItems(d.hn,"alle"))+'<div id="vplan"></div><div class="vf">Stand: '+esc(dt(d.u))+'</div>';
   bgPick();const s=document.getElementById("vth");s.value=cur;s.onchange=()=>{applyTheme(s.value);try{s.value?localStorage.setItem("u13theme",s.value):localStorage.removeItem("u13theme")}catch(e){}};
   vPlan(document.getElementById("vplan"),{...d.t,s:d.s,lg:d.l,hn:d.hn});
@@ -1582,7 +1685,7 @@ function planOnly(d){
 async function showExt(k,blob,key){
   let d;try{d=await unseal(key,blob)}catch(e){showAccess("Dieser Link ist nicht (mehr) gültig. Bitte den Trainer fragen.");return}
   if(d.k==="plan"){planOnly(d);return}
-  useBg();bgPick();Object.assign(D,d.db,{ready:true});window.__RO=true;window.__ANON=d.k==="anon";window.__DEMO=d.k==="demo";
+  useBg();window.__dz&&__dz.set(d.dz||"ruhig",true);bgPick();Object.assign(D,d.db,{ready:true});window.__RO=true;window.__ANON=d.k==="anon";window.__DEMO=d.k==="demo";
   document.body.classList.add("ro");if(window.__ANON)document.body.classList.add("anon");
   document.title="TuS Haltern U13 · "+(window.__DEMO?"Demo":"Teamzentrale");
   const st=document.getElementById("st");if(st){st.textContent=(window.__DEMO?"Demo · Zufallsdaten · ":"Nur Ansicht · ")+"Stand "+dt(d.u);st.className="pill"}
@@ -1612,7 +1715,7 @@ async function showViewer(pid,key){
   const blob=SNAP.p&&SNAP.p[pid];
   if(!blob){showAccess("Dieser Link ist nicht (mehr) aktiv. Bitte den Trainer fragen.");return}
   let d;try{d=await unseal(key,blob)}catch(e){showAccess("Dieser Link ist nicht (mehr) gültig. Bitte den Trainer fragen.");return}
-  useBg();const v=shell(),cur=document.documentElement.getAttribute("data-theme")||"";
+  useBg();window.__dz&&__dz.set(d.dz||"ruhig",true);const v=shell(),cur=document.documentElement.getAttribute("data-theme")||"";
   v.innerHTML='<div class="vh">'+(d.l?'<img alt="" src="'+esc(d.l)+'">':"")+'<div><b style="font-size:22px;line-height:1.2">'+(d.n?"Hey "+esc(d.n)+"!":"Hey!")+'</b><div class="note" style="font-size:14px">Deine '+esc(d.m||"U13")+'-Zentrale · Saison '+esc(d.s||"")+'</div></div><span style="flex:1"></span><select id="vth" aria-label="Darstellung"><option value="">Darstellung: Auto</option><option value="light">Hell</option><option value="dark">Dunkel</option></select></div>'+hnHtml(hnItems(d.hn,"alle"))+(d.t?'<div class="seg" id="vtab" style="margin-bottom:14px"><button data-v="p" class="on">Profil</button><button data-v="t">Terminplan</button></div>':"")+'<div id="vprof">'+d.h+'</div>'+(d.t?'<div id="vplan" hidden></div>':"")+'<div class="vf">Stand: '+esc(dt(d.u))+' · Persönlicher Link, bitte nicht weitergeben.</div>';
   bgPick();const s=document.getElementById("vth");s.value=cur;s.onchange=()=>{applyTheme(s.value);try{s.value?localStorage.setItem("u13theme",s.value):localStorage.removeItem("u13theme")}catch(e){}};
   if(d.t){const tb=document.getElementById("vtab");let ready=false;tb.onclick=(e)=>{const b=e.target.closest("button");if(!b)return;tb.querySelectorAll("button").forEach((x)=>x.classList.toggle("on",x===b));const pl=b.dataset.v==="t";document.getElementById("vprof").hidden=pl;document.getElementById("vplan").hidden=!pl;if(pl&&!ready){ready=true;vPlan(document.getElementById("vplan"),{...d.t,s:d.s,lg:d.l,hn:d.hn})}}}
@@ -1802,11 +1905,15 @@ const useBg=()=>{const b=SNAP.bg;if(!b||!window.applyBg)return;let v="";try{v=lo
 const bgPick=()=>{const b=SNAP.bg,t=document.getElementById("vth")||document.getElementById("th");if(!b||!b.i||!t||document.getElementById("vbg"))return;let v="";try{v=localStorage.getItem("u13vbg")||""}catch(e){}
   const e=document.createElement("select");e.id="vbg";e.setAttribute("aria-label","Hintergrund");e.innerHTML='<option value="">Hintergrund: Standard</option><option value="bild">Hintergrund: Bild</option>';e.value=v;
   e.onchange=()=>{try{e.value?localStorage.setItem("u13vbg",e.value):localStorage.removeItem("u13vbg")}catch(x){}useBg()};t.insertAdjacentElement("afterend",e)};
+const dzSel=(l)=>'<select data-dz aria-label="Design des Links" '+(window.__ROLE==="lesen"?"disabled":"")+'><option value=""'+(l.dz?"":" selected")+'>Standard ('+(window.__dz?__dz.names[__dz.linkDefault()]:"Klar & ruhig")+')</option><option value="ruhig"'+(l.dz==="ruhig"?" selected":"")+'>Klar &amp; ruhig</option><option value="glas"'+(l.dz==="glas"?" selected":"")+'>Liquid Glass</option></select>';
+const dzK=(pid)=>{const v=(L[pid]||{}).dz;return v?{dz:v}:{}};
+const dzOf=(id)=>{const v=(L[id]||{}).dz;return v==="glas"||v==="ruhig"?v:(window.__dz?__dz.linkDefault():"ruhig")};
+const dzSig=()=>JSON.stringify(Object.keys(L).sort().filter((k)=>L[k].aktiv&&L[k].key).map((k)=>[k,dzOf(k)]));
 async function buildSnap(){
   const TP=planSnap(),HN=(D.config&&D.config.hinweise)||[],out={v:1,u:new Date().toISOString(),p:{},k:{}},logo=(D.config&&D.config.logo)||"",sa=(D.config&&D.config.saison)||"";
-  for(const p of active()){const l=L[p.id];if(!l||!l.aktiv||!l.key)continue;out.p[p.id]=await seal(l.key,{h:profileHtml(p.id),l:logo,s:sa,m:mann(),u:out.u,t:TP,n:p.vorname,hn:HN});out.k[p.id]=await sha8(l.key)}
-  out.bg=await bgSnap();out.x={};out.xk={};
-  for(const k of ["full","anon","plan","demo"]){const l=L["x"+k];if(!l||!l.aktiv||!l.key)continue;out.x[k]=await seal(l.key,k==="plan"?{k,u:out.u,t:TP,l:logo,s:sa,m:mann(),hn:HN}:{k,u:out.u,db:extData(k)});out.xk[k]=await sha8(l.key)}
+  for(const p of active()){const l=L[p.id];if(!l||!l.aktiv||!l.key)continue;out.p[p.id]=await seal(l.key,{h:profileHtml(p.id),l:logo,s:sa,m:mann(),u:out.u,t:TP,n:p.vorname,hn:HN,dz:dzOf(p.id)});out.k[p.id]=await sha8(l.key)}
+  out.bg=await bgSnap();out.dzs=dzSig();out.x={};out.xk={};
+  for(const k of ["full","anon","plan","demo"]){const l=L["x"+k];if(!l||!l.aktiv||!l.key)continue;out.x[k]=await seal(l.key,k==="plan"?{k,u:out.u,t:TP,l:logo,s:sa,m:mann(),hn:HN,dz:dzOf("x"+k)}:{k,u:out.u,db:extData(k),dz:dzOf("x"+k)});out.xk[k]=await sha8(l.key)}
   {const f=await fingerprintParts();out.fp=f.a+f.s;out.fa=f.a;out.fs=f.s}return out;
 }
 function composeHtml(snap){
@@ -1820,17 +1927,17 @@ window.__lk={setSnap:(s)=>{SNAP=s},getSnap:()=>SNAP,seal,unseal,composeHtml,buil
 const saveLink=(pid,o)=>{
   const c=L[pid]||{};
   if(c.alias&&c.key&&o.key&&o.key!==c.key&&window.__kurzTr)return kzSet(pid,c.alias,o.key,o.aktiv,c.open);
-  const d={id:pid,key:o.key,aktiv:!!o.aktiv};["alias","pw","t","open"].forEach((k)=>{const v=k in o?o[k]:c[k];if(v)d[k]=v});
+  const d={id:pid,key:o.key,aktiv:!!o.aktiv};["alias","pw","t","open","dz"].forEach((k)=>{const v=k in o?o[k]:c[k];if(v)d[k]=v});
   return save("links",pid,d)};
 /* ---------- Kurzlinks (Trainer) ---------- */
 const kzVid=(pid)=>["xfull","xanon","xplan","xdemo"].includes(pid)?pid.slice(1):pid,kzA={};
 async function kzPre(){await Promise.all(Object.keys(L).filter((k)=>L[k].alias&&!kzA[L[k].alias]).map(async(k)=>{kzA[L[k].alias]=await kzId(L[k].alias)}))}
 async function kzSet(pid,alias,key,aktiv,open){
   const Tr=window.__kurzTr,aid=await kzId(alias),t=newKey();
-  if(open&&pid==="xplan"){await Tr.put(aid,{s:"",w:"",v:2,i:kzVid(pid),k:key},t);await save("links",pid,{id:pid,key,aktiv:!!aktiv,alias,open:true,t});return}
+  if(open&&pid==="xplan"){await Tr.put(aid,{s:"",w:"",v:2,i:kzVid(pid),k:key},t);await save("links",pid,{id:pid,key,aktiv:!!aktiv,alias,open:true,t,...dzK(pid)});return}
   const pw=kzPw(),n=await kzWrap(pw,{i:kzVid(pid),k:key,t});
   await Tr.put(aid,{s:n.s,w:n.w,v:0},t);
-  await save("links",pid,{id:pid,key,aktiv:!!aktiv,alias,pw,t});
+  await save("links",pid,{id:pid,key,aktiv:!!aktiv,alias,pw,t,...dzK(pid)});
 }
 async function kzCreate(pid,raw,open){
   const alias=String(raw||"").trim().toLowerCase(),l=L[pid]||{};
@@ -1841,7 +1948,7 @@ async function kzCreate(pid,raw,open){
   try{await kzSet(pid,alias,l.key,l.aktiv,open)}catch(e){return"Das hat nicht geklappt"+(e&&e.code?" ("+e.code+")":"")+"."}
   return"";
 }
-async function kzRemove(pid){const l=L[pid]||{};if(!l.alias)return;await window.__kurzTr.del(await kzId(l.alias));await save("links",pid,{id:pid,key:l.key,aktiv:!!l.aktiv})}
+async function kzRemove(pid){const l=L[pid]||{};if(!l.alias)return;await window.__kurzTr.del(await kzId(l.alias));await save("links",pid,{id:pid,key:l.key,aktiv:!!l.aktiv,...dzK(pid)})}
 function kzCell(pid){
   if(!window.__kurzTr||window.__ROLE==="lesen")return"";
   const l=L[pid]||{};if(!l.key)return"";
@@ -1878,12 +1985,13 @@ async function lkHealth(){
   if(off&&!window.__WEB)W.push(off+" Link(s) sind noch online, obwohl sie abgeschaltet oder der Spieler nicht mehr aktiv ist – beim nächsten Aktualisieren werden sie entfernt.");
   const fpp=await fingerprintParts();if(my!==lkTok)return;
   if(window.__WEB){/* Web-Version: automatisch veröffentlichen (Link-Änderungen sofort, neue Daten alle 6 Stunden) */
-    const now=Date.now(),changed=!SNAP.fa||SNAP.fa!==fpp.a||SNAP.fs!==fpp.s,daily=pubIds.length>0&&changed&&now-(Date.parse(SNAP.u||"")||0)>=216e5,struct=nOn.length>0||xMiss>0||off>0;
+    const now=Date.now(),changed=!SNAP.fa||SNAP.fa!==fpp.a||SNAP.fs!==fpp.s,daily=pubIds.length>0&&changed&&now-(Date.parse(SNAP.u||"")||0)>=216e5,dzChg=pubIds.length>0&&SNAP.dzs!==dzSig(),struct=nOn.length>0||xMiss>0||off>0||dzChg;
     if((struct||daily)&&!lkBusy&&now>lkQuiet&&window.__lkPublish&&window.__ROLE!=="lesen"){lkQuiet=now+9e4;window.__lkPublish(true)}
     for(let i=E.length-1;i>=0;i--)if(/noch nicht online/.test(E[i]))E.splice(i,1);W.length=0}
   /* Warnung nur, wenn Eltern etwas Veraltetes sehen, das wichtig ist: Termine, Hinweise, Kontakte, Notizen sofort;
      eingetragene Anwesenheit/Minuten erst, wenn der Stand in den Links mehrere Tage alt ist. */
   if(pubIds.length&&!window.__WEB){
+    if(SNAP.dzs!==dzSig())W.push("Das Design von Links wurde geändert und ist noch nicht online.");
     if(!SNAP.fa||SNAP.fa!==fpp.a)W.push("Termine, Hinweise, Kontakte oder Notizen in den Links sind nicht auf dem neuesten Stand.");
     else if(SNAP.fs!==fpp.s){const age=SNAP.u?(Date.now()-Date.parse(SNAP.u))/864e5:99;if(age>=LK_AUSW_TAGE)W.push("Die Auswertungen (Training, Spiele) in den Links sind "+(age>=99?"alt":Math.floor(age)+" Tage alt")+".")}}
   try{if(JSON.stringify(SNAP).length>12e6)E.push("Die Link-Daten sind fast zu groß für die Seite (über 12 MB) – bitte weniger Links aktivieren.")}catch(e){}
@@ -1912,12 +2020,12 @@ async function renderLinks(){if(window.__DEMO)return;
   $("#lks").innerHTML=(SNAP.u?"Letzter Stand online: <b>"+esc(dt(SNAP.u))+"</b> · ":"Noch nichts veröffentlicht · ")+"<b>"+on+"</b> Link(s) online"+(pend||stale?' · <span class="warn">⚠ '+(pend?"Link-Änderungen":"")+(pend&&stale?" und ":"")+(stale?"neuere Daten":"")+(window.__WEB?" noch nicht online – wird automatisch übernommen.":" noch nicht online – bitte „Alle Links aktualisieren“ klicken.")+"</span>":' · <span class="up">alles aktuell</span>');
   const xe=$("#lkxt");
   if(xe){const XN={full:["Vollansicht","Alles sichtbar, nur lesend (inkl. Namen, Fotos, Notizen, To-Dos, Kontakte)"],plan:["Nur Terminpläne","Monats- und Wochenplan zum Ansehen, ohne Anmeldung – keine Spielerprofile, Notizen oder To-Dos"],demo:["Demo (Zufallsdaten)","Ganze App mit komplett zufällig erzeugten Daten (Namen, Beteiligung, Ergebnisse, Lorem-ipsum-Notizen) – ohne Konto, nur lesend, nichts davon echt"],anon:["Struktur (anonym)","Spieler 1…n mit Rückennummer, ohne Fotos, Geburtstage, Kontakte, Notizen, To-Dos und interne Termine"]};
-    if(!(document.activeElement&&document.activeElement.matches&&document.activeElement.matches("[data-xln],[data-kzin]")))xe.innerHTML='<tr><th style="text-align:left">Link</th><th>Aktiv</th><th style="text-align:left">Adresse</th><th></th><th style="text-align:left">Stand</th></tr>'+xr.map((r)=>{const st=r.want&&r.want===r.pub?'<span class="pill ok">online</span>':r.want?'<span class="pill busy">geht beim Aktualisieren online</span>':r.pub?'<span class="pill busy">wird beim Aktualisieren abgeschaltet</span>':'<span class="pill">aus</span>';
-      return'<tr data-x="'+r.k+'"><td style="text-align:left"><b>'+XN[r.k][0]+'</b><div class="note" style="white-space:normal;max-width:260px">'+XN[r.k][1]+'</div></td><td><input type="checkbox" data-xak '+(r.l.aktiv?"checked":"")+'></td><td style="text-align:left">'+(r.l.key?'<input readonly data-xln value="'+esc(linkOf(r.k,r.l.key))+'" style="width:100%;min-width:230px">'+kzCell("x"+r.k):'<span class="note">noch kein Link</span>')+'</td><td style="white-space:nowrap">'+(r.l.key?'<button class="btn" data-xcp>Kopieren</button> <button class="btn'+(armed==="x"+r.k?" arm":"")+'" data-xnw title="Der bisherige Link wird ungültig">'+(armed==="x"+r.k?"Wirklich neu?":"Neu erzeugen")+"</button>":"")+'</td><td style="text-align:left">'+st+"</td></tr>"}).join("");
+    if(!(document.activeElement&&document.activeElement.matches&&document.activeElement.matches("[data-xln],[data-kzin]")))xe.innerHTML='<tr><th style="text-align:left">Link</th><th>Aktiv</th><th>Design</th><th style="text-align:left">Adresse</th><th></th><th style="text-align:left">Stand</th></tr>'+xr.map((r)=>{const st=r.want&&r.want===r.pub?'<span class="pill ok">online</span>':r.want?'<span class="pill busy">geht beim Aktualisieren online</span>':r.pub?'<span class="pill busy">wird beim Aktualisieren abgeschaltet</span>':'<span class="pill">aus</span>';
+      return'<tr data-x="'+r.k+'"><td style="text-align:left"><b>'+XN[r.k][0]+'</b><div class="note" style="white-space:normal;max-width:260px">'+XN[r.k][1]+'</div></td><td><input type="checkbox" data-xak '+(r.l.aktiv?"checked":"")+'></td><td>'+dzSel(r.l)+'</td><td style="text-align:left">'+(r.l.key?'<input readonly data-xln value="'+esc(linkOf(r.k,r.l.key))+'" style="width:100%;min-width:230px">'+kzCell("x"+r.k):'<span class="note">noch kein Link</span>')+'</td><td style="white-space:nowrap">'+(r.l.key?'<button class="btn" data-xcp>Kopieren</button> <button class="btn'+(armed==="x"+r.k?" arm":"")+'" data-xnw title="Der bisherige Link wird ungültig">'+(armed==="x"+r.k?"Wirklich neu?":"Neu erzeugen")+"</button>":"")+'</td><td style="text-align:left">'+st+"</td></tr>"}).join("");
   }
-  el.innerHTML='<tr><th style="text-align:left">Spieler</th><th>Aktiv</th><th style="text-align:left">Link</th><th></th><th style="text-align:left">Stand</th></tr>'+cur.map((r)=>{
+  el.innerHTML='<tr><th style="text-align:left">Spieler</th><th>Aktiv</th><th>Design</th><th style="text-align:left">Link</th><th></th><th style="text-align:left">Stand</th></tr>'+cur.map((r)=>{
     const p=r.p,l=r.l,st=r.want&&r.want===r.pub?'<span class="pill ok">online</span>':r.want?'<span class="pill busy">geht beim Aktualisieren online</span>':r.pub?'<span class="pill busy">wird beim Aktualisieren abgeschaltet</span>':'<span class="pill">aus</span>';
-    return'<tr data-p="'+p.id+'"><td style="text-align:left">'+esc(p.vorname+" "+p.name)+'</td><td><input type="checkbox" data-ak '+(l.aktiv?"checked":"")+'></td><td style="text-align:left">'+(l.key?'<input readonly data-ln value="'+esc(linkOf(p.id,l.key))+'" style="width:100%;min-width:230px">'+kzCell(p.id):'<span class="note">noch kein Link</span>')+'</td><td style="white-space:nowrap">'+(l.key?'<button class="btn" data-cp>Kopieren</button> <button class="btn'+(armed===p.id?" arm":"")+'" data-nw title="Der bisherige Link wird ungültig">'+(armed===p.id?"Wirklich neu?":"Neu erzeugen")+"</button>":"")+"</td><td style=\"text-align:left\">"+st+"</td></tr>"}).join("");
+    return'<tr data-p="'+p.id+'"><td style="text-align:left">'+esc(p.vorname+" "+p.name)+'</td><td><input type="checkbox" data-ak '+(l.aktiv?"checked":"")+'></td><td>'+dzSel(l)+'</td><td style="text-align:left">'+(l.key?'<input readonly data-ln value="'+esc(linkOf(p.id,l.key))+'" style="width:100%;min-width:230px">'+kzCell(p.id):'<span class="note">noch kein Link</span>')+'</td><td style="white-space:nowrap">'+(l.key?'<button class="btn" data-cp>Kopieren</button> <button class="btn'+(armed===p.id?" arm":"")+'" data-nw title="Der bisherige Link wird ungültig">'+(armed===p.id?"Wirklich neu?":"Neu erzeugen")+"</button>":"")+"</td><td style=\"text-align:left\">"+st+"</td></tr>"}).join("");
 }
 function initLinks(){
   if(started||!db)return;started=true;
@@ -1927,7 +2035,7 @@ function initLinks(){
 window.initLinks=initLinks;window.renderLinks=renderLinks;
 const T=(id)=>document.getElementById(id);
 if(T("lkt")){
-  T("lkt").addEventListener("change",(e)=>{const r=e.target.closest("tr[data-p]");if(!r||!e.target.matches("[data-ak]"))return;const pid=r.dataset.p,l=L[pid]||{};saveLink(pid,{key:l.key||newKey(),aktiv:e.target.checked})});
+  T("lkt").addEventListener("change",(e)=>{const r=e.target.closest("tr[data-p]");if(r&&e.target.matches("[data-dz]")){const pid=r.dataset.p,l=L[pid]||{};if(l.key)saveLink(pid,{key:l.key,aktiv:l.aktiv,dz:e.target.value});return}if(!r||!e.target.matches("[data-ak]"))return;const pid=r.dataset.p,l=L[pid]||{};saveLink(pid,{key:l.key||newKey(),aktiv:e.target.checked})});
   T("lkt").addEventListener("click",async(e)=>{
     const r=e.target.closest("tr[data-p]");if(!r)return;const pid=r.dataset.p,l=L[pid]||{};
     if(e.target.closest("[data-cp]")){const i=r.querySelector("[data-ln]"),m=T("lkm");try{await navigator.clipboard.writeText(i.value);m.textContent="Link kopiert."}catch(x){i.select();try{document.execCommand("copy");m.textContent="Link kopiert."}catch(y){m.textContent="Link markiert – bitte mit Cmd+C kopieren."}}m.className="note";return}
@@ -1944,7 +2052,7 @@ if(T("lkt")){
     });
   }
   if(T("lkxt")){
-    T("lkxt").addEventListener("change",(e)=>{const r=e.target.closest("tr[data-x]");if(!r||!e.target.matches("[data-xak]"))return;const id="x"+r.dataset.x,l=L[id]||{};saveLink(id,{key:l.key||newKey(),aktiv:e.target.checked})});
+    T("lkxt").addEventListener("change",(e)=>{const r=e.target.closest("tr[data-x]");if(r&&e.target.matches("[data-dz]")){const id="x"+r.dataset.x,l=L[id]||{};if(l.key)saveLink(id,{key:l.key,aktiv:l.aktiv,dz:e.target.value});return}if(!r||!e.target.matches("[data-xak]"))return;const id="x"+r.dataset.x,l=L[id]||{};saveLink(id,{key:l.key||newKey(),aktiv:e.target.checked})});
     T("lkxt").addEventListener("click",async(e)=>{
       const r=e.target.closest("tr[data-x]");if(!r)return;const k=r.dataset.x,id="x"+k,l=L[id]||{};
       if(e.target.closest("[data-xcp]")){const i=r.querySelector("[data-xln]"),m=T("lkm");try{await navigator.clipboard.writeText(i.value);m.textContent="Link kopiert."}catch(x){i.select();try{document.execCommand("copy");m.textContent="Link kopiert."}catch(y){m.textContent="Link markiert – bitte mit Cmd+C kopieren."}}m.className="note";return}
@@ -2114,8 +2222,8 @@ function renderStart(){
   /* Training heute: 30 Min. nach Trainingsende ausblenden (ohne Ende: Beginn + 2 Std.); Spiel heute: 2:30 Std. nach Anstoß */
   const trEnd=trT?(hmM(trT.ende)!=null?hmM(trT.ende)+30:hmM(trT.beginn)!=null?hmM(trT.beginn)+120:null):null,
     gEnd=(g)=>{const ev=(D.events||[]).find((e)=>e.spielId===g.id)||(D.events||[]).find((e)=>e.datum===g.datum&&isGameTyp(e.typ)&&hmM(e.beginn)!=null),k=ev?hmM(ev.beginn):null;return k==null?null:k+150};
-  {const h=$("#htd");if(h){const tile=(l,v,n,x)=>'<div class="card kpi'+(x?" hasx":"")+'" style="border-color:var(--ac);margin-bottom:8px"><span style="display:block">'+esc(l)+"</span><b>"+esc(v)+'</b><span class="note" style="display:block">'+esc(n)+"</span>"+(x||"")+"</div>",T=[],trX=(e)=>{const r=(k,v,b)=>v?'<div style="text-align:left;margin-top:8px;font-size:14px;line-height:1.4;white-space:pre-line">'+(k?'<span class="note" style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.04em">'+k+"</span>":"")+(b?'<b style="font-size:17px;line-height:1.3;display:block;padding:2px 0">':"")+esc(v)+(b?"</b>":"")+"</div>":"",c=e.ctask?'<div style="text-align:left;margin-top:8px;font-size:14px;line-height:1.4;white-space:pre-line;color:var(--ac)">'+esc(e.ctask)+"</div>":"";return'<div class="trx" style="margin-top:10px;padding-top:2px;border-top:1px solid var(--bd,rgba(128,128,128,.25))"><div class="trl">Schwerpunkt</div>'+r("",e.schwerpunkt,1)+r("",e.detail)+c+"</div>"};
-    if(trT&&alive(trEnd))T.push(tile("Training heute"+(trT.beginn?" · "+trT.beginn+" Uhr":""),aT?aT.f+" + "+aT.g:"–",aT?"Feldspieler + Torhüter · "+(aT.k?aT.k+" Kreisauswahl":"keine Kreisauswahl")+" · "+(aT.tot-aT.c)+" nicht dabei"+(aT.tot<act.length?" · "+(act.length-aT.tot)+" ohne Eintrag":""):"Anwesenheit noch nicht eingetragen",trT.schwerpunkt||trT.detail||trT.ctask?trX(trT):""));
+  {const h=$("#htd");if(h){const tile=(l,v,n,x,w)=>'<div class="card kpi'+(x?" hasx":"")+'"'+(w&&!window.__RO?' data-wa="'+w+'" title="Antippen: Bild für WhatsApp"':"")+' style="border-color:var(--ac);margin-bottom:8px'+(w&&!window.__RO?';cursor:pointer':"")+'"><span style="display:block">'+esc(l)+"</span><b>"+esc(v)+'</b><span class="note" style="display:block">'+esc(n)+"</span>"+(x||"")+"</div>",T=[],trX=(e)=>{const r=(k,v,b)=>v?'<div style="text-align:left;margin-top:8px;font-size:14px;line-height:1.4;white-space:pre-line">'+(k?'<span class="note" style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.04em">'+k+"</span>":"")+(b?'<b style="font-size:17px;line-height:1.3;display:block;padding:2px 0">':"")+esc(v)+(b?"</b>":"")+"</div>":"",c=e.ctask?'<div style="text-align:left;margin-top:8px;font-size:14px;line-height:1.4;white-space:pre-line;color:var(--ac)">'+esc(e.ctask)+"</div>":"";return'<div class="trx" style="margin-top:10px;padding-top:2px;border-top:1px solid var(--bd,rgba(128,128,128,.25))"><div class="trl">Schwerpunkt</div>'+r("",e.schwerpunkt,1)+r("",e.detail)+c+"</div>"};
+    if(trT&&alive(trEnd))T.push(tile("Training heute"+(trT.beginn?" · "+trT.beginn+" Uhr":""),aT?aT.f+" + "+aT.g:"–",aT?"Feldspieler + Torhüter · "+(aT.k?aT.k+" Kreisauswahl":"keine Kreisauswahl")+" · "+(aT.tot-aT.c)+" nicht dabei"+(aT.tot<act.length?" · "+(act.length-aT.tot)+" ohne Eintrag":""):"Anwesenheit noch nicht eingetragen",trT.schwerpunkt||trT.detail||trT.ctask?trX(trT):"",t));
     D.spiele.filter((g)=>g.datum===t&&alive(gEnd(g))).sort((x,y)=>x.nr-y.nr).forEach((g)=>{const E=act.filter((p)=>g.spieler&&g.spieler[p.id]),ka=E.filter((p)=>g.spieler[p.id].status==="k"),tw=ka.filter((p)=>twOf(p)).length,nd=E.length-ka.length;
       T.push(tile("Spiel heute · "+(g.art||"Spiel")+(g.gegner?" gegen "+g.gegner:""),E.length?(ka.length-tw)+" + "+tw:"–",E.length?"Feldspieler + Torhüter im Kader · "+nd+" nicht dabei"+(E.length<act.length?" · "+(act.length-E.length)+" ohne Eintrag":""):"Kader noch nicht eingetragen"))});
     D.spiele.filter((g)=>g.datum===t).sort((x,y)=>x.nr-y.nr).forEach((g)=>{const ev=(D.events||[]).find((e)=>e.spielId===g.id)||(D.events||[]).find((e)=>e.datum===g.datum&&isGameTyp(e.typ)&&hmM(e.beginn)!=null),k=ev?hmM(ev.beginn):null;const run0=g.live&&g.live.clk&&g.live.clk.run;if(k==null){T.push(tile("Spieltag · Spiel "+g.nr+(g.gegner?" gegen "+g.gegner:""),"Heute",run0?"Die Uhr läuft – hier geht es zurück zur Erfassung":"Aufstellung, Ansprache und Skizzen vorbereiten, Spielzeit live erfassen",'<button class="btn" data-lv="'+g.id+'" style="margin-top:8px;background:var(--ac);color:#fff;border-color:var(--ac)">🏟 '+(run0?"Zurück zum Spieltag":"Zum Spieltag")+"</button>"+' <button class="btn" data-lv="'+g.id+'" data-lvt="l" style="margin-top:8px">⏱ Live-Spielzeit</button>'));return}const n=nowM();
@@ -2123,7 +2231,7 @@ function renderStart(){
       const run=g.live&&g.live.clk&&g.live.clk.run;T.push(tile("Spieltag · Spiel "+g.nr+(g.gegner?" gegen "+g.gegner:""),"Anstoß "+ev.beginn+" Uhr",run?"Die Uhr läuft – hier geht es zurück zur Erfassung":(n<k?"Anstoß in "+(Math.ceil(k-n)>=60?Math.floor(Math.ceil(k-n)/60)+" Std. "+Math.ceil(k-n)%60+" Min.":Math.ceil(k-n)+" Min.")+" · Aufstellung, Ansprache und Skizzen vorbereiten":"Aufstellung, Wechsel und Minuten live erfassen"),'<button class="btn" data-lv="'+g.id+'" style="margin-top:8px;background:var(--ac);color:#fff;border-color:var(--ac)">🏟 '+(run?"Zurück zum Spieltag":"Zum Spieltag")+"</button>"+' <button class="btn" data-lv="'+g.id+'" data-lvt="l" style="margin-top:8px">⏱ Live-Spielzeit</button>'))});
     h.innerHTML=T.join("")}}
   clearTimeout(window.__htdT);if(nextHide!=null)window.__htdT=setTimeout(()=>{typeof renderStart==="function"&&renderStart()},Math.max(1000,Math.ceil(nextHide*60000)+1000));
-  $("#hk").innerHTML=K.map((k)=>'<div class="card kpi"'+(k[3]?' style="border-color:var(--ac)"':"")+'><span style="display:block">'+esc(k[1])+"</span><b"+(String(k[0]).length>10?' style="font-size:16px;line-height:1.3;padding:3px 0"':"")+">"+esc(k[0])+'</b><span class="note" style="display:block">'+esc(k[2])+"</span></div>").join("");
+  $("#hk").innerHTML=K.map((k)=>'<div class="card kpi"'+(k[1]==="Nächstes Training"&&ntr&&!window.__RO?' data-wa="'+ntr.datum+'" style="cursor:pointer;border-color:var(--ac)" title="Antippen: Bild für WhatsApp"':(k[3]?' style="border-color:var(--ac)"':""))+'><span style="display:block">'+esc(k[1])+"</span><b"+(String(k[0]).length>10?' style="font-size:16px;line-height:1.3;padding:3px 0"':"")+">"+esc(k[0])+'</b><span class="note" style="display:block">'+esc(k[2])+"</span>"+(k[1]==="Nächstes Training"&&ntr&&!window.__RO?'<span class="note" style="display:block;font-size:11px">📲 Antippen: Bild für WhatsApp</span>':"")+"</div>").join("");
   const todo=[];
   D.spiele.filter((g)=>g.wertung&&(g.tore==null||g.gt==null)&&g.datum&&g.datum<=t).forEach((g)=>todo.push('<div class="row"><span>Spiel '+g.nr+" · "+esc(g.gegner)+' – Ergebnis fehlt</span><button class="rm" data-go="g">öffnen</button></div>'));
   all.filter((e)=>e.typ==="Training"&&e.datum<t&&e.datum>=addD(t,-14)&&!D.trainings.some((x)=>x.datum===e.datum)).forEach((e)=>todo.push('<div class="row"><span>Training '+esc(ddm(e.datum))+' – Anwesenheit fehlt</span><button class="rm" data-go="t">öffnen</button></div>'));
@@ -2175,7 +2283,7 @@ function renderTermine(){
   $("#msub").textContent=all.length+" Termine in "+mname(mMonth)+" · Spiele aus dem Bereich „Spiele“ erscheinen automatisch";
   $("#ml").innerHTML='<i>Eltern = erscheint im Elternexport</i><i>intern = nur in der Trainerfassung</i>';
   $("#mt").innerHTML=all.length?'<tr><th>Datum</th><th>Art</th><th>Gegner / Aktion</th><th>Treffen / Anstoß</th><th>Ort</th><th>Elternexport</th><th></th></tr>'+all.map((e)=>{
-    const wk=[0,6].includes(wday(e.datum)),tx=isGameTyp(e.typ)?matchup(e):(e.titel||""),act=(e)=>e.kobs?'<button class="rm ic" data-kgo="1" title="Im Kader öffnen" aria-label="Im Kader öffnen">'+IC.go+'</button>':((e.virt?'<button class="rm ic" data-ee="'+e.id+'" title="Bearbeiten" aria-label="Bearbeiten">'+IC.ed+'</button>'+(e.trainId?'<button class="rm ic" data-vt="1" title="In Training öffnen" aria-label="In Training öffnen">'+IC.go+'</button>':'<button class="rm ic" data-vg="'+e.spielId+'" title="Im Bereich Spiele öffnen" aria-label="Im Bereich Spiele öffnen">'+IC.go+'</button>'):'<button class="rm ic" data-ee="'+e.id+'" title="Bearbeiten" aria-label="Bearbeiten">'+IC.ed+'</button>'+(e.linked?(e.spielId?'<button class="rm ic" data-vg="'+e.spielId+'" title="Im Bereich Spiele öffnen" aria-label="Im Bereich Spiele öffnen">'+IC.go+'</button>':'<button class="rm ic" data-vt="1" title="In Training öffnen" aria-label="In Training öffnen">'+IC.go+'</button>'):""))+'<button class="rm ic'+(mArm===e.id?" arm":"")+'" data-ed="'+e.id+'" title="Löschen" aria-label="Löschen">'+(mArm===e.id?(trAtt(e)?"Mit Anwesenheit löschen?":"Wirklich löschen?"):IC.del)+"</button>"),actions=act(e)+(e._m||[]).map(act).join("");
+    const wk=[0,6].includes(wday(e.datum)),tx=isGameTyp(e.typ)?matchup(e):(e.titel||""),act=(e)=>e.kobs?'<button class="rm ic" data-kgo="1" title="Im Kader öffnen" aria-label="Im Kader öffnen">'+IC.go+'</button>':((e.virt?'<button class="rm ic" data-ee="'+e.id+'" title="Bearbeiten" aria-label="Bearbeiten">'+IC.ed+'</button>'+(e.trainId?'<button class="rm ic" data-vt="1" title="In Training öffnen" aria-label="In Training öffnen">'+IC.go+'</button>':'<button class="rm ic" data-vg="'+e.spielId+'" title="Im Bereich Spiele öffnen" aria-label="Im Bereich Spiele öffnen">'+IC.go+'</button>'):'<button class="rm ic" data-ee="'+e.id+'" title="Bearbeiten" aria-label="Bearbeiten">'+IC.ed+'</button>'+(e.linked?(e.spielId?'<button class="rm ic" data-vg="'+e.spielId+'" title="Im Bereich Spiele öffnen" aria-label="Im Bereich Spiele öffnen">'+IC.go+'</button>':'<button class="rm ic" data-vt="1" title="In Training öffnen" aria-label="In Training öffnen">'+IC.go+'</button>'):""))+'<button class="rm ic'+(mArm===e.id?" arm":"")+'" data-ed="'+e.id+'" title="Löschen" aria-label="Löschen">'+(mArm===e.id?(trAtt(e)?"Mit Anwesenheit löschen?":"Wirklich löschen?"):IC.del)+"</button>"),actions=(e.typ==="Training"?'<button class="rm ic" data-wa="'+e.datum+'" title="Bild für WhatsApp" aria-label="Bild für WhatsApp">📲</button>':"")+act(e)+(e._m||[]).map(act).join("");
     return'<tr class="'+(wk?"mwe":"")+'" style="'+(wk?"font-weight:600":"")+'"><td style="text-align:center">'+esc(WK[wday(e.datum)]+" "+ddm(e.datum))+(e.bis&&e.bis>e.datum?" – "+esc(ddm(e.bis)):"")+'</td><td style="text-align:center">'+esc(typL(e))+'</td><td style="text-align:center">'+esc(tx)+esc(haSfx(e))+unsH(e)+(e.schwerpunkt?' <span class="note">'+esc(e.schwerpunkt)+"</span>":"")+(e.detail&&e.typ!=="Ferien"?'<div class="note" style="font-weight:400">Detail: '+esc(e.detail)+"</div>":"")+(e.ctask&&e.typ!=="Ferien"?'<div class="note" style="font-weight:400;color:var(--ac)">Co-Trainer: '+esc(e.ctask)+"</div>":"")+(e.typ!=="Ferien"?dienstSub(e,e.datum).map((s)=>'<div class="note" style="font-weight:400">'+esc(s)+"</div>").join(""):"")+'</td><td style="text-align:center">'+esc(zeitG(e))+'</td><td style="text-align:center">'+esc(e.ort||"")+"</td><td>"+(e.virt?"Eltern":e.eltern===false?"intern":"Eltern")+"</td><td>"+actions+"</td></tr>"}).join(""):'<tr><td class="empty" style="text-align:center">Keine Termine in '+mname(mMonth)+'. Oben „Termin“ oder „Serie“ wählen.</td></tr>';
   const wk=$("#mw").value||monday(today());$("#mw").value=wk;$("#mwk").textContent=kwOf(wk)+". KW · "+dlong(monday(wk))+" – "+dlong(addD(monday(wk),6));
 }
@@ -2369,7 +2477,8 @@ const xEvText=(e)=>(e._t!=null?e._t:xEvText0(e))+(e.unsicher?" – "+unsTx(e):""
 const xEvText0=(e)=>e._t!=null?e._t:xIsGame(e)?matchup(e)+(e.ha==="H"||e.ha==="A"?" ("+e.ha+")":isOpenG(e)?" ( )":""):(e.titel||"")+(e.ort&&e.typ!=="Training"?(e.titel?" – ":"")+e.ort:"");
 const xEvTime=(e)=>{if(e._t!=null)return e._z||"";const z=zeitOf(e);return z||(xIsGame(e)?"Offen":"")};
 /* Design: Farbtokens für Hell/Dunkel, abgerundete Karten, Pillen je Terminart */
-const xDark=()=>XC.bg!=="#ffffff",xShade=()=>xDark()?{ev:"#1a1c20",we:"#2c3037",hd:"#24272d",bd:"#f2f2f2",mu:"#9aa0aa",hb:"#e8e8e8",ht:"#111111",gl:"#4a505b",ac:"#f2f2f2",tag:{tr:["#2f333b","#e5e5e5"],sp:["#f2f2f2","#111111"],te:["#4a505b","#ffffff"],so:["#2f333b","#b0b5bf"],bd:["#1a1c20","#d0d3d9"]}}:{ev:"#f6f6f6",we:"#e0e0e0",hd:"#ebebeb",bd:"#111111",mu:"#666666",hb:"#111111",ht:"#ffffff",gl:"#b4b4b4",ac:"#111111",tag:{tr:["#ebebeb","#222222"],sp:["#111111","#ffffff"],te:["#cfcfcf","#111111"],so:["#ebebeb","#555555"],bd:["#ffffff","#333333"]}};
+var xDark=()=>XC.dk===undefined?XC.bg!=="#ffffff":!!XC.dk,xShade0=()=>xDark()?{ev:"#1a1c20",we:"#2c3037",hd:"#24272d",bd:"#f2f2f2",mu:"#9aa0aa",hb:"#e8e8e8",ht:"#111111",gl:"#4a505b",ac:"#f2f2f2",tag:{tr:["#2f333b","#e5e5e5"],sp:["#f2f2f2","#111111"],te:["#4a505b","#ffffff"],so:["#2f333b","#b0b5bf"],bd:["#1a1c20","#d0d3d9"]}}:{ev:"#f6f6f6",we:"#e0e0e0",hd:"#ebebeb",bd:"#111111",mu:"#666666",hb:"#111111",ht:"#ffffff",gl:"#b4b4b4",ac:"#111111",tag:{tr:["#ebebeb","#222222"],sp:["#111111","#ffffff"],te:["#cfcfcf","#111111"],so:["#ebebeb","#555555"],bd:["#ffffff","#333333"]}};
+var xShade=()=>window.__xsh?window.__xsh(xShade0()):xShade0();
 const xTk=(C,typ)=>C.tag[typ==="Training"?"tr":typ==="Geburtstag"?"bd":typ==="Teamevent"?"te":(isGameTyp(typ)||typ==="Turnier")?"sp":"so"];
 const xClip=(s,id,x,y,w,h,r)=>s.raw('<clipPath id="'+id+'"><rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+r+'"/></clipPath><g clip-path="url(#'+id+')">');
 function xcHead(s,W,M,title,sub){
@@ -3259,7 +3368,7 @@ TABF.sf=sfEd;
 K.sfNew=sfNew;K.clone=clone;K.setP=setP;K.getP=getP;K.normN=normN;K.bewTxt=bewTxt;K.posChips=posChips;
 
 /* ===== Kader Teil X: A4-Exporte (nur Trainer) ===== */
-function kxCard(kind){return'<div class="bar" style="margin:0 0 12px"><label class="note">Modus <select id="kxth"><option value="light"'+(ks.xth==="dark"?"":" selected")+'>Hell</option><option value="dark"'+(ks.xth==="dark"?" selected":"")+'>Dunkel</option></select></label><span class="note">A4-Export (hoch, nur für Trainer)</span><div class="seg"><button data-kx="'+kind+'" data-f="png">PNG</button><button data-kx="'+kind+'" data-f="jpg">JPG</button><button data-kx="'+kind+'" data-f="pdf">PDF</button></div></div>'}
+function kxCard(kind){return'<div class="bar" style="margin:0 0 12px"><label class="note">Modus <select id="kxth"><option value="light"'+(ks.xth==="dark"?"":" selected")+'>Hell</option><option value="dark"'+(ks.xth==="dark"?" selected":"")+'>Dunkel</option></select></label>'+(window.__xdzHtml||"")+'<span class="note">A4-Export (hoch, nur für Trainer)</span><div class="seg"><button data-kx="'+kind+'" data-f="png">PNG</button><button data-kx="'+kind+'" data-f="jpg">JPG</button><button data-kx="'+kind+'" data-f="pdf">PDF</button></div></div>'}
 document.addEventListener("change",(e)=>{if(e.target&&e.target.id==="kxth")ks.xth=e.target.value});
 const kxCol=(c)=>({r:XC.r,o:XC.o,y:XC.y,g:XC.g,gr:XC.gr,p:XC.p,be:XC.be,n1:XC.n1,n2:XC.n2,n3:XC.n3,n4:XC.n4}[c]||"#3b6fd6");
 function kxDoc(title,sub,body){
@@ -3990,6 +4099,109 @@ function subscribe(){
   db.collection("archiv").onSnapshot((s)=>{BK.arch=s.docs.map((d)=>({id:d.id,...d.data()}));bkRender()},()=>{});
 }
 setInterval(()=>{subscribe();auto()},3000);
+})();
+</script>
+<script>/* ---------- WhatsApp-Bild fürs Training (4:5): Teilnehmer + Schwerpunkt ---------- */
+function xWaTraining(d){
+  const W=1080,H=1350,M=72,PAD=38,BL="#1f6fe0",s=XS(W,H),IW=W-2*M-2*PAD;
+  const e=(()=>{const L=evAllM().filter((x)=>x.typ==="Training"&&x.datum===d);return L.find((x)=>x.schwerpunkt||x.detail||x.ctask)||L[0]||{datum:d}})();
+  const act=active(),tt=D.trainings.find((x)=>x.datum===d),a=tt?anw(act,tt):null,cnt=(c)=>tt?act.filter((p)=>(tt.spieler||{})[p.id]===c).length:0;
+  const chips=[];
+  if(a){[[cnt("e"),"entschuldigt"],[cnt("v"),"verletzt"],[a.k,"Kreisauswahl"],[cnt("t"),"terminlich verhindert"],[cnt("u"),"unentschuldigt"],[act.length-a.tot,"ohne Eintrag"]].forEach((c)=>{if(c[0]>0)chips.push(c[0]+" "+c[1])})}
+  const cut=(L,n,z,b)=>{if(L.length<=n)return L;const r=L.slice(0,n);let t=r[n-1];while(t.length>1&&xtw(t+" …",z,b)>IW)t=t.slice(0,-1);r[n-1]=t+" …";return r};
+  const sp=String(e.schwerpunkt||"").trim(),de=String(e.detail||"").trim(),ct=String(e.ctask||"").trim(),has=!!(sp||de||ct);
+  const chipRows=(z)=>{const R=[[]];let x=0;chips.forEach((t)=>{const w=xtw(t,z,0)+z*1.6;if(x&&x+w>IW){R.push([]);x=0}R[R.length-1].push({t,w});x+=w+12});return R};
+  /* Text so lange verkleinern, bis alles auf das Bild passt */
+  const zN=138,zCh=30,rows=chipRows(zCh),b1=PAD*2+(a?zN+34+rows.length*(zCh*1.9+12):80),room=H-120-(292+b1+24);
+  let k=1,plan=null;
+  for(;k>=.5;k-=.05){
+    const zS=Math.round(54*k),zD=Math.round(38*k),zC=Math.round(38*k);
+    const L1=sp?cut(xwrap(sp,IW,zS,1),4,zS,1):[],L2=de?cut(xwrap(de,IW,zD,0),12,zD,0):[],L3=ct?cut(xwrap(ct,IW,zC,1),8,zC,1):[];
+    const b2=has?PAD*2+L1.length*zS*1.28+(L2.length?(L1.length?16:0)+L2.length*zD*1.38:0)+(L3.length?(L1.length||L2.length?22:0)+L3.length*zC*1.38:0):0;
+    plan={zS,zD,zC,zN,zCh,L1,L2,L3,rows,b1,b2};if(b2<=room)break}
+  const P=plan;
+  s.t(M,108,"TuS Haltern am See · "+mann(),30,XC.mu);
+  s.t(M,194,"Training "+WK[wday(d)]+" "+ddm(d),72,XC.tx,{b:1});
+  const tm=e.beginn?(e.ende?e.beginn+" – "+e.ende:e.beginn)+" Uhr":"";if(tm)s.t(M,246,tm,34,XC.mu);
+  let y=292;
+  s.r(M,y,W-2*M,P.b1,XC.card,38,1,XC.ln);
+  if(a){let by=y+PAD+P.zN*.86;const n1=a.f+"+"+a.g;s.t(M+PAD,by,n1,P.zN,XC.tx,{b:1});s.t(M+PAD+xtw(n1,P.zN,1)+18,by,"/ "+act.length,Math.round(P.zN*.4),XC.mu);
+    let cy=by+34;P.rows.forEach((r)=>{let x=M+PAD;r.forEach((c)=>{s.r(x,cy,c.w,P.zCh*1.9,XC.track,P.zCh*.95,1);s.t(x+P.zCh*.8,cy+P.zCh*1.3,c.t,P.zCh,XC.tx);x+=c.w+12});cy+=P.zCh*1.9+12})}
+  else s.t(M+PAD,y+PAD+Math.round(58),"Zusagen noch offen",64,XC.mu,{b:1});
+  y+=P.b1+24;
+  if(has){s.r(M,y,W-2*M,P.b2,XC.card,38,1,XC.ln);let ty=y+PAD;
+    P.L1.forEach((l)=>{ty+=P.zS*1.05;s.t(M+PAD,ty,l,P.zS,XC.tx,{b:1});ty+=P.zS*.23});
+    if(P.L2.length){ty+=P.L1.length?16:0;P.L2.forEach((l)=>{ty+=P.zD*1.1;s.t(M+PAD,ty,l,P.zD,XC.tx);ty+=P.zD*.28})}
+    if(P.L3.length){ty+=(P.L1.length||P.L2.length)?22:0;P.L3.forEach((l)=>{ty+=P.zC*1.1;s.t(M+PAD,ty,l,P.zC,BL,{b:1});ty+=P.zC*.28})}}
+  const n=new Date();s.t(M,H-62,"Stand "+ddm(today())+" "+String(n.getHours()).padStart(2,"0")+":"+String(n.getMinutes()).padStart(2,"0")+" Uhr",24,XC.mu);
+  return{svg:s.done(),W,H,name:"Training_"+d.replace(/-/g,"")}}
+async function waOpen(d){
+  if(window.__RO)return;
+  let blob,url;
+  try{xTheme(false);const r=xWaTraining(d),cv=await xRaster(r.svg,r.W,r.H,1);blob=await xBlob(cv,"image/png");url=URL.createObjectURL(blob)}catch(err){setSt("Bild konnte nicht erstellt werden","err");return}
+  const name="Training_"+d+".png",file=(()=>{try{return new File([blob],name,{type:"image/png"})}catch(e){return null}})();
+  const can=!!(file&&navigator.canShare&&navigator.share&&navigator.canShare({files:[file]}));
+  const o=document.createElement("div");o.id="waov";o.style.cssText="position:fixed;inset:0;z-index:99;background:rgba(0,0,0,.72);display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px;overflow:auto";
+  o.innerHTML='<div style="background:var(--card);color:var(--tx);border-radius:12px;padding:10px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;max-width:100%"><b>Training '+esc(WK[wday(d)]+" "+ddm(d))+' · Bild für WhatsApp</b>'
+    +(can?'<button class="btn" id="wasend" style="background:var(--ac);color:#fff">An WhatsApp senden</button>':"")+'<a class="btn" id="wasave" download="'+esc(name)+'" href="'+url+'" style="text-decoration:none">Bild speichern</a><button class="btn" id="waclose">Schließen</button></div>'
+    +(can?"":'<div style="color:#fff;font-size:13px;max-width:560px;text-align:center">Auf diesem Gerät gibt es keinen direkten Senden-Knopf. Bild speichern und in WhatsApp als Foto anhängen.</div>')
+    +'<img alt="Vorschau" src="'+url+'" style="max-width:min(100%,560px);height:auto;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.4)">';
+  const close=()=>{o.remove();setTimeout(()=>URL.revokeObjectURL(url),3000)};
+  o.querySelector("#waclose").onclick=close;o.addEventListener("click",(e)=>{if(e.target===o)close()});
+  const sb=o.querySelector("#wasend");if(sb)sb.onclick=async()=>{try{await navigator.share({files:[file],title:"Training "+ddm(d)})}catch(e){}};
+  document.body.appendChild(o)}
+document.addEventListener("click",(e)=>{const t=e.target.closest&&e.target.closest("[data-wa]");if(!t)return;e.preventDefault();e.stopPropagation();waOpen(t.dataset.wa)},true);
+</script><script>/* ===== Designs: „Klar & ruhig“, „Liquid Glass“, „Klassisch“ – nur Optik. Gilt für die App, die externen Links und die A4-Exporte. ===== */
+(function(){
+const NAMES={ruhig:"Klar & ruhig",glas:"Liquid Glass",klassisch:"Klassisch"},root=document.documentElement;
+const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k)||"";v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){return""}};
+let cur=NAMES[ls("u13design")]?ls("u13design"):"ruhig",mem={};
+/* Symbole der Menüpunkte (Emoji) in eigene Hüllen setzen, damit sie in den neuen Designs am Rechner wegfallen können */
+function wrap(){document.querySelectorAll("nav button[data-s]").forEach((b)=>{if(b.querySelector(".em"))return;const t=b.firstChild;if(t&&t.nodeType===3){const m=t.nodeValue.match(/^(\S+)\s+([\s\S]*)$/);if(m&&!/^[A-Za-z0-9ÄÖÜäöü]/.test(m[1])){const s=document.createElement("span");s.className="em";s.textContent=m[1]+" ";b.insertBefore(s,t);t.nodeValue=m[2]}}})}
+function set(d,keep){if(!NAMES[d])d="ruhig";cur=d;root.setAttribute("data-design",d);if(!keep)ls("u13design",d);wrap();sync()}
+function sync(){const a=document.getElementById("dzapp"),l=document.getElementById("dzlnk"),c=(window.D&&D.config)||{};if(a&&document.activeElement!==a)a.value=cur;if(l&&document.activeElement!==l)l.value=c.linkDesign==="glas"?"glas":"ruhig";
+  document.querySelectorAll(".xdz").forEach((s)=>{if(document.activeElement!==s)s.value=xdes()})}
+const linkDefault=()=>(((window.D&&D.config)||{}).linkDesign==="glas")?"glas":"ruhig";
+function fromConfig(){if(window.__VIEWER||window.__RO)return;const c=window.D&&D.config&&D.config.design;if(c&&NAMES[c]&&c!==cur)set(c);else sync();const ro=window.__ROLE==="lesen";["dzapp","dzlnk"].forEach((i)=>{const e=document.getElementById(i);if(e)e.disabled=ro})}
+set(cur,true);
+const nav=document.querySelector("nav");if(nav)new MutationObserver(wrap).observe(nav,{childList:true,subtree:true,characterData:true});
+document.addEventListener("change",(e)=>{const t=e.target;if(!t||!t.id)return;
+  if(t.id==="dzapp"){set(t.value);if(typeof save==="function")save("config","main",{...(D.config||{}),design:t.value})}
+  if(t.id==="dzlnk"&&typeof save==="function")save("config","main",{...(D.config||{}),linkDesign:t.value})});
+window.__dz={names:NAMES,get:()=>cur,set,sync:fromConfig,linkDefault,wrap};
+window.__dzSync=fromConfig;
+
+/* ---------- A4-Export: Design wählbar ---------- */
+function xdes(){const v=ls("u13xdes")||mem.x;return v==="glas"||v==="ruhig"?v:(cur==="glas"?"glas":"ruhig")}
+const xset=(v)=>{mem.x=v;ls("u13xdes",v);document.querySelectorAll(".xdz").forEach((s)=>s.value=v)};
+const XDZ='<label class="note">Design <select class="xdz" aria-label="Design des Exports"><option value="ruhig">Klar &amp; ruhig</option><option value="glas">Liquid Glass</option></select></label>';
+document.querySelectorAll("select.xth,select.xthp").forEach((s)=>{const l=s.closest("label")||s;if(l.nextElementSibling&&l.nextElementSibling.querySelector&&l.nextElementSibling.querySelector(".xdz"))return;l.insertAdjacentHTML("afterend",XDZ)});
+window.__xdzHtml=XDZ;
+document.addEventListener("change",(e)=>{if(e.target&&e.target.classList&&e.target.classList.contains("xdz"))xset(e.target.value)});
+{let t=null;new MutationObserver(()=>{clearTimeout(t);t=setTimeout(sync,120)}).observe(document.body,{childList:true,subtree:true})}
+sync();
+if(typeof XT==="undefined"||typeof xTheme!=="function")return;
+const CL={light:Object.assign({},XT.light),dark:Object.assign({},XT.dark)};
+const RU={light:{bg:"#fbfbf9",tx:"#14201b",mu:"#6d7872",ln:"#e4e7e2",card:"#f3f5f1",stripe:"#f4f5f2",track:"#e8ebe6",avbg:"#e3f2ec",ac:"#0f7a5a",nb:"#0b5a43"},
+          dark:{bg:"#0f1311",tx:"#e9eeeb",mu:"#88948e",ln:"#252c28",card:"#171c19",stripe:"#141916",track:"#252c28",avbg:"#16302a",ac:"#4cc79c",nb:"#4cc79c"}};
+const GL={light:{bg:"#d6e6ff",tx:"#14171c",mu:"rgba(20,23,28,.64)",ln:"rgba(255,255,255,.92)",card:"rgba(255,255,255,.62)",stripe:"rgba(255,255,255,.35)",track:"rgba(20,23,28,.1)",avbg:"rgba(10,132,255,.16)",ac:"#0a84ff",nb:"#0a6ad6",itx:"#14171c",bk:"#14171c"},
+          dark:{bg:"#0e0f12",tx:"#f3f3f5",mu:"rgba(243,243,245,.64)",ln:"rgba(255,255,255,.14)",card:"rgba(255,255,255,.07)",stripe:"rgba(255,255,255,.04)",track:"rgba(255,255,255,.12)",avbg:"rgba(127,178,255,.2)",ac:"#7fb2ff",nb:"#7fb2ff",itx:"#f3f3f5",bk:"#f3f3f5"}};
+const pal=(kind,dark)=>{const m=dark?"dark":"light",d=xdes();let p=Object.assign({},CL[m]);
+  if(d==="ruhig"&&kind!=="plan")Object.assign(p,RU[m],kind==="saison"?{ac:CL[m].ac,nb:CL[m].nb,avbg:CL[m].avbg}:{});
+  if(d==="glas"){Object.assign(p,GL[m]);if(kind==="saison")Object.assign(p,{ac:CL[m].ac,nb:CL[m].nb});if(kind==="plan")Object.assign(p,{ac:GL[m].tx})}
+  p.itx=p.itx||undefined;return p};
+let dk=false;
+const apply=(kind)=>{const p=pal(kind,dk);delete XC.itx;Object.assign(XC,p);XC.dk=dk;XA[1]=XC.r;XA[2]=XC.o;XA[3]=XC.y;XA[4]=XC.g};
+const oT=xTheme;xTheme=function(dark){dk=!!dark;oT(dark);apply("other")};
+const kindOf=(fn,kind)=>{const o=window[fn];if(typeof o!=="function")return;window[fn]=function(){const keep=Object.assign({},XC),dk0=dk;if(kind==="wa")dk=false;apply(kind);try{return o.apply(this,arguments)}finally{dk=dk0;Object.keys(XC).forEach((k)=>{if(!(k in keep))delete XC[k]});Object.assign(XC,keep)}}};
+["xMonthPage","xWeekPage","xFocusPage"].forEach((f)=>kindOf(f,"plan"));["xSaison","xScatterPage","xZusatz"].forEach((f)=>kindOf(f,"saison"));kindOf("xWaTraining","wa");
+/* Terminplan im Glas-Design: schwarz-weiß, Zeilen milchig */
+window.__xsh=(c)=>{if(xdes()!=="glas")return c;return Object.assign({},c,dk?{ev:"rgba(255,255,255,.06)",we:"rgba(255,255,255,.13)",hd:"rgba(255,255,255,.11)"}:{ev:"rgba(255,255,255,.55)",we:"rgba(255,255,255,.28)",hd:"rgba(255,255,255,.78)"})};
+/* Hintergrund-Verlauf für das Glas-Design */
+const oX=XS;XS=function(W,H,nobg){const s=oX(W,H,nobg),d0=s.done;
+  s.done=function(){let o=d0();if(!nobg&&xdes()==="glas"){const c=dk?[["8%","4%","#3a3446"],["95%","14%","#2c3a36"],["55%","100%","#3a3030"]]:[["8%","4%","#bcd7ff"],["95%","14%","#e3d2ff"],["55%","100%","#bff0dd"]],b=dk?"#0e0f12":"#d6e6ff";
+    const g="<defs>"+c.map((a,i)=>'<radialGradient id="gl'+i+'" cx="'+a[0]+'" cy="'+a[1]+'" r="'+(i===1?45:55)+'%"><stop offset="0" stop-color="'+a[2]+'"/><stop offset="1" stop-color="'+b+'" stop-opacity="0"/></radialGradient>').join("")+"</defs>"+c.map((a,i)=>'<rect width="'+W+'" height="'+H+'" fill="url(#gl'+i+')"/>').join("");
+    o=o.replace(/(<rect width="\d+" height="\d+" fill="[^"]*"\/>)/,"$1"+g)}return o};return s};
 })();
 </script>
 </body></html>

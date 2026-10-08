@@ -222,7 +222,7 @@ async function publishSnap(snap){
   keep.add("scout");
   const all=await fs.collection("pub").get();
   for(const d of all.docs){if(!keep.has(d.id)&&d.id.slice(0,2)!=="a_")await fs.doc("pub/"+d.id).delete()}
-  await fs.doc("linkmeta/main").set({u:snap.u,k:snap.k||{},xk:snap.xk||{},fp:snap.fp||"",fa:snap.fa||"",fs:snap.fs||""});
+  await fs.doc("linkmeta/main").set({u:snap.u,k:snap.k||{},xk:snap.xk||{},fp:snap.fp||"",fa:snap.fa||"",fs:snap.fs||"",dzs:snap.dzs||""});
 }
 /* Kurzlinks (Trainer): Passwort-Paket veröffentlichen/entfernen; das geheime Zeichen liegt nur für Trainer lesbar in „aliasauth“ */
 if(!isViewerHash&&!isScout)window.__kurzTr={
@@ -236,7 +236,7 @@ window.__webOwnerSnap=function(cb){
     if(docs==null||meta==null)return;
     const raw={};docs.forEach((d)=>{raw[d.id]=d.data()});
     const join=(id)=>{const m=raw[id];if(!m||typeof m.b!=="string")return null;let b=m.b;for(let i=1;i<(m.n||1);i++){const c=raw[id+"~"+i];if(!c)return null;b+=c.b}return b};
-    const s={u:meta.u||"",k:meta.k||{},xk:meta.xk||{},fp:meta.fp||"",fa:meta.fa||"",fs:meta.fs||"",p:{},x:{},a:{}};
+    const s={u:meta.u||"",k:meta.k||{},xk:meta.xk||{},fp:meta.fp||"",fa:meta.fa||"",fs:meta.fs||"",dzs:meta.dzs||"",p:{},x:{},a:{}};
     Object.keys(raw).forEach((id)=>{if(id.indexOf("~")>=0)return;if(id.slice(0,2)==="a_"){s.a[id]={s:raw[id].s,w:raw[id].w,v:raw[id].v|0};return}if(id.slice(0,2)==="p_"){const b=join(id);if(b)s.p[id.slice(2)]=b}else if(id.slice(0,2)==="x_"){const b=join(id);if(b)s.x[id.slice(2)]=b}});
     window.__webSnapReady=true;cb(s);
   };
