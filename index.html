@@ -4241,7 +4241,7 @@ function set(d,keep){if(!NAMES[d])d="ruhig";cur=d;root.setAttribute("data-design
 function sync(){const a=document.getElementById("dzapp"),l=document.getElementById("dzlnk"),c=cfg();if(a&&document.activeElement!==a)a.value=cur;if(l&&document.activeElement!==l)l.value=c.linkDesign==="glas"?"glas":"ruhig";
   document.querySelectorAll(".xdz").forEach((s)=>{if(document.activeElement!==s)s.value=xdes()});
   const ac=document.getElementById("dzacc"),gs=document.getElementById("dzgl");
-  if(ac){if(!ac.options.length)ac.innerHTML=Object.keys(ACC).map((k)=>'<option value="'+k+'">'+ACC[k].n+"</option>").join("");ac.options[0].textContent=cur==="glas"?"Standard (Blau)":"Standard (Grün)";ac.disabled=cur==="klassisch"||window.__ROLE==="lesen";if(document.activeElement!==ac)ac.value=accKey(cur)}
+  if(ac){if(!ac.options.length)ac.innerHTML=Object.keys(ACC).map((k)=>'<option value="'+k+'">'+ACC[k].n+"</option>").join("");{const tx=cur==="glas"?"Standard (Blau)":"Standard (Grün)";if(ac.options[0].textContent!==tx)ac.options[0].textContent=tx}ac.disabled=cur==="klassisch"||window.__ROLE==="lesen";if(document.activeElement!==ac)ac.value=accKey(cur)}
   if(gs){if(!gs.options.length)gs.innerHTML=["dicht","std","klar"].map((k)=>'<option value="'+k+'">'+GLS[k].n+"</option>").join("");gs.disabled=cur!=="glas"||window.__ROLE==="lesen";if(document.activeElement!==gs)gs.value=glKey()}}
 const linkDefault=()=>cfg().linkDesign==="glas"?"glas":"ruhig";
 /* Design, Farbe und Glas-Transparenz gelten pro Konto (Sammlung „prefs“), nicht pro Gerät. Ohne eigenen Eintrag gelten ältere Werte aus den Einstellungen. */
