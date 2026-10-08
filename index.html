@@ -160,8 +160,6 @@ html[data-design="glas"] .kpi.c1,html[data-design="glas"] .kpi.c2,html[data-desi
  :is(html[data-design="ruhig"],html[data-design="glas"]) h2{font-size:26px}
 }
 @media(min-width:1500px){
- :is(html[data-design="ruhig"],html[data-design="glas"]) .gm{display:block;columns:3 340px;column-gap:14px}
- :is(html[data-design="ruhig"],html[data-design="glas"]) .gm .card{margin:0 0 14px;break-inside:avoid}
  :is(html[data-design="ruhig"],html[data-design="glas"]) .gr.pg{grid-template-columns:2fr 1fr}
 }
 :is(html[data-design="ruhig"],html[data-design="glas"]) #pm svg{max-height:300px;width:100%}
@@ -191,6 +189,9 @@ html[data-design="ruhig"][data-theme="dark"]{--onac:#0f1311}html[data-design="gl
 
 @media(max-width:760px) and (prefers-color-scheme:dark){html[data-design="glas"]:not([data-theme="light"]){--nvb:#1d1e23}}
 @media(max-width:760px){html[data-design="glas"][data-theme="dark"]{--nvb:#1d1e23}}
+
+/* Übersicht: Die Schnellzugriffe auf die Bereiche entfallen, wenn das Menü oben steht (Desktop/Tablet). Auf dem Handy mit unterer Leiste bleiben sie. */
+@media(min-width:761px){:is(html[data-design="ruhig"],html[data-design="glas"]) #hn,:is(html[data-design="ruhig"],html[data-design="glas"]) #hn+hr{display:none!important}}
 #lkco{display:none!important}</style>
 <div class="app">
 <nav><h1>U13 · <span id="sais">2026/27</span></h1><small>Teamzentrale</small>
@@ -226,8 +227,9 @@ html[data-design="ruhig"][data-theme="dark"]{--onac:#0f1311}html[data-design="gl
 <section id="p" hidden><div id="pwrap" class="pw"><div class="ph"><div class="av" id="av"></div><div style="min-width:0"><h2 id="pn" style="margin:0"></h2><div class="sub" style="margin:0" id="pi"></div></div><span style="flex:1"></span><span class="pnav"><button class="btn" id="pprev" aria-label="Vorheriger Spieler">◀</button><select id="ps" aria-label="Spieler"></select><button class="btn" id="pnext" aria-label="Nächster Spieler">▶</button></span></div>
 <div class="seg" id="pmode" style="margin-bottom:12px"><button data-pm="s">Einfach</button><button data-pm="d">Detailliert</button></div>
 <div class="bar"><label class="note">Modus <select class="xth"><option value="light">Hell</option><option value="dark">Dunkel</option></select></label><label class="note">Version <select id="xpv"><option value="d">Detailliert</option><option value="s">Einfach</option></select></label><span class="note">A4-Export (hoch)</span><div class="seg" id="xp"><button data-f="png">PNG</button><button data-f="jpg">JPG</button><button data-f="pdf">PDF</button></div><span style="width:14px"></span><span class="note">Alle Spieler</span><div class="seg" id="xpa"><button data-f="pdf" title="Eine PDF-Datei, eine Seite pro Spieler">PDF (1 Datei)</button><button data-f="png" title="ZIP mit einem Bild pro Spieler">PNG (ZIP)</button><button data-f="jpg" title="ZIP mit einem Bild pro Spieler">JPG (ZIP)</button></div></div><div class="bar" style="margin-top:-4px"><span class="note">Einzelnachweis (alle Trainings &amp; Spiele, Saison)</span><div class="seg" id="xnw"><button data-f="pdf">PDF</button><button data-f="png" title="ZIP bei mehreren Seiten">PNG</button><button data-f="jpg" title="ZIP bei mehreren Seiten">JPG</button></div></div><div id="psimp"></div><div id="pfull"><div class="kpis" id="pk"></div>
-<div class="gm"><div class="gc"><div class="card"><h3>Saisonübersicht Spiele</h3><div id="pz"></div></div><div class="card"><h3>Trainingsstatistik</h3><div id="pt"></div></div><div class="card"><h3>Absolute Trainingsdaten</h3><div id="pa"></div></div></div>
-<div class="gc"><div class="card"><h3>Spielzeiten im Detail</h3><div id="pd"></div></div><div class="card"><h3>Vergleich mit Team-Ø</h3><div id="pc"></div></div><div class="card"><h3>Spiele nach Spielform</h3><div id="pf"></div></div></div></div>
+<div class="gm"><div class="gc"><div class="card"><h3>Trainingsstatistik</h3><div id="pt"></div></div></div>
+<div class="gc"><div class="card"><h3>Saisonübersicht Spiele</h3><div id="pz"></div></div><div class="card"><h3>Spielzeiten im Detail</h3><div id="pd"></div></div></div>
+<div class="gc"><div class="card"><h3>Absolute Trainingsdaten</h3><div id="pa"></div></div><div class="card"><h3>Vergleich mit Team-Ø</h3><div id="pc"></div></div><div class="card"><h3>Spiele nach Spielform</h3><div id="pf"></div></div></div></div>
 <div class="gr pg"><div class="card"><h3>Trainingsbeteiligung gewichtet pro Monat</h3><div id="pm"></div></div><div class="card"><h3>Verteilung Spiele &amp; Training</h3><div id="pv"></div></div></div>
 </div><div class="card" style="margin-top:12px"><h3>Notizen und Entwicklungsziele</h3><div id="pnt"></div></div></div>
 <div class="card empty" id="pempty" hidden>Noch keine Spieler. Unter „Stammdaten“ anlegen.</div></section>
