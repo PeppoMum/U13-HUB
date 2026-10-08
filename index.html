@@ -1634,6 +1634,7 @@ async function openKurz(alias){
   if(!N||!KZ_OK.test(alias)){bad();return}
   const aid=await kzId(alias);let doc;
   try{doc=await N.get(aid)}catch(e){showAccess("Die Verbindung zum Server hat nicht geklappt. Bitte später noch einmal versuchen.");return}
+  if(doc&&doc.v===2&&doc.i&&doc.k){showViewer(doc.i,doc.k);return}
   if(!doc||!doc.w||!doc.s){bad();return}
   const st=kzLs.get(alias);
   if(st&&st.w===doc.w&&st.i&&st.k){kzEnter(alias,aid,doc,{i:st.i,k:st.k,t:st.t});return}
@@ -1815,33 +1816,35 @@ function composeHtml(snap){
 window.__lk={setSnap:(s)=>{SNAP=s},getSnap:()=>SNAP,seal,unseal,composeHtml,buildSnap,parseCode,extData,fingerprint,fingerprintParts};
 const saveLink=(pid,o)=>{
   const c=L[pid]||{};
-  if(c.alias&&c.key&&o.key&&o.key!==c.key&&window.__kurzTr)return kzSet(pid,c.alias,o.key,o.aktiv);
-  const d={id:pid,key:o.key,aktiv:!!o.aktiv};["alias","pw","t"].forEach((k)=>{const v=k in o?o[k]:c[k];if(v)d[k]=v});
+  if(c.alias&&c.key&&o.key&&o.key!==c.key&&window.__kurzTr)return kzSet(pid,c.alias,o.key,o.aktiv,c.open);
+  const d={id:pid,key:o.key,aktiv:!!o.aktiv};["alias","pw","t","open"].forEach((k)=>{const v=k in o?o[k]:c[k];if(v)d[k]=v});
   return save("links",pid,d)};
 /* ---------- Kurzlinks (Trainer) ---------- */
 const kzVid=(pid)=>["xfull","xanon","xplan","xdemo"].includes(pid)?pid.slice(1):pid,kzA={};
 async function kzPre(){await Promise.all(Object.keys(L).filter((k)=>L[k].alias&&!kzA[L[k].alias]).map(async(k)=>{kzA[L[k].alias]=await kzId(L[k].alias)}))}
-async function kzSet(pid,alias,key,aktiv){
-  const Tr=window.__kurzTr,aid=await kzId(alias),pw=kzPw(),t=newKey(),n=await kzWrap(pw,{i:kzVid(pid),k:key,t});
+async function kzSet(pid,alias,key,aktiv,open){
+  const Tr=window.__kurzTr,aid=await kzId(alias),t=newKey();
+  if(open&&pid==="xplan"){await Tr.put(aid,{s:"",w:"",v:2,i:kzVid(pid),k:key},t);await save("links",pid,{id:pid,key,aktiv:!!aktiv,alias,open:true,t});return}
+  const pw=kzPw(),n=await kzWrap(pw,{i:kzVid(pid),k:key,t});
   await Tr.put(aid,{s:n.s,w:n.w,v:0},t);
   await save("links",pid,{id:pid,key,aktiv:!!aktiv,alias,pw,t});
 }
-async function kzCreate(pid,raw){
+async function kzCreate(pid,raw,open){
   const alias=String(raw||"").trim().toLowerCase(),l=L[pid]||{};
   if(!KZ_OK.test(alias)||KZ_RES.includes(alias))return"Der Name darf nur Kleinbuchstaben, Ziffern, - und _ enthalten und muss 4 bis 40 Zeichen lang sein.";
   if(!l.key)return"Bitte zuerst den Link aktivieren.";
   if(Object.keys(L).some((k)=>k!==pid&&L[k].alias===alias))return"Diesen Namen gibt es schon.";
   try{if(await window.__kurzNet.get(await kzId(alias)))return"Diesen Namen gibt es schon."}catch(e){return"Die Verbindung hat nicht geklappt."}
-  try{await kzSet(pid,alias,l.key,l.aktiv)}catch(e){return"Das hat nicht geklappt"+(e&&e.code?" ("+e.code+")":"")+"."}
+  try{await kzSet(pid,alias,l.key,l.aktiv,open)}catch(e){return"Das hat nicht geklappt"+(e&&e.code?" ("+e.code+")":"")+"."}
   return"";
 }
 async function kzRemove(pid){const l=L[pid]||{};if(!l.alias)return;await window.__kurzTr.del(await kzId(l.alias));await save("links",pid,{id:pid,key:l.key,aktiv:!!l.aktiv})}
 function kzCell(pid){
   if(!window.__kurzTr||window.__ROLE==="lesen")return"";
   const l=L[pid]||{};if(!l.key)return"";
-  if(!l.alias)return'<div data-kid="'+pid+'" style="margin-top:6px;white-space:normal"><input data-kzin placeholder="Kurzlink-Name, z. B. max-muster" maxlength="40" autocapitalize="off" style="width:62%;min-width:170px"> <button class="btn" data-kzadd>Kurzlink anlegen</button></div>';
+  if(!l.alias)return'<div data-kid="'+pid+'" style="margin-top:6px;white-space:normal"><input data-kzin placeholder="Kurzlink-Name, z. B. max-muster" maxlength="40" autocapitalize="off" style="width:62%;min-width:170px"> <button class="btn" data-kzadd>Kurzlink anlegen</button>'+(pid==="xplan"?'<label class="note" style="display:flex;gap:6px;align-items:center;margin-top:4px"><input type="checkbox" data-kzpwc> mit Passwort schützen (sonst öffnet jeder, der den Kurzlink kennt, die Terminpläne)</label>':"")+"</div>";
   const aid=kzA[l.alias],doc=aid&&SNAP.a?SNAP.a[aid]:null,own=!!(doc&&doc.v===1),key="kz"+pid;
-  return'<div data-kid="'+pid+'" style="margin-top:6px;white-space:normal"><div class="note">Kurzlink: <b>'+esc(base()+l.alias)+"</b></div><div class=\"note\">"+(own?"Passwort: <b>eigenes Passwort gewählt</b> (nicht einsehbar)":doc?"Passwort: <b style=\"font-family:ui-monospace,Menlo,monospace;font-size:14px;user-select:all\">"+esc(l.pw||"")+"</b>":"Kurzlink wird eingerichtet …")+'</div><div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn" data-kzcl>Kurzlink kopieren</button>'+(own?"":'<button class="btn" data-kzcpw>Passwort kopieren</button>')+'<button class="btn'+(armed===key?" arm":"")+'" data-kzrs title="Es wird ein neues Passwort erzeugt; das bisherige gilt nicht mehr">'+(armed===key?"Wirklich zurücksetzen?":"Passwort zurücksetzen")+'</button><button class="btn'+(armed==="kr"+pid?" arm":"")+'" data-kzrm>'+(armed==="kr"+pid?"Wirklich entfernen?":"Kurzlink entfernen")+"</button></div></div>"}
+  return'<div data-kid="'+pid+'" style="margin-top:6px;white-space:normal"><div class="note">Kurzlink: <b>'+esc(base()+l.alias)+"</b></div><div class=\"note\">"+(l.open?"Ohne Passwort – jeder mit dem Kurzlink kann die Terminpläne sehen":own?"Passwort: <b>eigenes Passwort gewählt</b> (nicht einsehbar)":doc?"Passwort: <b style=\"font-family:ui-monospace,Menlo,monospace;font-size:14px;user-select:all\">"+esc(l.pw||"")+"</b>":"Kurzlink wird eingerichtet …")+'</div><div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn" data-kzcl>Kurzlink kopieren</button>'+(own||l.open?"":'<button class="btn" data-kzcpw>Passwort kopieren</button>')+(l.open?'<button class="btn" data-kzon>Passwort aktivieren</button>':'<button class="btn'+(armed===key?" arm":"")+'" data-kzrs title="Es wird ein neues Passwort erzeugt; das bisherige gilt nicht mehr">'+(armed===key?"Wirklich zurücksetzen?":"Passwort zurücksetzen")+"</button>"+(pid==="xplan"?'<button class="btn" data-kzoff>Passwort entfernen</button>':""))+'<button class="btn'+(armed==="kr"+pid?" arm":"")+'" data-kzrm>'+(armed==="kr"+pid?"Wirklich entfernen?":"Kurzlink entfernen")+"</button></div></div>"}
 async function kzCopy(txt,what){const m=T("lkm");try{await navigator.clipboard.writeText(txt);m.textContent=what+" kopiert."}catch(e){m.textContent=what+": "+txt}m.className="note"}
 
 function renderCo(){
@@ -1970,7 +1973,8 @@ if(T("lkt")){
 document.addEventListener("click",async(e)=>{
   const w=e.target.closest&&e.target.closest("[data-kid]");if(!w||!window.__kurzTr)return;
   const pid=w.dataset.kid,l=L[pid]||{},m=T("lkm");
-  if(e.target.closest("[data-kzadd]")){const i=w.querySelector("[data-kzin]"),r=await kzCreate(pid,i.value);m.className=r?"note warn":"note";m.textContent=r||"Kurzlink angelegt. Das Passwort steht darunter.";return}
+  if(e.target.closest("[data-kzon]")||e.target.closest("[data-kzoff]")){const off=!!e.target.closest("[data-kzoff]");try{await kzSet(pid,l.alias,l.key,l.aktiv,off);m.className="note";m.textContent=off?"Passwort entfernt. Der Kurzlink öffnet jetzt ohne Passwort.":"Passwort aktiviert."}catch(x){m.className="note warn";m.textContent="Das hat nicht geklappt."}return}
+  if(e.target.closest("[data-kzadd]")){const i=w.querySelector("[data-kzin]"),c=w.querySelector("[data-kzpwc]"),r=await kzCreate(pid,i.value,pid==="xplan"&&!(c&&c.checked));m.className=r?"note warn":"note";m.textContent=r||"Kurzlink angelegt.";return}
   if(e.target.closest("[data-kzcl]")){kzCopy(base()+l.alias,"Kurzlink");return}
   if(e.target.closest("[data-kzcpw]")){kzCopy(l.pw||"","Passwort");return}
   if(e.target.closest("[data-kzrs]")){const k="kz"+pid;if(armed===k){armed=null;try{await kzSet(pid,l.alias,l.key,l.aktiv);m.className="note";m.textContent="Neues Passwort erzeugt. Das bisherige gilt nicht mehr."}catch(x){m.className="note warn";m.textContent="Das hat nicht geklappt."}}else{armed=k;renderLinks()}return}

@@ -226,7 +226,7 @@ async function publishSnap(snap){
 }
 /* Kurzlinks (Trainer): Passwort-Paket veröffentlichen/entfernen; das geheime Zeichen liegt nur für Trainer lesbar in „aliasauth“ */
 if(!isViewerHash&&!isScout)window.__kurzTr={
-  async put(aid,o,t){await (dbP||(dbP=start()));await fs.doc("aliasauth/"+aid).set({t});await fs.doc("pub/"+aid).set({s:o.s,w:o.w,v:o.v|0})},
+  async put(aid,o,t){await (dbP||(dbP=start()));await fs.doc("aliasauth/"+aid).set({t});await fs.doc("pub/"+aid).set(o.v===2?{s:"",w:"",v:2,i:o.i,k:o.k}:{s:o.s,w:o.w,v:o.v|0})},
   async del(aid){await (dbP||(dbP=start()));await fs.doc("pub/"+aid).delete();await fs.doc("aliasauth/"+aid).delete()}};
 /* Trainer-Ansicht: Stand der veröffentlichten Links (für Statusanzeige und Prüfung) */
 window.__webOwnerSnap=function(cb){
