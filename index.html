@@ -83,6 +83,7 @@ body.bgimg main>section>.kpis{background:none}body.bgimg .hl{display:none}body.b
 @media(max-width:760px){nav{-webkit-overflow-scrolling:touch;scrollbar-width:none}nav::-webkit-scrollbar{display:none}nav button[data-s="h"]{position:sticky;left:0;z-index:3;background:var(--card);box-shadow:8px 0 8px -6px rgba(0,0,0,.25)}}
 .etb{margin:0 0 14px}.etb button{flex:1;min-width:0}.etp>.card{margin:0 0 12px!important}.etp>.gr{margin:0 0 12px}.coonly{display:none}body.co .coonly{display:inline}body.co .ownonly{display:none}
 body.co #etb,body.co #etp-m,body.co #etp-s{display:none!important}body.co #etp-l{display:block!important}body.co #etp-l>.card:not(#lkh):not(#ktc){display:none}
+body.scoutonly nav button:not([data-s="k"]){display:none!important}body.scoutonly #lkw,body.scoutonly #bkw,body.scoutonly #ccw{display:none!important}
 body.kaus nav button[data-s="k"],body.kaus #hn [data-go="k"],body.kaus #k{display:none!important}#lkco{display:none!important}</style>
 <div class="app">
 <nav><h1>U13 · <span id="sais">2026/27</span></h1><small>Teamzentrale</small>
@@ -112,7 +113,7 @@ body.kaus nav button[data-s="k"],body.kaus #hn [data-go="k"],body.kaus #k{displa
 <div class="card tw" style="padding:0"><table id="wt"></table></div>
 <h3 style="margin-top:18px">Trainerschwerpunkte &amp; To-Dos</h3><div id="wtd"></div></section>
 <section id="a" hidden><h2>Saisonübersicht</h2><p class="sub" id="asub"></p><div class="kpis" id="kp"></div>
-<div class="bar"><div class="seg" id="vw" role="group" aria-label="Ansicht"><button data-v="all" class="on">Alles</button><button data-v="tr">Training</button><button data-v="sp">Spiele</button></div><label>Sortieren nach <select id="so"><option value="b" data-grp="tr" selected>Beteiligung gewichtet</option><option value="x" data-grp="tr">Beteiligung absolut</option><option value="l" data-grp="tr">Letzte 60 Tage gewichtet</option><option value="g" data-grp="sp">Spielzeit gewichtet</option><option value="a" data-grp="sp">Spielzeit absolut</option><option value="k" data-grp="sp">Spielzeit im Kader</option><option value="m" data-grp="sp">Minuten</option></select></label><label>Reihenfolge <select id="od"><option value="-1">Absteigend</option><option value="1">Aufsteigend</option></select></label><span style="flex:1"></span><label class="note">Modus <select class="xth"><option value="light">Hell</option><option value="dark">Dunkel</option></select></label><span class="note">Seiten</span><select id="xsp" aria-label="Seiten des Exports"><option value="all">Übersicht + Streudiagramm</option><option value="z3">Alle drei Seiten (mit Zusatzkennzahlen)</option><option value="ue">Nur Übersicht</option><option value="sc">Nur Streudiagramm</option><option value="zu">Nur Zusatzkennzahlen</option></select><span class="note">A4-Export (quer)</span><div class="seg" id="xa"><button data-f="png">PNG</button><button data-f="jpg">JPG</button><button data-f="pdf">PDF</button></div></div>
+<div class="bar"><div class="seg" id="vw" role="group" aria-label="Ansicht"><button data-v="all" class="on">Alles</button><button data-v="tr">Training</button><button data-v="sp">Spiele</button></div><label>Sortieren nach <select id="so"><option value="b" data-grp="tr" selected>Beteiligung gewichtet</option><option value="x" data-grp="tr">Beteiligung absolut</option><option value="l" data-grp="tr">Letzte 60 Tage gewichtet</option><option value="g" data-grp="sp">Spielzeit gewichtet</option><option value="a" data-grp="sp">Spielzeit absolut</option><option value="k" data-grp="sp">Spielzeit im Kader</option><option value="m" data-grp="sp">Minuten</option></select></label><label>Reihenfolge <select id="od"><option value="-1">Absteigend</option><option value="1">Aufsteigend</option></select></label><span style="flex:1"></span><label class="note">Modus <select class="xth"><option value="light">Hell</option><option value="dark">Dunkel</option></select></label><label class="note">Seiten <select id="xsp" aria-label="Seiten des Exports"><option value="all">Übersicht + Streudiagramm</option><option value="z3">Alle drei Seiten (mit Zusatzkennzahlen)</option><option value="ue">Nur Übersicht</option><option value="sc">Nur Streudiagramm</option><option value="zu">Nur Zusatzkennzahlen</option></select></label><span class="note">A4-Export (quer)</span><div class="seg" id="xa"><button data-f="png">PNG</button><button data-f="jpg">JPG</button><button data-f="pdf">PDF</button></div></div>
 <div class="leg" id="lg"></div><div class="card tw" style="padding:0"><table id="tb"></table></div><div class="gr" id="ch" style="margin:14px 0 0"></div><div id="sc" style="margin:14px 0 0"></div></section>
 <section id="s" hidden><h2>Stammdaten</h2><div class="seg" id="sseg" style="margin-bottom:14px"><button data-v="p" class="on">Spieler</button><button data-v="t">Trainer &amp; Verantwortliche</button></div><div id="s_pl"><p class="sub">Positionen: 1× klicken = <span class="chip pN">Nebenposition</span>, 2× = <span class="chip pS">Stammposition</span>, 3× = aus · 25 Plätze · nur belegte Plätze erscheinen in allen anderen Ansichten · Änderungen werden sofort gespeichert</p><div class="kpis" id="sdk"></div><div class="card tw" style="padding:0"><table id="sdt"></table></div></div><div id="s_st" hidden><p class="sub">Trainer, Co-Trainer und weitere Verantwortliche. Die Namen lassen sich bei To-Dos als Zuständige auswählen (ohne Namen nur als Platzhalter, z. B. für einen Torwarttrainer, dessen Name noch offen ist); Geburtstage erscheinen auf Start und im Trainer-Export.</p><div class="card tw" style="padding:0;margin-bottom:12px"><table id="stt"></table></div><div class="card"><h3>Neu hinzufügen</h3><div class="bar" style="margin:0"><label class="note">Name<br><input id="stn" style="width:200px" autocomplete="off"></label><label class="note">Rolle<br><select id="str"><option>Trainer</option><option>Co-Trainer</option><option>Betreuer</option><option>Torwarttrainer</option><option>Athletiktrainer</option></select></label><label class="note">Geburtsdatum (optional)<br><input type="date" id="stg"></label><button class="btn" id="sta" style="background:var(--ac);color:#fff;border-color:var(--ac)">＋ Hinzufügen</button></div></div></div></section>
 <section id="p" hidden><div id="pwrap" class="pw"><div class="ph"><div class="av" id="av"></div><div style="min-width:0"><h2 id="pn" style="margin:0"></h2><div class="sub" style="margin:0" id="pi"></div></div><span style="flex:1"></span><button class="btn" id="pprev" aria-label="Vorheriger Spieler">◀</button><select id="ps" aria-label="Spieler"></select><button class="btn" id="pnext" aria-label="Nächster Spieler">▶</button></div>
@@ -174,7 +175,7 @@ body.kaus nav button[data-s="k"],body.kaus #hn [data-go="k"],body.kaus #k{displa
 </div></section>
 </main></div>
 <script type="application/json" id="snap">{}</script><script type="text/plain" id="src"></script>
-<script>window.__SCOUT=/^#scout\.[A-Za-z0-9_-]{16,}$/.test(location.hash);window.__CO=null&&(location.hash.match(/^#co([A-Za-z0-9]+)\.([A-Za-z0-9_-]{16,})$/)||null);window.__VIEWER=!window.__SCOUT&&!window.__CO&&/^#[A-Za-z0-9]+\.[A-Za-z0-9_-]{16,}$/.test(location.hash);if(window.__CO)document.documentElement.classList.add("cogate")</script>
+<script>window.__SCOUT=/^#scout\.[A-Za-z0-9_-]{16,}$/.test(location.hash);window.__CO=null&&(location.hash.match(/^#co([A-Za-z0-9]+)\.([A-Za-z0-9_-]{16,})$/)||null);window.__VIEWER=!window.__SCOUT&&!window.__CO&&(/^#[A-Za-z0-9]+\.[A-Za-z0-9_-]{16,}$/.test(location.hash)||/^#k\/[A-Za-z0-9_-]{4,40}$/.test(location.hash));if(window.__CO)document.documentElement.classList.add("cogate")</script>
 <script>/* U13 – Berechnungsmodul (reine Funktionen, keine Abhängigkeit zu Oberfläche oder Datenbank).
    Läuft im Browser (window.U13) und in Node (require). Eingabe: Datenmodell aus seed.json. */
 (function (root) {
@@ -712,6 +713,7 @@ function renderAll(){window.__renderErr=null;const g=(n,f)=>{try{f()}catch(e){wi
 /* ---------- Datenbank ---------- */
 const got={};
 function sub(coll,key,map){
+  if(window.__ROLE==="scout"){got[key]=true;if(got.spieler&&got.spiele&&got.trainings)D.ready=true;return}
   db.collection(coll).onSnapshot((s)=>{try{ccSnap(coll,s.docs)}catch(e){}D[key]=s.docs.map((d)=>({id:d.id,...d.data()})).sort(map||(()=>0));qReapply(key);got[key]=true;if(key==="spiele"){try{window.__fixA&&window.__fixA()}catch(e){}try{window.__liveSync&&window.__liveSync()}catch(e){}}if(got.spieler&&got.spiele&&got.trainings){D.ready=true}renderAll();if(D.ready&&$("#st").className.indexOf("busy")<0&&!window.__renderErr)setSt("Synchron","ok")},(er)=>setSt("Lesefehler: "+(er&&er.code||""),"err"));
 }
 (async()=>{
@@ -720,8 +722,8 @@ function sub(coll,key,map){
   try{db=await (window.claude&&window.claude.use?window.claude.use("db"):null)}catch(e){db=null}
   if(!db){setSt("Keine Verbindung: bitte anmelden und die Seite neu laden","err");window.__noDb=true;typeof showAccess==="function"&&showAccess();return}
   try{const c0=await db.doc("config/main").get();if(!c0||c0.exists===false)throw new Error("noaccess")}catch(e){db=null;window.__noDb=true;setSt("Kein Zugriff","err");typeof showAccess==="function"&&showAccess("Kein Zugriff. Diese App ist nur für das Trainerteam.");return}
-  window.__dbUp=true;qRestore();if(window.__SCOUT){typeof scoutMode==="function"&&scoutMode(db);return}typeof initLinks==="function"&&initLinks();typeof initKader==="function"&&initKader(db);
-  sub("players","spieler",(a,b)=>a.slot-b.slot);sub("games","spiele",(a,b)=>a.nr-b.nr);sub("trainings","trainings",(a,b)=>a.datum.localeCompare(b.datum));sub("events","events");sub("dienste","dienste");sub("todos","todos");db.collection("notes").onSnapshot((x)=>{D.notizen=x.docs.map((d)=>({id:d.id,...d.data()}));renderNotes();renderProfile();typeof renderStart==="function"&&renderStart()},()=>{});
+  window.__dbUp=true;qRestore();if(window.__SCOUT){typeof scoutMode==="function"&&scoutMode(db);return}window.__ROLE!=="scout"&&window.__ROLE!=="lesen"&&typeof initLinks==="function"&&initLinks();typeof initKader==="function"&&initKader(db);if(window.__ROLE==="scout"){D.ready=true;go("k")}
+  sub("players","spieler",(a,b)=>a.slot-b.slot);sub("games","spiele",(a,b)=>a.nr-b.nr);sub("trainings","trainings",(a,b)=>a.datum.localeCompare(b.datum));sub("events","events");sub("dienste","dienste");sub("todos","todos");window.__ROLE!=="scout"&&db.collection("notes").onSnapshot((x)=>{D.notizen=x.docs.map((d)=>({id:d.id,...d.data()}));renderNotes();renderProfile();typeof renderStart==="function"&&renderStart()},()=>{});
   try{db.doc("config/sicherung").onSnapshot((s)=>{D.sicherung=s&&s.exists?s.data():null;D.sicherungGot=true;typeof bkwRender==="function"&&bkwRender()},()=>{D.sicherungGot=true})}catch(e){}
   db.doc("config/main").onSnapshot((s)=>{D.config=s.exists?s.data():null;renderSaison();renderLogo();renderTrain();typeof renderSettings==="function"&&renderSettings();renderGames();typeof renderQ==="function"&&renderQ();typeof renderLinks==="function"&&renderLinks();typeof renderPlan==="function"&&renderPlan();typeof renderKader==="function"&&renderKader();if(D.ready&&$("#st").className.indexOf("busy")<0&&!window.__renderErr)setSt("Synchron","ok")},()=>{});
 })();
@@ -1443,7 +1445,7 @@ function renderQ(){
   $("#qc").innerHTML=ch("Punktschnitt nach Spiel","Ø Punkte (Sieg 3 · Remis 1)",(s)=>qLine(s,0,0,cw,92,QPA,st.verlauf),92)
    +ch("Spiele nach Spielart","Blau gewertet · grau nicht gewertet",(s)=>qBars(s,0,0,cw,rh(d.ba.length),QPA,d.ba,qSerSpiele(QPA),"stack",QF,(r)=>r.spiele+(r.spiele-r.gewertet?" ("+r.gewertet+" gew.)":"")),rh(d.ba.length))
    +ch("Punkte nach Spielart","nur gewertete Spiele",(s)=>qBars(s,0,0,cw,rh(d.bg.length),QPA,d.bg,[{c:QPA.g,f:(r)=>r.punkte}],"cluster",QF),rh(d.bg.length))
-   +ch("Tore &amp; Gegentore nach Spielart",'<span style="color:var(--g)">■</span> Tore &nbsp;<span style="color:var(--r)">■</span> Gegentore',(s)=>qBars(s,0,0,cw,d.bg.length*32+2,QPA,d.bg,[{c:QPA.g,f:(r)=>r.tore},{c:QPA.r,f:(r)=>r.gt}],"cluster",QF),Math.max(34,d.bg.length*32+2))
+   +ch("Tore &amp; Gegentore nach Spielart",'<span style="color:var(--g)">■</span> Tore &nbsp;<span style="color:var(--r)">■</span> Gegentore',(s)=>qBars(s,0,0,cw,Math.max(34,d.bg.length*32+2),QPA,d.bg,[{c:QPA.g,f:(r)=>r.tore},{c:QPA.r,f:(r)=>r.gt}],"cluster",QF),Math.max(34,d.bg.length*32+2))
    +'<div class="card qhl"><h3>Saisonstatistik (Highlights)</h3>'+qHigh(d).map((h)=>'<div class="row"><span>'+QEMO[h[1]]+" "+h[1]+"</span><b>"+h[2]+"</b></div>").join("")+"</div>"+qQuartHtml();
 }
 $("#qf").onchange=()=>{QF=$("#qf").value;renderQ()};{let lw=0;try{new ResizeObserver(()=>{const q0=$("#qc"),w=q0&&q0.clientWidth;if(w&&Math.abs(w-lw)>6){lw=w;renderQ()}}).observe($("#qc"))}catch(e){}}$("#qc").addEventListener("click",(e)=>{const b=e.target.closest("#qwseg button");if(!b)return;QW=b.dataset.w==="1";renderQ()});
@@ -1619,6 +1621,64 @@ async function showViewer(pid,key){
 }
 window.showAccess=showAccess;
 
+/* ---------- Kurzlinks (Web): /name -> Passwort -> Ansicht. Das Passwort entschlüsselt Profil-Schlüssel; ohne Passwort ist nichts lesbar. ---------- */
+const KZ_OK=/^[a-z0-9][a-z0-9_-]{3,39}$/,KZ_RES=["index","scout","admin","login","app","www","api","404"],KZ_IT=300000;
+const kzId=async(a)=>"a_"+await sha("kz:"+a);
+async function kzKey(pw,salt){const m=await crypto.subtle.importKey("raw",enc.encode(pw),"PBKDF2",false,["deriveBits"]);return b64u(new Uint8Array(await crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt:unb64u(salt),iterations:KZ_IT},m,256)))}
+const kzPw=()=>{const A="abcdefghjkmnpqrstuvwxyz23456789",r=crypto.getRandomValues(new Uint8Array(10));return[...r].map((x)=>A[x%A.length]).join("")};
+async function kzWrap(pw,pl){const s=newKey();return{s,w:await seal(await kzKey(pw,s),pl)}}
+const kzLs={get(k){try{return JSON.parse(localStorage.getItem("u13kz."+k)||"null")}catch(e){return null}},set(k,v){try{localStorage.setItem("u13kz."+k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem("u13kz."+k)}catch(e){}}};
+async function openKurz(alias){
+  alias=String(alias||"").toLowerCase();
+  const N=window.__kurzNet,bad=()=>showAccess("Dieser Kurzlink ist nicht (mehr) aktiv. Bitte den Trainer fragen.");
+  if(!N||!KZ_OK.test(alias)){bad();return}
+  const aid=await kzId(alias);let doc;
+  try{doc=await N.get(aid)}catch(e){showAccess("Die Verbindung zum Server hat nicht geklappt. Bitte später noch einmal versuchen.");return}
+  if(!doc||!doc.w||!doc.s){bad();return}
+  const st=kzLs.get(alias);
+  if(st&&st.w===doc.w&&st.i&&st.k){kzEnter(alias,aid,doc,{i:st.i,k:st.k,t:st.t});return}
+  if(st)kzLs.del(alias);
+  kzAsk(alias,aid,doc,st?"Das Passwort wurde geändert. Bitte neu anmelden.":"");
+}
+function kzAsk(alias,aid,doc,msg){
+  const v=shell();
+  v.innerHTML='<div class="card" style="max-width:440px;margin:8vh auto 0"><h3>TuS Haltern U13 · Teamzentrale</h3><p style="margin-top:0">Bitte das Passwort eingeben, das du vom Trainer bekommen hast.</p><label class="note">Passwort<br><input id="kzp" type="password" style="width:100%" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false"></label><label class="note" style="display:flex;gap:8px;align-items:center;margin-top:10px;white-space:normal"><input type="checkbox" id="kzs"> Auf diesem Gerät angemeldet bleiben</label><div class="bar" style="margin:10px 0 0"><button class="btn" id="kzg">Öffnen</button></div><p class="note" id="kzm" style="margin-bottom:0">'+esc(msg||"")+"</p></div>";
+  const pi=document.getElementById("kzp"),m=document.getElementById("kzm"),b=document.getElementById("kzg");
+  const go=async()=>{
+    const pw=pi.value.trim();if(!pw){m.textContent="Bitte das Passwort eingeben.";return}
+    b.disabled=true;m.className="note";m.textContent="Wird geprüft …";
+    let p=null;try{p=await unseal(await kzKey(pw,doc.s),doc.w)}catch(e){p=null}
+    if(!p||!p.i||!p.k){b.disabled=false;m.className="note warn";m.textContent="Das Passwort stimmt nicht.";pi.select();return}
+    if(document.getElementById("kzs").checked)kzLs.set(alias,{i:p.i,k:p.k,t:p.t,w:doc.w});
+    kzEnter(alias,aid,doc,p);
+  };
+  b.onclick=go;pi.onkeydown=(e)=>{if(e.key==="Enter")go()};pi.focus();
+}
+async function kzEnter(alias,aid,doc,p){await showViewer(p.i,p.k);kzFoot(alias,aid,doc,p)}
+function kzFoot(alias,aid,doc,p){
+  let f=document.getElementById("kzf");if(f)f.remove();
+  f=document.createElement("div");f.id="kzf";
+  f.style.cssText="position:fixed;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:60;display:flex;flex-direction:column;align-items:flex-end;gap:6px;max-width:calc(100vw - 20px)";
+  const bs="font:inherit;font-size:12px;padding:5px 10px;border-radius:8px;border:1px solid var(--ln,#d0d5dd);background:var(--card,#fff);color:var(--tx,#1c1f24);cursor:pointer";
+  f.innerHTML='<div id="kzpn" hidden style="background:var(--card,#fff);color:var(--tx,#1c1f24);border:1px solid var(--ln,#d0d5dd);border-radius:12px;padding:12px;width:min(300px,calc(100vw - 20px));box-shadow:0 6px 24px rgba(0,0,0,.18)"><b style="font-size:13px">Eigenes Passwort wählen</b><input id="kzn1" type="password" placeholder="Neues Passwort (mind. 8 Zeichen)" autocomplete="new-password" style="width:100%;box-sizing:border-box;margin:8px 0 6px;padding:8px"><input id="kzn2" type="password" placeholder="Wiederholen" autocomplete="new-password" style="width:100%;box-sizing:border-box;padding:8px"><div style="margin-top:8px;display:flex;gap:6px"><button id="kzsv" style="'+bs+'">Speichern</button><button id="kzcl" style="'+bs+'">Abbrechen</button></div><div id="kzpm" style="font-size:12px;margin-top:6px"></div></div><div style="display:flex;gap:6px"><button id="kzch" style="'+bs+'">Passwort ändern</button><button id="kzout" style="'+bs+'">Abmelden</button></div>';
+  document.body.appendChild(f);
+  const $k=(i)=>document.getElementById(i),pn=$k("kzpn"),pm=$k("kzpm");
+  $k("kzch").onclick=()=>{pn.hidden=!pn.hidden;pm.textContent=""};$k("kzcl").onclick=()=>{pn.hidden=true};
+  $k("kzout").onclick=()=>{kzLs.del(alias);location.reload()};
+  $k("kzsv").onclick=async()=>{
+    const a=$k("kzn1").value.trim(),b=$k("kzn2").value.trim();pm.style.color="";
+    if(a.length<8){pm.textContent="Bitte mindestens 8 Zeichen wählen.";return}
+    if(a!==b){pm.textContent="Die beiden Eingaben sind nicht gleich.";return}
+    if(!p.t){pm.textContent="Bitte einmal abmelden und neu anmelden.";return}
+    $k("kzsv").disabled=true;pm.textContent="Wird gespeichert …";
+    try{const n=await kzWrap(a,{i:p.i,k:p.k,t:p.t});await window.__kurzNet.setPw(aid,p.t,{s:n.s,w:n.w,v:1});
+      const st=kzLs.get(alias);if(st)kzLs.set(alias,{...st,w:n.w});doc.w=n.w;doc.s=n.s;
+      $k("kzn1").value="";$k("kzn2").value="";pm.textContent="Passwort geändert. Ab jetzt gilt das neue.";setTimeout(()=>{pn.hidden=true},2500)}
+    catch(e){pm.textContent="Das hat nicht geklappt. Bitte später noch einmal versuchen."}
+    $k("kzsv").disabled=false;
+  };
+}
+
 /* ---------- Trainer: Schlüssel, Schnappschuss, Veröffentlichen ---------- */
 const L={};window.__links=L;let started=false,tok=0,armed=null;
 const base=()=>window.__WEB_BASE||BASE_DEFAULT;window.__lkbase=base;
@@ -1753,7 +1813,37 @@ function composeHtml(snap){
   return HEAD+frag+"</body></html>";
 }
 window.__lk={setSnap:(s)=>{SNAP=s},getSnap:()=>SNAP,seal,unseal,composeHtml,buildSnap,parseCode,extData,fingerprint,fingerprintParts};
-const saveLink=(pid,o)=>save("links",pid,{id:pid,key:o.key,aktiv:!!o.aktiv});
+const saveLink=(pid,o)=>{
+  const c=L[pid]||{};
+  if(c.alias&&c.key&&o.key&&o.key!==c.key&&window.__kurzTr)return kzSet(pid,c.alias,o.key,o.aktiv);
+  const d={id:pid,key:o.key,aktiv:!!o.aktiv};["alias","pw","t"].forEach((k)=>{const v=k in o?o[k]:c[k];if(v)d[k]=v});
+  return save("links",pid,d)};
+/* ---------- Kurzlinks (Trainer) ---------- */
+const kzVid=(pid)=>["xfull","xanon","xplan","xdemo"].includes(pid)?pid.slice(1):pid,kzA={};
+async function kzPre(){await Promise.all(Object.keys(L).filter((k)=>L[k].alias&&!kzA[L[k].alias]).map(async(k)=>{kzA[L[k].alias]=await kzId(L[k].alias)}))}
+async function kzSet(pid,alias,key,aktiv){
+  const Tr=window.__kurzTr,aid=await kzId(alias),pw=kzPw(),t=newKey(),n=await kzWrap(pw,{i:kzVid(pid),k:key,t});
+  await Tr.put(aid,{s:n.s,w:n.w,v:0},t);
+  await save("links",pid,{id:pid,key,aktiv:!!aktiv,alias,pw,t});
+}
+async function kzCreate(pid,raw){
+  const alias=String(raw||"").trim().toLowerCase(),l=L[pid]||{};
+  if(!KZ_OK.test(alias)||KZ_RES.includes(alias))return"Der Name darf nur Kleinbuchstaben, Ziffern, - und _ enthalten und muss 4 bis 40 Zeichen lang sein.";
+  if(!l.key)return"Bitte zuerst den Link aktivieren.";
+  if(Object.keys(L).some((k)=>k!==pid&&L[k].alias===alias))return"Diesen Namen gibt es schon.";
+  try{if(await window.__kurzNet.get(await kzId(alias)))return"Diesen Namen gibt es schon."}catch(e){return"Die Verbindung hat nicht geklappt."}
+  try{await kzSet(pid,alias,l.key,l.aktiv)}catch(e){return"Das hat nicht geklappt"+(e&&e.code?" ("+e.code+")":"")+"."}
+  return"";
+}
+async function kzRemove(pid){const l=L[pid]||{};if(!l.alias)return;await window.__kurzTr.del(await kzId(l.alias));await save("links",pid,{id:pid,key:l.key,aktiv:!!l.aktiv})}
+function kzCell(pid){
+  if(!window.__kurzTr||window.__ROLE==="lesen")return"";
+  const l=L[pid]||{};if(!l.key)return"";
+  if(!l.alias)return'<div data-kid="'+pid+'" style="margin-top:6px;white-space:normal"><input data-kzin placeholder="Kurzlink-Name, z. B. max-muster" maxlength="40" autocapitalize="off" style="width:62%;min-width:170px"> <button class="btn" data-kzadd>Kurzlink anlegen</button></div>';
+  const aid=kzA[l.alias],doc=aid&&SNAP.a?SNAP.a[aid]:null,own=!!(doc&&doc.v===1),key="kz"+pid;
+  return'<div data-kid="'+pid+'" style="margin-top:6px;white-space:normal"><div class="note">Kurzlink: <b>'+esc(base()+l.alias)+"</b></div><div class=\"note\">"+(own?"Passwort: <b>eigenes Passwort gewählt</b> (nicht einsehbar)":doc?"Passwort: <b style=\"font-family:ui-monospace,Menlo,monospace;font-size:14px;user-select:all\">"+esc(l.pw||"")+"</b>":"Kurzlink wird eingerichtet …")+'</div><div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn" data-kzcl>Kurzlink kopieren</button>'+(own?"":'<button class="btn" data-kzcpw>Passwort kopieren</button>')+'<button class="btn'+(armed===key?" arm":"")+'" data-kzrs title="Es wird ein neues Passwort erzeugt; das bisherige gilt nicht mehr">'+(armed===key?"Wirklich zurücksetzen?":"Passwort zurücksetzen")+'</button><button class="btn'+(armed==="kr"+pid?" arm":"")+'" data-kzrm>'+(armed==="kr"+pid?"Wirklich entfernen?":"Kurzlink entfernen")+"</button></div></div>"}
+async function kzCopy(txt,what){const m=T("lkm");try{await navigator.clipboard.writeText(txt);m.textContent=what+" kopiert."}catch(e){m.textContent=what+": "+txt}m.className="note"}
+
 function renderCo(){
   const t=$("#lkct");if(!t||(document.activeElement&&document.activeElement.matches&&document.activeElement.matches("[data-cln]")))return;
   const S=(typeof staffList==="function"?staffList():[]).filter((s)=>!s.owner&&s.id);
@@ -1783,7 +1873,7 @@ async function lkHealth(){
   const fpp=await fingerprintParts();if(my!==lkTok)return;
   if(window.__WEB){/* Web-Version: automatisch veröffentlichen (Link-Änderungen sofort, neue Daten täglich nach 23:00 Uhr) */
     const now=Date.now(),changed=!SNAP.fa||SNAP.fa!==fpp.a||SNAP.fs!==fpp.s,daily=pubIds.length>0&&changed&&(Date.parse(SNAP.u||"")||0)<lkMark(now),struct=nOn.length>0||xMiss>0||off>0;
-    if((struct||daily)&&!lkBusy&&now>lkQuiet&&window.__lkPublish){lkQuiet=now+9e4;window.__lkPublish(true)}
+    if((struct||daily)&&!lkBusy&&now>lkQuiet&&window.__lkPublish&&window.__ROLE!=="lesen"){lkQuiet=now+9e4;window.__lkPublish(true)}
     for(let i=E.length-1;i>=0;i--)if(/noch nicht online/.test(E[i]))E.splice(i,1);W.length=0}
   /* Warnung nur, wenn Eltern etwas Veraltetes sehen, das wichtig ist: Termine, Hinweise, Kontakte, Notizen sofort;
      eingetragene Anwesenheit/Minuten erst, wenn der Stand in den Links mehrere Tage alt ist. */
@@ -1806,21 +1896,22 @@ async function renderLinks(){if(window.__DEMO)return;
   renderCo();lkHealth();
   const el=$("#lkt");if(!el)return;
   if(D.ready&&!D.config&&!D.spieler.length&&!window.__VIEWER&&!window.__WEB){showAccess();return}
-  if(document.activeElement&&document.activeElement.matches&&document.activeElement.matches("[data-ln]"))return;
+  if(document.activeElement&&document.activeElement.matches&&document.activeElement.matches("[data-ln],[data-kzin]"))return;
   const my=++tok,P=active(),cur=await Promise.all(P.map(async(p)=>{const l=L[p.id]||{};return{p,l,want:l.aktiv&&l.key?await sha8(l.key):null,pub:(SNAP.k||{})[p.id]||null}}));
   const fp=await fingerprint();if(my!==tok)return;
   const pubIds=Object.keys(SNAP.k||{}),orphan=pubIds.filter((id)=>!P.some((p)=>p.id===id)).length;
   const xr=await Promise.all(["full","anon","plan","demo"].map(async(k)=>{const l=L["x"+k]||{};return{k,l,want:l.aktiv&&l.key?await sha8(l.key):null,pub:(SNAP.xk||{})[k]||null}}));if(my!==tok)return;
+  await kzPre();if(my!==tok)return;
   const pend=cur.filter((r)=>r.want!==r.pub).length+xr.filter((r)=>r.want!==r.pub).length+orphan,stale=!!SNAP.fp&&SNAP.fp!==fp||(!SNAP.fp&&pubIds.length>0),on=cur.filter((r)=>r.want&&r.want===r.pub).length;
   $("#lks").innerHTML=(SNAP.u?"Letzter Stand online: <b>"+esc(dt(SNAP.u))+"</b> · ":"Noch nichts veröffentlicht · ")+"<b>"+on+"</b> Link(s) online"+(pend||stale?' · <span class="warn">⚠ '+(pend?"Link-Änderungen":"")+(pend&&stale?" und ":"")+(stale?"neuere Daten":"")+(window.__WEB?" noch nicht online – wird automatisch übernommen.":" noch nicht online – bitte „Alle Links aktualisieren“ klicken.")+"</span>":' · <span class="up">alles aktuell</span>');
   const xe=$("#lkxt");
   if(xe){const XN={full:["Vollansicht","Alles sichtbar, nur lesend (inkl. Namen, Fotos, Notizen, To-Dos, Kontakte)"],plan:["Nur Terminpläne","Monats- und Wochenplan zum Ansehen, ohne Anmeldung – keine Spielerprofile, Notizen oder To-Dos"],demo:["Demo (Zufallsdaten)","Ganze App mit komplett zufällig erzeugten Daten (Namen, Beteiligung, Ergebnisse, Lorem-ipsum-Notizen) – ohne Konto, nur lesend, nichts davon echt"],anon:["Struktur (anonym)","Spieler 1…n mit Rückennummer, ohne Fotos, Geburtstage, Kontakte, Notizen, To-Dos und interne Termine"]};
-    if(!(document.activeElement&&document.activeElement.matches&&document.activeElement.matches("[data-xln]")))xe.innerHTML='<tr><th style="text-align:left">Link</th><th>Aktiv</th><th style="text-align:left">Adresse</th><th></th><th style="text-align:left">Stand</th></tr>'+xr.map((r)=>{const st=r.want&&r.want===r.pub?'<span class="pill ok">online</span>':r.want?'<span class="pill busy">geht beim Aktualisieren online</span>':r.pub?'<span class="pill busy">wird beim Aktualisieren abgeschaltet</span>':'<span class="pill">aus</span>';
-      return'<tr data-x="'+r.k+'"><td style="text-align:left"><b>'+XN[r.k][0]+'</b><div class="note" style="white-space:normal;max-width:260px">'+XN[r.k][1]+'</div></td><td><input type="checkbox" data-xak '+(r.l.aktiv?"checked":"")+'></td><td style="text-align:left">'+(r.l.key?'<input readonly data-xln value="'+esc(linkOf(r.k,r.l.key))+'" style="width:100%;min-width:230px">':'<span class="note">noch kein Link</span>')+'</td><td style="white-space:nowrap">'+(r.l.key?'<button class="btn" data-xcp>Kopieren</button> <button class="btn'+(armed==="x"+r.k?" arm":"")+'" data-xnw title="Der bisherige Link wird ungültig">'+(armed==="x"+r.k?"Wirklich neu?":"Neu erzeugen")+"</button>":"")+'</td><td style="text-align:left">'+st+"</td></tr>"}).join("");
+    if(!(document.activeElement&&document.activeElement.matches&&document.activeElement.matches("[data-xln],[data-kzin]")))xe.innerHTML='<tr><th style="text-align:left">Link</th><th>Aktiv</th><th style="text-align:left">Adresse</th><th></th><th style="text-align:left">Stand</th></tr>'+xr.map((r)=>{const st=r.want&&r.want===r.pub?'<span class="pill ok">online</span>':r.want?'<span class="pill busy">geht beim Aktualisieren online</span>':r.pub?'<span class="pill busy">wird beim Aktualisieren abgeschaltet</span>':'<span class="pill">aus</span>';
+      return'<tr data-x="'+r.k+'"><td style="text-align:left"><b>'+XN[r.k][0]+'</b><div class="note" style="white-space:normal;max-width:260px">'+XN[r.k][1]+'</div></td><td><input type="checkbox" data-xak '+(r.l.aktiv?"checked":"")+'></td><td style="text-align:left">'+(r.l.key?'<input readonly data-xln value="'+esc(linkOf(r.k,r.l.key))+'" style="width:100%;min-width:230px">'+kzCell("x"+r.k):'<span class="note">noch kein Link</span>')+'</td><td style="white-space:nowrap">'+(r.l.key?'<button class="btn" data-xcp>Kopieren</button> <button class="btn'+(armed==="x"+r.k?" arm":"")+'" data-xnw title="Der bisherige Link wird ungültig">'+(armed==="x"+r.k?"Wirklich neu?":"Neu erzeugen")+"</button>":"")+'</td><td style="text-align:left">'+st+"</td></tr>"}).join("");
   }
   el.innerHTML='<tr><th style="text-align:left">Spieler</th><th>Aktiv</th><th style="text-align:left">Link</th><th></th><th style="text-align:left">Stand</th></tr>'+cur.map((r)=>{
     const p=r.p,l=r.l,st=r.want&&r.want===r.pub?'<span class="pill ok">online</span>':r.want?'<span class="pill busy">geht beim Aktualisieren online</span>':r.pub?'<span class="pill busy">wird beim Aktualisieren abgeschaltet</span>':'<span class="pill">aus</span>';
-    return'<tr data-p="'+p.id+'"><td style="text-align:left">'+esc(p.vorname+" "+p.name)+'</td><td><input type="checkbox" data-ak '+(l.aktiv?"checked":"")+'></td><td style="text-align:left">'+(l.key?'<input readonly data-ln value="'+esc(linkOf(p.id,l.key))+'" style="width:100%;min-width:230px">':'<span class="note">noch kein Link</span>')+'</td><td style="white-space:nowrap">'+(l.key?'<button class="btn" data-cp>Kopieren</button> <button class="btn'+(armed===p.id?" arm":"")+'" data-nw title="Der bisherige Link wird ungültig">'+(armed===p.id?"Wirklich neu?":"Neu erzeugen")+"</button>":"")+"</td><td style=\"text-align:left\">"+st+"</td></tr>"}).join("");
+    return'<tr data-p="'+p.id+'"><td style="text-align:left">'+esc(p.vorname+" "+p.name)+'</td><td><input type="checkbox" data-ak '+(l.aktiv?"checked":"")+'></td><td style="text-align:left">'+(l.key?'<input readonly data-ln value="'+esc(linkOf(p.id,l.key))+'" style="width:100%;min-width:230px">'+kzCell(p.id):'<span class="note">noch kein Link</span>')+'</td><td style="white-space:nowrap">'+(l.key?'<button class="btn" data-cp>Kopieren</button> <button class="btn'+(armed===p.id?" arm":"")+'" data-nw title="Der bisherige Link wird ungültig">'+(armed===p.id?"Wirklich neu?":"Neu erzeugen")+"</button>":"")+"</td><td style=\"text-align:left\">"+st+"</td></tr>"}).join("");
 }
 function initLinks(){
   if(started||!db)return;started=true;
@@ -1875,6 +1966,17 @@ if(T("lkt")){
   };
   T("lku").onclick=()=>lkPublish(false);window.__lkPublish=lkPublish;
 }
+/* Kurzlinks: Klicks in den Link-Tabellen */
+document.addEventListener("click",async(e)=>{
+  const w=e.target.closest&&e.target.closest("[data-kid]");if(!w||!window.__kurzTr)return;
+  const pid=w.dataset.kid,l=L[pid]||{},m=T("lkm");
+  if(e.target.closest("[data-kzadd]")){const i=w.querySelector("[data-kzin]"),r=await kzCreate(pid,i.value);m.className=r?"note warn":"note";m.textContent=r||"Kurzlink angelegt. Das Passwort steht darunter.";return}
+  if(e.target.closest("[data-kzcl]")){kzCopy(base()+l.alias,"Kurzlink");return}
+  if(e.target.closest("[data-kzcpw]")){kzCopy(l.pw||"","Passwort");return}
+  if(e.target.closest("[data-kzrs]")){const k="kz"+pid;if(armed===k){armed=null;try{await kzSet(pid,l.alias,l.key,l.aktiv);m.className="note";m.textContent="Neues Passwort erzeugt. Das bisherige gilt nicht mehr."}catch(x){m.className="note warn";m.textContent="Das hat nicht geklappt."}}else{armed=k;renderLinks()}return}
+  if(e.target.closest("[data-kzrm]")){const k="kr"+pid;if(armed===k){armed=null;try{await kzRemove(pid);m.className="note";m.textContent="Kurzlink entfernt. Der lange Link funktioniert weiter."}catch(x){m.className="note warn";m.textContent="Das hat nicht geklappt."}}else{armed=k;renderLinks()}return}
+});
+document.addEventListener("keydown",(e)=>{if(e.key==="Enter"&&e.target.matches&&e.target.matches("[data-kzin]")){const b=e.target.closest("[data-kid]").querySelector("[data-kzadd]");b&&b.click()}});
 /* Co-Trainer-Zugang: Vollzugriff, sofern der Link in der Datenbank aktiv ist */
 async function gateCo(){
   const sid="s"+window.__CO[1].replace(/^s/,""),key=window.__CO[2],id="c"+window.__CO[1];
@@ -1890,7 +1992,7 @@ async function gateCo(){
 /* Start */
 const h=location.hash;
 if(window.__CO)gateCo();
-else if(window.__VIEWER){const c=parseCode(h);c?showViewer(c.pid,c.key):showAccess()}
+else if(window.__VIEWER){const kz=h.match(/^#k\/([A-Za-z0-9_-]{4,40})$/);if(kz)openKurz(kz[1]);else{const c=parseCode(h);c?showViewer(c.pid,c.key):showAccess()}}
 else if(window.__SCOUT){}
 else{if(window.__noDb)showAccess();if(window.__dbUp)initLinks()}
 })();
