@@ -166,7 +166,9 @@ html[data-design="glas"] .kpi.c1,html[data-design="glas"] .kpi.c2,html[data-desi
 }
 :is(html[data-design="ruhig"],html[data-design="glas"]) #pm svg{max-height:300px;width:100%}
 @media(max-width:760px){
- :is(html[data-design="ruhig"],html[data-design="glas"]) nav button[data-s="h"]{position:static;box-shadow:none;background:transparent}
+ :is(html[data-design="ruhig"],html[data-design="glas"]) nav button[data-s="h"]{position:sticky;left:6px;z-index:3;background:var(--nvb);box-shadow:-6px 0 0 var(--nvb),10px 0 10px -8px rgba(0,0,0,.28);margin-right:4px}
+ html[data-design="ruhig"]{--nvb:var(--card)}
+ html[data-design="glas"]{--nvb:#f4f8ff}
  :is(html[data-design="ruhig"],html[data-design="glas"]) nav button.on[data-s="h"]{background:var(--segon);color:var(--segtx)}
  html[data-design="ruhig"] nav button.on{background:var(--tx);color:var(--bg)}
  
@@ -186,6 +188,9 @@ html[data-design="ruhig"][data-theme="dark"]{--onac:#0f1311}html[data-design="gl
 :is(html[data-design="ruhig"],html[data-design="glas"]) :is([style*="background:var(--ac)"],.chip.pS,.chips button.on.pS){color:var(--onac)!important}
 
 @media(min-width:761px) and (max-width:1100px){:is(html[data-design="ruhig"],html[data-design="glas"]) nav{padding-left:12px;padding-right:12px;gap:2px}:is(html[data-design="ruhig"],html[data-design="glas"]) nav button{padding:6px 9px;font-size:13px}:is(html[data-design="ruhig"],html[data-design="glas"]) nav h1{font-size:15px}}
+
+@media(max-width:760px) and (prefers-color-scheme:dark){html[data-design="glas"]:not([data-theme="light"]){--nvb:#1d1e23}}
+@media(max-width:760px){html[data-design="glas"][data-theme="dark"]{--nvb:#1d1e23}}
 #lkco{display:none!important}</style>
 <div class="app">
 <nav><h1>U13 · <span id="sais">2026/27</span></h1><small>Teamzentrale</small>
@@ -244,7 +249,7 @@ html[data-design="ruhig"][data-theme="dark"]{--onac:#0f1311}html[data-design="gl
 <section id="e" hidden><h2>Einstellungen</h2><p class="sub">Änderungen werden sofort gespeichert und gelten in allen Auswertungen</p>
 <div class="seg etb" id="etb" role="group" aria-label="Bereich der Einstellungen"><button data-et="l" class="on">Hinweise &amp; Links</button><button data-et="m">Mannschaft</button><button data-et="s">Sicherung</button></div>
 <div class="etp" id="etp-m">
-<div class="card" id="dzcard" style="margin-bottom:12px"><h3>Design</h3><div class="bar" style="margin:0"><label>Design der App <select id="dzapp"><option value="ruhig">Klar &amp; ruhig</option><option value="glas">Liquid Glass</option><option value="klassisch">Klassisch (bisheriges Design)</option></select></label><label>Standard für externe Links <select id="dzlnk"><option value="ruhig">Klar &amp; ruhig</option><option value="glas">Liquid Glass</option></select></label></div><p class="note" style="margin:8px 0 0">Das Design der App gilt für alle Trainer und Geräte. Für jeden externen Link lässt sich das Design unter „Hinweise &amp; Links“ einzeln ändern. Das Design der A4-Exporte wählst du direkt bei den Export-Knöpfen.</p></div>
+<div class="card" id="dzcard" style="margin-bottom:12px"><h3>Design</h3><div class="bar" style="margin:0"><label>Design der App <select id="dzapp"><option value="ruhig">Klar &amp; ruhig</option><option value="glas">Liquid Glass</option><option value="klassisch">Klassisch (bisheriges Design)</option></select></label><label>Farbe <select id="dzacc"></select></label><label>Glas-Transparenz <select id="dzgl"></select></label><label>Standard für externe Links <select id="dzlnk"><option value="ruhig">Klar &amp; ruhig</option><option value="glas">Liquid Glass</option></select></label></div><p class="note" style="margin:8px 0 0">Das Design der App gilt für alle Trainer und Geräte. Für jeden externen Link lässt sich das Design unter „Hinweise &amp; Links“ einzeln ändern. Das Design der A4-Exporte wählst du direkt bei den Export-Knöpfen.</p></div>
 <div class="card" id="kadsw" style="margin-bottom:12px"><h3>Kader-Modul</h3><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="kadon" checked> Kader (Kaderplanung &amp; Scouting) einblenden</label><p class="note" style="margin:6px 0 0">Ausgeblendet ist der Kader für alle weg (auch Co-Trainer, Kalender, Scouting-Link). Die Daten bleiben erhalten.</p></div>
 <div class="gr" style="margin-top:0"><div class="card"><h3>Saison</h3><label class="note">Saison (z. B. 2026/27)<br><input id="esa" style="width:120px" autocomplete="off"></label> <label class="note" style="margin-left:12px">Mannschaft (z. B. U13)<br><input id="emn" style="width:90px" autocomplete="off"></label><p class="note" id="emsg" style="margin:8px 0 0">Die Saison bestimmt die zwölf Monate im Bereich Training (Juli bis Juni).</p></div>
 <div class="card"><h3>Zählende Abwesenheiten</h3><p class="note" style="margin-top:0">Diese Status zählen bei der gewichteten Trainingsbeteiligung als Fehlen. Die übrigen werden nicht gezählt.</p><div id="ezl"></div></div></div>
@@ -828,6 +833,7 @@ function sub(coll,key,map){
   window.__dbUp=true;qRestore();if(window.__SCOUT){typeof scoutMode==="function"&&scoutMode(db);return}window.__ROLE!=="scout"&&window.__ROLE!=="lesen"&&typeof initLinks==="function"&&initLinks();typeof initKader==="function"&&initKader(db);if(window.__ROLE==="scout"){D.ready=true;go("k")}
   sub("players","spieler",(a,b)=>a.slot-b.slot);sub("games","spiele",(a,b)=>a.nr-b.nr);sub("trainings","trainings",(a,b)=>a.datum.localeCompare(b.datum));sub("events","events");sub("dienste","dienste");sub("todos","todos");window.__ROLE!=="scout"&&db.collection("notes").onSnapshot((x)=>{D.notizen=x.docs.map((d)=>({id:d.id,...d.data()}));renderNotes();renderProfile();typeof renderStart==="function"&&renderStart()},()=>{});
   try{db.doc("config/sicherung").onSnapshot((s)=>{D.sicherung=s&&s.exists?s.data():null;D.sicherungGot=true;typeof bkwRender==="function"&&bkwRender()},()=>{D.sicherungGot=true})}catch(e){}
+  try{db.doc("prefs/"+(window.__ACCT||"main")).onSnapshot((s)=>{window.__dzPrefs&&window.__dzPrefs(s.exists?s.data():null)},()=>{})}catch(e){}
   db.doc("config/main").onSnapshot((s)=>{D.config=s.exists?s.data():null;window.__dzSync&&window.__dzSync();renderSaison();renderLogo();renderTrain();typeof renderSettings==="function"&&renderSettings();renderGames();typeof renderQ==="function"&&renderQ();typeof renderLinks==="function"&&renderLinks();typeof renderPlan==="function"&&renderPlan();typeof renderKader==="function"&&renderKader();if(D.ready&&$("#st").className.indexOf("busy")<0&&!window.__renderErr)setSt("Synchron","ok")},()=>{});
 })();
 </script>
@@ -1676,16 +1682,17 @@ function vPlan(root,T){
   draw();
 }
 function planOnly(d){
-  useBg();window.__dz&&__dz.set(d.dz||SNAP.dz||"ruhig",true);const v=shell(),cur=document.documentElement.getAttribute("data-theme")||"";
+  useBg();dzApply(d,SNAP.dz);const v=shell(),cur=document.documentElement.getAttribute("data-theme")||"";
   v.innerHTML='<div class="vh">'+(d.l?'<img alt="" src="'+esc(d.l)+'">':"")+'<div><b style="font-size:22px;line-height:1.2">Terminplan '+esc(d.m||"U13")+'</b><div class="note" style="font-size:14px">TuS Haltern am See · Saison '+esc(d.s||"")+'</div></div><span style="flex:1"></span><select id="vth" aria-label="Darstellung"><option value="">Darstellung: Auto</option><option value="light">Hell</option><option value="dark">Dunkel</option></select></div>'+hnHtml(hnItems(d.hn,"alle"))+'<div id="vplan"></div><div class="vf">Stand: '+esc(dt(d.u))+'</div>';
   bgPick();const s=document.getElementById("vth");s.value=cur;s.onchange=()=>{applyTheme(s.value);try{s.value?localStorage.setItem("u13theme",s.value):localStorage.removeItem("u13theme")}catch(e){}};
   vPlan(document.getElementById("vplan"),{...d.t,s:d.s,lg:d.l,hn:d.hn});
   document.title="TuS Haltern U13 · Terminplan";
 }
+const dzApply=(d,s)=>{let n=0;const f=()=>{if(window.__dz){__dz.set(d.dz||s||"ruhig",true);__dz.view(d.da,d.dg);return}if(++n<40)setTimeout(f,100)};f()};
 async function showExt(k,blob,key){
   let d;try{d=await unseal(key,blob)}catch(e){showAccess("Dieser Link ist nicht (mehr) gültig. Bitte den Trainer fragen.");return}
   if(d.k==="plan"){planOnly(d);return}
-  useBg();window.__dz&&__dz.set(d.dz||"ruhig",true);bgPick();Object.assign(D,d.db,{ready:true});window.__RO=true;window.__ANON=d.k==="anon";window.__DEMO=d.k==="demo";
+  useBg();dzApply(d);bgPick();Object.assign(D,d.db,{ready:true});window.__RO=true;window.__ANON=d.k==="anon";window.__DEMO=d.k==="demo";
   document.body.classList.add("ro");if(window.__ANON)document.body.classList.add("anon");
   document.title="TuS Haltern U13 · "+(window.__DEMO?"Demo":"Teamzentrale");
   const st=document.getElementById("st");if(st){st.textContent=(window.__DEMO?"Demo · Zufallsdaten · ":"Nur Ansicht · ")+"Stand "+dt(d.u);st.className="pill"}
@@ -1715,7 +1722,7 @@ async function showViewer(pid,key){
   const blob=SNAP.p&&SNAP.p[pid];
   if(!blob){showAccess("Dieser Link ist nicht (mehr) aktiv. Bitte den Trainer fragen.");return}
   let d;try{d=await unseal(key,blob)}catch(e){showAccess("Dieser Link ist nicht (mehr) gültig. Bitte den Trainer fragen.");return}
-  useBg();window.__dz&&__dz.set(d.dz||"ruhig",true);const v=shell(),cur=document.documentElement.getAttribute("data-theme")||"";
+  useBg();dzApply(d);const v=shell(),cur=document.documentElement.getAttribute("data-theme")||"";
   v.innerHTML='<div class="vh">'+(d.l?'<img alt="" src="'+esc(d.l)+'">':"")+'<div><b style="font-size:22px;line-height:1.2">'+(d.n?"Hey "+esc(d.n)+"!":"Hey!")+'</b><div class="note" style="font-size:14px">Deine '+esc(d.m||"U13")+'-Zentrale · Saison '+esc(d.s||"")+'</div></div><span style="flex:1"></span><select id="vth" aria-label="Darstellung"><option value="">Darstellung: Auto</option><option value="light">Hell</option><option value="dark">Dunkel</option></select></div>'+hnHtml(hnItems(d.hn,"alle"))+(d.t?'<div class="seg" id="vtab" style="margin-bottom:14px"><button data-v="p" class="on">Profil</button><button data-v="t">Terminplan</button></div>':"")+'<div id="vprof">'+d.h+'</div>'+(d.t?'<div id="vplan" hidden></div>':"")+'<div class="vf">Stand: '+esc(dt(d.u))+' · Persönlicher Link, bitte nicht weitergeben.</div>';
   bgPick();const s=document.getElementById("vth");s.value=cur;s.onchange=()=>{applyTheme(s.value);try{s.value?localStorage.setItem("u13theme",s.value):localStorage.removeItem("u13theme")}catch(e){}};
   if(d.t){const tb=document.getElementById("vtab");let ready=false;tb.onclick=(e)=>{const b=e.target.closest("button");if(!b)return;tb.querySelectorAll("button").forEach((x)=>x.classList.toggle("on",x===b));const pl=b.dataset.v==="t";document.getElementById("vprof").hidden=pl;document.getElementById("vplan").hidden=!pl;if(pl&&!ready){ready=true;vPlan(document.getElementById("vplan"),{...d.t,s:d.s,lg:d.l,hn:d.hn})}}}
@@ -1908,12 +1915,13 @@ const bgPick=()=>{const b=SNAP.bg,t=document.getElementById("vth")||document.get
 const dzSel=(l)=>'<select data-dz aria-label="Design des Links" '+(window.__ROLE==="lesen"?"disabled":"")+'><option value=""'+(l.dz?"":" selected")+'>Standard ('+(window.__dz?__dz.names[__dz.linkDefault()]:"Klar & ruhig")+')</option><option value="ruhig"'+(l.dz==="ruhig"?" selected":"")+'>Klar &amp; ruhig</option><option value="glas"'+(l.dz==="glas"?" selected":"")+'>Liquid Glass</option></select>';
 const dzK=(pid)=>{const v=(L[pid]||{}).dz;return v?{dz:v}:{}};
 const dzOf=(id)=>{const v=(L[id]||{}).dz;return v==="glas"||v==="ruhig"?v:(window.__dz?__dz.linkDefault():"ruhig")};
-const dzSig=()=>JSON.stringify(Object.keys(L).sort().filter((k)=>L[k].aktiv&&L[k].key).map((k)=>[k,dzOf(k)]));
+const daOf=(dz)=>window.__dz?__dz.accOf(dz):"",dgOf=(dz)=>dz==="glas"&&window.__dz?__dz.glOf():"std";
+const dzSig=()=>JSON.stringify(Object.keys(L).sort().filter((k)=>L[k].aktiv&&L[k].key).map((k)=>[k,dzOf(k),daOf(dzOf(k)),dgOf(dzOf(k))]));
 async function buildSnap(){
   const TP=planSnap(),HN=(D.config&&D.config.hinweise)||[],out={v:1,u:new Date().toISOString(),p:{},k:{}},logo=(D.config&&D.config.logo)||"",sa=(D.config&&D.config.saison)||"";
-  for(const p of active()){const l=L[p.id];if(!l||!l.aktiv||!l.key)continue;out.p[p.id]=await seal(l.key,{h:profileHtml(p.id),l:logo,s:sa,m:mann(),u:out.u,t:TP,n:p.vorname,hn:HN,dz:dzOf(p.id)});out.k[p.id]=await sha8(l.key)}
+  for(const p of active()){const l=L[p.id];if(!l||!l.aktiv||!l.key)continue;out.p[p.id]=await seal(l.key,{h:profileHtml(p.id),l:logo,s:sa,m:mann(),u:out.u,t:TP,n:p.vorname,hn:HN,dz:dzOf(p.id),da:daOf(dzOf(p.id)),dg:dgOf(dzOf(p.id))});out.k[p.id]=await sha8(l.key)}
   out.bg=await bgSnap();out.dzs=dzSig();out.x={};out.xk={};
-  for(const k of ["full","anon","plan","demo"]){const l=L["x"+k];if(!l||!l.aktiv||!l.key)continue;out.x[k]=await seal(l.key,k==="plan"?{k,u:out.u,t:TP,l:logo,s:sa,m:mann(),hn:HN,dz:dzOf("x"+k)}:{k,u:out.u,db:extData(k),dz:dzOf("x"+k)});out.xk[k]=await sha8(l.key)}
+  for(const k of ["full","anon","plan","demo"]){const l=L["x"+k];if(!l||!l.aktiv||!l.key)continue;out.x[k]=await seal(l.key,k==="plan"?{k,u:out.u,t:TP,l:logo,s:sa,m:mann(),hn:HN,dz:dzOf("x"+k),da:daOf(dzOf("x"+k)),dg:dgOf(dzOf("x"+k))}:{k,u:out.u,db:extData(k),dz:dzOf("x"+k),da:daOf(dzOf("x"+k)),dg:dgOf(dzOf("x"+k))});out.xk[k]=await sha8(l.key)}
   {const f=await fingerprintParts();out.fp=f.a+f.s;out.fa=f.a;out.fs=f.s}return out;
 }
 function composeHtml(snap){
@@ -2231,7 +2239,7 @@ function renderStart(){
       const run=g.live&&g.live.clk&&g.live.clk.run;T.push(tile("Spieltag · Spiel "+g.nr+(g.gegner?" gegen "+g.gegner:""),"Anstoß "+ev.beginn+" Uhr",run?"Die Uhr läuft – hier geht es zurück zur Erfassung":(n<k?"Anstoß in "+(Math.ceil(k-n)>=60?Math.floor(Math.ceil(k-n)/60)+" Std. "+Math.ceil(k-n)%60+" Min.":Math.ceil(k-n)+" Min.")+" · Aufstellung, Ansprache und Skizzen vorbereiten":"Aufstellung, Wechsel und Minuten live erfassen"),'<button class="btn" data-lv="'+g.id+'" style="margin-top:8px;background:var(--ac);color:#fff;border-color:var(--ac)">🏟 '+(run?"Zurück zum Spieltag":"Zum Spieltag")+"</button>"+' <button class="btn" data-lv="'+g.id+'" data-lvt="l" style="margin-top:8px">⏱ Live-Spielzeit</button>'))});
     h.innerHTML=T.join("")}}
   clearTimeout(window.__htdT);if(nextHide!=null)window.__htdT=setTimeout(()=>{typeof renderStart==="function"&&renderStart()},Math.max(1000,Math.ceil(nextHide*60000)+1000));
-  $("#hk").innerHTML=K.map((k)=>'<div class="card kpi"'+(k[1]==="Nächstes Training"&&ntr&&!window.__RO?' data-wa="'+ntr.datum+'" style="cursor:pointer;border-color:var(--ac)" title="Antippen: Bild für WhatsApp"':(k[3]?' style="border-color:var(--ac)"':""))+'><span style="display:block">'+esc(k[1])+"</span><b"+(String(k[0]).length>10?' style="font-size:16px;line-height:1.3;padding:3px 0"':"")+">"+esc(k[0])+'</b><span class="note" style="display:block">'+esc(k[2])+"</span>"+(k[1]==="Nächstes Training"&&ntr&&!window.__RO?'<span class="note" style="display:block;font-size:11px">📲 Antippen: Bild für WhatsApp</span>':"")+"</div>").join("");
+  $("#hk").innerHTML=K.map((k)=>'<div class="card kpi"'+(k[1]==="Nächstes Spiel"&&nxt&&!window.__RO?' data-sp="'+nxt.id+'" style="cursor:pointer" title="Antippen: Spielvorbereitung (A4)"':k[1]==="Nächstes Training"&&ntr&&!window.__RO?' data-wa="'+ntr.datum+'" style="cursor:pointer" title="Antippen: Bild für WhatsApp"':(k[3]?' style="border-color:var(--ac)"':""))+'><span style="display:block">'+esc(k[1])+"</span><b"+(String(k[0]).length>10?' style="font-size:16px;line-height:1.3;padding:3px 0"':"")+">"+esc(k[0])+'</b><span class="note" style="display:block">'+esc(k[2])+"</span>"+(k[1]==="Nächstes Training"&&ntr&&!window.__RO?'<span class="note" style="display:block;font-size:11px">📲 Antippen: Bild für WhatsApp</span>':k[1]==="Nächstes Spiel"&&nxt&&!window.__RO?'<span class="note" style="display:block;font-size:11px">📄 Antippen: Spielvorbereitung (A4)</span>':"")+"</div>").join("");
   const todo=[];
   D.spiele.filter((g)=>g.wertung&&(g.tore==null||g.gt==null)&&g.datum&&g.datum<=t).forEach((g)=>todo.push('<div class="row"><span>Spiel '+g.nr+" · "+esc(g.gegner)+' – Ergebnis fehlt</span><button class="rm" data-go="g">öffnen</button></div>'));
   all.filter((e)=>e.typ==="Training"&&e.datum<t&&e.datum>=addD(t,-14)&&!D.trainings.some((x)=>x.datum===e.datum)).forEach((e)=>todo.push('<div class="row"><span>Training '+esc(ddm(e.datum))+' – Anwesenheit fehlt</span><button class="rm" data-go="t">öffnen</button></div>'));
@@ -2974,7 +2982,7 @@ function viewS(g,fs){const set=placed(),P0=plist(),rest=P0.filter((p)=>!set.has(
   const lines=TX.filter((t)=>(P.t[t[0]]||"").trim()).map((t)=>'<div class="mdln"><b>'+t[1]+"</b>"+bul(P.t[t[0]])+"</div>");
   const ind=P0.filter((p)=>P.i[p.id]);
   const sk=!showSk?[]:P.k.map((k,i)=>({k,i})).filter((o)=>o.k.s.length);
-  const head=fs?"":'<div class="mdzh"><b>'+gtOf(g)+'</b><span class="note">'+esc(g.art||"")+(g.form?" · "+esc(g.form):"")+'</span><span style="flex:1"></span><button class="btn" id="mdskt">'+(showSk?"Skizzen ausblenden":"Skizzen einblenden")+'</button><button class="btn" id="mdfsb">⤢ Vollbild</button></div>';
+  const head=fs?"":'<div class="mdzh"><b>'+gtOf(g)+'</b><span class="note">'+esc(g.art||"")+(g.form?" · "+esc(g.form):"")+'</span><span style="flex:1"></span><button class="btn" data-sp="'+g.id+'">📄 A4-Export</button><button class="btn" id="mdskt">'+(showSk?"Skizzen ausblenden":"Skizzen einblenden")+'</button><button class="btn" id="mdfsb">⤢ Vollbild</button></div>';
   return'<div class="mdv'+(fs?" mdfsb":"")+'">'+head+'<div class="mdzt'+(sk.length?" hsk":"")+'"'+(fs?"":' data-mdfs="1"')+'>'
    +'<div class="card mdzp"><div class="mdzpi"><div class="mdpit mdpit-s">'+pitchSvg(true)+P.a.s.map(chipRo).join("")+'</div><div class="mdzs"><h3>'+esc(P.a.f)+'</h3><p><b>Bank</b><br>'+names(bank)+'</p><p><b>Nicht dabei</b><br>'+names(al)+"</p></div></div></div>"
    +'<div class="card mdzn"><h3>Vor dem Spiel</h3>'+(lines.length?lines.join(""):'<p class="note">Noch nichts eingetragen (Reiter Ansprache).</p>')+(ind.length?'<div class="mdln"><b>Individuelle Aufgaben</b>'+ind.map((p)=>'<div class="mdli">'+esc(nm(p))+" – "+esc(P.i[p.id])+"</div>").join("")+"</div>":"")+"</div>"
@@ -4151,25 +4159,107 @@ async function waOpen(d){
   const sb=o.querySelector("#wasend");if(sb)sb.onclick=async()=>{try{await navigator.share({files:[file],title:"Training "+ddm(d)})}catch(e){}};
   document.body.appendChild(o)}
 document.addEventListener("click",(e)=>{const t=e.target.closest&&e.target.closest("[data-wa]");if(!t)return;e.preventDefault();e.stopPropagation();waOpen(t.dataset.wa)},true);
+
+/* ---------- A4: Spielvorbereitung (Aufstellung, Bank, Ansprache) ---------- */
+const SP_STAT={v:"verletzt",t:"verhindert",n:"nicht nominiert",e:"entschuldigt",u:"unentschuldigt"};
+function xSpielPage(gid){
+  const g=(D.spiele||[]).find((x)=>x.id===gid);if(!g)return null;
+  try{window.__mdFlush&&window.__mdFlush()}catch(e){}
+  const R=(window.__ST||{})[gid]||{},A=R.a||{f:"",s:[],x:null},T=R.t||{},I=R.i||{};
+  const W=794,H=1123,M=38,s=XS(W,H),act=active(),byId=(id)=>(D.spieler||[]).find((p)=>p.id===id);
+  const nmS=(p)=>(p.vorname||"")+(p.name?" "+String(p.name).charAt(0)+".":"");
+  const sp=(g.spieler||{}),xs=Array.isArray(A.x)?A.x:Object.keys(sp).filter((id)=>["t","v","n"].indexOf(sp[id]&&sp[id].status)>=0);
+  const placed=new Set((A.s||[]).map((q)=>q.id).filter(Boolean)),bank=act.filter((p)=>!placed.has(p.id)&&xs.indexOf(p.id)<0),off=act.filter((p)=>!placed.has(p.id)&&xs.indexOf(p.id)>=0);
+  const ev=(D.events||[]).find((e)=>e.spielId===g.id)||(D.events||[]).find((e)=>e.datum===g.datum&&isGameTyp(e.typ)&&e.beginn);
+  const dt=g.datum?WK[wday(g.datum)]+" "+g.datum.slice(8)+"."+g.datum.slice(5,7)+"."+g.datum.slice(0,4):"";
+  const sub=["gegen "+(g.gegner||"Gegner offen"),dt,g.ha==="H"?"Heim":g.ha==="A"?"Auswärts":"",ev&&ev.beginn?"Anstoß "+ev.beginn+" Uhr":"",ev&&ev.treffen?"Treffen "+ev.treffen+" Uhr":""].filter(Boolean).join(" · ");
+  xhead(s,W,"Spielvorbereitung",sub,M);
+  /* Aufstellung */
+  const y0=92,pw=432,ph=Math.round(pw*59/71),cx=M,top=y0;
+  s.r(cx,top,pw+20,ph+20,XC.card,12,1,XC.ln);
+  const px=cx+10,py=top+10,PITCH="M0,0H68V52.5H0Z M13.85,0V16.5H54.15V0 M24.85,0V5.5H43.15V0 M26.69,16.5A9.15,9.15 0 0 0 41.31,16.5 M24.85,52.5A9.15,9.15 0 0 1 43.15,52.5 M30.84,0V-2H37.16V0";
+  s.raw('<g transform="translate('+px+" "+py+") scale("+pw/71+" "+ph/59+') translate(1.5 3.5)"><g transform="translate(0 52.5) scale(1 -1)" fill="none" stroke="'+XC.mu+'" stroke-width=".28" stroke-linejoin="round"><path d="'+PITCH+'"/></g></g>');
+  (A.s||[]).forEach((q)=>{const p=q.id&&byId(q.id),x=px+q.x/1000*pw,y=py+q.y/1000*ph;
+    s.c(x,y-5,14,p?XC.tx:XC.track);if(p){s.t(x,y,String(p.nr!=null&&p.nr!==""?p.nr:"·"),12,XC.bg,{b:1,an:"middle"});s.t(x,y+24,p.vorname||"",11,XC.tx,{an:"middle",b:1})}});
+  s.t(cx+12,top+ph+16+2,"",1,XC.mu);
+  const fm=(A.f||"")+((A.s||[]).length?" · "+(A.s||[]).filter((q)=>q.id).length+" von "+(A.s||[]).length+" Plätzen besetzt":"");
+  /* rechte Spalte: Bank und Nicht dabei */
+  const rx=cx+pw+20+16,rw=W-M-rx;let ry=top+4;
+  s.t(rx,ry+12,"Formation",9.5,XC.mu);s.t(rx,ry+27,A.f||"–",14,XC.tx,{b:1});ry+=44;
+  s.r(rx,ry,rw,22,XC.track,6,.6);s.t(rx+9,ry+15,"Bank ("+bank.length+")",11,XC.tx,{b:1});ry+=30;
+  const lh=17;bank.forEach((p)=>{if(ry<top+ph+10){s.t(rx+4,ry+11,(p.nr!=null&&p.nr!==""?p.nr+"  ":"")+nmS(p),12,XC.tx);ry+=lh}});if(!bank.length){s.t(rx+4,ry+10,"–",11,XC.mu);ry+=lh}
+  ry+=10;s.r(rx,ry,rw,22,XC.track,6,.6);s.t(rx+9,ry+15,"Nicht dabei ("+off.length+")",11,XC.tx,{b:1});ry+=30;
+  off.forEach((p)=>{if(ry<top+ph+16){const r=SP_STAT[(sp[p.id]||{}).status]||"";s.t(rx+4,ry+11,nmS(p),12,XC.tx);if(r)s.t(rx+rw-2,ry+10,r,9.5,XC.mu,{an:"end"});ry+=lh}});if(!off.length)s.t(rx+4,ry+10,"–",11,XC.mu);
+  /* Ansprache */
+  const TXB=[["an","Stichpunkte vor dem Spiel"],["st","Standards"],["so","Sonstiges"]],blocks=[];
+  TXB.forEach((t)=>{const v=String(T[t[0]]||"").trim();if(v)blocks.push({h:t[1],t:v})});
+  const ind=act.filter((p)=>String(I[p.id]||"").trim()).map((p)=>nmS(p)+" – "+String(I[p.id]).trim().replace(/\s*\n\s*/g,"; "));
+  if(ind.length)blocks.push({h:"Individuelle Aufgaben",t:ind.map((l)=>"• "+l).join("\n")});
+  const y1=top+ph+20+22,avail=H-44-y1,bw=W-2*M-28;
+  const bul=(t)=>String(t).split("\n").map((l)=>{const m=/^\s*[•\-*–]\s+(.*)$/.exec(l);return m?"• "+m[1]:l});
+  let z=15,lay=null;
+  for(;z>=7.5;z-=.5){const L=blocks.map((b)=>{const ls=[];bul(b.t).forEach((l)=>{(l.trim()?xwrap(l.replace(/^•/,"•"),bw-(l.startsWith("•")?0:0),z,0):[""]).forEach((w,i)=>ls.push(i&&l.startsWith("•")?"   "+w:w))});return{h:b.h,ls}});
+    const tot=L.reduce((a,b)=>a+14+b.ls.length*z*1.38+26,0)+(L.length-1)*10;lay={L,tot};if(tot<=avail)break}
+  if(!blocks.length){s.r(M,y1,W-2*M,60,XC.card,12,1,XC.ln);s.t(M+16,y1+34,"Noch keine Notizen zur Ansprache eingetragen (Spielzettel, Reiter Ansprache).",11.5,XC.mu)}
+  else{let y=y1;lay.L.forEach((b)=>{const h=14+b.ls.length*z*1.38+26;s.r(M,y,W-2*M,h,XC.card,12,1,XC.ln);s.t(M+14,y+22,b.h,12.5,XC.tx,{b:1});b.ls.forEach((l,i)=>s.t(M+14,y+22+10+z*1.1+i*z*1.38,l,z,XC.tx));y+=h+10})}
+  return{svg:s.done(),W,H,name:"Spielvorbereitung_"+(g.datum||"")}}
+async function spOpen(gid){
+  if(window.__RO)return;const g=(D.spiele||[]).find((x)=>x.id===gid);if(!g)return;
+  const o=document.createElement("div");o.id="spov";o.style.cssText="position:fixed;inset:0;z-index:98;background:rgba(0,0,0,.72);display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px;overflow:auto";
+  o.innerHTML='<div style="background:var(--card);color:var(--tx);border-radius:12px;padding:10px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;max-width:100%"><b>Spielvorbereitung (A4)</b><label class="note">Modus <select id="spth"><option value="light">Hell</option><option value="dark">Dunkel</option></select></label><div class="seg" id="spf"><button data-f="pdf">PDF</button><button data-f="png">PNG</button><button data-f="jpg">JPG</button></div><button class="btn" id="spx">Schließen</button></div><img id="spim" alt="Vorschau" style="max-width:min(100%,620px);height:auto;border-radius:6px;background:#fff;box-shadow:0 8px 30px rgba(0,0,0,.4)">';
+  document.body.appendChild(o);
+  let url=null;const rend=async()=>{try{xTheme($("#spth").value==="dark");const r=xSpielPage(gid),cv=await xRaster(r.svg,r.W,r.H,1.4),b=await xBlob(cv,"image/png");if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(b);$("#spim").src=url}catch(e){setSt("Vorschau konnte nicht erstellt werden","err")}};
+  $("#spth").onchange=rend;$("#spx").onclick=()=>{o.remove();if(url)URL.revokeObjectURL(url)};
+  $("#spf").onclick=(e)=>{const b=e.target.closest("button");if(!b)return;xThemeOv=$("#spth").value;xRunPages(()=>[xSpielPage(gid)],b.dataset.f,"Spielvorbereitung_"+(g.datum||"")+"_"+String(g.gegner||"").replace(/[^A-Za-z0-9]+/g,""),false)};
+  await rend()}
+document.addEventListener("click",(e)=>{const t=e.target.closest&&e.target.closest("[data-sp]");if(!t)return;e.preventDefault();e.stopPropagation();spOpen(t.dataset.sp)},true);
 </script><script>/* ===== Designs: „Klar & ruhig“, „Liquid Glass“, „Klassisch“ – nur Optik. Gilt für die App, die externen Links und die A4-Exporte. ===== */
 (function(){
 const NAMES={ruhig:"Klar & ruhig",glas:"Liquid Glass",klassisch:"Klassisch"},root=document.documentElement;
 const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k)||"";v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){return""}};
 let cur=NAMES[ls("u13design")]?ls("u13design"):"ruhig",mem={};
+/* Farben und Glas-Transparenz (nur Optik, pro Design merkbar) */
+const ACC={std:{n:"Standard"},gruen:{n:"Grün",l:"#0f7a5a",d:"#4cc79c"},blau:{n:"Blau",l:"#0a6ad6",d:"#7fb2ff"},tuerkis:{n:"Türkis",l:"#0b7f8c",d:"#4fc7d3"},violett:{n:"Violett",l:"#6b46d6",d:"#b39cff"},beere:{n:"Beere",l:"#b8235f",d:"#ff8fba"},orange:{n:"Orange",l:"#bf5608",d:"#ffa45c"},rot:{n:"Rot",l:"#c62828",d:"#ff8a80"},graphit:{n:"Graphit",l:"#3b4350",d:"#c3cad6"}};
+const GLS={dicht:{n:"Wenig durchsichtig",l:.82,d:.13,b:30,nv:.95},std:{n:"Standard"},klar:{n:"Sehr durchsichtig",l:.3,d:.035,b:12,nv:.72}};
+const cfg=()=>(typeof D!=="undefined"&&D&&D.config)||{};
+let acc={},gl="std",ovr=null,pf=null,pfSeen=false;
+try{const a=JSON.parse(ls("u13acc")||"{}");if(a&&typeof a==="object")acc=a;const g=ls("u13gl");if(GLS[g])gl=g}catch(e){}
+const accKey=(des)=>{const k=ovr?ovr.a:acc[des];return ACC[k]?k:"std"},glKey=()=>{const k=ovr?ovr.g:gl;return GLS[k]?k:"std"};
+function inject(){let st=document.getElementById("dzdyn");if(!st){st=document.createElement("style");st.id="dzdyn";document.head.appendChild(st)}
+  const D1=cur;let css="";
+  if(D1==="ruhig"||D1==="glas"){const k=accKey(D1),c=ACC[k];
+    if(k!=="std"){const sel=':root[data-design="'+D1+'"]',lt=sel+"{--ac:"+c.l+";--acs:color-mix(in srgb,"+c.l+" 14%,transparent)"+(D1==="glas"?";--segon:"+c.l:"")+"}",dk="--ac:"+c.d+";--acs:color-mix(in srgb,"+c.d+" 20%,transparent)";
+      css+=lt+"@media(prefers-color-scheme:dark){"+sel+':not([data-theme="light"]){'+dk+"}}"+sel+'[data-theme="dark"]{'+dk+"}"}}
+  if(D1==="glas"&&glKey()!=="std"){const g=GLS[glKey()],sel=':root[data-design="glas"]',bl="backdrop-filter:blur("+g.b+"px) saturate(1.6);-webkit-backdrop-filter:blur("+g.b+"px) saturate(1.6)",dk="--card:rgba(255,255,255,"+g.d+")";
+    css+=sel+"{--card:rgba(255,255,255,"+g.l+")}"+sel+" :is(.card,.logo,.lkw){"+bl+"}@media(prefers-color-scheme:dark){"+sel+':not([data-theme="light"]){'+dk+"}}"+sel+'[data-theme="dark"]{'+dk+"}"
+      +"@media(max-width:760px){"+sel+" nav{background:rgba(255,255,255,"+g.nv+")}@media(prefers-color-scheme:dark){"+sel+':not([data-theme="light"]) nav{background:rgba(28,29,34,'+g.nv+")}}"+sel+'[data-theme="dark"] nav{background:rgba(28,29,34,'+g.nv+")}}"}
+  st.textContent=css}
+
 /* Symbole der Menüpunkte (Emoji) in eigene Hüllen setzen, damit sie in den neuen Designs am Rechner wegfallen können */
 function wrap(){document.querySelectorAll("nav button[data-s]").forEach((b)=>{if(b.querySelector(".em"))return;const t=b.firstChild;if(t&&t.nodeType===3){const m=t.nodeValue.match(/^(\S+)\s+([\s\S]*)$/);if(m&&!/^[A-Za-z0-9ÄÖÜäöü]/.test(m[1])){const s=document.createElement("span");s.className="em";s.textContent=m[1]+" ";b.insertBefore(s,t);t.nodeValue=m[2]}}})}
-function set(d,keep){if(!NAMES[d])d="ruhig";cur=d;root.setAttribute("data-design",d);if(!keep)ls("u13design",d);wrap();sync()}
-function sync(){const a=document.getElementById("dzapp"),l=document.getElementById("dzlnk"),c=(window.D&&D.config)||{};if(a&&document.activeElement!==a)a.value=cur;if(l&&document.activeElement!==l)l.value=c.linkDesign==="glas"?"glas":"ruhig";
-  document.querySelectorAll(".xdz").forEach((s)=>{if(document.activeElement!==s)s.value=xdes()})}
-const linkDefault=()=>(((window.D&&D.config)||{}).linkDesign==="glas")?"glas":"ruhig";
-function fromConfig(){if(window.__VIEWER||window.__RO)return;const c=window.D&&D.config&&D.config.design;if(c&&NAMES[c]&&c!==cur)set(c);else sync();const ro=window.__ROLE==="lesen";["dzapp","dzlnk"].forEach((i)=>{const e=document.getElementById(i);if(e)e.disabled=ro})}
+function set(d,keep){if(!NAMES[d])d="ruhig";cur=d;root.setAttribute("data-design",d);if(!keep)ls("u13design",d);inject();wrap();sync()}
+function sync(){const a=document.getElementById("dzapp"),l=document.getElementById("dzlnk"),c=cfg();if(a&&document.activeElement!==a)a.value=cur;if(l&&document.activeElement!==l)l.value=c.linkDesign==="glas"?"glas":"ruhig";
+  document.querySelectorAll(".xdz").forEach((s)=>{if(document.activeElement!==s)s.value=xdes()});
+  const ac=document.getElementById("dzacc"),gs=document.getElementById("dzgl");
+  if(ac){if(!ac.options.length)ac.innerHTML=Object.keys(ACC).map((k)=>'<option value="'+k+'">'+ACC[k].n+"</option>").join("");ac.options[0].textContent=cur==="glas"?"Standard (Blau)":"Standard (Grün)";ac.disabled=cur==="klassisch"||window.__ROLE==="lesen";if(document.activeElement!==ac)ac.value=accKey(cur)}
+  if(gs){if(!gs.options.length)gs.innerHTML=["dicht","std","klar"].map((k)=>'<option value="'+k+'">'+GLS[k].n+"</option>").join("");gs.disabled=cur!=="glas"||window.__ROLE==="lesen";if(document.activeElement!==gs)gs.value=glKey()}}
+const linkDefault=()=>cfg().linkDesign==="glas"?"glas":"ruhig";
+/* Design, Farbe und Glas-Transparenz gelten pro Konto (Sammlung „prefs“), nicht pro Gerät. Ohne eigenen Eintrag gelten ältere Werte aus den Einstellungen. */
+function applyPrefs(p){if(window.__VIEWER||window.__RO)return;const c=cfg(),S=p||{design:c.design,acc:c.acc,gl:c.gl};
+  if(S.design&&NAMES[S.design]&&S.design!==cur)set(S.design);
+  if(S.acc&&typeof S.acc==="object"&&JSON.stringify(S.acc)!==JSON.stringify(acc)){acc=S.acc;ls("u13acc",JSON.stringify(acc));inject()}
+  if(S.gl&&GLS[S.gl]&&S.gl!==gl){gl=S.gl;ls("u13gl",gl);inject()}sync()}
+function fromConfig(){if(window.__VIEWER||window.__RO)return;if(!pf)applyPrefs(null);else sync();const ro=window.__ROLE==="lesen";["dzapp","dzlnk","dzacc","dzgl"].forEach((i)=>{const e=document.getElementById(i);if(e&&i==="dzlnk")e.disabled=ro})}
+const savePrefs=()=>{if(typeof save==="function"&&window.__ROLE!=="lesen"&&window.__ROLE!=="scout")try{save("prefs",window.__ACCT||"main",{design:cur,acc,gl})}catch(e){}};
 set(cur,true);
 const nav=document.querySelector("nav");if(nav)new MutationObserver(wrap).observe(nav,{childList:true,subtree:true,characterData:true});
 document.addEventListener("change",(e)=>{const t=e.target;if(!t||!t.id)return;
-  if(t.id==="dzapp"){set(t.value);if(typeof save==="function")save("config","main",{...(D.config||{}),design:t.value})}
-  if(t.id==="dzlnk"&&typeof save==="function")save("config","main",{...(D.config||{}),linkDesign:t.value})});
-window.__dz={names:NAMES,get:()=>cur,set,sync:fromConfig,linkDefault,wrap};
-window.__dzSync=fromConfig;
+  if(t.id==="dzapp"){set(t.value);savePrefs()}
+  if(t.id==="dzlnk"&&typeof save==="function")save("config","main",{...cfg(),linkDesign:t.value});
+  if(t.id==="dzacc"){acc={...acc,[cur]:t.value==="std"?"":t.value};ls("u13acc",JSON.stringify(acc));inject();savePrefs()}
+  if(t.id==="dzgl"){gl=t.value;ls("u13gl",gl);inject();savePrefs()}});
+window.__dz={names:NAMES,get:()=>cur,set,sync:fromConfig,linkDefault,wrap,accOf:(des)=>acc[des]||"",glOf:()=>gl,view:(a,g)=>{ovr={a:a||"",g:g||"std"};inject()}};
+window.__dzSync=fromConfig;window.__dzPrefs=(p)=>{pf=p;pfSeen=true;applyPrefs(p)};
 
 /* ---------- A4-Export: Design wählbar ---------- */
 function xdes(){const v=ls("u13xdes")||mem.x;return v==="glas"||v==="ruhig"?v:(cur==="glas"?"glas":"ruhig")}
@@ -4189,6 +4279,8 @@ const GL={light:{bg:"#d6e6ff",tx:"#14171c",mu:"rgba(20,23,28,.64)",ln:"rgba(255,
 const pal=(kind,dark)=>{const m=dark?"dark":"light",d=xdes();let p=Object.assign({},CL[m]);
   if(d==="ruhig"&&kind!=="plan")Object.assign(p,RU[m],kind==="saison"?{ac:CL[m].ac,nb:CL[m].nb,avbg:CL[m].avbg}:{});
   if(d==="glas"){Object.assign(p,GL[m]);if(kind==="saison")Object.assign(p,{ac:CL[m].ac,nb:CL[m].nb});if(kind==="plan")Object.assign(p,{ac:GL[m].tx})}
+  if((d==="ruhig"||d==="glas")&&kind!=="plan"&&kind!=="saison"){const k=accKey(d);if(k!=="std"){const c=ACC[k],h=dark?c.d:c.l,n=parseInt(h.slice(1),16);p.ac=h;p.nb=h;p.avbg="rgba("+(n>>16)+","+(n>>8&255)+","+(n&255)+","+(dark?.2:.14)+")"}}
+  if(d==="glas"){const g=glKey(),A={dicht:[.85,.13],klar:[.38,.04]}[g];if(A)p.card="rgba(255,255,255,"+A[dark?1:0]+")"}
   p.itx=p.itx||undefined;return p};
 let dk=false;
 const apply=(kind)=>{const p=pal(kind,dk);delete XC.itx;Object.assign(XC,p);XC.dk=dk;XA[1]=XC.r;XA[2]=XC.o;XA[3]=XC.y;XA[4]=XC.g};

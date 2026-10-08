@@ -162,7 +162,7 @@ async function afterLogin(){
     try{const em=((auth.currentUser&&auth.currentUser.email)||"").toLowerCase(),me=await fs.doc("trainer/"+em).get();role=(me.exists&&me.data()&&me.data().rolle)||"voll";try{localStorage.setItem("u13rolle",role)}catch(e){}}
     catch(e){try{role=localStorage.getItem("u13rolle")||"voll"}catch(x){role="voll"}}
   }
-  window.__ROLE=owner?"voll":role;
+  window.__ROLE=owner?"voll":role;window.__ACCT=(((auth.currentUser&&auth.currentUser.email)||"")+"").toLowerCase().replace(/[^a-z0-9@._-]/g,"_")||"main";
   if(!owner)document.body.classList.add("co");
   if(window.__ROLE==="scout")document.body.classList.add("scoutonly");
   if(window.__ROLE==="lesen"||window.__ROLE==="scout"){const t=document.querySelector(".top .note");if(t){const sp=document.createElement("span");sp.style.marginLeft="8px";sp.textContent=window.__ROLE==="lesen"?"· Nur Ansicht":"· Scouting-Zugang";t.appendChild(sp)}}
