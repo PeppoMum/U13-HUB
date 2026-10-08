@@ -293,7 +293,18 @@ html[data-design="ruhig"][data-theme="dark"]{--onac:#0f1311}html[data-design="gl
   const div = (a, b) => (b > 0 ? a / b : null);
   /* Geplante (zukünftige) Trainings und Spiele zählen erst, wenn ihr Datum erreicht ist. */
   const heute = () => { const n = new Date(); return n.getFullYear() + "-" + String(n.getMonth() + 1).padStart(2, "0") + "-" + String(n.getDate()).padStart(2, "0"); };
-  const erreicht = (x) => !x.datum || x.datum <= heute();
+  /* Optionaler Zusatz: U13.kickoff(x) liefert die Anstoßzeit eines Spiels in Minuten (oder null). Am Spieltag zählt das Spiel erst ab Anstoß. */
+  const hook = { kickoff: null };
+  const erreicht = (x) => {
+    if (!x.datum) return true;
+    const h = heute();
+    if (x.datum < h) return true;
+    if (x.datum > h) return false;
+    const k = hook.kickoff ? hook.kickoff(x) : null;
+    if (k == null) return true;
+    const n = new Date();
+    return n.getHours() * 60 + n.getMinutes() >= k;
+  };
   /* Ein Spiel zählt für die Spielzeit erst, wenn Spielzeit eingetragen ist (mindestens ein Spieler im Kader mit Minuten > 0). */
   const zeitErfasst = (g) => Object.values(g.spieler || {}).some((s) => s && s.status === "k" && (+s.minuten || 0) > 0);
 
@@ -411,7 +422,7 @@ html[data-design="ruhig"][data-theme="dark"]{--onac:#0f1311}html[data-design="gl
     return arten.map((a) => { const st = statistik(spiele, a); return { art: a, spiele: st.spiele, gewertet: st.gewertet, punkte: st.punkte, tore: st.tore, gt: st.gt }; });
   }
 
-  const api = { erreicht, zeitErfasst, spielStats, trainStats, saison, farbeSpielzeit, farbeTraining, ergebnis, statistik, nachArt };
+  const api = { hook, erreicht, zeitErfasst, spielStats, trainStats, saison, farbeSpielzeit, farbeTraining, ergebnis, statistik, nachArt };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.U13 = api;
 })(typeof window !== "undefined" ? window : globalThis);
 </script>
@@ -749,7 +760,7 @@ function renderProfile(){
   const cS=tw?0:R.farbeSpielzeit,cT=R.farbeTraining;
   $("#pk").innerHTML=[[mn(sp.minuten),"Minuten gesamt",0],[pc(sp.imKader),"Spielzeit im Kader",0],[sp.kader+" von "+sp.spiele,"Spiele im Kader",0],[pc(sp.gewichtet),"Spielzeit gewichtet (ohne Twin/Halle)",cS],[pc(q.gewichtet),"Beteiligung gewichtet",cT],[pc(q.abs),"Beteiligung absolut",0],[pc(q.l2mGewichtet),"Beteiligung letzte 60 Tage (gewichtet)",q.l2mGewichtet==null?0:U13.farbeTraining(q.l2mGewichtet)],[tr(q.trend),"Trainings-Trend (letzte 60 Tage)",trendCls(q.trend)]].map((x)=>'<div class="card kpi'+(x[2]?" c"+x[2]:"")+'"><b>'+x[0]+"</b><span>"+x[1]+"</span></div>").join("");
   $("#pz").innerHTML=rowP("Im Kader",sp.kader)+rowP("Abwesend",sp.t)+rowP("Verletzt",sp.v)+rowP("Nicht nominiert",sp.n)+rowP("Gesamt nicht im Kader",sp.nichtImKader);
-  const fm=forms(),byForm={};D.spiele.forEach((g)=>{const o=byForm[g.form]||(byForm[g.form]={tot:0,k:0});o.tot++;const e=(g.spieler||{})[p.id];if(e&&e.status==="k")o.k++});
+  const fm=forms(),byForm={};D.spiele.filter(U13.erreicht).forEach((g)=>{const o=byForm[g.form]||(byForm[g.form]={tot:0,k:0});o.tot++;const e=(g.spieler||{})[p.id];if(e&&e.status==="k")o.k++});
   $("#pf").innerHTML=rowP("Gesamtspiele",sp.kader+" von "+sp.spiele)+Object.keys(byForm).map((k)=>{const f=fm.find((x)=>x.kuerzel===k);return rowP(esc(f?f.name:k),byForm[k].k+" von "+byForm[k].tot)}).join("");
   $("#pd").innerHTML=rowP("Minuten gesamt",mn(sp.minuten))+rowP("Spielzeit gewichtet",pc(sp.gewichtet),cS)+rowP("Spielzeit absolut",pc(sp.abs))+rowP("Spielzeit im Kader",pc(sp.imKader))+rowP("Letzte 60 Tage gewichtet",pc(sp.l2mGewichtet),tw?0:U13.farbeSpielzeit(sp.l2mGewichtet))+rowP("Letzte 60 Tage absolut",pc(sp.l2mAbs))+rowP("Spielzeit-Trend",tr(sp.trend));
   $("#pt").innerHTML=rowP("Teilgenommen",q.x)+(q.k?rowP("davon Kreisauswahl",q.k):"")+rowP("Entschuldigt",q.e)+rowP("Unentschuldigt",q.u)+rowP("Verletzt",q.v)+rowP("Terminlich verhindert",q.t)+rowP("Beteiligung gewichtet (Saison)",pc(q.gewichtet),cT)+rowP("Beteiligung absolut (Saison)",pc(q.abs))+rowP("Letzte 60 Tage gewichtet",pc(q.l2mGewichtet),q.l2mGewichtet==null?0:U13.farbeTraining(q.l2mGewichtet))+rowP("Letzte 60 Tage absolut",pc(q.l2mAbs))+rowP("Trend",tr(q.trend),trendCls(q.trend));
@@ -964,7 +975,7 @@ function xProfil(pid){
   const KS=[[sp.kader+" von "+sp.spiele,"Spiele dabei",0],[mn(sp.minuten),"Minuten gespielt",0],[pc(q.gewichtet),"Training: Beteiligung gewichtet",cT],[pc(q.abs),"Training: Beteiligung absolut",0]];
   (SIMPLE?KS:K).forEach((a2,i)=>{const kx=M+(i%4)*(kw+10),ky=92+Math.floor(i/4)*60;s.r(kx,ky,kw,52,XC.card,9,1,XC.ln);if(a2[2])s.r(kx,ky+6,4,40,XA[a2[2]],2);s.t(kx+14,ky+25,a2[0],18,a2[3]||XC.tx,{b:1});s.t(kx+14,ky+41,a2[1],7.5,XC.mu)});
   /* Karten */
-  const cw=(W-2*M-16)/2,fm=forms(),byForm={};D.spiele.forEach((g)=>{const o=byForm[g.form]||(byForm[g.form]={tot:0,k:0});o.tot++;const e=(g.spieler||{})[p.id];if(e&&e.status==="k")o.k++});
+  const cw=(W-2*M-16)/2,fm=forms(),byForm={};D.spiele.filter(U13.erreicht).forEach((g)=>{const o=byForm[g.form]||(byForm[g.form]={tot:0,k:0});o.tot++;const e=(g.spieler||{})[p.id];if(e&&e.status==="k")o.k++});
   const avg=(f)=>{const v=S.rows.map(f).filter((x)=>x!=null);return v.length?v.reduce((x,y)=>x+y,0)/v.length:null};
   const card=(title,body)=>(sx,x,y)=>{const h0=body(XS(1,1),0,0,cw-24)+40;sx.r(x,y,cw,h0,XC.card,10,1,XC.ln);sx.t(x+12,y+20,title,10,XC.mu,{b:1});body(sx,x+12,y+30,cw-24);return h0};
   const paras=(sx,x,y,w,arr)=>{let yy=y;arr.forEach((t)=>{const L=xwrap(t,w,8.5);L.forEach((ln,i)=>sx.t(x,yy+10+i*11,ln,8.5,XC.mu));yy+=L.length*11+5});return yy-y};
@@ -1522,7 +1533,7 @@ function qQuart(){
   const ys=Object.keys(cnt).map(Number).sort((a,b)=>a-b);let dom=null;ys.forEach((y)=>{if(dom==null||cnt[y]>cnt[dom])dom=y});
   const qOf=(p)=>{const y=yr(p);if(y==null)return null;return y>dom?3:Math.floor((+p.geburtsdatum.slice(5,7)-1)/3)};
   const fs=sp.filter((p)=>!p.torwart),ohne=fs.filter((p)=>qOf(p)==null).length;
-  const G=D.spiele.filter((g)=>g.dauer>0&&(!g.datum||g.datum<=today())&&(!QF||g.art===QF)&&(!QW||g.gewichtet));
+  const G=D.spiele.filter((g)=>g.dauer>0&&U13.erreicht(g)&&(!QF||g.art===QF)&&(!QW||g.gewichtet));
   const cap=(g,e)=>{const f=e.fit;return f==null||f===""||isNaN(+f)?g.dauer:Math.min(g.dauer,Math.max(+f,e.minuten||0))};
   const pq=(p)=>{let m=0,c=0;G.forEach((g)=>{const e=g.spieler&&g.spieler[p.id];if(e&&e.status==="k"){m+=+e.minuten||0;c+=cap(g,e)}});return c>0?{m,v:m/c}:null};
   const R=[0,1,2,3].map((q)=>({q,n:0,vs:[],min:0,jung:0})),alle=[];let mAll=0;
@@ -2477,6 +2488,9 @@ function renderKontakte(){
 $("#kct").addEventListener("change",(e)=>{const K=kontakte().map((k)=>({...k})),t=e.target.dataset.kt,z=e.target.dataset.kz;if(t!=null||z!=null){const i=+(t!=null?t:z);if(!K[i])return;if(t!=null)K[i].titel=e.target.value.trim();else K[i].zeilen=e.target.value;cfgSave({kontakte:K})}});
 $("#kct").addEventListener("click",(e)=>{const x=e.target.closest("[data-kx]");if(x){cfgSave({kontakte:kontakte().filter((_,k)=>k!==+x.dataset.kx)});return}if(e.target.id==="kta")cfgSave({kontakte:kontakte().concat([{titel:"Neuer Block",zeilen:""}])})});
 renderPlan();
+
+/* Anstoßzeit eines Spiels (Minuten seit Mitternacht) aus dem verknüpften Termin – für „Spiel hat schon stattgefunden“. */
+U13.hook.kickoff=(g)=>{if(g.nr==null||typeof D==="undefined")return null;const E=D.events||[],ev=E.find((e)=>e.spielId===g.id)||E.find((e)=>e.datum===g.datum&&isGameTyp(e.typ)&&/^\d{1,2}:\d{2}/.test(e.beginn||"")),m=ev&&/^(\d{1,2}):(\d{2})/.exec(ev.beginn||"");return m?+m[1]*60+ +m[2]:null};
 </script>
 <script>/* ---------- A4-Export: Monatsplan, Wochenplan (Eltern / Trainer), Trainingsschwerpunkte (nur Trainer) ---------- */
 const xcut=(t,w,z,b)=>{t=String(t||"");if(xtw(t,z,b)<=w)return t;while(t.length>1&&xtw(t+"…",z,b)>w)t=t.slice(0,-1);return t+"…"};
