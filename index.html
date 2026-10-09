@@ -1460,7 +1460,7 @@ let xThemeOv=null;
 /* Ersatz, wenn die Seite keine Download-Berechtigung hat (z. B. Spielerlinks ohne Konto): Vorschau mit Speichern-Link */
 function xNativeDl(){return{save:({filename,data})=>new Promise((res)=>{
   const blob=data instanceof Blob?data:new Blob([data]),u=URL.createObjectURL(blob),ext=filename.split(".").pop().toLowerCase(),img=ext==="png"||ext==="jpg";
-  const o=document.createElement("div");o.style.cssText="position:fixed;inset:0;z-index:99;background:rgba(0,0,0,.72);display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px;overflow:auto";
+  const o=document.createElement("div");o.style.cssText="position:fixed;inset:0;z-index:401;background:rgba(0,0,0,.72);display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px;overflow:auto";
   o.innerHTML='<div style="background:var(--card);color:var(--tx);border-radius:12px;padding:10px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;max-width:100%"><b>'+esc(filename)+'</b><a class="btn" download="'+esc(filename)+'" href="'+u+'" style="text-decoration:none">Speichern</a><button class="btn" type="button">Schließen</button></div>'+(img?'<img src="'+u+'" style="max-width:100%;background:#fff" alt=""><div class="note" style="color:#fff">Falls „Speichern“ nichts tut: Bild lange drücken bzw. Rechtsklick → Bild speichern.</div>':'<embed src="'+u+'" type="application/pdf" style="width:min(900px,100%);height:80vh;background:#fff"><div class="note" style="color:#fff">Falls „Speichern“ nichts tut, bitte stattdessen PNG oder JPG wählen.</div>');
   o.querySelector("button").onclick=()=>{o.remove();setTimeout(()=>URL.revokeObjectURL(u),3000);res()};
   document.body.appendChild(o)})}}
@@ -2995,8 +2995,8 @@ function bul(t){return esc(t||"").split("\n").map((l)=>{const b=/^\s*[•\-*–]
 function viewS(g,fs){const set=placed(),P0=plist(),rest=P0.filter((p)=>!set.has(p.id)),bank=rest.filter((p)=>!inA(p.id)),al=rest.filter((p)=>inA(p.id));
   const chipRo=(s)=>{const p=s.id&&pById(s.id);return'<div class="mdc mdro'+(p?"":" mde")+'" style="left:'+s.x/10+'%;top:'+s.y/10+'%">'+(p?'<b>'+esc(p.nr!=null&&p.nr!==""?p.nr:"·")+'</b><span>'+esc(p.vorname||"")+"</span>":"<b>·</b>")+"</div>"};
   const names=(L)=>L.length?L.map((p)=>esc(nm(p))).join(", "):"–";
-  const lines=TX.filter((t)=>(P.t[t[0]]||"").trim()).map((t)=>'<div class="mdln"><b>'+t[1]+"</b>"+bul(P.t[t[0]])+"</div>");
-  const ind=P0.filter((p)=>P.i[p.id]);
+  const lines=TX.filter((t)=>/[^\s•\-*–]/.test(P.t[t[0]]||"")).map((t)=>'<div class="mdln"><b>'+t[1]+"</b>"+bul(P.t[t[0]])+"</div>");
+  const ind=P0.filter((p)=>/[^\s•\-*–]/.test(P.i[p.id]||""));
   const sk=!showSk?[]:P.k.map((k,i)=>({k,i})).filter((o)=>o.k.s.length);
   const head=fs?"":'<div class="mdzh"><b>'+gtOf(g)+'</b><span class="note">'+esc(g.art||"")+(g.form?" · "+esc(g.form):"")+'</span><span style="flex:1"></span><button class="btn" data-sp="'+g.id+'">📄 A4-Export</button><button class="btn" id="mdskt">'+(showSk?"Skizzen ausblenden":"Skizzen einblenden")+'</button><button class="btn" id="mdfsb">⤢ Vollbild</button></div>';
   return'<div class="mdv'+(fs?" mdfsb":"")+'">'+head+'<div class="mdzt'+(sk.length?" hsk":"")+'"'+(fs?"":' data-mdfs="1"')+'>'
@@ -3008,7 +3008,7 @@ function fit(){qa(".mdzt").forEach((z)=>{const top=z.getBoundingClientRect().top
 window.addEventListener("resize",()=>{if(q(".mdzt"))fit()});window.addEventListener("orientationchange",()=>setTimeout(fit,250));
 const gtOf=(g)=>[g.gegner?esc(g.gegner):"Gegner offen",g.datum?dd0(g.datum):"",(g.ha==="A"?"Auswärts":g.ha==="H"?"Heim":"")].filter(Boolean).join(" · ");
 const dd0=(s)=>{const m=/^(\d{4})-(\d\d)-(\d\d)/.exec(s||"");return m?m[3]+"."+m[2]+"."+m[1]:s};
-window.__mdHas=function(){if(!P)return false;return placed().size>0||Object.values(P.t||{}).some((v)=>(v||"").trim())||P.k.some((k)=>k.s.length)};
+window.__mdHas=function(){if(!P)return false;return placed().size>0||Object.values(P.t||{}).some((v)=>/[^\s•\-*–]/.test(v||""))||P.k.some((k)=>k.s.length)};
 function mountRO(host){const key=host.dataset.ro,r=ref(key);if(!r)return;const cv=document.createElement("canvas");cv.className="mdcanvas";cv.style.cursor="default";host.appendChild(cv);host.style.background="var(--gs)";const v={key,cv,host};size(v);try{new ResizeObserver(()=>{if(cv.isConnected&&Math.abs((host.clientWidth||0)-(cv.__w||0))>2){cv.__w=host.clientWidth;size(v)}}).observe(host)}catch(e){}}
 
 /* ---------- Notizblatt ---------- */
@@ -3125,6 +3125,7 @@ document.addEventListener("keydown",(e)=>{const t=e.target;if(e.key!=="Enter"||!
   const v=t.value,pos=t.selectionStart,ls=v.lastIndexOf("\n",pos-1)+1,line=v.slice(ls,pos),mm=BU.exec(line);if(!mm)return;e.preventDefault();
   if(!mm[3].trim()){t.setRangeText("",ls,pos,"end")}else{t.setRangeText("\n"+mm[1]+"• ",pos,t.selectionEnd,"end")}fireIn(t)});
 document.addEventListener("focusin",(e)=>{const t=e.target;if(t&&t.tagName==="TEXTAREA"&&t.dataset&&t.dataset.mdt!==undefined&&!t.value.trim()){t.value="• ";try{t.setSelectionRange(2,2)}catch(x){}fireIn(t)}});
+document.addEventListener("focusout",(e)=>{const t=e.target;if(t&&t.tagName==="TEXTAREA"&&t.dataset&&t.dataset.mdt!==undefined&&t.value&&!/[^\s•\-*–]/.test(t.value)){t.value="";fireIn(t)}});
 document.addEventListener("input",(e)=>{const t=e.target,d=t.dataset;if(!P||!d||!t.closest||!t.closest("#lv"))return;lastAct=Date.now();
   if(d.mdt){P.t[d.mdt]=t.value;mark("t")}else if(d.mdi){if(t.value)P.i[d.mdi]=t.value;else delete P.i[d.mdi];mark("i")}
   else if(d.mdkn!==undefined){P.k[+d.mdkn].n=t.value;mark("k")}else if(d.mdkt!==undefined){P.k[+d.mdkt].tx=t.value;mark("k")}});
@@ -4188,7 +4189,7 @@ function xSpielPage(gid){
   const placed=new Set((A.s||[]).map((q)=>q.id).filter(Boolean)),bank=act.filter((p)=>!placed.has(p.id)&&xs.indexOf(p.id)<0),off=act.filter((p)=>!placed.has(p.id)&&xs.indexOf(p.id)>=0);
   const ev=(D.events||[]).find((e)=>e.spielId===g.id)||(D.events||[]).find((e)=>e.datum===g.datum&&isGameTyp(e.typ)&&e.beginn);
   const dt=g.datum?WK[wday(g.datum)]+" "+g.datum.slice(8)+"."+g.datum.slice(5,7)+"."+g.datum.slice(0,4):"";
-  const sub=["gegen "+(g.gegner||"Gegner offen"),dt,g.ha==="H"?"Heim":g.ha==="A"?"Auswärts":"",ev&&ev.beginn?"Anstoß "+ev.beginn+" Uhr":"",ev&&ev.treffen?"Treffen "+ev.treffen+" Uhr":""].filter(Boolean).join(" · ");
+  const sub=["gegen "+(g.gegner||"Gegner offen"),dt,g.ha==="H"?"Heim":g.ha==="A"?"Auswärts":"",ev&&ev.treffen?"Treffen "+ev.treffen+" Uhr":"",ev&&ev.beginn?"Anstoß "+ev.beginn+" Uhr":""].filter(Boolean).join(" · ");
   xhead(s,W,"Spielvorbereitung",sub,M);
   /* Aufstellung */
   const y0=92,pw=432,ph=Math.round(pw*59/71),cx=M,top=y0;
@@ -4196,7 +4197,7 @@ function xSpielPage(gid){
   const px=cx+10,py=top+10,PITCH="M0,0H68V52.5H0Z M13.85,0V16.5H54.15V0 M24.85,0V5.5H43.15V0 M26.69,16.5A9.15,9.15 0 0 0 41.31,16.5 M24.85,52.5A9.15,9.15 0 0 1 43.15,52.5 M30.84,0V-2H37.16V0";
   s.raw('<g transform="translate('+px+" "+py+") scale("+pw/71+" "+ph/59+') translate(1.5 3.5)"><g transform="translate(0 52.5) scale(1 -1)" fill="none" stroke="'+XC.mu+'" stroke-width=".28" stroke-linejoin="round"><path d="'+PITCH+'"/></g></g>');
   (A.s||[]).forEach((q)=>{const p=q.id&&byId(q.id),x=px+q.x/1000*pw,y=py+q.y/1000*ph;
-    s.c(x,y-5,14,p?XC.tx:XC.track);if(p){s.t(x,y,String(p.nr!=null&&p.nr!==""?p.nr:"·"),12,XC.bg,{b:1,an:"middle"});s.t(x,y+24,p.vorname||"",11,XC.tx,{an:"middle",b:1})}});
+    s.c(x,y-5,14,p?XC.tx:XC.track);if(p){s.t(x,y,String(p.nr!=null&&p.nr!==""?p.nr:"·"),12,XC.bg,{b:1,an:"middle"});{const nmz=p.vorname||"",bw2=nmz.length*6.4+10;const ny=q.y>880?y-24:y+24;s.r(x-bw2/2,ny-12,bw2,16,XC.bg,5,.88);s.t(x,ny,nmz,11,XC.tx,{an:"middle",b:1})}}});
   s.t(cx+12,top+ph+16+2,"",1,XC.mu);
   const fm=(A.f||"")+((A.s||[]).length?" · "+(A.s||[]).filter((q)=>q.id).length+" von "+(A.s||[]).length+" Plätzen besetzt":"");
   /* rechte Spalte: Bank und Nicht dabei */
@@ -4208,24 +4209,24 @@ function xSpielPage(gid){
   off.forEach((p)=>{if(ry<top+ph+16){const r=SP_STAT[(sp[p.id]||{}).status]||"";s.t(rx+4,ry+11,nmS(p),12,XC.tx);if(r)s.t(rx+rw-2,ry+10,r,9.5,XC.mu,{an:"end"});ry+=lh}});if(!off.length)s.t(rx+4,ry+10,"–",11,XC.mu);
   /* Ansprache */
   const TXB=[["an","Stichpunkte vor dem Spiel"],["st","Standards"],["so","Sonstiges"]],blocks=[];
-  TXB.forEach((t)=>{const v=String(T[t[0]]||"").trim();if(v)blocks.push({h:t[1],t:v})});
-  const ind=act.filter((p)=>String(I[p.id]||"").trim()).map((p)=>nmS(p)+" – "+String(I[p.id]).trim().replace(/\s*\n\s*/g,"; "));
+  TXB.forEach((t)=>{const v=String(T[t[0]]||"").trim();if(v&&/[^\s•\-*–]/.test(v))blocks.push({h:t[1],t:v})});
+  const ind=act.filter((p)=>/[^\s•\-*–]/.test(String(I[p.id]||""))).map((p)=>nmS(p)+" – "+String(I[p.id]).trim().replace(/\s*\n\s*/g,"; "));
   if(ind.length)blocks.push({h:"Individuelle Aufgaben",t:ind.map((l)=>"• "+l).join("\n")});
   const y1=top+ph+20+22,avail=H-44-y1,bw=W-2*M-28;
   const bul=(t)=>String(t).split("\n").map((l)=>{const m=/^\s*[•\-*–]\s+(.*)$/.exec(l);return m?"• "+m[1]:l});
-  let z=15,lay=null;
+  let z=22,lay=null,hs=12.5;
   for(;z>=7.5;z-=.5){const L=blocks.map((b)=>{const ls=[];bul(b.t).forEach((l)=>{(l.trim()?xwrap(l.replace(/^•/,"•"),bw-(l.startsWith("•")?0:0),z,0):[""]).forEach((w,i)=>ls.push(i&&l.startsWith("•")?"   "+w:w))});return{h:b.h,ls}});
-    const tot=L.reduce((a,b)=>a+14+b.ls.length*z*1.38+26,0)+(L.length-1)*10;lay={L,tot};if(tot<=avail)break}
+    hs=Math.max(12.5,Math.min(z*.95,17));const tot=L.reduce((a,b)=>a+16+hs*1.2+b.ls.length*z*1.38+14,0)+(L.length-1)*10;lay={L,tot};if(tot<=avail)break}
   if(!blocks.length){s.r(M,y1,W-2*M,60,XC.card,12,1,XC.ln);s.t(M+16,y1+34,"Noch keine Notizen zur Ansprache eingetragen (Spielzettel, Reiter Ansprache).",11.5,XC.mu)}
-  else{let y=y1;lay.L.forEach((b)=>{const h=14+b.ls.length*z*1.38+26;s.r(M,y,W-2*M,h,XC.card,12,1,XC.ln);s.t(M+14,y+22,b.h,12.5,XC.tx,{b:1});b.ls.forEach((l,i)=>s.t(M+14,y+22+10+z*1.1+i*z*1.38,l,z,XC.tx));y+=h+10})}
+  else{let y=y1;lay.L.forEach((b)=>{const h=16+hs*1.2+b.ls.length*z*1.38+14;s.r(M,y,W-2*M,h,XC.card,12,1,XC.ln);s.t(M+14,y+14+hs,b.h,hs,XC.tx,{b:1});b.ls.forEach((l,i)=>s.t(M+14,y+16+hs*1.2+z*1.1+i*z*1.38,l,z,XC.tx));y+=h+10})}
   return{svg:s.done(),W,H,name:"Spielvorbereitung_"+(g.datum||"")}}
 async function spOpen(gid){
   if(window.__RO)return;const g=(D.spiele||[]).find((x)=>x.id===gid);if(!g)return;
-  const o=document.createElement("div");o.id="spov";o.style.cssText="position:fixed;inset:0;z-index:98;background:rgba(0,0,0,.72);display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px;overflow:auto";
-  o.innerHTML='<div style="background:var(--card);color:var(--tx);border-radius:12px;padding:10px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;max-width:100%"><b>Spielvorbereitung (A4)</b><label class="note">Modus <select id="spth"><option value="light">Hell</option><option value="dark">Dunkel</option></select></label><div class="seg" id="spf"><button data-f="pdf">PDF</button><button data-f="png">PNG</button><button data-f="jpg">JPG</button></div><button class="btn" id="spx">Schließen</button></div><img id="spim" alt="Vorschau" style="max-width:min(100%,620px);height:auto;border-radius:6px;background:#fff;box-shadow:0 8px 30px rgba(0,0,0,.4)">';
-  document.body.appendChild(o);
+  const o=document.createElement("div");o.id="spov";o.style.cssText="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.72);display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px;overflow:auto";
+  o.innerHTML='<div style="background:var(--card);color:var(--tx);border-radius:12px;padding:10px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;max-width:100%"><b>Spielvorbereitung (A4)</b><label class="note">Modus <select id="spth"><option value="light">Hell</option><option value="dark">Dunkel</option></select></label>'+(window.__xdzHtml||"")+'<div class="seg" id="spf"><button data-f="pdf">PDF</button><button data-f="png">PNG</button><button data-f="jpg">JPG</button></div><button class="btn" id="spx">Schließen</button></div><img id="spim" alt="Vorschau" style="max-width:min(100%,620px);height:auto;border-radius:6px;background:#fff;box-shadow:0 8px 30px rgba(0,0,0,.4)">';
+  document.body.appendChild(o);try{const xz=o.querySelector(".xdz");if(xz){xz.value=window.__dz&&window.__dz.get()==="glas"?"glas":"ruhig";xz.dispatchEvent(new Event("change",{bubbles:true}))}}catch(e){}
   let url=null;const rend=async()=>{try{xTheme($("#spth").value==="dark");const r=xSpielPage(gid),cv=await xRaster(r.svg,r.W,r.H,1.4),b=await xBlob(cv,"image/png");if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(b);$("#spim").src=url}catch(e){setSt("Vorschau konnte nicht erstellt werden","err")}};
-  $("#spth").onchange=rend;$("#spx").onclick=()=>{o.remove();if(url)URL.revokeObjectURL(url)};
+  $("#spth").onchange=rend;o.addEventListener("change",(e)=>{if(e.target.classList&&e.target.classList.contains("xdz"))setTimeout(rend,0)});$("#spx").onclick=()=>{o.remove();if(url)URL.revokeObjectURL(url)};
   $("#spf").onclick=(e)=>{const b=e.target.closest("button");if(!b)return;xThemeOv=$("#spth").value;xRunPages(()=>[xSpielPage(gid)],b.dataset.f,"Spielvorbereitung_"+(g.datum||"")+"_"+String(g.gegner||"").replace(/[^A-Za-z0-9]+/g,""),false)};
   await rend()}
 document.addEventListener("click",(e)=>{const t=e.target.closest&&e.target.closest("[data-sp]");if(!t)return;e.preventDefault();e.stopPropagation();spOpen(t.dataset.sp)},true);
@@ -4279,7 +4280,7 @@ window.__dzSync=fromConfig;window.__dzPrefs=(p)=>{pf=p;pfSeen=true;applyPrefs(p)
 
 /* ---------- A4-Export: Design wählbar ---------- */
 function xdes(){const v=ls("u13xdes")||mem.x;return v==="glas"||v==="ruhig"?v:(cur==="glas"?"glas":"ruhig")}
-const xset=(v)=>{mem.x=v;ls("u13xdes",v);document.querySelectorAll(".xdz").forEach((s)=>s.value=v)};
+window.__xdes=xdes;const xset=(v)=>{mem.x=v;ls("u13xdes",v);document.querySelectorAll(".xdz").forEach((s)=>s.value=v)};
 const XDZ='<label class="note">Design <select class="xdz" aria-label="Design des Exports"><option value="ruhig">Klar &amp; ruhig</option><option value="glas">Liquid Glass</option></select></label>';
 document.querySelectorAll("select.xth,select.xthp").forEach((s)=>{const l=s.closest("label")||s;if(l.nextElementSibling&&l.nextElementSibling.querySelector&&l.nextElementSibling.querySelector(".xdz"))return;l.insertAdjacentHTML("afterend",XDZ)});
 window.__xdzHtml=XDZ;
