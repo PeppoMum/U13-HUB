@@ -609,7 +609,7 @@ $("#ad").onclick=()=>{
 };
 $("#tg").addEventListener("click",(e)=>{
   const d=e.target.closest("[data-del]");
-  if(d){if(armed===d.dataset.del){save("trainings",armed,null);armed=null}else armed=d.dataset.del;renderTrain();return}
+  if(d){if(armed===d.dataset.del){const tr0=D.trainings.find((x)=>x.id===armed);(D.events||[]).filter((ev)=>ev.typ==="Training"&&(ev.trainId===armed||(!ev.trainId&&tr0&&ev.datum===tr0.datum))).forEach((ev)=>save("events",ev.id,null));save("trainings",armed,null);armed=null}else armed=d.dataset.del;renderTrain();return}
   const b=e.target.closest("[data-t]");armed=null;if(!b){renderTrain();return}
   const t=D.trainings.find((x)=>x.id===b.dataset.t);if(!t)return;
   const cur=(t.spieler||{})[b.dataset.p]||"",nxt=ORDER[(ORDER.indexOf(cur)+1)%ORDER.length],sp={...(t.spieler||{})};
@@ -2157,7 +2157,7 @@ const matchup=(e)=>e._mu?e._mu:e.titel?e.titel:e.gegner?e.gegner:"Offen";
 const isOpenG=(e)=>(isGameTyp(e.typ)||e.typ==="Turnier")&&!e.gegner&&!e.titel&&!e._mu,haSfx=(e)=>e.ha?" ("+e.ha+")":isOpenG(e)?" ( )":"",zeitG=(e)=>zeitOf(e)||((isGameTyp(e.typ)||e.typ==="Turnier")?"Offen":"");
 /* Alle Termine: eigene Einträge plus Spiele aus „Spiele“ (sofern am selben Tag kein eigener Spieltermin existiert) */
 function evAll(){
-  const E=(D.events||[]).map((e)=>{const o={...e};
+  const E=(D.events||[]).filter((e)=>!(e.trainId&&!e.spielId&&e.typ==="Training"&&!(D.trainings||[]).some((t)=>t.id===e.trainId))).map((e)=>{const o={...e};
     if(o.spielId){const g=D.spiele.find((x)=>x.id===o.spielId);if(g){if(g.datum)o.datum=g.datum;o.gegner=g.gegner;o.ha=g.ha||"";if(g.art)o.typ=g.art;o.linked=1}}
     else if(o.trainId){const t=D.trainings.find((x)=>x.id===o.trainId);if(t){o.datum=t.datum;o.linked=1}}
     return o}),has=new Set(E.filter((e)=>isGameTyp(e.typ)).map((e)=>e.datum));
@@ -2304,7 +2304,7 @@ function renderTermine(){
   $("#msub").textContent=all.length+" Termine in "+mname(mMonth)+" · Spiele aus dem Bereich „Spiele“ erscheinen automatisch";
   $("#ml").innerHTML='<i>Eltern = erscheint im Elternexport</i><i>intern = nur in der Trainerfassung</i>';
   $("#mt").innerHTML=all.length?'<tr><th>Datum</th><th>Art</th><th>Gegner / Aktion</th><th>Treffen / Anstoß</th><th>Ort</th><th>Elternexport</th><th></th></tr>'+all.map((e)=>{
-    const wk=[0,6].includes(wday(e.datum)),tx=isGameTyp(e.typ)?matchup(e):(e.titel||""),act=(e)=>e.kobs?'<button class="rm ic" data-kgo="1" title="Im Kader öffnen" aria-label="Im Kader öffnen">'+IC.go+'</button>':((e.virt?'<button class="rm ic" data-ee="'+e.id+'" title="Bearbeiten" aria-label="Bearbeiten">'+IC.ed+'</button>'+(e.trainId?'<button class="rm ic" data-vt="1" title="In Training öffnen" aria-label="In Training öffnen">'+IC.go+'</button>':'<button class="rm ic" data-vg="'+e.spielId+'" title="Im Bereich Spiele öffnen" aria-label="Im Bereich Spiele öffnen">'+IC.go+'</button>'):'<button class="rm ic" data-ee="'+e.id+'" title="Bearbeiten" aria-label="Bearbeiten">'+IC.ed+'</button>'+(e.linked?(e.spielId?'<button class="rm ic" data-vg="'+e.spielId+'" title="Im Bereich Spiele öffnen" aria-label="Im Bereich Spiele öffnen">'+IC.go+'</button>':'<button class="rm ic" data-vt="1" title="In Training öffnen" aria-label="In Training öffnen">'+IC.go+'</button>'):""))+'<button class="rm ic'+(mArm===e.id?" arm":"")+'" data-ed="'+e.id+'" title="Löschen" aria-label="Löschen">'+(mArm===e.id?(trAtt(e)?"Mit Anwesenheit löschen?":"Wirklich löschen?"):IC.del)+"</button>"),actions=(e.typ==="Training"?'<button class="rm ic" data-wa="'+e.datum+'" title="Bild für WhatsApp" aria-label="Bild für WhatsApp">📲</button>':"")+act(e)+(e._m||[]).map(act).join("");
+    const wk=[0,6].includes(wday(e.datum)),tx=isGameTyp(e.typ)?matchup(e):(e.titel||""),act=(e)=>e.kobs?'<button class="rm ic" data-kgo="1" title="Im Kader öffnen" aria-label="Im Kader öffnen">'+IC.go+'</button>':((e.virt?'<button class="rm ic" data-ee="'+e.id+'" title="Bearbeiten" aria-label="Bearbeiten">'+IC.ed+'</button>'+(e.trainId?'<button class="rm ic" data-vt="1" title="In Training öffnen" aria-label="In Training öffnen">'+IC.go+'</button>':'<button class="rm ic" data-vg="'+e.spielId+'" title="Im Bereich Spiele öffnen" aria-label="Im Bereich Spiele öffnen">'+IC.go+'</button>'):'<button class="rm ic" data-ee="'+e.id+'" title="Bearbeiten" aria-label="Bearbeiten">'+IC.ed+'</button>'+(e.linked?(e.spielId?'<button class="rm ic" data-vg="'+e.spielId+'" title="Im Bereich Spiele öffnen" aria-label="Im Bereich Spiele öffnen">'+IC.go+'</button>':'<button class="rm ic" data-vt="1" title="In Training öffnen" aria-label="In Training öffnen">'+IC.go+'</button>'):""))+'<button class="rm ic'+(mArm===e.id?" arm":"")+'" data-ed="'+e.id+'" title="Löschen" aria-label="Löschen">'+(mArm===e.id?(trAtt(e)?"Mit Anwesenheit löschen?":"Wirklich löschen?"):IC.del)+"</button>"),actions=(isGameTyp(e.typ)&&e.spielId&&!window.__RO?'<button class="rm ic" data-si="'+e.spielId+'" title="Spielinfo für WhatsApp" aria-label="Spielinfo für WhatsApp">📲</button>':"")+(e.typ==="Training"?'<button class="rm ic" data-wa="'+e.datum+'" title="Bild für WhatsApp" aria-label="Bild für WhatsApp">📲</button>':"")+act(e)+(e._m||[]).map(act).join("");
     return'<tr class="'+(wk?"mwe":"")+'" style="'+(wk?"font-weight:600":"")+'"><td style="text-align:center">'+esc(WK[wday(e.datum)]+" "+ddm(e.datum))+(e.bis&&e.bis>e.datum?" – "+esc(ddm(e.bis)):"")+'</td><td style="text-align:center">'+esc(typL(e))+'</td><td style="text-align:center">'+esc(tx)+esc(haSfx(e))+unsH(e)+(e.schwerpunkt?' <span class="note">'+esc(e.schwerpunkt)+"</span>":"")+(e.detail&&e.typ!=="Ferien"?'<div class="note" style="font-weight:400">Detail: '+esc(e.detail)+"</div>":"")+(e.ctask&&e.typ!=="Ferien"?'<div class="note" style="font-weight:400;color:var(--ac)">Co-Trainer: '+esc(e.ctask)+"</div>":"")+(e.typ!=="Ferien"?dienstSub(e,e.datum).map((s)=>'<div class="note" style="font-weight:400">'+esc(s)+"</div>").join(""):"")+'</td><td style="text-align:center">'+esc(zeitG(e))+'</td><td style="text-align:center">'+esc(e.ort||"")+"</td><td>"+(e.virt?"Eltern":e.eltern===false?"intern":"Eltern")+"</td><td>"+actions+"</td></tr>"}).join(""):'<tr><td class="empty" style="text-align:center">Keine Termine in '+mname(mMonth)+'. Oben „Termin“ oder „Serie“ wählen.</td></tr>';
   const wk=$("#mw").value||monday(today());$("#mw").value=wk;$("#mwk").textContent=kwOf(wk)+". KW · "+dlong(monday(wk))+" – "+dlong(addD(monday(wk),6));
 }
@@ -2998,7 +2998,7 @@ function viewS(g,fs){const set=placed(),P0=plist(),rest=P0.filter((p)=>!set.has(
   const lines=TX.filter((t)=>/[^\s•\-*–]/.test(P.t[t[0]]||"")).map((t)=>'<div class="mdln"><b>'+t[1]+"</b>"+bul(P.t[t[0]])+"</div>");
   const ind=P0.filter((p)=>/[^\s•\-*–]/.test(P.i[p.id]||""));
   const sk=!showSk?[]:P.k.map((k,i)=>({k,i})).filter((o)=>o.k.s.length);
-  const head=fs?"":'<div class="mdzh"><b>'+gtOf(g)+'</b><span class="note">'+esc(g.art||"")+(g.form?" · "+esc(g.form):"")+'</span><span style="flex:1"></span><button class="btn" data-sp="'+g.id+'">📄 A4-Export</button><button class="btn" id="mdskt">'+(showSk?"Skizzen ausblenden":"Skizzen einblenden")+'</button><button class="btn" id="mdfsb">⤢ Vollbild</button></div>';
+  const head=fs?"":'<div class="mdzh"><b>'+gtOf(g)+'</b><span class="note">'+esc(g.art||"")+(g.form?" · "+esc(g.form):"")+'</span><span style="flex:1"></span><button class="btn" data-sp="'+g.id+'">📄 A4-Export</button><button class="btn" data-si="'+g.id+'">📲 Spielinfo WhatsApp</button><button class="btn" id="mdskt">'+(showSk?"Skizzen ausblenden":"Skizzen einblenden")+'</button><button class="btn" id="mdfsb">⤢ Vollbild</button></div>';
   return'<div class="mdv'+(fs?" mdfsb":"")+'">'+head+'<div class="mdzt'+(sk.length?" hsk":"")+'"'+(fs?"":' data-mdfs="1"')+'>'
    +'<div class="card mdzp"><div class="mdzpi"><div class="mdpit mdpit-s">'+pitchSvg(true)+P.a.s.map(chipRo).join("")+'</div><div class="mdzs"><h3>'+esc(P.a.f)+'</h3><p><b>Bank</b><br>'+names(bank)+'</p><p><b>Nicht dabei</b><br>'+names(al)+"</p></div></div></div>"
    +'<div class="card mdzn"><h3>Vor dem Spiel</h3>'+(lines.length?lines.join(""):'<p class="note">Noch nichts eingetragen (Reiter Ansprache).</p>')+(ind.length?'<div class="mdln"><b>Individuelle Aufgaben</b>'+ind.map((p)=>'<div class="mdli">'+esc(nm(p))+" – "+esc(P.i[p.id])+"</div>").join("")+"</div>":"")+"</div>"
@@ -4230,6 +4230,78 @@ async function spOpen(gid){
   $("#spf").onclick=(e)=>{const b=e.target.closest("button");if(!b)return;xThemeOv=$("#spth").value;xRunPages(()=>[xSpielPage(gid)],b.dataset.f,"Spielvorbereitung_"+(g.datum||"")+"_"+String(g.gegner||"").replace(/[^A-Za-z0-9]+/g,""),false)};
   await rend()}
 document.addEventListener("click",(e)=>{const t=e.target.closest&&e.target.closest("[data-sp]");if(!t)return;e.preventDefault();e.stopPropagation();spOpen(t.dataset.sp)},true);
+
+/* ---------- WhatsApp: Spielinfo für Eltern und Spieler (Bild 4:5 und Text) ---------- */
+function siData(gid){
+  const g=(D.spiele||[]).find((x)=>x.id===gid);if(!g)return null;
+  const E=D.events||[],ev=E.find((e)=>e.spielId===g.id)||E.find((e)=>e.datum===g.datum&&isGameTyp(e.typ)&&e.beginn)||{},home=g.ha!=="A";
+  const DI=(D.dienste||[]).filter((x)=>(x.ref&&(x.ref===ev.id||x.ref==="v"+g.id||x.ref===g.id))||(!x.ref&&x.datum===g.datum));
+  const obst=[];DI.filter((x)=>x.art==="Obst & Gemüse").forEach((x)=>dPlayers(x).forEach((p)=>obst.push({n:((p.vorname||"")+" "+(p.name||"")).trim(),nr:p.nr!=null&&p.nr!==""?String(p.nr):""})));
+  const tk=DI.filter((x)=>x.art==="Trikots").map((x)=>x.label).filter(Boolean).join(" ");
+  const ho=(D.config&&D.config.heimOrt)||"Stauseekampfbahn";
+  return{g,ev,home,art:g.art||ev.typ||"Spiel",gegner:g.gegner||"Gegner offen",datum:g.datum||ev.datum,treffen:ev.treffen||"",beginn:ev.beginn||"",ort:home?ho:(ev.ort||""),obst,note:tk}}
+function siTitle(x,sep){const u=mann();return x.home?u+sep+x.gegner:x.gegner+sep+u}
+function siText(x,o){
+  const d=x.datum,L=[];L.push(WT[wday(d)]+", "+d.slice(8)+"."+d.slice(5,7)+".");
+  L.push(x.art+": "+siTitle(x," - "),"");
+  const ort=o.ort?(x.home?", "+o.ort:" ("+o.ort+")"):"";
+  if(x.treffen)L.push("Treffen: "+x.treffen+" Uhr"+ort);else if(o.ort)L.push("Ort: "+o.ort);
+  if(x.beginn)L.push("Anstoß: "+x.beginn+" Uhr");
+  if(x.obst.length){L.push("","*Obst & Gemüse: "+x.obst.map((p)=>p.n+(p.nr?" (#"+p.nr+")":"")).join(", ")+"*")}
+  if(String(o.note||"").trim())L.push("","_"+String(o.note).trim().replace(/\s*\n\s*/g," ")+"_");
+  return L.join("\n")}
+function xWaSpiel(gid,o){
+  const x=siData(gid);if(!x)return null;o=o||{};const ort0=String(o.ort!=null?o.ort:x.ort).trim(),ort=ort0&&x.home?"Heimspiel, "+ort0:ort0,note=String(o.note!=null?o.note:x.note).trim();
+  const W=1080,H=1350,M=72,PAD=38,IW=W-2*M-2*PAD,s=XS(W,H),BL="#1f6fe0",d=x.datum;
+  const it=(tx,px,py,z)=>s.raw('<text x="'+px+'" y="'+py+'" font-size="'+z+'" font-style="italic" fill="'+XC.tx+'">'+esc(tx)+"</text>");
+  const vsL=xwrap(siTitle(x," – "),W-2*M,60,1);
+  let k=1,lay=null;
+  for(;k>=.5;k-=.05){
+    const zO=Math.round(56*k),zN=Math.round(40*k),ortL=ort?(x.home?xwrap(ort,IW,zO,1):ort0.split(/,\s*/).reduce((r,pt,i,A)=>r.concat(xwrap(pt+(i<A.length-1?",":""),IW,zO,1)),[])):[],noteL=note?xwrap(note,IW-34,zN,0):[];
+    const hasT=!!(x.treffen||x.beginn),b1=PAD*2-8+(hasT?34+8+96+10:0)+(ort?(hasT?26+1+22:0)+34+6+ortL.length*zO*1.18:0);
+    const b2=x.obst.length?PAD*2-8+34+8+x.obst.length*60:0,b3=note?PAD*2-8+noteL.length*zN*1.38:0;
+    const top=262+34+vsL.length*68+12,tot=top+(b1?b1+20:0)+(b2?b2+20:0)+(b3?b3+20:0);lay={zO,zN,ortL,noteL,hasT,b1,b2,b3,top};if(tot<=H-110)break}
+  const L=lay;
+  s.t(M,108,"TuS Haltern am See · "+mann(),30,XC.mu);
+  s.t(M,206,WT[wday(d)]+", "+d.slice(8)+"."+d.slice(5,7)+".",72,XC.tx,{b:1});
+  s.t(M,254,x.art,36,XC.mu);
+  vsL.forEach((l,i)=>s.t(M,322+i*68,l,60,XC.tx,{b:1}));
+  let y=L.top;
+  if(L.b1){s.r(M,y,W-2*M,L.b1,XC.card,38,1,XC.ln);let cy=y+PAD-8;
+    if(L.hasT){const cols=[["Treffen",x.treffen],["Anstoß",x.beginn]].filter((c)=>c[1]);cols.forEach((c,i)=>{const cx=M+PAD+i*(IW/2);s.t(cx,cy+30,c[0],34,XC.mu);s.t(cx,cy+34+8+86,c[1],96,XC.tx,{b:1});s.t(cx+xtw(c[1],96,1)+10,cy+34+8+86,"Uhr",34,XC.mu)});cy+=34+8+96+10;
+      if(ort){cy+=26;s.l(M+PAD,cy,W-M-PAD,cy,XC.ln);cy+=22}}
+    if(ort){s.t(M+PAD,cy+30,"Ort",34,XC.mu);L.ortL.forEach((l,i)=>s.t(M+PAD,cy+34+6+L.zO*.98+i*L.zO*1.18,l,L.zO,XC.tx,{b:1}))}
+    y+=L.b1+20}
+  if(L.b2){s.r(M,y,W-2*M,L.b2,XC.card,38,1,XC.ln);s.t(M+PAD,y+PAD-8+30,"Obst & Gemüse",34,XC.mu);
+    x.obst.forEach((p,i)=>{const by=y+PAD-8+34+8+46+i*60;s.t(M+PAD,by,p.n,56,XC.tx,{b:1});if(p.nr)s.t(M+PAD+xtw(p.n,56,1)+14,by,"#"+p.nr,40,XC.mu)});y+=L.b2+20}
+  if(L.b3){s.r(M,y,W-2*M,L.b3,XC.card,38,1,XC.ln);s.r(M+PAD,y+PAD-8,8,L.noteL.length*L.zN*1.38-6,BL,4);L.noteL.forEach((l,i)=>it(l,M+PAD+34,y+PAD-8+L.zN*1.0+i*L.zN*1.38,L.zN))}
+  const n=new Date();s.t(M,H-62,"Stand "+ddm(today())+" "+String(n.getHours()).padStart(2,"0")+":"+String(n.getMinutes()).padStart(2,"0")+" Uhr",24,XC.mu);
+  return{svg:s.done(),W,H,name:"Spielinfo_"+String(d).replace(/-/g,"")}}
+async function siOpen(gid){
+  if(window.__RO)return;const x=siData(gid);if(!x)return;
+  const o=document.createElement("div");o.id="siov";o.style.cssText="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.72);display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px;overflow:auto";
+  const inp='style="width:100%;box-sizing:border-box"';
+  o.innerHTML='<div style="background:var(--card);color:var(--tx);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;width:min(100%,560px)"><b>Spielinfo für WhatsApp · '+esc(siTitle(x," – "))+"</b>"
+    +'<label class="note">Ort<br><input id="siort" '+inp+' value="'+esc(x.ort)+'"></label>'
+    +'<label class="note">Ansage Trikots (nur für diesen Versand, wird nicht gespeichert)<br><textarea id="sinote" rows="3" '+inp+" placeholder=\"z. B. Wir spielen ganz in Schwarz, Torhüter in Orange.\">"+esc(x.note)+"</textarea></label>"
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'+(window.__xdzHtml||"")+'<button class="btn" id="sisend" style="background:var(--ac);color:#fff;display:none">Bild an WhatsApp senden</button><a class="btn" id="sisave" style="text-decoration:none">Bild speichern</a></div>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="sicopy">Text kopieren</button><a class="btn" id="siwa" target="_blank" rel="noopener" style="text-decoration:none">Text in WhatsApp öffnen</a><button class="btn" id="siclose">Schließen</button></div>'
+    +'<textarea id="sitx" rows="9" readonly '+inp+' aria-label="Text für WhatsApp"></textarea></div>'
+    +'<img id="siim" alt="Vorschau" style="max-width:min(100%,560px);height:auto;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.4)">';
+  document.body.appendChild(o);
+  try{const xz=o.querySelector(".xdz");if(xz){xz.value=window.__dz&&window.__dz.get()==="glas"?"glas":"ruhig";xz.dispatchEvent(new Event("change",{bubbles:true}))}}catch(e){}
+  let url=null,blob=null,file=null,tmr=null;const vals=()=>({ort:$("#siort").value.trim(),note:$("#sinote").value});
+  const rend=async()=>{const v=vals();$("#sitx").value=siText(x,v);$("#siwa").href="https://wa.me/?text="+encodeURIComponent($("#sitx").value);
+    try{xTheme(false);const r=xWaSpiel(gid,v),cv=await xRaster(r.svg,r.W,r.H,1);blob=await xBlob(cv,"image/png");if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(blob);$("#siim").src=url;
+      const nm=r.name+".png";$("#sisave").href=url;$("#sisave").download=nm;try{file=new File([blob],nm,{type:"image/png"})}catch(e){file=null}
+      $("#sisend").style.display=file&&navigator.canShare&&navigator.share&&navigator.canShare({files:[file]})?"":"none"}catch(e){setSt("Bild konnte nicht erstellt werden","err")}};
+  const later=()=>{clearTimeout(tmr);tmr=setTimeout(rend,250)};
+  $("#siort").oninput=later;$("#sinote").oninput=later;o.addEventListener("change",(e)=>{if(e.target.classList&&e.target.classList.contains("xdz"))setTimeout(rend,0)});
+  $("#siclose").onclick=()=>{o.remove();if(url)URL.revokeObjectURL(url)};
+  $("#sisend").onclick=async()=>{try{await navigator.share({files:[file],title:"Spielinfo"})}catch(e){}};
+  $("#sicopy").onclick=async()=>{const t=$("#sitx").value;try{await navigator.clipboard.writeText(t);setSt("Text kopiert – in WhatsApp einfügen","ok")}catch(e){const a=$("#sitx");a.removeAttribute("readonly");a.select();try{document.execCommand("copy");setSt("Text kopiert – in WhatsApp einfügen","ok")}catch(e2){setSt("Bitte den markierten Text von Hand kopieren","err")}a.setAttribute("readonly","")}};
+  await rend()}
+document.addEventListener("click",(e)=>{const t=e.target.closest&&e.target.closest("[data-si]");if(!t)return;e.preventDefault();e.stopPropagation();siOpen(t.dataset.si)},true);
 </script><script>/* ===== Designs: „Klar & ruhig“, „Liquid Glass“, „Klassisch“ – nur Optik. Gilt für die App, die externen Links und die A4-Exporte. ===== */
 (function(){
 const NAMES={ruhig:"Klar & ruhig",glas:"Liquid Glass",klassisch:"Klassisch"},root=document.documentElement;
@@ -4303,7 +4375,7 @@ let dk=false;
 const apply=(kind)=>{const p=pal(kind,dk);delete XC.itx;Object.assign(XC,p);XC.dk=dk;XA[1]=XC.r;XA[2]=XC.o;XA[3]=XC.y;XA[4]=XC.g};
 const oT=xTheme;xTheme=function(dark){dk=!!dark;oT(dark);apply("other")};
 const kindOf=(fn,kind)=>{const o=window[fn];if(typeof o!=="function")return;window[fn]=function(){const keep=Object.assign({},XC),dk0=dk;if(kind==="wa")dk=false;apply(kind);try{return o.apply(this,arguments)}finally{dk=dk0;Object.keys(XC).forEach((k)=>{if(!(k in keep))delete XC[k]});Object.assign(XC,keep)}}};
-["xMonthPage","xWeekPage","xFocusPage"].forEach((f)=>kindOf(f,"plan"));["xSaison","xScatterPage","xZusatz"].forEach((f)=>kindOf(f,"saison"));kindOf("xWaTraining","wa");
+["xMonthPage","xWeekPage","xFocusPage"].forEach((f)=>kindOf(f,"plan"));["xSaison","xScatterPage","xZusatz"].forEach((f)=>kindOf(f,"saison"));kindOf("xWaTraining","wa");kindOf("xWaSpiel","wa");
 /* Terminplan im Glas-Design: schwarz-weiß, Zeilen milchig */
 window.__xsh=(c)=>{if(xdes()!=="glas")return c;return Object.assign({},c,dk?{ev:"rgba(255,255,255,.06)",we:"rgba(255,255,255,.13)",hd:"rgba(255,255,255,.11)"}:{ev:"rgba(255,255,255,.55)",we:"rgba(255,255,255,.28)",hd:"rgba(255,255,255,.78)"})};
 /* Hintergrund-Verlauf für das Glas-Design */
