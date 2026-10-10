@@ -2825,7 +2825,7 @@ function rowHtml(p){const d=+L.d||0,e=L.p[p.id]||{},s=e.s||"",m=minutes(p.id,d),
   const seg=[["s","Startelf"],["b","Bank"],["x","Nicht dabei"]].map((o)=>'<button type="button" data-st="'+p.id+"."+o[0]+'"'+(s===o[0]?' class="on"':"")+">"+o[1]+"</button>").join("");
   const gr=x?'<select data-gr="'+p.id+'" aria-label="Grund">'+[["a","abwesend"],["v","verletzt"],["n","nicht nominiert"]].map((o)=>'<option value="'+o[0]+'"'+((e.a||"a")===o[0]?" selected":"")+">"+o[1]+"</option>").join("")+"</select>":"";
   return'<div class="lvr'+(x?" lvx":"")+'" data-r="'+p.id+'"><div class="lvh"><span class="lvn"><b>'+esc(p.nr!=null&&p.nr!==""?"#"+p.nr:"")+"</b> "+esc(nm(p))+'</span><span class="lvm" data-m="'+p.id+'">'+(m==null?"–":Math.round(m)+" Min."+(d?" · "+Math.round(m/d*100)+" %":""))+'</span></div><div class="lvs">'+seg+gr+"</div>"
-   +(s==="s"||s==="b"?'<div class="lvt">'+chips+'<button type="button" class="lva" data-wa="'+p.id+'">＋ '+((start?w.length%2===1:w.length%2===0)?"Einwechslung":"Auswechslung")+"</button></div>":"")+"</div>"}
+   +(s==="s"||s==="b"?'<div class="lvt">'+chips+'<button type="button" class="lva" data-lwa="'+p.id+'">＋ '+((start?w.length%2===1:w.length%2===0)?"Einwechslung":"Auswechslung")+"</button></div>":"")+"</div>"}
 /* Abschnitt, der als nächstes beginnt, wenn die Uhr genau auf einer Grenze steht (sonst 0) */
 function nxtSeg(){const c=L.clk,n=NS(),sg=SEG();if(!(c.base>0)||c.run)return 0;for(let k=1;k<n;k++)if(Math.abs(c.base-k*sg)<500)return k+1;return 0}
 function lastSeg(){const c=L.clk;return NS()>2&&el()>=(NS()-1)*SEG()-500&&c.base>0}
@@ -2867,7 +2867,7 @@ document.addEventListener("click",(e)=>{const t=e.target;
   if(t.id==="lvok"){const any=pl().some((p)=>L.p[p.id]&&L.p[p.id].s);if(!any){arm=false;alert("Noch kein Spieler eingetragen.");return}
     if(arm!=="ok"){arm="ok";render();return}arm=false;const n=apply();render();if(n)alert(n+" Spieler ins Spiel übernommen. Du findest sie unter Spiele.");return}
   const st=t.dataset&&t.dataset.st;if(st){const [id,s]=st.split(".");const r=L.p[id]=L.p[id]||{};r.s=r.s===s?"":s;if(r.s==="s"||r.s==="b"){r.w=[]}if(r.s==="x"&&!r.a)r.a="a";arm=false;mkP(id);persist();render();return}
-  const wa=t.dataset&&t.dataset.wa;if(wa){const r=L.p[wa]=L.p[wa]||{};r.w=r.w||[];r.w.push(el()>0?curMin():"");mkP(wa);persist();render();const i=q('[data-w="'+wa+"."+(r.w.length-1)+'"]');if(i&&i.value==="")i.focus();return}
+  const wa=t.dataset&&t.dataset.lwa;if(wa){const r=L.p[wa]=L.p[wa]||{};r.w=r.w||[];r.w.push(el()>0?curMin():"");mkP(wa);persist();render();const i=q('[data-w="'+wa+"."+(r.w.length-1)+'"]');if(i&&i.value==="")i.focus();return}
   const wx=t.dataset&&t.dataset.wx;if(wx){const [id,i]=wx.split(".");L.p[id].w.splice(+i,1);mkP(id);persist();render();return}
 });
 document.addEventListener("input",(e)=>{const t=e.target;if(!L||!t.closest||!t.closest("#lv"))return;
