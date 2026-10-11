@@ -54,7 +54,7 @@ td.k{background:linear-gradient(90deg,var(--c,var(--grs)) var(--v),transparent v
 .sb{display:flex;height:28px;border-radius:8px;overflow:hidden;margin:6px 0 14px}.sb i{font-style:normal;text-align:center;line-height:28px;font-weight:700;font-size:12px;white-space:nowrap;overflow:hidden}
 .chip{font-size:12px;padding:2px 9px;border-radius:99px;background:var(--acs);color:var(--ac);font-weight:600}
 svg text{fill:var(--mu);font-size:10px}
-.top{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}.logo{width:80px;height:80px;border:1.5px dashed var(--ln);border-radius:12px;display:grid;place-items:center;color:var(--mu);font-size:10px;text-align:center;line-height:1.15;cursor:pointer;overflow:hidden;background:var(--card);flex:none;padding:0}.logo img{width:100%;height:100%;object-fit:contain}.av{cursor:pointer;overflow:hidden;position:relative}.av img{width:100%;height:100%;object-fit:cover}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}.logo{width:80px;height:80px;border:1.5px dashed var(--ln);border-radius:12px;display:grid;place-items:center;color:var(--mu);font-size:10px;text-align:center;line-height:1.15;cursor:pointer;overflow:hidden;background:var(--card);flex:none;padding:0}.logo img{width:100%;height:100%;object-fit:contain}.logo.lgset{border:0!important;background:none!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border-radius:50%}.av{cursor:pointer;overflow:hidden;position:relative}.av img{width:100%;height:100%;object-fit:cover}
 .nf{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px}.nf label{color:var(--mu);font-size:12px}textarea{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--ln);border-radius:9px;padding:8px 10px;width:100%;min-height:84px;resize:vertical}
 .nt{padding:12px 0;border-bottom:1px solid var(--ln)}.nt:last-child{border:0}.nt .h{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:4px}.nt p{margin:0;white-space:pre-wrap}.pv{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--acs);color:var(--ac)}.zl{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--os);color:var(--o)}
 body.ro .rm,body.ro .s,body.ro .chips button,body.ro #av,body.ro #gl tr[data-g] .rm{pointer-events:none}body.ro .rm{display:none}#mt th,#mt td{text-align:center}#mt tr.mwe td{background:var(--grs)}#mt tr.mwe td:first-child{box-shadow:inset 4px 0 0 var(--tx)}.hl{border:0;border-top:2px solid var(--ln);margin:22px 0 16px}.kpi .note{margin-top:2px}.empty{padding:28px;text-align:center;color:var(--mu)}
@@ -251,6 +251,7 @@ html[data-design="ruhig"][data-theme="dark"]{--onac:#0f1311}html[data-design="gl
 <section id="e" hidden><h2>Einstellungen</h2><p class="sub">Änderungen werden sofort gespeichert und gelten in allen Auswertungen</p>
 <div class="seg etb" id="etb" role="group" aria-label="Bereich der Einstellungen"><button data-et="l" class="on">Hinweise &amp; Links</button><button data-et="m">Mannschaft</button><button data-et="s">Sicherung</button></div>
 <div class="etp" id="etp-m">
+<div class="card" id="gccard" style="margin-bottom:12px"><h3>Kalender (Apple Kalender über Google)</h3><p class="note" id="gcweb" hidden style="margin:0">Der Kalender-Abgleich funktioniert nur in der Web-Version der App (mannschaftscockpit.de).</p><div id="gcbody"><p class="note" style="margin:0 0 8px">Spiele, Trainings und Team-Events erscheinen automatisch in einem eigenen Kalender „U13 Trainer-Cockpit“. Neue, geänderte und gelöschte Termine werden mitgezogen, solange die App geöffnet ist. Ferien, Hinweise und Geburtstage gehören nicht dazu.</p><div class="bar" style="margin:0 0 8px"><label>Adresse von zu Hause (für die Fahrzeit) <input id="gchome" style="width:300px" autocomplete="off" placeholder="Straße Nr., PLZ Ort"></label><label>Google-Client-ID <input id="gccid" style="width:300px" autocomplete="off" placeholder="…apps.googleusercontent.com"></label></div><div class="bar" style="margin:0 0 8px"><button class="btn" id="gcconn" data-gc="conn">Mit Google verbinden</button><button class="btn" id="gcnow" data-gc="now" hidden>Jetzt abgleichen</button><button class="btn" data-gc="fz">Fahrzeiten neu berechnen</button><button class="btn" id="gcoff" data-gc="off" hidden>Trennen</button></div><p class="note" id="gcst" style="margin:0 0 8px"></p><p class="note" style="margin:0">Die Adresse bleibt in deinem Konto gespeichert und taucht in keinem Export und keinem Link auf. Die Fahrzeit ist eine Schätzung ohne Verkehr. Fehlt die Adresse beim Spiel, wird mit 20 Minuten gerechnet; sobald sie eingetragen ist, passt sich der Kalender an.</p><details style="margin-top:8px"><summary class="note" style="cursor:pointer">Einmalige Einrichtung (Anleitung)</summary><ol class="note" style="margin:8px 0 0;padding-left:18px"><li>Auf console.cloud.google.com ein neues Projekt anlegen (kostenlos).</li><li>„APIs &amp; Dienste“ → „Bibliothek“ → „Google Calendar API“ aktivieren.</li><li>„OAuth-Zustimmungsbildschirm“: Typ „Extern“, App-Name beliebig, deine Gmail-Adresse als Testnutzer eintragen.</li><li>„Anmeldedaten“ → „Anmeldedaten erstellen“ → „OAuth-Client-ID“ → Typ „Webanwendung“. Bei „Autorisierte JavaScript-Quellen“ <b>https://mannschaftscockpit.de</b> eintragen (und ggf. die Adresse der GitHub-Seite).</li><li>Die Client-ID oben einfügen, auf „Mit Google verbinden“ tippen und den Zugriff erlauben.</li><li>Auf iPhone/iPad/Mac: Einstellungen → Kalender → Accounts → Google-Konto hinzufügen, Kalender aktivieren.</li></ol></details></div></div>
 <div class="card" id="dzcard" style="margin-bottom:12px"><h3>Design</h3><div class="bar" style="margin:0"><label>Design der App <select id="dzapp"><option value="ruhig">Klar &amp; ruhig</option><option value="glas">Liquid Glass</option><option value="klassisch">Klassisch (bisheriges Design)</option></select></label><label>Farbe <select id="dzacc"></select></label><label>Glas-Transparenz <select id="dzgl"></select></label><label>Standard für externe Links <select id="dzlnk"><option value="ruhig">Klar &amp; ruhig</option><option value="glas">Liquid Glass</option></select></label></div><p class="note" style="margin:8px 0 0">Das Design der App gilt für alle Trainer und Geräte. Für jeden externen Link lässt sich das Design unter „Hinweise &amp; Links“ einzeln ändern. Das Design der A4-Exporte wählst du direkt bei den Export-Knöpfen.</p></div>
 <div class="card" id="kadsw" style="margin-bottom:12px"><h3>Kader-Modul</h3><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="kadon" checked> Kader (Kaderplanung &amp; Scouting) einblenden</label><p class="note" style="margin:6px 0 0">Ausgeblendet ist der Kader für alle weg (auch Co-Trainer, Kalender, Scouting-Link). Die Daten bleiben erhalten.</p></div>
 <div class="gr" style="margin-top:0"><div class="card"><h3>Saison</h3><label class="note">Saison (z. B. 2026/27)<br><input id="esa" style="width:120px" autocomplete="off"></label> <label class="note" style="margin-left:12px">Mannschaft (z. B. U13)<br><input id="emn" style="width:90px" autocomplete="off"></label><p class="note" id="emsg" style="margin:8px 0 0">Die Saison bestimmt die zwölf Monate im Bereich Training (Juli bis Juni).</p></div>
@@ -779,7 +780,7 @@ $("#tb").addEventListener("click",(e)=>{const r=e.target.closest("tr[data-pid]")
 /* ---------- Logo und Fotos (als kleine Bilder direkt in der Datenbank) ---------- */
 function shrink(file,max,square,type){return new Promise((res)=>{const im=new Image(),u=URL.createObjectURL(file);im.onload=()=>{let sx=0,sy=0,sw=im.width,sh=im.height;if(square){const m=Math.min(sw,sh);sx=(sw-m)/2;sy=(sh-m)/2;sw=sh=m}const sc=Math.min(1,max/Math.max(sw,sh)),c=document.createElement("canvas");c.width=Math.round(sw*sc);c.height=Math.round(sh*sc);const x=c.getContext("2d");if(type==="image/jpeg"){x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height)}x.drawImage(im,sx,sy,sw,sh,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL(type,.85))};im.onerror=()=>res(null);im.src=u})}
 let picMode=null;
-function renderLogo(){const l=D.config&&D.config.logo;$("#logo").innerHTML=l?'<img alt="Vereinslogo" src="'+l+'">':"Logo<br>einfügen";$("#logox").hidden=!l;$("#sais2").textContent=(D.config&&D.config.saison)||"2026/27";$("#mann2").textContent=mann()}
+function renderLogo(){const l=lgR();$("#logo").classList.toggle("lgset",!!l);$("#logo").innerHTML=l?'<img alt="Vereinslogo" src="'+l+'">':"Logo<br>einfügen";$("#logox").hidden=!l;$("#sais2").textContent=(D.config&&D.config.saison)||"2026/27";$("#mann2").textContent=mann()}
 const cfgSave=(o)=>save("config","main",{...(D.config||{}),...o});
 $("#logo").onclick=()=>{picMode="logo";$("#fi").click()};
 $("#logox").onclick=()=>{const c={...(D.config||{})};delete c.logo;D.config=c;save("config","main",c);renderLogo()};
@@ -856,6 +857,18 @@ const XT={light:{bg:"#ffffff",tx:"#1c1f24",mu:"#6b7280",ln:"#e5e7eb",card:"#f8f9
 const XC={r:"#d64545",o:"#e07b1a",y:"#d9a400",g:"#22a06b",gr:"#8b93a1",p:"#8b5cf6",be:"#b8975f",n1:"#111827",n2:"#4b5563",n3:"#8a93a1",n4:"#b8bec9"},XA={};
 function xTheme(dark){Object.assign(XC,XT[dark?"dark":"light"]);XC.dk=!!dark;XA[1]=XC.r;XA[2]=XC.o;XA[3]=XC.y;XA[4]=XC.g}
 xTheme(false);
+
+/* Vereinslogo: weißen Rand außen entfernen und rund ausschneiden (nur wenn das Logo rund ist) */
+let _lgSrc="",_lgOut="";
+function lgPrep(){const s=D.config&&D.config.logo;if(!s||s===_lgSrc)return;_lgSrc=s;_lgOut="";const im=new Image();
+  im.onload=()=>{try{const w=im.naturalWidth,h=im.naturalHeight,c=document.createElement("canvas");c.width=w;c.height=h;const g=c.getContext("2d");g.drawImage(im,0,0);const d=g.getImageData(0,0,w,h).data,bg=(i)=>d[i+3]<20||(d[i]>235&&d[i+1]>235&&d[i+2]>235);
+    let x0=w,x1=-1,y0=h,y1=-1;for(let y=0;y<h;y++)for(let x=0;x<w;x++){if(!bg((y*w+x)*4)){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}}
+    if(x1<0)return;const bw=x1-x0+1,bh=y1-y0+1,S=Math.max(bw,bh),cx=x0+bw/2,cy=y0+bh/2,o=document.createElement("canvas");o.width=o.height=S;const q=o.getContext("2d");
+    const corner=[[x0,y0],[x1,y0],[x0,y1],[x1,y1]].every((p)=>bg((p[1]*w+p[0])*4)),round=corner&&Math.abs(bw-bh)<=S*.06;
+    if(round){q.beginPath();q.arc(S/2,S/2,S/2,0,Math.PI*2);q.closePath();q.clip()}
+    q.drawImage(im,cx-S/2,cy-S/2,S,S,0,0,S,S);_lgOut=o.toDataURL("image/png");try{renderLogo()}catch(e){}}catch(e){}};
+  im.src=s}
+function lgR(){const s=D.config&&D.config.logo;if(!s)return "";if(s!==_lgSrc)lgPrep();return s===_lgSrc&&_lgOut?_lgOut:s}
 const XF="system-ui,-apple-system,Segoe UI,Helvetica,Arial,sans-serif";
 const xctx=document.createElement("canvas").getContext("2d");
 function xtw(t,z,b){xctx.font=(b?"600 ":"")+z+"px "+XF;return xctx.measureText(String(t)).width}
@@ -876,7 +889,7 @@ const xargs=(P)=>({spieler:P,spiele:D.spiele,trainings:D.trainings,einstellungen
 const xdate=()=>{const t=today();return t.slice(8)+"."+t.slice(5,7)+"."+t.slice(0,4)};
 function xtrend(t){if(t==null)return{s:"–",c:XC.mu,k:0};const v=Math.round(t*100),k=trendCls(t);return{s:(k===4?"▲ +":k===1?"▼ ":v>0?"▬ +":"▬ ")+v+" %",c:k===4?XC.g:k===1?XC.r:XC.mu,k}}
 function xhead(s,W,title,sub,x0,photo,ini){
-  let x=x0;const lg=D.config&&D.config.logo;
+  let x=x0;const lg=lgR();
   if(photo){s.img(x,22,52,52,photo,true);x+=64}else if(ini){s.c(x+26,48,26,XC.avbg);s.t(x+26,55,ini,18,XC.itx||XC.ac,{b:1,an:"middle"});x+=64}
   s.t(x,44,title,21,XC.tx,{b:1});s.t(x,63,sub,10.5,XC.mu);
   if(lg)s.img(W-x0-56,20,56,56,lg,false);
@@ -1931,7 +1944,7 @@ const dzOf=(id)=>{const v=(L[id]||{}).dz;return v==="glas"||v==="ruhig"?v:(windo
 const daOf=(dz)=>window.__dz?__dz.accOf(dz):"",dgOf=(dz)=>dz==="glas"&&window.__dz?__dz.glOf():"std";
 const dzSig=()=>JSON.stringify(Object.keys(L).sort().filter((k)=>L[k].aktiv&&L[k].key).map((k)=>[k,dzOf(k),daOf(dzOf(k)),dgOf(dzOf(k))]));
 async function buildSnap(){
-  const TP=planSnap(),HN=(D.config&&D.config.hinweise)||[],out={v:1,u:new Date().toISOString(),p:{},k:{}},logo=(D.config&&D.config.logo)||"",sa=(D.config&&D.config.saison)||"";
+  const TP=planSnap(),HN=(D.config&&D.config.hinweise)||[],out={v:1,u:new Date().toISOString(),p:{},k:{}},logo=lgR(),sa=(D.config&&D.config.saison)||"";
   for(const p of active()){const l=L[p.id];if(!l||!l.aktiv||!l.key)continue;out.p[p.id]=await seal(l.key,{h:profileHtml(p.id),l:logo,s:sa,m:mann(),u:out.u,t:TP,n:p.vorname,hn:HN,dz:dzOf(p.id),da:daOf(dzOf(p.id)),dg:dgOf(dzOf(p.id))});out.k[p.id]=await sha8(l.key)}
   out.bg=await bgSnap();out.dzs=dzSig();out.x={};out.xk={};
   for(const k of ["full","anon","plan","demo"]){const l=L["x"+k];if(!l||!l.aktiv||!l.key)continue;out.x[k]=await seal(l.key,k==="plan"?{k,u:out.u,t:TP,l:logo,s:sa,m:mann(),hn:HN,dz:dzOf("x"+k),da:daOf(dzOf("x"+k)),dg:dgOf(dzOf("x"+k))}:{k,u:out.u,db:extData(k),dz:dzOf("x"+k),da:daOf(dzOf("x"+k)),dg:dgOf(dzOf("x"+k))});out.xk[k]=await sha8(l.key)}
@@ -2321,7 +2334,7 @@ function openEv(id){
   $("#med").innerHTML='<div class="card" style="margin-bottom:14px"><b style="font-size:16px">'+(e?"Termin bearbeiten":"Neuer Termin")+(e&&(e.linked||e.virt)?' <span class="note">· verknüpft mit '+(isGameTyp(e.typ)?"Spiele":"Training")+" – Änderungen gelten dort ebenfalls</span>":"")+'</b><div class="grid" style="display:flex;flex-wrap:wrap;gap:12px;margin:12px 0">'
    +fld("","Datum",inp("ed_dat",d.datum,150,"date"))+fld("","bis (optional)",inp("ed_bis",d.bis,150,"date"))
    +fld("","Art",'<input id="ed_typ" list="ed_typl" value="'+esc(d.typ)+'" placeholder="tippen oder wählen" autocomplete="off" style="width:170px"><datalist id="ed_typl">'+evTypes().map((t)=>'<option value="'+esc(t)+'">').join("")+"</datalist>")
-   +'<span id="ed_gm" style="display:contents"'+(isGameTyp(d.typ)?"":" hidden")+">"+fld("","Spielform",'<select id="ed_fo"><option value="">–</option>'+forms().map((f)=>'<option value="'+esc(f.kuerzel)+'"'+(f.kuerzel===gf?" selected":"")+">"+esc(f.kuerzel)+"</option>").join("")+"</select>")+fld("","Spielzeit (Min.)",'<input id="ed_da" type="number" min="1" step="1" value="'+esc(gd||"")+'" style="width:90px" placeholder="–">')+"</span>"
+   +'<span id="ed_gm" style="display:contents"'+(isGameTyp(d.typ)?"":" hidden")+">"+fld("","Spielform",'<select id="ed_fo"><option value="">–</option>'+forms().map((f)=>'<option value="'+esc(f.kuerzel)+'"'+(f.kuerzel===gf?" selected":"")+">"+esc(f.kuerzel)+"</option>").join("")+"</select>")+fld("","Spielzeit (Min.)",'<input id="ed_da" type="number" min="1" step="1" value="'+esc(gd||"")+'" style="width:90px" placeholder="–">')+fld("","Fahrzeit (Min., leer = automatisch)",'<input id="ed_fz" type="number" min="1" step="1" value="'+esc(d.fzm||"")+'" style="width:90px" placeholder="auto">'+((typeof gcOrt==="function"&&!gcOrt(d)&&d.ha==="A")?'<br><span style="color:var(--o)">Adresse fehlt – Fahrzeit geschätzt (20 Min.)</span>':""))+"</span>"
    +fld("","Gegner",inp("ed_geg",d.gegner,170))+fld("","Heim/Auswärts",'<select id="ed_ha"><option value="">–</option><option value="H"'+(d.ha==="H"?" selected":"")+'>Heim</option><option value="A"'+(d.ha==="A"?" selected":"")+'>Auswärts</option><option value="N"'+(d.ha==="N"?" selected":"")+">Neutral</option></select>")
    +fld("","Titel / Aktion",inp("ed_tit",d.titel,220))+fld("","Treffen",inp("ed_tr",d.treffen,100,"time"))+fld("","Beginn / Anstoß",inp("ed_be",d.beginn,100,"time"))+fld("","Ende",inp("ed_en",d.ende,100,"time"))
    +fld("","Zeit als Text (überschreibt, z. B. „Offen“)",inp("ed_zt",d.zeit,190))+fld("","Ort",inp("ed_ort",d.ort,190))
@@ -2357,7 +2370,7 @@ $("#med").addEventListener("click",(e)=>{
   const vv=$("#med").dataset.virt?evAll().find((x)=>x.id===$("#med").dataset.virt):null;
   const id=$("#med").dataset.id||"e"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),old=(D.events||[]).find((x)=>x.id===id)||(vv?{spielId:vv.spielId,trainId:vv.trainId}:{});
   const o={...old,id,datum:dat,bis:g("ed_bis")&&g("ed_bis")>dat?g("ed_bis"):null,typ:evTypRes($("#ed_typ").value)||(old&&old.typ)||evTypes()[0],gegner:g("ed_geg"),ha:$("#ed_ha").value,titel:g("ed_tit"),treffen:g("ed_tr"),beginn:g("ed_be"),ende:g("ed_en"),zeit:g("ed_zt"),ort:g("ed_ort"),schwerpunkt:g("ed_sp"),detail:g("ed_de"),unsicher:$("#ed_un").checked||undefined,unsGrund:$("#ed_un").checked?g("ed_ug"):undefined,eltern:$("#ed_el").checked};
-  if($("#ed_fo")){o.form=$("#ed_fo").value;o.dauer=Math.round(+$("#ed_da").value)||0}
+  if($("#ed_fo")){o.form=$("#ed_fo").value;o.dauer=Math.round(+$("#ed_da").value)||0}if($("#ed_fz")){const fzv=Math.round(+$("#ed_fz").value);if(fzv>0)o.fzm=fzv;else delete o.fzm}
   syncEv(o,old);delete o.form;delete o.dauer;save("events",id,o);mMonth=dat.slice(0,7);$("#med").hidden=true;$("#med").innerHTML="";renderTermine();
 });
 $("#mser").onclick=()=>{$("#med").hidden=true;const s=$("#mse");s.hidden=!s.hidden};
@@ -2506,7 +2519,7 @@ var xShade=()=>window.__xsh?window.__xsh(xShade0()):xShade0();
 const xTk=(C,typ)=>C.tag[typ==="Training"?"tr":typ==="Geburtstag"?"bd":typ==="Teamevent"?"te":(isGameTyp(typ)||typ==="Turnier")?"sp":"so"];
 const xClip=(s,id,x,y,w,h,r)=>s.raw('<clipPath id="'+id+'"><rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+r+'"/></clipPath><g clip-path="url(#'+id+')">');
 function xcHead(s,W,M,title,sub){
-  const C=xShade(),lg=D.config&&D.config.logo;
+  const C=xShade(),lg=lgR();
   s.r(M,30,34,4,C.ac,2);
   s.t(M,54,"U13"+((D.config&&D.config.saison)?" · SAISON "+D.config.saison:""),9.5,C.ac,{b:1});
   s.t(M,88,title,27,XC.tx,{b:1});
@@ -2821,7 +2834,7 @@ function setEl(ms){const c=L.clk;ms=Math.max(0,ms);c.base=ms;if(c.run)c.t0=Date.
 function tick(){const c=q("#lvclk");if(!c)return;c.textContent=clkTxt();const n=q("#lvon");if(n)n.innerHTML=onTxt()}
 function onTxt(){const g=game(),m=Math.floor(el()/60000),n=pl().filter((p)=>onAt(p.id,m)).length,z=g&&g.spielerzahl;return"Auf dem Feld (Min. "+m+"): <b"+(z&&n>z?' style="color:var(--r)"':"")+">"+n+(z?" / "+z:"")+"</b>"}
 function rowHtml(p){const d=+L.d||0,e=L.p[p.id]||{},s=e.s||"",m=minutes(p.id,d),x=s==="x",w=e.w||[],start=s==="s";
-  const chips=w.map((v,i)=>{const on0=start?i%2===0?false:true:i%2===0?true:false;return'<span class="lvw"><i>'+(on0?"↓":"↑")+'</i><input type="number" inputmode="numeric" min="1" max="'+d+'" step="1" data-w="'+p.id+"."+i+'" value="'+esc(v)+'" placeholder="Min."><button type="button" data-wx="'+p.id+"."+i+'" aria-label="Wechsel entfernen">✕</button></span>'}).join("");
+  const chips=w.map((v,i)=>{const on0=start?i%2===0?false:true:i%2===0?true:false;return'<span class="lvw"><i>'+(on0?"↑":"↓")+'</i><input type="number" inputmode="numeric" min="1" max="'+d+'" step="1" data-w="'+p.id+"."+i+'" value="'+esc(v)+'" placeholder="Min."><button type="button" data-wx="'+p.id+"."+i+'" aria-label="Wechsel entfernen">✕</button></span>'}).join("");
   const seg=[["s","Startelf"],["b","Bank"],["x","Nicht dabei"]].map((o)=>'<button type="button" data-st="'+p.id+"."+o[0]+'"'+(s===o[0]?' class="on"':"")+">"+o[1]+"</button>").join("");
   const gr=x?'<select data-gr="'+p.id+'" aria-label="Grund">'+[["a","abwesend"],["v","verletzt"],["n","nicht nominiert"]].map((o)=>'<option value="'+o[0]+'"'+((e.a||"a")===o[0]?" selected":"")+">"+o[1]+"</option>").join("")+"</select>":"";
   return'<div class="lvr'+(x?" lvx":"")+'" data-r="'+p.id+'"><div class="lvh"><span class="lvn"><b>'+esc(p.nr!=null&&p.nr!==""?"#"+p.nr:"")+"</b> "+esc(nm(p))+'</span><span class="lvm" data-m="'+p.id+'">'+(m==null?"–":Math.round(m)+" Min."+(d?" · "+Math.round(m/d*100)+" %":""))+'</span></div><div class="lvs">'+seg+gr+"</div>"
@@ -2842,7 +2855,7 @@ function renderLive(){const g=game();if(!g)return;const o=q("#lv"),c=L.clk,P=pl(
   o.innerHTML='<div class="lvb">'+barHtml(g)
    +'<div class="card lvtop"><div class="lvck"><div id="lvclk">'+clkTxt()+'</div><div class="lvcb"><button class="btn" id="lvrun" style="background:var(--ac);color:#fff;border-color:var(--ac)">'+(c.run?"⏸ Pause":(nxtSeg()?"▶ "+nxtSeg()+(NS()===2?". Halbzeit":". Durchgang"):c.base?"▶ Weiter":"▶ Anpfiff"))+'</button>'+(lastSeg()?"":'<button class="btn" id="lvht" title="Stoppt die Uhr genau am Ende des Abschnitts">'+(NS()===2?"Halbzeit":"Ende Durchgang "+curSeg())+'</button>')+'<button class="btn" id="lvend" title="Stoppt die Uhr zum Abpfiff">Abpfiff</button><button class="btn" id="lvrst">'+(arm==="rst"?"Wirklich zurücksetzen?":"Uhr zurück")+'</button></div></div><div class="lvadj"><span class="note">Uhr stellen:</span><button class="btn" data-adj="-60">−1 Min.</button><button class="btn" data-adj="60">+1 Min.</button><button class="btn" data-adj="-300">−5</button><button class="btn" data-adj="300">+5</button><label class="note">auf Minute <input type="number" id="lvset" min="0" step="1" value="'+Math.floor(el()/60000)+'" style="width:64px"></label><button class="btn" id="lvsetb">Setzen</button></div>'
    +'<div class="lvf"><label>Spielzeit (Min.) <input type="number" id="lvd" min="1" step="1" value="'+esc(L.d)+'" style="width:80px"></label>'+(twinF()?'<label>Durchgänge <select id="lvn">'+[2,3,4].map((k)=>'<option'+(NS()===k?" selected":"")+">"+k+"</option>").join("")+"</select></label>":"")+'<span id="lvon" class="note">'+onTxt()+"</span></div></div>"
-   +'<p class="note" style="margin:8px 2px">Je Spieler Startelf oder Bank wählen, bei einem Wechsel „＋“ drücken (die Minute kommt aus der Uhr, sonst eintragen) – ↓ = rein, ↑ = raus. Wer nicht da ist: „Nicht dabei“. Die Minuten werden erst beim Übernehmen ins Spiel geschrieben. Ihr könnt zu zweit arbeiten: Änderungen des anderen Geräts erscheinen automatisch.</p>'
+   +'<p class="note" style="margin:8px 2px">Je Spieler Startelf oder Bank wählen, bei einem Wechsel „＋“ drücken (die Minute kommt aus der Uhr, sonst eintragen) – ↑ = rein, ↓ = raus. Wer nicht da ist: „Nicht dabei“. Die Minuten werden erst beim Übernehmen ins Spiel geschrieben. Ihr könnt zu zweit arbeiten: Änderungen des anderen Geräts erscheinen automatisch.</p>'
    +'<div class="lvg">'+P.map(rowHtml).join("")+'</div>'
    +'<div class="lvfoot"><span class="note">'+esc(done)+'</span><span style="flex:1"></span><button class="btn" id="lvok" style="background:var(--g);color:#fff;border-color:var(--g)">'+(arm==="ok"?"Wirklich übernehmen?":"✓ In Spiel übernehmen")+"</button></div></div>";
   o.scrollTop=keep}
@@ -3398,7 +3411,7 @@ document.addEventListener("change",(e)=>{if(e.target&&e.target.id==="kxth")ks.xt
 const kxCol=(c)=>({r:XC.r,o:XC.o,y:XC.y,g:XC.g,gr:XC.gr,p:XC.p,be:XC.be,n1:XC.n1,n2:XC.n2,n3:XC.n3,n4:XC.n4}[c]||"#3b6fd6");
 function kxDoc(title,sub,body){
   const W=794,H=1123,M=36,C=xShade(),pages=[];let s=null,y=0;
-  const head=(first)=>{s=XS(W,H);pages.push(s);const lg=D.config&&D.config.logo,pl=ks._xpl;
+  const head=(first)=>{s=XS(W,H);pages.push(s);const lg=lgR(),pl=ks._xpl;
     s.t(M,first?44:34,first?title:title+" (Fortsetzung)",first?21:14,XC.tx,{b:1});if(first)s.t(M,63,sub,10.5,XC.mu);
     if(lg&&first)s.img(W-M-56,20,56,56,lg,false);
     s.t(W-M-(lg&&first?66:0),first?44:34,pl.stufe+" · "+pl.saison,11,XC.mu,{an:"end",b:1});if(first)s.t(W-M-(lg?66:0),60,"Stand "+xdate(),10,XC.mu,{an:"end"});
@@ -4339,7 +4352,7 @@ function applyPrefs(p){if(window.__VIEWER||window.__RO)return;const c=cfg(),S=p|
   if(S.acc&&typeof S.acc==="object"&&JSON.stringify(S.acc)!==JSON.stringify(acc)){acc=S.acc;ls("u13acc",JSON.stringify(acc));inject()}
   if(S.gl&&GLS[S.gl]&&S.gl!==gl){gl=S.gl;ls("u13gl",gl);inject()}sync()}
 function fromConfig(){if(window.__VIEWER||window.__RO)return;if(!pf)applyPrefs(null);else sync();const ro=window.__ROLE==="lesen";["dzapp","dzlnk","dzacc","dzgl"].forEach((i)=>{const e=document.getElementById(i);if(e&&i==="dzlnk")e.disabled=ro})}
-const savePrefs=()=>{if(typeof save==="function"&&window.__ROLE!=="lesen"&&window.__ROLE!=="scout")try{save("prefs",window.__ACCT||"main",{design:cur,acc,gl})}catch(e){}};
+const savePrefs=()=>{if(typeof save==="function"&&window.__ROLE!=="lesen"&&window.__ROLE!=="scout")try{save("prefs",window.__ACCT||"main",{design:cur,acc,gl,...(window.__gcP?{gc:window.__gcP}:{})})}catch(e){}};
 set(cur,true);
 const nav=document.querySelector("nav");if(nav)new MutationObserver(wrap).observe(nav,{childList:true,subtree:true,characterData:true});
 document.addEventListener("change",(e)=>{const t=e.target;if(!t||!t.id)return;
@@ -4348,7 +4361,7 @@ document.addEventListener("change",(e)=>{const t=e.target;if(!t||!t.id)return;
   if(t.id==="dzacc"){acc={...acc,[cur]:t.value==="std"?"":t.value};ls("u13acc",JSON.stringify(acc));inject();savePrefs()}
   if(t.id==="dzgl"){gl=t.value;ls("u13gl",gl);inject();savePrefs()}});
 window.__dz={names:NAMES,get:()=>cur,set,sync:fromConfig,linkDefault,wrap,accOf:(des)=>acc[des]||"",glOf:()=>gl,view:(a,g)=>{ovr={a:a||"",g:g||"std"};inject()}};
-window.__dzSync=fromConfig;window.__dzPrefs=(p)=>{pf=p;pfSeen=true;applyPrefs(p)};
+window.__dzSync=fromConfig;window.__dzSavePrefs=savePrefs;window.__dzPrefs=(p)=>{pf=p;pfSeen=true;applyPrefs(p);window.__gcP=(p&&p.gc)||window.__gcP||null;window.__gcOnPrefs&&window.__gcOnPrefs()};
 
 /* ---------- A4-Export: Design wählbar ---------- */
 function xdes(){const v=ls("u13xdes")||mem.x;return v==="glas"||v==="ruhig"?v:(cur==="glas"?"glas":"ruhig")}
@@ -4384,5 +4397,187 @@ const oX=XS;XS=function(W,H,nobg){const s=oX(W,H,nobg),d0=s.done;
     const g="<defs>"+c.map((a,i)=>'<radialGradient id="gl'+i+'" cx="'+a[0]+'" cy="'+a[1]+'" r="'+(i===1?45:55)+'%"><stop offset="0" stop-color="'+a[2]+'"/><stop offset="1" stop-color="'+b+'" stop-opacity="0"/></radialGradient>').join("")+"</defs>"+c.map((a,i)=>'<rect width="'+W+'" height="'+H+'" fill="url(#gl'+i+')"/>').join("");
     o=o.replace(/(<rect width="\d+" height="\d+" fill="[^"]*"\/>)/,"$1"+g)}return o};return s};
 })();
+</script><script>/* ---------- Kalender-Abgleich: Termine -> eigener Google-Kalender (erscheint in Apple Kalender) ---------- */
+const GC_TZ="Europe/Berlin",GC_API="https://www.googleapis.com/calendar/v3",GC_SCOPE="https://www.googleapis.com/auth/calendar.app.created";
+const gcLs=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k)||"";v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){return""}};
+let gcPv=null,gcBusy=false,gcPend=false,gcTk=null,gcTkExp=0,gcFail="",gcInfo=null,gcClient=null,gcClientId="";
+const gcP=()=>{if(window.__gcP)return window.__gcP;if(!gcPv){try{gcPv=JSON.parse(gcLs("u13gc")||"{}")}catch(e){gcPv={}}}return gcPv};
+function gcSet(patch,noSave){const p={...gcP(),...patch};window.__gcP=p;gcPv=p;gcLs("u13gc",JSON.stringify(p));if(!noSave&&window.__dzSavePrefs)try{window.__dzSavePrefs()}catch(e){}return p}
+const gcMin=(t)=>{const m=/^(\d{1,2}):(\d{2})/.exec(String(t||""));return m?(+m[1])*60+(+m[2]):null};
+const gcHM=(m)=>{m=((Math.round(m)%1440)+1440)%1440;return pad(Math.floor(m/60))+":"+pad(m%60)};
+function gcDay(date,add){const [y,m,d]=date.split("-").map(Number),t=new Date(Date.UTC(y,m-1,d+add));return t.getUTCFullYear()+"-"+pad(t.getUTCMonth()+1)+"-"+pad(t.getUTCDate())}
+function gcDT(date,min){const add=Math.floor(min/1440),m=min-add*1440;return gcDay(date,add)+"T"+gcHM(m)+":00"}
+const gcOrt=(e)=>{let o=String(e.ort||"").trim().replace(/^Heimspiel,\s*/i,"");if(!o&&e.ha!=="A"&&e.ha!=="N")o=String((D.config&&D.config.heimOrt)||"Stauseekampfbahn");else if(o&&e.ha!=="A"&&e.ha!=="N"&&!/haltern/i.test(o))o+=", Haltern am See";return o};
+const gcFzKey=(e)=>{const o=gcOrt(e),h=String(gcP().home||"").trim();return h&&o?h.toLowerCase()+"|"+o.toLowerCase():""};
+function gcFz(e){const m=Math.round(+e.fzm);if(m>0)return{min:m,src:"m"};const k=gcFzKey(e),r=k&&gcP().rt?gcP().rt[k]:undefined;if(typeof r==="number"&&r>0)return{min:r,src:"b"};return{min:20,src:"g"}}
+const gcId=(key)=>"u13"+Array.from(unescape(encodeURIComponent(String(key)))).map((c)=>c.charCodeAt(0).toString(16).padStart(2,"0")).join("").replace(/[^0-9a-f]/g,"");
+const gcHash=(o)=>{const s=JSON.stringify(o);let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return(h>>>0).toString(36)+s.length};
+const GC_SKIP=["Ferien","Hinweis","Geburtstag"];
+function gcBuild(){
+  const out=[],u=typeof mann==="function"?mann():"U13",arts=arten();
+  evAll().forEach((e)=>{
+    if(e.kobs||!e.datum||GC_SKIP.includes(e.typ))return;
+    const key=e.id,tr=e.trainId?(D.trainings||[]).find((t)=>t.id===e.trainId):null;
+    let sum="",desc=[],loc=String(e.ort||"").trim(),s=null,en=null,allDay=false,endDate=null;
+    if(e.typ==="Training"){
+      const b=gcMin(e.beginn)!=null?gcMin(e.beginn):tr?gcMin(tr.beginn):null,z=gcMin(e.ende)!=null?gcMin(e.ende):tr?gcMin(tr.ende):null;
+      sum="Training "+u+(e.titel?" – "+e.titel:"");
+      if(b==null)allDay=true;else{s=b-30;en=(z!=null?z:b+90)+30;desc.push("Training: "+gcHM(b)+(z!=null?" – "+gcHM(z):"")+" Uhr","Kalender: 30 Min. vorher bis 30 Min. nachher")}
+    }else if(isGameTyp(e.typ)){
+      const g=e.spielId?(D.spiele||[]).find((x)=>x.id===e.spielId):null,a=arts.find((x)=>x.name===e.typ)||{},dur=(g&&g.dauer>0?g.dauer:0)||a.dauer||60;
+      const an=gcMin(e.beginn);let tf=gcMin(e.treffen);const anE=an!=null?an:tf!=null?tf+90:null;
+      sum=e.typ+": "+(e.ha==="A"?(e.gegner||"Gegner offen")+" – "+u:u+" – "+(e.gegner||"Gegner offen"));
+      if(anE==null)allDay=true;
+      else{
+        const est=tf==null;if(est)tf=anE-90;
+        const fz=gcFz(e),ort=gcOrt(e);
+        s=tf-fz.min-15;en=anE+dur+45;
+        desc.push("Treffen: "+gcHM(tf)+" Uhr"+(est?" (geschätzt: 90 Min. vor Anstoß)":""));
+        if(an!=null)desc.push("Anstoß: "+gcHM(an)+" Uhr");
+        desc.push("Abfahrt: "+gcHM(tf-fz.min)+" Uhr (Fahrzeit ca. "+fz.min+" Min., "+(fz.src==="m"?"von dir eingetragen":fz.src==="b"?"berechnet":"geschätzt – Adresse fehlt")+")");
+        if(!loc)loc=ort;
+      }
+      if(e.spielId&&typeof siData==="function")try{const x=siData(e.spielId);if(x&&x.obst&&x.obst.length)desc.push("Obst & Gemüse: "+x.obst.map((p)=>p.n).join(", "))}catch(er){}
+    }else{
+      const b=gcMin(e.treffen)!=null?gcMin(e.treffen):gcMin(e.beginn),z=gcMin(e.ende);
+      sum=(e.typ&&e.typ!=="Sonstiges"?e.typ+(e.titel?": ":""):"")+(e.titel||"")||"Termin";
+      if(b==null||(e.bis&&e.bis>e.datum))allDay=true;else{s=b;en=z!=null&&z>b?z:b+60;desc.push("Beginn: "+gcHM(b)+" Uhr")}
+      if(allDay&&e.bis&&e.bis>e.datum)endDate=gcDay(e.bis,1)
+    }
+    if(e.zeit&&!desc.length)desc.push(e.zeit);
+    if(e.unsicher)desc.push("⚠ Verlegung wahrscheinlich");
+    const body={summary:sum,description:desc.join("\n"),location:loc,reminders:{useDefault:true}};
+    if(allDay){body.start={date:e.datum};body.end={date:endDate||gcDay(e.datum,1)}}
+    else{body.start={dateTime:gcDT(e.datum,s),timeZone:GC_TZ};body.end={dateTime:gcDT(e.datum,en),timeZone:GC_TZ}}
+    const id=gcId(key),h=gcHash(body);
+    out.push({...body,id,extendedProperties:{private:{u13k:String(key),u13h:h}}})});
+  const seen={};return out.filter((x)=>seen[x.id]?false:(seen[x.id]=1))}
+const gcFp=(w)=>gcHash({w:w.map((x)=>x.id+x.extendedProperties.private.u13h),h:gcP().home||"",c:gcP().cal||""});
+/* ----- Fahrzeit (Adresse -> Ort) ----- */
+let gcGeoLast=0;
+async function gcGeo(q){
+  let c={};try{c=JSON.parse(gcLs("u13geo")||"{}")}catch(e){}
+  if(q in c)return c[q];
+  const w=gcGeoLast+1100-Date.now();if(w>0)await new Promise((r)=>setTimeout(r,w));gcGeoLast=Date.now();
+  let v=null;try{const r=await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&q="+encodeURIComponent(q)),j=await r.json();if(j&&j[0])v=[+j[0].lon,+j[0].lat]}catch(e){return undefined}
+  c[q]=v;gcLs("u13geo",JSON.stringify(c));return v}
+async function gcRoute(home,ort){
+  if(window.__gcRouteFake)return window.__gcRouteFake(home,ort);
+  const a=await gcGeo(home),b=await gcGeo(ort);if(a===undefined||b===undefined)return undefined;if(!a||!b)return null;
+  try{const r=await fetch("https://router.project-osrm.org/route/v1/driving/"+a[0]+","+a[1]+";"+b[0]+","+b[1]+"?overview=false"),j=await r.json(),s=j&&j.routes&&j.routes[0]&&j.routes[0].duration;
+    return s>0?Math.max(5,Math.ceil(s/60*1.1/5)*5):null}catch(e){return undefined}}
+let gcTrBusy=false;
+async function gcTravelAll(){
+  const home=String(gcP().home||"").trim();if(!home||gcTrBusy)return false;gcTrBusy=true;let ch=false;
+  try{
+    const t=today(),todo={};
+    evAll().forEach((e)=>{if(e.kobs||!e.datum||e.datum<t||!isGameTyp(e.typ)||e.fzm>0)return;const k=gcFzKey(e);if(k&&!(gcP().rt&&k in gcP().rt))todo[k]=[home,gcOrt(e)]});
+    for(const k of Object.keys(todo)){const m=await gcRoute(todo[k][0],todo[k][1]);if(m===undefined)continue;
+      const rt={...(gcP().rt||{}),[k]:m};gcSet({rt});ch=true}
+  }finally{gcTrBusy=false}
+  return ch}
+/* ----- Google: Anmeldung und Zugriff ----- */
+const gcGisOk=()=>!!(window.google&&google.accounts&&google.accounts.oauth2);
+function gcLoadGis(){return new Promise((res,rej)=>{if(window.google&&google.accounts&&google.accounts.oauth2)return res();
+  let s=document.getElementById("gcgis");if(!s){s=document.createElement("script");s.id="gcgis";s.src="https://accounts.google.com/gsi/client";s.async=true;document.head.appendChild(s)}
+  s.addEventListener("load",()=>res());s.addEventListener("error",()=>rej(new Error("Google-Anmeldung nicht erreichbar")))})}
+function gcTok(inter){
+  if(window.__gcFake)return Promise.resolve("fake");
+  if(gcTk&&Date.now()<gcTkExp-60000)return Promise.resolve(gcTk);
+  return new Promise((res,rej)=>{
+    if(!(window.google&&google.accounts&&google.accounts.oauth2))return rej(new Error("gis"));
+    const cid=String(gcP().cid||"").trim();if(!cid)return rej(new Error("Client-ID fehlt"));
+    if(!gcClient||gcClientId!==cid){gcClientId=cid;gcClient=google.accounts.oauth2.initTokenClient({client_id:cid,scope:GC_SCOPE,callback:()=>{},error_callback:()=>{}})}
+    gcClient.callback=(r)=>{if(r&&r.access_token){gcTk=r.access_token;gcTkExp=Date.now()+(+r.expires_in||3600)*1000;res(gcTk)}else rej(new Error((r&&r.error)||"auth"))};
+    gcClient.error_callback=(er)=>rej(new Error("popup:"+((er&&er.type)||"")));
+    gcClient.requestAccessToken({prompt:inter&&!gcLs("u13gcok")?"consent":""})})}
+async function gcReq(method,path,body){
+  if(window.__gcFake)return window.__gcFake(method,path,body);
+  for(let i=0;i<5;i++){
+    const r=await fetch(GC_API+path,{method,headers:{Authorization:"Bearer "+gcTk,"Content-Type":"application/json"},body:body?JSON.stringify(body):undefined});
+    let j=null;try{j=await r.json()}catch(e){}
+    if(r.status===401){gcTk=null;gcTkExp=0;return{s:401,j:null}}
+    const rate=r.status===429||r.status>=500||(r.status===403&&/rate|quota/i.test(JSON.stringify(j||{})));
+    if(rate&&i<4){await new Promise((z)=>setTimeout(z,600*Math.pow(2,i)));continue}
+    return{s:r.status,j}}
+  return{s:429,j:null}}
+async function gcCal(){
+  let id=gcP().cal;
+  if(id){const r=await gcReq("GET","/calendars/"+encodeURIComponent(id));if(r.s===200)return id;if(r.s===401)throw new Error("auth");if(r.s!==404&&r.s!==403&&r.s!==410)throw new Error("Kalender: Fehler "+r.s)}
+  const r=await gcReq("POST","/calendars",{summary:"U13 Trainer-Cockpit",timeZone:GC_TZ,description:"Wird automatisch aus der Trainer-App gepflegt. Bitte hier nichts von Hand ändern."});
+  if(r.s!==200||!r.j||!r.j.id)throw new Error("Kalender anlegen: Fehler "+r.s);gcSet({cal:r.j.id});return r.j.id}
+async function gcList(cal){
+  const out={};let pt="";
+  do{const r=await gcReq("GET","/calendars/"+encodeURIComponent(cal)+"/events?maxResults=2500&showDeleted=false&fields="+encodeURIComponent("items(id,status,extendedProperties/private),nextPageToken")+(pt?"&pageToken="+encodeURIComponent(pt):""));
+    if(r.s===401)throw new Error("auth");if(r.s!==200)throw new Error("Liste: Fehler "+r.s);
+    (r.j.items||[]).forEach((x)=>{const p=(x.extendedProperties&&x.extendedProperties.private)||{};if(p.u13k)out[x.id]={k:p.u13k,h:p.u13h||""}});
+    pt=r.j.nextPageToken||""}while(pt);
+  return out}
+async function gcPool(tasks,n){let i=0,err=null;await Promise.all(Array.from({length:Math.min(n,tasks.length)},async()=>{while(i<tasks.length&&!err){const t=tasks[i++];try{await t()}catch(e){err=e}}}));if(err)throw err}
+async function gcSync(inter){
+  if(gcBusy||window.__gcOff)return;
+  const P=gcP();if(!P.on||(!P.cid&&!window.__gcFake))return;
+  gcBusy=true;gcPend=false;gcRender("Abgleich läuft …");
+  try{
+    if(!window.__gcFake&&!gcGisOk()){await gcLoadGis();gcPend=true;return}
+    try{await gcTok(inter)}catch(e){if(/popup|gis/.test(e.message)&&!inter){gcPend=true;gcFail="";gcRender();return}throw e}
+    await gcTravelAll();
+    const cal=await gcCal(),want=gcBuild(),have=await gcList(cal),wm={};
+    want.forEach((w)=>wm[w.id]=w);
+    const tasks=[];let c=0,u=0,d=0;
+    const path=(id)=>"/calendars/"+encodeURIComponent(cal)+"/events/"+encodeURIComponent(id);
+    want.forEach((w)=>{
+      if(!have[w.id])tasks.push(async()=>{const r=await gcReq("POST","/calendars/"+encodeURIComponent(cal)+"/events",w);
+        if(r.s===409){const r2=await gcReq("PUT",path(w.id),{...w,status:"confirmed"});if(r2.s!==200)throw new Error("Schreiben: Fehler "+r2.s)}
+        else if(r.s===401)throw new Error("auth");else if(r.s!==200)throw new Error("Schreiben: Fehler "+r.s);c++});
+      else if(have[w.id].h!==w.extendedProperties.private.u13h)tasks.push(async()=>{const r=await gcReq("PUT",path(w.id),w);if(r.s===401)throw new Error("auth");if(r.s!==200)throw new Error("Ändern: Fehler "+r.s);u++})});
+    Object.keys(have).forEach((id)=>{if(!wm[id])tasks.push(async()=>{const r=await gcReq("DELETE",path(id));if(r.s===401)throw new Error("auth");if(r.s!==204&&r.s!==200&&r.s!==404&&r.s!==410)throw new Error("Löschen: Fehler "+r.s);d++})});
+    await gcPool(tasks,3);
+    gcLs("u13gcfp",gcFp(want));gcLs("u13gcok","1");gcFail="";gcInfo={t:Date.now(),n:want.length,c,u,d};gcLs("u13gcinfo",JSON.stringify(gcInfo))
+  }catch(e){
+    if(e.message==="auth"){gcTk=null;gcTkExp=0;gcPend=true;gcFail=""}else gcFail=e.message||"Fehler"}
+  finally{gcBusy=false;gcRender()}}
+function gcRender(busyTx){
+  const st=document.getElementById("gcst"),card=document.getElementById("gccard");if(!card)return;
+  const ro=window.__RO||window.__VIEWER||window.__ROLE==="lesen"||window.__ROLE==="scout";
+  card.hidden=!!ro;if(ro)return;
+  const web=!!window.__WEB_BASE||!!window.__gcFake,P=gcP();
+  const setV=(i,v)=>{const e=document.getElementById(i);if(e&&document.activeElement!==e&&e.value!==v)e.value=v};
+  setV("gchome",P.home||"");setV("gccid",P.cid||"");
+  const q=(i)=>document.getElementById(i);
+  if(q("gcweb"))q("gcweb").hidden=web;if(q("gcbody"))q("gcbody").hidden=!web;
+  if(q("gcconn"))q("gcconn").textContent=P.on?"Neu verbinden":"Mit Google verbinden";
+  if(q("gcnow"))q("gcnow").hidden=!P.on;if(q("gcoff"))q("gcoff").hidden=!P.on;
+  if(!st)return;
+  let tx="";
+  if(busyTx)tx=busyTx;
+  else if(gcFail)tx="Fehler: "+gcFail;
+  else if(!P.on)tx="Nicht verbunden. Trage unten die Client-ID ein und tippe auf „Mit Google verbinden“.";
+  else if(gcPend)tx="Es gibt Änderungen. Tippe kurz irgendwo in der App, dann wird der Kalender abgeglichen (Google fragt ggf. kurz nach).";
+  else{let i=gcInfo;if(!i){try{i=JSON.parse(gcLs("u13gcinfo")||"null")}catch(e){}}
+    tx=i?"Verbunden. Zuletzt abgeglichen: "+new Date(i.t).toLocaleString("de-DE",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+" Uhr · "+i.n+" Termine ("+i.c+" neu, "+i.u+" geändert, "+i.d+" entfernt)":"Verbunden. Noch nicht abgeglichen."}
+  st.textContent=tx}
+async function gcTick(){
+  const P=gcP();if(!P.on||gcBusy||window.__RO||window.__VIEWER||window.__ROLE==="lesen"||window.__ROLE==="scout"||!window.__WEB_BASE&&!window.__gcFake||typeof D==="undefined"||!D.spiele)return;
+  if(gcPend)return;
+  let ch=false;if(P.home){ch=await gcTravelAll()}
+  const fp=gcFp(gcBuild());if(ch||fp!==gcLs("u13gcfp"))gcSync(false)}
+window.__gcOnPrefs=()=>{gcPv=null;gcRender()};
+window.gcDebug={build:gcBuild,sync:gcSync,fz:gcFz,set:gcSet,p:gcP,tick:gcTick,travel:gcTravelAll};
+document.addEventListener("pointerup",()=>{if(gcPend&&!gcBusy)gcSync(true)},true);
+document.addEventListener("click",(e)=>{
+  const t=e.target&&e.target.closest?e.target.closest("[data-gc]"):null;if(!t)return;const a=t.dataset.gc;
+  if(a==="conn"){const cid=(q("gccid").value||"").trim(),home=(q("gchome").value||"").trim();
+    if(!cid&&!window.__gcFake){gcFail="Bitte zuerst die Client-ID eintragen (Anleitung unten).";gcRender();return}
+    gcFail="";gcSet({cid,home,on:1});gcLs("u13gcfp","");gcLs("u13gcok","");gcSync(true)}
+  if(a==="now"){gcFail="";gcLs("u13gcfp","");gcSync(true)}
+  if(a==="fz"){const rt={};gcSet({rt});gcLs("u13gcfp","");gcSync(true)}
+  if(a==="off"){try{if(gcTk&&window.google&&google.accounts&&google.accounts.oauth2)google.accounts.oauth2.revoke(gcTk,()=>{})}catch(er){}gcTk=null;gcTkExp=0;gcPend=false;gcSet({on:0});gcLs("u13gcfp","");gcLs("u13gcok","");gcRender()}
+  function q(i){return document.getElementById(i)}},true);
+document.addEventListener("change",(e)=>{const t=e.target;if(!t||!t.id)return;
+  if(t.id==="gchome"){gcSet({home:t.value.trim()});gcLs("u13gcfp","")}
+  if(t.id==="gccid"){gcSet({cid:t.value.trim()});if(t.value.trim()&&window.__WEB_BASE&&!gcGisOk())gcLoadGis().catch(()=>{})}});
+setInterval(()=>{try{gcTick()}catch(e){}},20000);
+setTimeout(()=>{try{gcRender();if(window.__WEB_BASE&&gcP().cid&&gcP().on&&!gcGisOk())gcLoadGis().catch(()=>{})}catch(e){}},1500);
 </script>
 </body></html>
