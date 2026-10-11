@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://www.gstatic.com; frame-src https://*.firebaseapp.com https://accounts.google.com https://apis.google.com; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'"><meta name="theme-color" content="#2563eb"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><script src="firebase-config.js"></script><script src="web.js"></script></head><body style="margin:0"><title>TuS Haltern U13 · Teamzentrale</title>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://accounts.google.com; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://accounts.google.com https://nominatim.openstreetmap.org https://router.project-osrm.org https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://www.gstatic.com; frame-src https://*.firebaseapp.com https://accounts.google.com https://apis.google.com; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'"><meta name="theme-color" content="#2563eb"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><script src="firebase-config.js"></script><script src="web.js"></script></head><body style="margin:0"><title>TuS Haltern U13 · Teamzentrale</title>
 <style>
 /* Layout: feste Seitenleiste (auf dem Handy untere Leiste), Inhalt in Karten und Tabellen. Farben aus dem freigegebenen Entwurf. */
 :root{--bg:#f4f5f7;--card:#fff;--tx:#1c1f24;--mu:#6b7280;--ln:#e5e7eb;--ac:#2563eb;--acs:#dbe6fd;--g:#22a06b;--gs:#d8f3e6;--y:#d9a400;--ys:#fbf0c6;--r:#d64545;--rs:#fbdcdc;--o:#e07b1a;--os:#fbe6cf;--gr:#8b93a1;--grs:#e6e8ec;--b:#3b82f6;--bs:#dbe8fd;--vi:#000;--nb:#1e3a8a;--p:#8b5cf6;--ps:#e9defc;--be:#8a6d3b;--bes:#f1e8d6;--n1:#111827;--n1s:#c3c9d4;--n2:#374151;--n2s:#d8dce4;--n3:#6b7280;--n3s:#e6e8ee;--n4:#8b93a1;--n4s:#f0f1f4;--font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Helvetica,Arial,sans-serif}
@@ -4459,12 +4459,12 @@ async function gcGeo(q){
   let c={};try{c=JSON.parse(gcLs("u13geo")||"{}")}catch(e){}
   if(q in c)return c[q];
   const w=gcGeoLast+1100-Date.now();if(w>0)await new Promise((r)=>setTimeout(r,w));gcGeoLast=Date.now();
-  let v=null;try{const r=await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&q="+encodeURIComponent(q)),j=await r.json();if(j&&j[0])v=[+j[0].lon,+j[0].lat]}catch(e){return undefined}
+  let v=null;try{const r=await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&q="+encodeURIComponent(q),{signal:AbortSignal.timeout(10000)}),j=await r.json();if(j&&j[0])v=[+j[0].lon,+j[0].lat]}catch(e){return undefined}
   c[q]=v;gcLs("u13geo",JSON.stringify(c));return v}
 async function gcRoute(home,ort){
   if(window.__gcRouteFake)return window.__gcRouteFake(home,ort);
   const a=await gcGeo(home),b=await gcGeo(ort);if(a===undefined||b===undefined)return undefined;if(!a||!b)return null;
-  try{const r=await fetch("https://router.project-osrm.org/route/v1/driving/"+a[0]+","+a[1]+";"+b[0]+","+b[1]+"?overview=false"),j=await r.json(),s=j&&j.routes&&j.routes[0]&&j.routes[0].duration;
+  try{const r=await fetch("https://router.project-osrm.org/route/v1/driving/"+a[0]+","+a[1]+";"+b[0]+","+b[1]+"?overview=false",{signal:AbortSignal.timeout(10000)}),j=await r.json(),s=j&&j.routes&&j.routes[0]&&j.routes[0].duration;
     return s>0?Math.max(5,Math.ceil(s/60*1.1/5)*5):null}catch(e){return undefined}}
 let gcTrBusy=false;
 async function gcTravelAll(){
@@ -4478,9 +4478,14 @@ async function gcTravelAll(){
   return ch}
 /* ----- Google: Anmeldung und Zugriff ----- */
 const gcGisOk=()=>!!(window.google&&google.accounts&&google.accounts.oauth2);
-function gcLoadGis(){return new Promise((res,rej)=>{if(window.google&&google.accounts&&google.accounts.oauth2)return res();
-  let s=document.getElementById("gcgis");if(!s){s=document.createElement("script");s.id="gcgis";s.src="https://accounts.google.com/gsi/client";s.async=true;document.head.appendChild(s)}
-  s.addEventListener("load",()=>res());s.addEventListener("error",()=>rej(new Error("Google-Anmeldung nicht erreichbar")))})}
+let gcGisP=null;
+function gcLoadGis(){if(gcGisOk())return Promise.resolve();if(gcGisP)return gcGisP;
+  gcGisP=new Promise((res,rej)=>{const old=document.getElementById("gcgis");if(old)old.remove();
+    const s=document.createElement("script");s.id="gcgis";s.src="https://accounts.google.com/gsi/client";s.async=true;
+    const to=setTimeout(()=>{gcGisP=null;rej(new Error("Die Google-Anmeldung lässt sich nicht laden (Internet oder Werbeblocker?)"))},12000);
+    s.onload=()=>{clearTimeout(to);gcGisP=null;gcGisOk()?res():rej(new Error("Google-Anmeldung nicht verfügbar"))};
+    s.onerror=()=>{clearTimeout(to);gcGisP=null;rej(new Error("Die Google-Anmeldung wird blockiert oder ist nicht erreichbar"))};
+    document.head.appendChild(s)});return gcGisP}
 function gcTok(inter){
   if(window.__gcFake)return Promise.resolve("fake");
   if(gcTk&&Date.now()<gcTkExp-60000)return Promise.resolve(gcTk);
@@ -4490,11 +4495,13 @@ function gcTok(inter){
     if(!gcClient||gcClientId!==cid){gcClientId=cid;gcClient=google.accounts.oauth2.initTokenClient({client_id:cid,scope:GC_SCOPE,callback:()=>{},error_callback:()=>{}})}
     gcClient.callback=(r)=>{if(r&&r.access_token){gcTk=r.access_token;gcTkExp=Date.now()+(+r.expires_in||3600)*1000;res(gcTk)}else rej(new Error((r&&r.error)||"auth"))};
     gcClient.error_callback=(er)=>rej(new Error("popup:"+((er&&er.type)||"")));
+    const to=setTimeout(()=>rej(new Error("Keine Antwort von Google. Fenster geschlossen oder Client-ID/Quelle falsch? Prüfe, ob https://mannschaftscockpit.de als autorisierte JavaScript-Quelle eingetragen ist.")),90000);
+    const r0=res,j0=rej;res=(v)=>{clearTimeout(to);r0(v)};rej=(e)=>{clearTimeout(to);j0(e)};
     gcClient.requestAccessToken({prompt:inter&&!gcLs("u13gcok")?"consent":""})})}
 async function gcReq(method,path,body){
   if(window.__gcFake)return window.__gcFake(method,path,body);
   for(let i=0;i<5;i++){
-    const r=await fetch(GC_API+path,{method,headers:{Authorization:"Bearer "+gcTk,"Content-Type":"application/json"},body:body?JSON.stringify(body):undefined});
+    const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),30000);let r;try{r=await fetch(GC_API+path,{signal:ac.signal,method,headers:{Authorization:"Bearer "+gcTk,"Content-Type":"application/json"},body:body?JSON.stringify(body):undefined})}finally{clearTimeout(tm)}
     let j=null;try{j=await r.json()}catch(e){}
     if(r.status===401){gcTk=null;gcTkExp=0;return{s:401,j:null}}
     const rate=r.status===429||r.status>=500||(r.status===403&&/rate|quota/i.test(JSON.stringify(j||{})));
@@ -4517,7 +4524,7 @@ async function gcPool(tasks,n){let i=0,err=null;await Promise.all(Array.from({le
 async function gcSync(inter){
   if(gcBusy||window.__gcOff)return;
   const P=gcP();if(!P.on||(!P.cid&&!window.__gcFake))return;
-  gcBusy=true;gcPend=false;gcRender("Abgleich läuft …");
+  gcBusy=true;gcPend=false;gcRender("Abgleich läuft …");const wd=setTimeout(()=>{if(gcBusy){gcBusy=false;gcFail="Zeitüberschreitung beim Abgleich. Tippe auf „Jetzt abgleichen“.";gcRender()}},180000);
   try{
     if(!window.__gcFake&&!gcGisOk()){await gcLoadGis();gcPend=true;return}
     try{await gcTok(inter)}catch(e){if(/popup|gis/.test(e.message)&&!inter){gcPend=true;gcFail="";gcRender();return}throw e}
@@ -4535,8 +4542,8 @@ async function gcSync(inter){
     await gcPool(tasks,3);
     gcLs("u13gcfp",gcFp(want));gcLs("u13gcok","1");gcFail="";gcInfo={t:Date.now(),n:want.length,c,u,d};gcLs("u13gcinfo",JSON.stringify(gcInfo))
   }catch(e){
-    if(e.message==="auth"){gcTk=null;gcTkExp=0;gcPend=true;gcFail=""}else gcFail=e.message||"Fehler"}
-  finally{gcBusy=false;gcRender()}}
+    if(e.message==="auth"){gcTk=null;gcTkExp=0;gcPend=true;gcFail=""}else gcFail=/^popup/.test(e.message||"")?"Das Google-Fenster wurde geschlossen oder blockiert. Erlaube Pop-ups für die Seite und tippe erneut auf „Jetzt abgleichen“.":(e.message||"Fehler")}
+  finally{clearTimeout(wd);gcBusy=false;gcRender()}}
 function gcRender(busyTx){
   const st=document.getElementById("gcst"),card=document.getElementById("gccard");if(!card)return;
   const ro=window.__RO||window.__VIEWER||window.__ROLE==="lesen"||window.__ROLE==="scout";
