@@ -56,7 +56,25 @@ td.k{background:linear-gradient(90deg,var(--c,var(--grs)) var(--v),transparent v
 svg text{fill:var(--mu);font-size:10px}
 .top{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}.logo{width:80px;height:80px;border:1.5px dashed var(--ln);border-radius:12px;display:grid;place-items:center;color:var(--mu);font-size:10px;text-align:center;line-height:1.15;cursor:pointer;overflow:hidden;background:var(--card);flex:none;padding:0}.logo img{width:100%;height:100%;object-fit:contain}.logo.lgset{border:0!important;background:none!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border-radius:50%}.av{cursor:pointer;overflow:hidden;position:relative}.av img{width:100%;height:100%;object-fit:cover}
 .nf{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px}.nf label{color:var(--mu);font-size:12px}textarea{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--ln);border-radius:9px;padding:8px 10px;width:100%;min-height:84px;resize:vertical}
-#n [hidden]{display:none!important}.og{border-top:1px solid var(--ln);padding:6px 0}.og>summary{cursor:pointer;padding:6px 0}.og .nt{padding:8px 0 8px 14px}.nt{padding:12px 0;border-bottom:1px solid var(--ln)}.nt:last-child{border:0}.nt .h{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:4px}.nt p{margin:0;white-space:pre-wrap}.pv{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--acs);color:var(--ac)}.zl{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--os);color:var(--o)}
+#n [hidden]{display:none!important}.bwov{position:fixed;inset:0;z-index:350;background:var(--bg);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}
+.bwh{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:10px 14px;background:var(--card);border-bottom:1px solid var(--ln)}.bwtt{font-size:17px}
+.bwsum{display:flex;gap:12px;align-items:baseline;padding:8px 14px;font-size:20px;background:var(--card);border-bottom:1px solid var(--ln)}.bwsum .note{font-size:12px}
+.bwpos{color:var(--g)}.bwneg{color:var(--r)}
+.bwl{flex:1;overflow:auto;padding:10px 12px;display:grid;grid-template-columns:1fr;gap:8px;align-content:start}@media(min-width:700px){.bwl{grid-template-columns:1fr 1fr;gap:8px 12px}}
+.bwr{background:var(--card);border:1px solid var(--ln);border-radius:14px;padding:8px 10px}.bwrt{display:flex;align-items:center;gap:8px}.bwn{width:26px;color:var(--mu);font-size:13px;text-align:right}.bwnm{flex:1;min-width:0;font-weight:600;overflow-wrap:anywhere}
+.bwb{width:54px;height:46px;border-radius:12px;border:1px solid var(--ln);font-family:inherit;font-weight:700;font-size:28px;line-height:1;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}.bwb.bwp{background:var(--gs);color:var(--g);border-color:var(--g)}.bwb.bwm{background:var(--rs);color:var(--r);border-color:var(--r)}.bwb:active{transform:scale(.94)}
+.bwc{min-width:62px;text-align:center;font-size:15px;white-space:nowrap}.bwun{background:none;border:0;color:var(--mu);font-size:20px;width:34px;height:40px;cursor:pointer}
+.bwtags{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px;padding-top:8px;border-top:1px dashed var(--ln)}.bwtg{font:inherit;font-size:13px;padding:6px 11px;border-radius:99px;border:1px solid var(--g);background:var(--gs);color:var(--g);cursor:pointer}.bwtg[aria-pressed=true]{background:var(--g);color:#fff}.bwhint{font-size:11px;color:var(--mu)}
+.bwtl{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.bwt1{font:inherit;font-size:13px;padding:4px 10px;border-radius:99px;border:1px solid var(--ln);background:var(--gs);color:var(--g)}.bwt1.bwm1{background:var(--rs);color:var(--r)}button.bwt1{cursor:pointer}.bwt1.bwsel{outline:2px solid var(--tx)}.bwskip{opacity:.45;text-decoration:line-through}
+.bwamp{display:flex;gap:8px}.bwa{width:36px;height:36px;border-radius:50%;border:3px solid transparent;cursor:pointer;touch-action:manipulation}.bwag{background:var(--g)}.bway{background:var(--y)}.bwar{background:var(--r)}.bwan{background:var(--mu);opacity:.65}.bwa.bwon{border-color:var(--tx);opacity:1}
+.bwfoot{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));background:var(--card);border-top:1px solid var(--ln)}.bwov .bwdone{background:var(--ac)!important;color:#fff!important;border-color:var(--ac)!important;font-weight:700;padding:12px 18px}
+.bwch{font-size:12px;padding:3px 9px;border-radius:99px;background:var(--gs);color:var(--mu);white-space:nowrap}.bwch.bwvg{background:var(--gs);color:var(--g);font-weight:600}.bwch.bwvs{background:var(--rs);color:var(--r);font-weight:600}
+.bwgo{display:flex;gap:14px;align-items:center;width:100%;text-align:left;font:inherit;color:#fff;background:var(--ac);border:0;border-radius:16px;padding:16px 18px;cursor:pointer}.bwgo b{font-size:18px;display:block}.bwgo small{font-size:13px;opacity:.92}.bwic{font-size:30px}
+.bwstk{display:flex;height:24px;border-radius:8px;overflow:hidden;margin:6px 0}.bwstk div{display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700}.bwstk .bwg{background:var(--g)}.bwstk .bwnn{background:var(--mu)}.bwstk .bws{background:var(--r)}
+.bwbars{display:flex;gap:3px;height:100px;margin-top:8px;position:relative}.bwbars:before{content:"";position:absolute;left:0;right:0;top:50%;border-top:1px solid var(--ln)}.bwcol{flex:1;min-width:6px;position:relative}.bwcol i{position:absolute;left:0;right:0;display:block;border-radius:3px}.bwup{bottom:50%;background:var(--g)}.bwdn{top:50%;background:var(--r)}.bwmid{top:calc(50% - 2px);height:4px;background:var(--mu)}
+#bwtb th,#bwtb td{text-align:center}#bwtb tr.bwtr{cursor:pointer}#bwtb tr.bwsel td{background:var(--acs)}
+@media(max-width:560px){.bwb{width:48px}.bwc{min-width:54px}}
+.og{border-top:1px solid var(--ln);padding:6px 0}.og>summary{cursor:pointer;padding:6px 0}.og .nt{padding:8px 0 8px 14px}.nt{padding:12px 0;border-bottom:1px solid var(--ln)}.nt:last-child{border:0}.nt .h{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:4px}.nt p{margin:0;white-space:pre-wrap}.pv{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--acs);color:var(--ac)}.zl{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--os);color:var(--o)}
 body.ro .rm,body.ro .s,body.ro .chips button,body.ro #av,body.ro #gl tr[data-g] .rm{pointer-events:none}body.ro .rm{display:none}#mt th,#mt td{text-align:center}#mt tr.mwe td{background:var(--grs)}#mt tr.mwe td:first-child{box-shadow:inset 4px 0 0 var(--tx)}.hl{border:0;border-top:2px solid var(--ln);margin:22px 0 16px}.kpi .note{margin-top:2px}.empty{padding:28px;text-align:center;color:var(--mu)}
 @media(max-width:760px){.app{display:block}nav{position:fixed;bottom:0;left:0;right:0;top:auto;height:auto;z-index:9;display:flex;padding:8px 6px calc(9px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--ln);border-right:0}nav h1,nav small{display:none}nav{overflow-x:auto}nav button{flex-direction:column;align-items:center;gap:2px;font-size:11px;padding:8px 8px;min-width:64px;flex:none;width:auto}main{padding:16px 16px 104px}h2{font-size:24px}}
 #vw2{max-width:1100px;margin:0 auto;padding:16px 16px 40px}.vh{display:flex;align-items:center;gap:10px;margin-bottom:14px}.vh img{width:68px;height:68px;object-fit:contain}.hn{border-radius:12px;padding:10px 14px;margin:0 0 12px;white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid;border-left-width:6px;color:var(--tx)}.hb{background:var(--bs);border-color:var(--b)}.hy{background:var(--ys);border-color:var(--y)}.hr{background:var(--rs);border-color:var(--r)}.hg{background:var(--gs);border-color:var(--g)}.vf{margin-top:18px;text-align:center;color:var(--mu);font-size:12px}.btn.arm{background:var(--rs);color:var(--r)}
@@ -198,7 +216,7 @@ html[data-design="ruhig"][data-theme="dark"]{--onac:#0f1311}html[data-design="gl
 <button data-s="h" class="on">🏠 Start</button><button data-s="a">👥 Beteiligung</button><button data-s="q">🏆 Bilanz</button><button data-s="p">👤 Profil</button><button data-s="n">📝 Notizen</button><button data-s="t">🏃 Training</button><button data-s="g">⚽ Spiele</button><button data-s="m">📅 Termine</button><button data-s="w">🎯 Schwerpunkte</button><button data-s="s">🗂 Stammdaten</button><button data-s="k">🧩 Kader</button><button data-s="e">⚙️ Einstellungen</button></nav>
 <main>
 <div class="top"><button class="logo" id="logo" type="button" title="Vereinslogo einfügen" aria-label="Vereinslogo einfügen">Logo<br>einfügen</button><button class="rm" id="logox" hidden title="Logo entfernen">✕</button><div><b style="font-size:22px;line-height:1.2"><span id="mann2">U13</span> · <span id="sais2"></span></b><div class="note" style="font-size:14px">Teamzentrale</div></div><span style="flex:1"></span><select id="th" aria-label="Darstellung" title="Darstellung"><option value="">Darstellung: Auto</option><option value="light">Hell</option><option value="dark">Dunkel</option></select><span class="pill" id="st">Verbinde …</span></div><div id="lkw" class="lkw" role="alert" hidden></div><div id="ccw" class="lkw lkw-y" role="alert" hidden></div><div id="bkw" class="lkw lkw-y" role="status" hidden></div><input type="file" id="fi" accept="image/*" hidden>
-<section id="h"><h2>Übersicht</h2><p class="sub" id="hsub"></p><div id="vnh" style="margin:0 0 8px"></div><div id="htd" style="margin:0 0 14px"></div>
+<section id="h"><h2>Übersicht</h2><p class="sub" id="hsub"></p><div id="vnh" style="margin:0 0 8px"></div><div id="bwt" style="margin:0 0 10px"></div><div id="htd" style="margin:0 0 14px"></div>
 <div class="kpis" id="hn" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))"></div>
 <hr class="hl"><h3>Termine &amp; Hinweise</h3><div class="gr" id="hg" style="margin-top:0"></div><hr class="hl"><h3>Kennzahlen</h3><div class="kpis" id="hk"></div><hr class="hl"><div class="card" style="margin-top:14px"><h3>Export für Eltern und Trainer</h3><div class="bar"><label class="note">Fassung <select id="hv"><option value="Eltern">Eltern / Spieler (ohne Geburtstage, Schwerpunkte, interne Termine)</option><option value="Trainer">Trainer (alles)</option></select></label><label class="note">Modus <select class="xthp"><option value="light">Hell</option><option value="dark">Dunkel</option></select></label></div>
 <div class="bar"><span class="note" style="min-width:110px">Monatsplan (A4)</span><select id="hmm" aria-label="Monat"></select><div class="seg" id="hxmo"><button data-f="png">PNG</button><button data-f="jpg">JPG</button><button data-f="pdf">PDF</button></div></div>
@@ -220,9 +238,9 @@ html[data-design="ruhig"][data-theme="dark"]{--onac:#0f1311}html[data-design="gl
 <div class="bar"><button class="btn" id="wprev" aria-label="Vorheriger Monat">◀</button><select id="wm" aria-label="Monat"></select><button class="btn" id="wnext" aria-label="Nächster Monat">▶</button><span style="flex:1"></span><label class="note">Modus <select class="xth"><option value="light">Hell</option><option value="dark">Dunkel</option></select></label><span class="note">Monat als A4:</span><div class="seg" id="xsw"><button data-f="png">PNG</button><button data-f="jpg">JPG</button><button data-f="pdf">PDF</button></div></div><div class="bar"><span class="note" style="min-width:150px">Woche als A4:</span><input type="date" id="wkd" aria-label="Woche (beliebiger Tag)"><span class="note" id="wkk"></span><div class="seg" id="xsk"><button data-f="png">PNG</button><button data-f="jpg">JPG</button><button data-f="pdf">PDF</button></div></div>
 <div class="card tw" style="padding:0"><table id="wt"></table></div>
 <h3 style="margin-top:18px">Trainerschwerpunkte &amp; To-Dos</h3><div id="wtd"></div></section>
-<section id="a" hidden><h2>Beteiligung</h2><p class="sub" id="asub"></p><div class="kpis" id="kp"></div>
+<section id="a" hidden><h2>Beteiligung</h2><p class="sub" id="asub"></p><div class="seg" id="abseg" role="group" aria-label="Ansicht" style="margin:0 0 12px"><button type="button" data-bwv="b" class="on">Beteiligung</button><button type="button" data-bwv="w">Bewertung</button></div><div id="a_b"><div class="kpis" id="kp"></div>
 <div class="bar"><div class="seg" id="vw" role="group" aria-label="Ansicht"><button data-v="all" class="on">Alles</button><button data-v="tr">Training</button><button data-v="sp">Spiele</button></div><label>Sortieren nach <select id="so"><option value="b" data-grp="tr" selected>Beteiligung gewichtet</option><option value="x" data-grp="tr">Beteiligung absolut</option><option value="l" data-grp="tr">Letzte 60 Tage gewichtet</option><option value="g" data-grp="sp">Spielzeit gewichtet</option><option value="a" data-grp="sp">Spielzeit absolut</option><option value="k" data-grp="sp">Spielzeit im Kader</option><option value="m" data-grp="sp">Minuten</option></select></label><label>Reihenfolge <select id="od"><option value="-1">Absteigend</option><option value="1">Aufsteigend</option></select></label><span style="flex:1"></span><label class="note">Modus <select class="xth"><option value="light">Hell</option><option value="dark">Dunkel</option></select></label><label class="note">Seiten <select id="xsp" aria-label="Seiten des Exports"><option value="all">Übersicht + Streudiagramm</option><option value="z3">Alle drei Seiten (mit Zusatzkennzahlen)</option><option value="ue">Nur Übersicht</option><option value="sc">Nur Streudiagramm</option><option value="zu">Nur Zusatzkennzahlen</option></select></label><span class="note">A4-Export (quer)</span><div class="seg" id="xa"><button data-f="png">PNG</button><button data-f="jpg">JPG</button><button data-f="pdf">PDF</button></div></div>
-<div class="leg" id="lg"></div><div class="card tw" style="padding:0"><table id="tb"></table></div><div class="gr" id="ch" style="margin:14px 0 0"></div><div id="sc" style="margin:14px 0 0"></div></section>
+<div class="leg" id="lg"></div><div class="card tw" style="padding:0"><table id="tb"></table></div><div class="gr" id="ch" style="margin:14px 0 0"></div><div id="sc" style="margin:14px 0 0"></div></div><div id="a_w" hidden></div></section>
 <section id="s" hidden><h2>Stammdaten</h2><div class="seg" id="sseg" style="margin-bottom:14px"><button data-v="p" class="on">Spieler</button><button data-v="t">Trainer &amp; Verantwortliche</button></div><div id="s_pl"><p class="sub">Positionen: 1× klicken = <span class="chip pN">Nebenposition</span>, 2× = <span class="chip pS">Stammposition</span>, 3× = aus · 25 Plätze · nur belegte Plätze erscheinen in allen anderen Ansichten · Änderungen werden sofort gespeichert</p><div class="kpis" id="sdk"></div><div class="card tw" style="padding:0"><table id="sdt"></table></div></div><div id="s_st" hidden><p class="sub">Trainer, Co-Trainer und weitere Verantwortliche. Die Namen lassen sich bei To-Dos als Zuständige auswählen (ohne Namen nur als Platzhalter, z. B. für einen Torwarttrainer, dessen Name noch offen ist); Geburtstage erscheinen auf Start und im Trainer-Export.</p><div class="card tw" style="padding:0;margin-bottom:12px"><table id="stt"></table></div><div class="card"><h3>Neu hinzufügen</h3><div class="bar" style="margin:0"><label class="note">Name<br><input id="stn" style="width:200px" autocomplete="off"></label><label class="note">Rolle<br><select id="str"><option>Trainer</option><option>Co-Trainer</option><option>Betreuer</option><option>Torwarttrainer</option><option>Athletiktrainer</option></select></label><label class="note">Geburtsdatum (optional)<br><input type="date" id="stg"></label><button class="btn" id="sta" style="background:var(--ac);color:#fff;border-color:var(--ac)">＋ Hinzufügen</button></div></div></div></section>
 <section id="p" hidden><div id="pwrap" class="pw"><div class="ph"><div class="av" id="av"></div><div style="min-width:0"><h2 id="pn" style="margin:0"></h2><div class="sub" style="margin:0" id="pi"></div></div><span style="flex:1"></span><span class="pnav"><button class="btn" id="pprev" aria-label="Vorheriger Spieler">◀</button><select id="ps" aria-label="Spieler"></select><button class="btn" id="pnext" aria-label="Nächster Spieler">▶</button></span></div>
 <div class="seg" id="pmode" style="margin-bottom:12px"><button data-pm="s">Einfach</button><button data-pm="d">Detailliert</button></div>
@@ -254,6 +272,7 @@ html[data-design="ruhig"][data-theme="dark"]{--onac:#0f1311}html[data-design="gl
 <div class="seg etb" id="etb" role="group" aria-label="Bereich der Einstellungen"><button data-et="l" class="on">Hinweise &amp; Links</button><button data-et="m">Mannschaft</button><button data-et="p">Persönlich</button><button data-et="s">Sicherung</button></div>
 <div class="etp" id="etp-m">
 <div class="card" id="kadsw" style="margin-bottom:12px"><h3>Kader-Modul</h3><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="kadon" checked> Kader (Kaderplanung &amp; Scouting) einblenden</label><p class="note" style="margin:6px 0 0">Ausgeblendet ist der Kader für alle weg (auch Co-Trainer, Kalender, Scouting-Link). Die Daten bleiben erhalten.</p></div>
+<div class="card" id="bwcard" style="margin-bottom:12px"><h3>Training bewerten</h3><p class="note" style="margin:0 0 8px">Plus und Minus pro Spieler im Training. Die Einstellungen gelten für alle Trainer. Die Bewertung ist nur für das Trainerteam sichtbar, nie in Profil, Links oder Exporten.</p><div class="bar" style="margin:0"><label>Doppeltipps: zwei Trainer geben dasselbe Vorzeichen innerhalb von <select id="bwwin"><option value="0">Aus (jeder Tipp zählt)</option><option value="5">5 Minuten</option><option value="10">10 Minuten</option><option value="15">15 Minuten</option><option value="20">20 Minuten</option></select> – dann zählt es einmal</label></div><label class="note" style="display:block;margin-top:8px">Schlagwörter (mit Komma getrennt, höchstens 8)<br><input id="bwtags" style="width:100%;max-width:520px" autocomplete="off"></label></div>
 <div class="gr" style="margin-top:0"><div class="card"><h3>Saison</h3><label class="note">Saison (z. B. 2026/27)<br><input id="esa" style="width:120px" autocomplete="off"></label> <label class="note" style="margin-left:12px">Mannschaft (z. B. U13)<br><input id="emn" style="width:90px" autocomplete="off"></label><p class="note" id="emsg" style="margin:8px 0 0">Die Saison bestimmt die zwölf Monate im Bereich Training (Juli bis Juni).</p></div>
 <div class="card"><h3>Zählende Abwesenheiten</h3><p class="note" style="margin-top:0">Diese Status zählen bei der gewichteten Trainingsbeteiligung als Fehlen. Die übrigen werden nicht gezählt.</p><div id="ezl"></div></div></div>
 <div class="card" style="margin-top:12px"><h3>Spielformen</h3><p class="note" style="margin-top:0">Die Voreinstellung „gewichtet" gilt für neue Spiele. Bestehende Spiele behalten ihre Gewichtung.</p><div class="tw"><table id="efm"></table></div>
@@ -269,7 +288,7 @@ html[data-design="ruhig"][data-theme="dark"]{--onac:#0f1311}html[data-design="gl
 <p class="note" style="margin:0 0 12px">Diese Einstellungen gelten nur für dein Konto und auf allen deinen Geräten. Andere Trainer sehen sie nicht.</p>
 <div class="card" id="vncard" style="margin-bottom:12px"><h3>Sprachnotizen (mit Claude)</h3><p class="note" style="margin:0 0 8px">Nur für dich in deinem Konto. Du sprichst deine Notizen in Claude ein, Claude sortiert sie nach Spielern, und hier importierst du sie mit einer Vorschau. Außerdem lassen sich alle Notizen als Datei für Claude exportieren.</p><div class="bar" style="margin:0 0 8px;flex-wrap:wrap"><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="vnon"> Hinweis nach Training/Spiel und Import-Knöpfe anzeigen</label><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="vntr" checked> nach Training</label><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="vnsp" checked> nach Spiel</label></div><div class="bar" style="margin:0"><label class="note">„Von“ bei importierten Notizen <select id="vnme"><option value="">– niemand –</option></select></label></div></div>
 <div class="card" id="gccard" style="margin-bottom:12px"><h3>Kalender (Apple Kalender über Google)</h3><p class="note" id="gcweb" hidden style="margin:0">Der Kalender-Abgleich funktioniert nur in der Web-Version der App (mannschaftscockpit.de).</p><div id="gcbody"><p class="note" style="margin:0 0 8px">Spiele, Trainings und Team-Events erscheinen automatisch in einem eigenen Kalender „U13 Trainer-Cockpit“. Neue, geänderte und gelöschte Termine werden mitgezogen, solange die App geöffnet ist. Ferien, Hinweise und Geburtstage gehören nicht dazu.</p><div class="bar" style="margin:0 0 8px"><label>Adresse von zu Hause (für die Fahrzeit) <input id="gchome" style="width:300px" autocomplete="off" placeholder="Straße Nr., PLZ Ort"></label><label>Google-Client-ID <input id="gccid" style="width:300px" autocomplete="off" placeholder="…apps.googleusercontent.com"></label></div><div class="bar" style="margin:0 0 8px"><button class="btn" id="gcconn" data-gc="conn">Mit Google verbinden</button><button class="btn" id="gcnow" data-gc="now" hidden>Jetzt abgleichen</button><button class="btn" data-gc="fz">Fahrzeiten neu berechnen</button><button class="btn" id="gcoff" data-gc="off" hidden>Trennen</button></div><p class="note" id="gcst" style="margin:0 0 8px"></p><p class="note" style="margin:0">Die Adresse bleibt in deinem Konto gespeichert und taucht in keinem Export und keinem Link auf. Die Fahrzeit ist eine Schätzung ohne Verkehr. Fehlt die Adresse beim Spiel, wird mit 20 Minuten gerechnet; sobald sie eingetragen ist, passt sich der Kalender an.</p><details style="margin-top:8px"><summary class="note" style="cursor:pointer">Einmalige Einrichtung (Anleitung)</summary><ol class="note" style="margin:8px 0 0;padding-left:18px"><li>Auf console.cloud.google.com ein neues Projekt anlegen (kostenlos).</li><li>„APIs &amp; Dienste“ → „Bibliothek“ → „Google Calendar API“ aktivieren.</li><li>„OAuth-Zustimmungsbildschirm“: Typ „Extern“, App-Name beliebig, deine Gmail-Adresse als Testnutzer eintragen.</li><li>„Anmeldedaten“ → „Anmeldedaten erstellen“ → „OAuth-Client-ID“ → Typ „Webanwendung“. Bei „Autorisierte JavaScript-Quellen“ <b>https://mannschaftscockpit.de</b> eintragen (und ggf. die Adresse der GitHub-Seite).</li><li>Die Client-ID oben einfügen, auf „Mit Google verbinden“ tippen und den Zugriff erlauben.</li><li>Auf iPhone/iPad/Mac: Einstellungen → Kalender → Accounts → Google-Konto hinzufügen, Kalender aktivieren.</li></ol></details></div></div>
-<div class="card" id="dzcard" style="margin-bottom:12px"><h3>Design</h3><div class="bar" style="margin:0"><label>Design der App <select id="dzapp"><option value="ruhig">Klar &amp; ruhig</option><option value="glas">Liquid Glass</option><option value="klassisch">Klassisch (bisheriges Design)</option></select></label><label>Farbe <select id="dzacc"></select></label><label>Glas-Transparenz <select id="dzgl"></select></label><label>Standard für externe Links <select id="dzlnk"><option value="ruhig">Klar &amp; ruhig</option><option value="glas">Liquid Glass</option></select></label></div><p class="note" style="margin:8px 0 0">Das Design der App gilt für alle Trainer und Geräte. Für jeden externen Link lässt sich das Design unter „Hinweise &amp; Links“ einzeln ändern. Das Design der A4-Exporte wählst du direkt bei den Export-Knöpfen.</p></div>
+<div class="card" id="dzcard" style="margin-bottom:12px"><h3>Design</h3><div class="bar" style="margin:0"><label>Design der App <select id="dzapp"><option value="ruhig">Klar &amp; ruhig</option><option value="glas">Liquid Glass</option></select></label><label>Farbe <select id="dzacc"></select></label><label>Glas-Transparenz <select id="dzgl"></select></label><label>Standard für externe Links <select id="dzlnk"><option value="ruhig">Klar &amp; ruhig</option><option value="glas">Liquid Glass</option></select></label></div><p class="note" style="margin:8px 0 0">Das Design der App gilt für alle Trainer und Geräte. Für jeden externen Link lässt sich das Design unter „Hinweise &amp; Links“ einzeln ändern. Das Design der A4-Exporte wählst du direkt bei den Export-Knöpfen.</p></div>
 </div>
 <div class="etp" id="etp-l" hidden>
 <div class="card" id="lkh" style="margin-bottom:12px"><h3>Hinweise in Spielerlinks</h3><p class="note" style="margin-top:0">Farbiger Hinweis oben im Link („Gesamter Link“: in beiden Reitern und im Terminplan-Link) oder nur in den Terminplänen. Ohne Datum bleibt er sichtbar, bis du ihn entfernst. Wirkt in den Links bei der nächsten Aktualisierung (alle 6 Stunden).</p><div id="hnl"></div>
@@ -436,7 +455,7 @@ html[data-design="ruhig"][data-theme="dark"]{--onac:#0f1311}html[data-design="gl
 <script>
 const $=(q)=>document.querySelector(q),POS=["TW","IV","AV","FL","ZM","ST"],pc=(x)=>x==null?"–":(x*100).toFixed(1).replace(".",",")+" %",mn=(x)=>String(Math.round(x));
 const SECS=["h","a","p","t","g","q","n","m","w","s","k","e"];
-const D={spieler:[],spiele:[],trainings:[],notizen:[],events:[],dienste:[],todos:[],config:null,ready:false};let db=null;
+const D={spieler:[],spiele:[],trainings:[],notizen:[],events:[],dienste:[],todos:[],tipps:[],config:null,ready:false};let db=null;
 const nm=(p)=>window.__ANON?p.vorname+" "+p.name:p.vorname+" "+(p.name||"")[0]+".";
 function applyTheme(v){if(v)document.documentElement.setAttribute("data-theme",v);else document.documentElement.removeAttribute("data-theme")}
 (()=>{let v="";try{v=localStorage.getItem("u13theme")||""}catch(e){}applyTheme(v);$("#th").value=v;$("#th").onchange=()=>{const x=$("#th").value;applyTheme(x);try{x?localStorage.setItem("u13theme",x):localStorage.removeItem("u13theme")}catch(e){}}})();
@@ -458,7 +477,7 @@ const th=document.getElementById("th");if(th)th.addEventListener("change",ap);ma
 window.applyBg=ap;ap()})();
 function setSt(t,c){const e=$("#st");if(!e)return;e.textContent=t;e.className="pill "+(c||"")}
 /* ---------- Speichern: pro Dokument nacheinander, mit Warteschlange für Offline/Funkloch ---------- */
-const chain=new Map(),OQ=new Map(),QK="u13oq",COLKEY={players:"spieler",games:"spiele",trainings:"trainings",events:"events",dienste:"dienste",todos:"todos",notes:"notizen"};
+const chain=new Map(),OQ=new Map(),QK="u13oq",COLKEY={players:"spieler",games:"spiele",trainings:"trainings",events:"events",dienste:"dienste",todos:"todos",notes:"notizen",tipps:"tipps"};
 const qStore=()=>{try{const a=[...OQ.values()].map((x)=>({coll:x.coll,id:x.id,data:x.data,ts:x.ts}));a.length?localStorage.setItem(QK,JSON.stringify(a)):localStorage.removeItem(QK)}catch(e){}};
 const qTxt=()=>"Offline – "+OQ.size+(OQ.size===1?" Änderung wartet":" Änderungen warten")+" auf Verbindung";
 function qApply(coll,id,data,quiet){const k=COLKEY[coll];if(!k||!D[k])return;const i=D[k].findIndex((x)=>x.id===id);if(data){const o={id,...data};if(i>=0)D[k][i]=o;else D[k].push(o)}else if(i>=0)D[k].splice(i,1);if(!quiet){try{renderAll()}catch(e){}}}
@@ -484,6 +503,7 @@ function ccLabel(coll,id,d){d=d||{};const g=(i)=>(D.spiele||[]).find((x)=>x.id==
   if(coll==="dienste")return"Dienst „"+(d.art||"")+"“";
   if(coll==="notes")return"Eine Notiz";
   if(coll==="todos")return"Ein To-Do";
+  if(coll==="tipps")return"Bewertung (Tipps) zum Training am "+ccDate(d.datum);
   return"Ein Dokument ("+coll+")"}
 function ccRender(){const b=document.getElementById("ccw");if(!b)return;if(!CW.items.length){b.hidden=true;b.innerHTML="";return}
   b.innerHTML="<b>⚠ Gleichzeitige Änderung</b><ul>"+CW.items.slice(0,5).map((x)=>"<li>"+esc(x)+"</li>").join("")+(CW.items.length>5?"<li>… und "+(CW.items.length-5)+" weitere</li>":"")+'</ul><p class="note" style="margin:0 0 6px">Ein anderes Gerät (zum Beispiel das des Co-Trainers) hat dies geändert, während du daran gearbeitet hast. Es gilt immer die zuletzt gespeicherte Fassung. Bitte kurz prüfen, ob alles stimmt.</p><div class="bar"><button class="btn" data-ccok="1">Verstanden</button></div>';b.hidden=false}
@@ -598,7 +618,7 @@ function renderTrain(){
   if(!P.length){$("#tg").innerHTML='<tr><td class="empty" style="text-align:center">Noch keine Spieler. Unter „Stammdaten“ anlegen.</td></tr>';$("#tn").textContent="";return}
   const wd=(iso)=>["So","Mo","Di","Mi","Do","Fr","Sa"][new Date(iso+"T12:00:00").getDay()];
   const zl0=(D.config&&D.config.zaehlendeAbwesenheiten)||{e:true,u:true,v:false,t:false},QS=P.map((p)=>U13.trainStats(p.id,ts,zl0,cm)),pl=(v,c)=>'<span class="pl'+(c?" p"+c:"")+'">'+pc(v)+"</span>";
-  let h='<tr><th>#</th><th style="text-align:left">Spieler</th>'+ts.map((t)=>"<th>"+wd(t.datum)+"<br>"+t.datum.slice(8)+"."+t.datum.slice(5,7)+'.<br><button class="rm'+(armed===t.id?" arm":"")+'" data-del="'+t.id+'" title="Training löschen">'+(armed===t.id?"Löschen?":"✕")+"</button></th>").join("")+'<th>Teilgen.</th><th title="Teilnahmequote gewichtet in diesem Monat">Quote gew.</th><th title="Teilnahmequote absolut in diesem Monat">Quote abs.</th></tr>';
+  let h='<tr><th>#</th><th style="text-align:left">Spieler</th>'+ts.map((t)=>"<th>"+wd(t.datum)+"<br>"+t.datum.slice(8)+"."+t.datum.slice(5,7)+'.<br><button class="rm" data-bwopen="'+t.id+'" title="Training bewerten" aria-label="Training bewerten">'+(typeof bwRated==="function"&&bwRated(t.id)?"⭐":"☆")+'</button><button class="rm'+(armed===t.id?" arm":"")+'" data-del="'+t.id+'" title="Training löschen">'+(armed===t.id?"Löschen?":"✕")+"</button></th>").join("")+'<th>Teilgen.</th><th title="Teilnahmequote gewichtet in diesem Monat">Quote gew.</th><th title="Teilnahmequote absolut in diesem Monat">Quote abs.</th></tr>';
   h+=P.map((p,i)=>{const st=ts.map((t)=>(t.spieler||{})[p.id]||""),q=QS[i];return"<tr><td>"+esc(p.nr||"")+"</td><td>"+esc(nm(p))+"</td>"+st.map((c,j)=>'<td><button class="s '+(c||"o")+'" data-t="'+ts[j].id+'" data-p="'+p.id+'" aria-label="'+nm(p)+", "+ts[j].datum+'">'+(c==="K"?"k":c||"·")+"</button></td>").join("")+"<td>"+st.filter((c)=>c==="x"||c==="K").length+"/"+ts.length+"</td><td>"+pl(q.gewichtet,U13.farbeTraining(q.gewichtet))+"</td><td>"+pl(q.abs,0)+"</td></tr>"}).join("");
   const av=(f)=>{const v=QS.map(f).filter((x)=>x!=null);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null},cnt=ts.map((t)=>{const a=anw(P,t);return[a.c,a.tot,a.f+"+"+a.g,a.k]});
   h+='<tr style="font-weight:600"><td></td><td>Anwesend</td>'+cnt.map((c)=>'<td style="text-align:center;white-space:nowrap">'+'<span style="display:block;text-align:center">'+c[2]+"/"+c[1]+'</span><span style="display:block;height:1px;width:60%;margin:3px auto;background:var(--mu);opacity:.45"></span><span style="display:block;text-align:center">'+c[0]+"/"+c[1]+"</span></td>").join("")+'<td></td><td>Ø '+pc(av((q)=>q.gewichtet))+"</td><td>Ø "+pc(av((q)=>q.abs))+'</td></tr><tr><td></td><td class="note" style="font-weight:400">Quote</td>'+cnt.map((c)=>'<td style="text-align:center" class="note">'+(c[1]?Math.round(c[0]/c[1]*100)+" %":"–")+"</td>").join("")+"<td></td><td></td><td></td></tr>";
@@ -854,7 +874,7 @@ $("#nl").addEventListener("click",(e)=>{
 });
 function renderAll(){window.__renderErr=null;const g=(n,f)=>{try{f()}catch(e){window.__renderErr=window.__renderErr||(n+": "+((e&&e.message)||e));try{console.error(e)}catch(x){}}};
   g("Saison",()=>renderSaison());g("Stamm",()=>renderStamm());g("Training",()=>renderTrain());g("Spiele",()=>renderGames());g("Profil",()=>renderProfile());g("Notizen",()=>renderNotes());g("Logo",()=>renderLogo());
-  g("Einstellungen",()=>{typeof renderSettings==="function"&&renderSettings()});g("Statistik",()=>{typeof renderQ==="function"&&renderQ()});g("Sicherung",()=>{typeof bkwRender==="function"&&bkwRender()});g("Links",()=>{typeof renderLinks==="function"&&renderLinks()});g("Plan",()=>{typeof renderPlan==="function"&&renderPlan()});g("Kader",()=>{typeof renderKader==="function"&&renderKader()});
+  g("Einstellungen",()=>{typeof renderSettings==="function"&&renderSettings()});g("Statistik",()=>{typeof renderQ==="function"&&renderQ()});g("Sicherung",()=>{typeof bkwRender==="function"&&bkwRender()});g("Links",()=>{typeof renderLinks==="function"&&renderLinks()});g("Plan",()=>{typeof renderPlan==="function"&&renderPlan()});g("Bewertung",()=>{typeof bwRender==="function"&&bwRender()});g("Kader",()=>{typeof renderKader==="function"&&renderKader()});
   if(window.__renderErr)setSt("Anzeigefehler – "+window.__renderErr,"err")}
 /* ---------- Datenbank ---------- */
 const got={};
@@ -869,7 +889,7 @@ function sub(coll,key,map){
   if(!db){setSt("Keine Verbindung: bitte anmelden und die Seite neu laden","err");window.__noDb=true;typeof showAccess==="function"&&showAccess();return}
   try{const c0=await db.doc("config/main").get();if(!c0||c0.exists===false)throw new Error("noaccess")}catch(e){db=null;window.__noDb=true;setSt("Kein Zugriff","err");typeof showAccess==="function"&&showAccess("Kein Zugriff. Diese App ist nur für das Trainerteam.");return}
   window.__dbUp=true;qRestore();if(window.__SCOUT){typeof scoutMode==="function"&&scoutMode(db);return}window.__ROLE!=="scout"&&window.__ROLE!=="lesen"&&typeof initLinks==="function"&&initLinks();typeof initKader==="function"&&initKader(db);if(window.__ROLE==="scout"){D.ready=true;go("k")}
-  sub("players","spieler",(a,b)=>a.slot-b.slot);sub("games","spiele",(a,b)=>a.nr-b.nr);sub("trainings","trainings",(a,b)=>a.datum.localeCompare(b.datum));sub("events","events");sub("dienste","dienste");sub("todos","todos");window.__ROLE!=="scout"&&db.collection("notes").onSnapshot((x)=>{D.notizen=x.docs.map((d)=>({id:d.id,...d.data()}));renderNotes();renderProfile();typeof renderStart==="function"&&renderStart()},()=>{});
+  sub("players","spieler",(a,b)=>a.slot-b.slot);sub("games","spiele",(a,b)=>a.nr-b.nr);sub("trainings","trainings",(a,b)=>a.datum.localeCompare(b.datum));sub("events","events");sub("dienste","dienste");sub("todos","todos");sub("tipps","tipps");window.__ROLE!=="scout"&&db.collection("notes").onSnapshot((x)=>{D.notizen=x.docs.map((d)=>({id:d.id,...d.data()}));renderNotes();renderProfile();typeof renderStart==="function"&&renderStart()},()=>{});
   try{db.doc("config/sicherung").onSnapshot((s)=>{D.sicherung=s&&s.exists?s.data():null;D.sicherungGot=true;typeof bkwRender==="function"&&bkwRender()},()=>{D.sicherungGot=true})}catch(e){}
   try{db.doc("prefs/"+(window.__ACCT||"main")).onSnapshot((s)=>{window.__dzPrefs&&window.__dzPrefs(s.exists?s.data():null)},()=>{})}catch(e){}
   db.doc("config/main").onSnapshot((s)=>{D.config=s.exists?s.data():null;window.__dzSync&&window.__dzSync();renderSaison();renderLogo();renderTrain();typeof renderSettings==="function"&&renderSettings();renderGames();typeof renderQ==="function"&&renderQ();typeof renderLinks==="function"&&renderLinks();typeof renderPlan==="function"&&renderPlan();typeof renderKader==="function"&&renderKader();if(D.ready&&$("#st").className.indexOf("busy")<0&&!window.__renderErr)setSt("Synchron","ok")},()=>{});
@@ -1847,7 +1867,7 @@ function kzFoot(alias,aid,doc,p){
 const L={};window.__links=L;let started=false,tok=0,armed=null;
 const base=()=>window.__WEB_BASE||BASE_DEFAULT;window.__lkbase=base;
 const linkOf=(pid,key)=>base()+"#"+pid+"."+key;
-const FP_INT=["trainerToDos","trainerToDosM","kaderAus","linkBasis","sicherung"];
+const FP_INT=["trainerToDos","trainerToDosM","kaderAus","linkBasis","sicherung","bw"];
 /* Zwei Stände: A = was Eltern sofort im Plan bzw. im Profil lesen (Termine, Dienste, Hinweise, Kontakte, sichtbare Notizen, Spielerdaten),
    S = Auswertung (eingetragene Anwesenheit, Kader und Minuten bereits erreichter Termine). Änderungen an S sind weniger dringend. */
 const fingerprintParts=async()=>{
@@ -3944,7 +3964,7 @@ async function unpack(enc,d){let u=unb64(d);if(enc==="gz"){const ds=new Blob([u]
 
 /* ---- Gesamtstand als Objekt (gleiches Format wie die Dateisicherung) ---- */
 window.bkObj=function(){
-  const o={app:"U13 Trainer-Cockpit",version:2,erstellt:new Date().toISOString(),config:D.config,players:D.spieler,games:D.spiele,trainings:D.trainings,notes:D.notizen,events:D.events||[],dienste:D.dienste||[],todos:D.todos||[]};
+  const o={app:"U13 Trainer-Cockpit",version:2,erstellt:new Date().toISOString(),config:D.config,players:D.spieler,games:D.spiele,trainings:D.trainings,notes:D.notizen,events:D.events||[],dienste:D.dienste||[],todos:D.todos||[],tipps:D.tipps||[]};
   if(window.__STready)o.spieltag=Object.values(window.__ST||{}).map((x)=>({...x}));
   const L=window.__links||{};o.links=Object.keys(L).map((k)=>({id:k,key:L[k].key,aktiv:!!L[k].aktiv}));
   try{const KK=window.__kader&&window.__kader.KD;if(KK)o.kader={plans:KK.plans,personen:KK.pers,beobachtungen:KK.obs,eingang:KK.inbox}}catch(e){}
@@ -4002,7 +4022,7 @@ async function prune(){
 
 /* ---- Einspielen (Dateisicherung und Datenbank-Stand) ---- */
 window.bkApply=async function(o){
-  const jobs=[],sets=[["players","spieler","players"],["games","spiele","games"],["trainings","trainings","trainings"],["notes","notizen","notes"],["events","events","events"],["dienste","dienste","dienste"],["todos","todos","todos"]];
+  const jobs=[],sets=[["players","spieler","players"],["games","spiele","games"],["trainings","trainings","trainings"],["notes","notizen","notes"],["events","events","events"],["dienste","dienste","dienste"],["todos","todos","todos"]].concat(Array.isArray(o.tipps)?[["tipps","tipps","tipps"]]:[]);
   sets.forEach(([coll,key,ok])=>{const inn=(o[ok]||[]),ids=new Set(inn.map((x)=>x.id));(D[key]||[]).forEach((x)=>{if(!ids.has(x.id))jobs.push(save(coll,x.id,null))});inn.forEach((x)=>{const {id,...rest}=x;jobs.push(save(coll,id,{id,...rest}))})});
   if(Array.isArray(o.links)){const L=window.__links||{},ids=new Set(o.links.map((x)=>x.id));Object.keys(L).forEach((k)=>{if(!ids.has(k))jobs.push(save("links",k,null))});o.links.forEach((x)=>jobs.push(save("links",x.id,{id:x.id,key:x.key,aktiv:!!x.aktiv})))}
   if(o.kader&&window.__kader){const KK=window.__kader.KD;[["kplan","plans","plans"],["kperson","pers","personen"],["kobs","obs","beobachtungen"],["kinbox","inbox","eingang"]].forEach(([coll,key,ok])=>{if(!Array.isArray(o.kader[ok]))return;const inn=o.kader[ok],ids=new Set(inn.map((x)=>x.id));(KK[key]||[]).forEach((x)=>{if(!ids.has(x.id))jobs.push(save(coll,x.id,null))});inn.forEach((x)=>jobs.push(save(coll,x.id,x)))})}
@@ -4111,6 +4131,7 @@ async function wzRun(){
     /* Daten der alten Saison entfernen, übrige bereinigen */
     D.spiele.filter((g)=>oldD(g.datum)).forEach((g)=>jobs.push(save("games",g.id,null)));
     D.trainings.filter((t)=>oldD(t.datum)).forEach((t)=>jobs.push(save("trainings",t.id,null)));
+    (D.tipps||[]).filter((d)=>oldD(d.datum)).forEach((d)=>jobs.push(save("tipps",d.id,null)));
     (D.events||[]).filter((e)=>((e.bis||e.datum)||"9999")<cut).forEach((e)=>jobs.push(save("events",e.id,null)));
     (D.dienste||[]).filter((e)=>((e.bis||e.datum)||"9999")<cut).forEach((e)=>jobs.push(save("dienste",e.id,null)));
     D.notizen.filter((n)=>(n.pid&&drop2.has(n.pid))||(!z.keepNotes&&oldD(n.datum))||(z.keepNotes&&n.pid==="team"&&oldD(n.datum))).forEach((n)=>jobs.push(save("notes",n.id,null)));
@@ -4339,9 +4360,9 @@ async function siOpen(gid){
   $("#sicopy").onclick=async()=>{const t=$("#sitx").value;try{await navigator.clipboard.writeText(t);setSt("Text kopiert – in WhatsApp einfügen","ok")}catch(e){const a=$("#sitx");a.removeAttribute("readonly");a.select();try{document.execCommand("copy");setSt("Text kopiert – in WhatsApp einfügen","ok")}catch(e2){setSt("Bitte den markierten Text von Hand kopieren","err")}a.setAttribute("readonly","")}};
   await rend()}
 document.addEventListener("click",(e)=>{const t=e.target.closest&&e.target.closest("[data-si]");if(!t)return;e.preventDefault();e.stopPropagation();siOpen(t.dataset.si)},true);
-</script><script>/* ===== Designs: „Klar & ruhig“, „Liquid Glass“, „Klassisch“ – nur Optik. Gilt für die App, die externen Links und die A4-Exporte. ===== */
+</script><script>/* ===== Designs: „Klar & ruhig“, „Liquid Glass“ – nur Optik. Gilt für die App, die externen Links und die A4-Exporte. ===== */
 (function(){
-const NAMES={ruhig:"Klar & ruhig",glas:"Liquid Glass",klassisch:"Klassisch"},root=document.documentElement;
+const NAMES={ruhig:"Klar & ruhig",glas:"Liquid Glass"},root=document.documentElement;
 const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k)||"";v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){return""}};
 let cur=NAMES[ls("u13design")]?ls("u13design"):"ruhig",mem={};
 /* Farben und Glas-Transparenz (nur Optik, pro Design merkbar) */
@@ -4367,7 +4388,7 @@ function set(d,keep){if(!NAMES[d])d="ruhig";cur=d;root.setAttribute("data-design
 function sync(){const a=document.getElementById("dzapp"),l=document.getElementById("dzlnk"),c=cfg();if(a&&document.activeElement!==a)a.value=cur;if(l&&document.activeElement!==l)l.value=c.linkDesign==="glas"?"glas":"ruhig";
   document.querySelectorAll(".xdz").forEach((s)=>{if(document.activeElement!==s)s.value=xdes()});
   const ac=document.getElementById("dzacc"),gs=document.getElementById("dzgl");
-  if(ac){if(!ac.options.length)ac.innerHTML=Object.keys(ACC).map((k)=>'<option value="'+k+'">'+ACC[k].n+"</option>").join("");{const tx=cur==="glas"?"Standard (Blau)":"Standard (Grün)";if(ac.options[0].textContent!==tx)ac.options[0].textContent=tx}ac.disabled=cur==="klassisch"||window.__ROLE==="lesen";if(document.activeElement!==ac)ac.value=accKey(cur)}
+  if(ac){if(!ac.options.length)ac.innerHTML=Object.keys(ACC).map((k)=>'<option value="'+k+'">'+ACC[k].n+"</option>").join("");{const tx=cur==="glas"?"Standard (Blau)":"Standard (Grün)";if(ac.options[0].textContent!==tx)ac.options[0].textContent=tx}ac.disabled=window.__ROLE==="lesen";if(document.activeElement!==ac)ac.value=accKey(cur)}
   if(gs){if(!gs.options.length)gs.innerHTML=["dicht","std","klar"].map((k)=>'<option value="'+k+'">'+GLS[k].n+"</option>").join("");gs.disabled=cur!=="glas"||window.__ROLE==="lesen";if(document.activeElement!==gs)gs.value=glKey()}}
 const linkDefault=()=>cfg().linkDesign==="glas"?"glas":"ruhig";
 /* Design, Farbe und Glas-Transparenz gelten pro Konto (Sammlung „prefs“), nicht pro Gerät. Ohne eigenen Eintrag gelten ältere Werte aus den Einstellungen. */
@@ -4749,5 +4770,147 @@ document.addEventListener("input",(e)=>{const t=e.target,row=t&&t.closest&&t.clo
 window.__vnOnPrefs=()=>{vnPv=null;vnRender()};
 setInterval(()=>{try{vnRender()}catch(e){}},30000);
 setTimeout(()=>{try{vnRender()}catch(e){}},1500);
+</script><script>/* ===== Bewertung: Plus/Minus pro Spieler im Training, Ampel danach, Statistik in „Beteiligung“. Nur für das Trainerteam, nie in Profil, Links oder Exporten. ===== */
+/* Daten: Sammlung „tipps“, EIN Dokument pro Training und Trainer (id = Trainings-ID + "_" + Konto). So überschreiben sich zwei Trainer nie.
+   { tid, datum, vk, taps: { spielerId: [[Zeit(ms), +1/-1, Schlagwort]] }, amp: { spielerId: [g|y|r|n, Zeit] } } */
+const BWTAGS=["Einsatz","Technik","Zweikampf","Spielintelligenz","Verhalten"],BWU={1:"gut",0:"neutral","-1":"nicht gut"},BWAMP=[["g","grün"],["y","gelb"],["r","rot"],["n","keine Einschätzung"]];
+const bwCfg=()=>{const c=(D.config&&D.config.bw)||{},w=c.win;return{win:w===0||w==="0"?0:(+w>0?+w:10),tags:Array.isArray(c.tags)&&c.tags.length?c.tags:BWTAGS}};
+const bwCan=()=>!(window.__RO||window.__VIEWER||window.__ROLE==="lesen"||window.__ROLE==="scout");
+const bwKey=()=>String(window.__ACCT||"main");
+const bwSgn=(x)=>x>0?1:x<0?-1:0;
+const bwTr=(tid)=>(D.trainings||[]).find((t)=>t.id===tid);
+const bwPresent=(t)=>active().filter((p)=>((t&&t.spieler)||{})[p.id]==="x");
+/* ----- Rechnen (ohne Anzeige) ----- */
+/* Tipps eines Trainings je Spieler. Gibt ein Trainer in der Zeitspanne dasselbe Vorzeichen wie ein anderer Trainer, zählt es nur einmal. */
+function bwTaps(tid){
+  const win=bwCfg().win*6e4,by={};
+  (D.tipps||[]).filter((d)=>d.tid===tid).forEach((d)=>Object.keys(d.taps||{}).forEach((pid)=>(d.taps[pid]||[]).forEach((x,i)=>(by[pid]=by[pid]||[]).push({ts:x[0],v:x[1],tag:x[2]||"",vk:d.vk,id:d.id,i}))));
+  Object.keys(by).forEach((pid)=>{const ok=[];by[pid].sort((a,b)=>a.ts-b.ts).forEach((x)=>{x.skip=!!win&&ok.some((o)=>o.vk!==x.vk&&o.v===x.v&&x.ts-o.ts<=win);if(!x.skip)ok.push(x)})});
+  return by}
+/* Ampel je Spieler: gilt, was zuletzt gesetzt wurde. */
+function bwAmps(tid){const m={};(D.tipps||[]).filter((d)=>d.tid===tid).forEach((d)=>Object.keys(d.amp||{}).forEach((pid)=>{const a=d.amp[pid];if(a&&(!m[pid]||a[1]>m[pid][1]))m[pid]=a}));const o={};Object.keys(m).forEach((k)=>o[k]=m[k][0]);return o}
+/* Urteil eines Trainings und aller Anwesenden: 1 gut, 0 neutral, -1 nicht gut, null = nicht bewertet. Tipps zählen zuerst, fehlen sie, die Ampel. */
+function bwSum(t){
+  const by=bwTaps(t.id),am=bwAmps(t.id),rows=bwPresent(t).map((p)=>{
+    const L=(by[p.id]||[]).filter((x)=>!x.skip),pl=L.filter((x)=>x.v>0).length,mi=L.length-pl,a=am[p.id]||"";
+    let u=null,src="";if(pl+mi>0){u=bwSgn(pl-mi);src="t"}else if(a==="g"||a==="y"||a==="r"){u=a==="g"?1:a==="r"?-1:0;src="a"}
+    return{p,pl,mi,a,u,src,all:by[p.id]||[]}});
+  const tp=rows.reduce((s,r)=>s+r.pl,0),tm=rows.reduce((s,r)=>s+r.mi,0);let u=null,src="";
+  if(tp+tm>0){u=bwSgn(tp-tm);src="t"}else{const g=rows.filter((r)=>r.a==="g").length,r2=rows.filter((r)=>r.a==="r").length,y=rows.filter((r)=>r.a==="y").length;if(g+r2+y>0){u=bwSgn(g-r2);src="a"}}
+  return{t,rows,tp,tm,n:tp+tm,u,src}}
+const bwRated=(tid)=>{const t=bwTr(tid);return!!t&&bwSum(t).u!==null};
+/* Statistik: alle bewerteten Trainings, je Spieler die Tage, an denen er da war und ein Urteil hat. */
+function bwStats(){
+  const now=today(),ts=(D.trainings||[]).filter((t)=>t.datum<=now).sort((a,b)=>a.datum.localeCompare(b.datum)),sums=ts.map(bwSum),rated=sums.filter((s)=>s.u!==null),by={};
+  rated.forEach((s)=>s.rows.forEach((r)=>{if(r.u!==null)(by[r.p.id]=by[r.p.id]||[]).push({datum:s.t.datum,u:r.u,pl:r.pl,mi:r.mi,tu:s.u})}));
+  const start=rated.length?rated[0].t.datum:"",since=start?ts.filter((t)=>t.datum>=start).length:0;
+  const cnt=(L)=>({g:L.filter((x)=>x.u===1).length,n:L.filter((x)=>x.u===0).length,s:L.filter((x)=>x.u===-1).length});
+  const team=cnt(rated.map((s)=>({u:s.u}))),pl={};
+  Object.keys(by).forEach((pid)=>{const L=by[pid],c=cnt(L),k=c.g+c.n+c.s,tc=cnt(L.map((x)=>({u:x.tu}))),tk=tc.g+tc.n+tc.s;let trend=null;
+    if(L.length>=5){const a5=L.slice(-5),old=L.slice(0,-5),av=(A)=>A.reduce((s,x)=>s+x.u,0)/A.length;if(old.length){const d=av(a5)-av(old);trend=d>.25?"up":d<-.25?"down":"flat"}}
+    pl[pid]={days:L,c,k,share:k?c.g/k:null,pl:L.reduce((s,x)=>s+x.pl,0),mi:L.reduce((s,x)=>s+x.mi,0),teamShare:tk?tc.g/tk:null,trend,enough:L.length>=5}});
+  return{start,since,rated:rated.length,sums,ratedSums:rated,team,pl}}
+/* Wofür gab es Plus/Minus? Zählt Schlagwörter eines Spielers über alle Trainings (ohne Doppeltipps). */
+function bwTagCount(pid){const o={p:{},m:{},p0:0,m0:0};(D.trainings||[]).forEach((t)=>{const L=bwTaps(t.id)[pid]||[];L.filter((x)=>!x.skip).forEach((x)=>{const k=x.v>0?"p":"m";if(x.tag)o[k][x.tag]=(o[k][x.tag]||0)+1;else o[k+"0"]++})});return o}
+/* ----- Speichern (eigenes Dokument des angemeldeten Trainers) ----- */
+function bwDoc(t){const id=t.id+"_"+bwKey();let d=(D.tipps||[]).find((x)=>x.id===id);if(!d){d={id,tid:t.id,datum:t.datum,vk:bwKey(),taps:{},amp:{}};(D.tipps=D.tipps||[]).push(d)}return d}
+function bwSave(d){const q={...d};delete q.id;save("tipps",d.id,q)}
+function bwTap(pid,v){const t=bwTr(bwS.tid);if(!t||!bwCan())return;const d=bwDoc(t);(d.taps[pid]=d.taps[pid]||[]).push([Date.now(),v,""]);bwS.tag={pid,id:d.id,i:d.taps[pid].length-1,live:true};bwSave(d);bwTimer();bwRender()}
+function bwUndo(pid){const t=bwTr(bwS.tid);if(!t||!bwCan())return;const d=bwDoc(t),L=d.taps[pid]||[];if(!L.length)return;L.pop();if(!L.length)delete d.taps[pid];bwS.tag=null;bwSave(d);bwRender()}
+function bwSetTag(tag){const g=bwS.tag;if(!g)return;const d=(D.tipps||[]).find((x)=>x.id===g.id),x=d&&d.taps&&d.taps[g.pid]&&d.taps[g.pid][g.i];if(!x)return;x[2]=x[2]===tag?"":tag;bwSave(d);bwS.tag=null;bwRender()}
+function bwSetAmp(pid,a){const t=bwTr(bwS.tid);if(!t||!bwCan())return;const d=bwDoc(t),cur=(d.amp[pid]||[])[0];if(cur===a)delete d.amp[pid];else d.amp[pid]=[a,Date.now()];bwSave(d);bwRender()}
+let bwTm=0;function bwTimer(){clearTimeout(bwTm);bwTm=setTimeout(()=>{if(bwS.tag&&bwS.tag.live){bwS.tag=null;bwRender()}},6000)}
+/* ----- Anzeige ----- */
+const bwS={tid:"",mode:"live",tag:null,sel:"",view:"b"};
+const bwD=(iso)=>iso?iso.slice(8)+"."+iso.slice(5,7)+".":"";
+const bwWd=(iso)=>["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"][new Date(iso+"T12:00:00").getDay()];
+const bwSg=(n)=>(n>0?"+":n<0?"−":"")+Math.abs(n);
+const bwPM=(p,m)=>'<b class="bwpos">+'+p+'</b> <b class="bwneg">−'+m+"</b>";
+const bwChip=(u,extra)=>u===null?'<span class="bwch">noch nicht bewertet</span>':'<span class="bwch bwv'+(u===1?"g":u===-1?"s":"n")+'">'+BWU[u]+(extra||"")+"</span>";
+function bwTimes(t){const e=(D.events||[]).find((x)=>x.typ==="Training"&&(x.trainId===t.id||x.datum===t.datum));return e&&e.beginn?e.beginn+(e.ende?"–"+e.ende:""):""}
+function bwTags(on){return bwCfg().tags.map((g)=>'<button type="button" class="bwtg" data-bwtag="'+esc(g)+'"'+(on===g?' aria-pressed="true"':"")+">"+esc(g)+"</button>").join("")}
+function bwLiveRow(r){
+  const g=bwS.tag&&bwS.tag.pid===r.p.id&&bwS.tag.live?bwS.tag:null;
+  return'<div class="bwr" data-bwp="'+r.p.id+'"><div class="bwrt"><span class="bwn">'+esc(r.p.nr||"")+'</span><span class="bwnm">'+esc(nm(r.p))+'</span><button type="button" class="bwb bwm" data-bw="m" aria-label="Minus für '+esc(nm(r.p))+'">−</button><span class="bwc">'+bwPM(r.pl,r.mi)+'</span><button type="button" class="bwb bwp" data-bw="p" aria-label="Plus für '+esc(nm(r.p))+'">+</button><button type="button" class="bwun" data-bw="u" title="Letzten Tipp zurücknehmen" aria-label="Letzten Tipp zurücknehmen">↶</button></div>'
+   +(g?'<div class="bwtags">'+bwTags(((D.tipps.find((x)=>x.id===g.id)||{taps:{}}).taps[g.pid]||[])[g.i]?.[2])+'<span class="bwhint">Schlagwort ist freiwillig</span></div>':"")+"</div>"}
+function bwPostRow(r){
+  const me=bwKey(),chips=r.all.map((x)=>{const own=x.vk===me,k=x.v>0?"bwp1":"bwm1",sel=bwS.tag&&bwS.tag.id===x.id&&bwS.tag.pid===r.p.id&&bwS.tag.i===x.i;
+    return(own?'<button type="button" class="bwt1 '+k+(x.skip?" bwskip":"")+(sel?" bwsel":"")+'" data-bwtap="'+r.p.id+"|"+x.id+"|"+x.i+'">':'<span class="bwt1 '+k+(x.skip?" bwskip":"")+'">')+(x.v>0?"＋":"−")+(x.tag?" "+esc(x.tag):"")+(own?"</button>":"</span>")}).join(""),
+  g=bwS.tag&&bwS.tag.pid===r.p.id&&!bwS.tag.live?bwS.tag:null;
+  return'<div class="bwr"><div class="bwrt"><span class="bwnm">'+esc(nm(r.p))+(r.all.length?"":' <span class="note">kein Tipp</span>')+'</span><span class="bwamp" role="group" aria-label="Ampel">'+BWAMP.map((a)=>'<button type="button" class="bwa bwa'+a[0]+(r.a===a[0]?" bwon":"")+'" data-bwa="'+r.p.id+"|"+a[0]+'" title="'+a[1]+'" aria-label="'+a[1]+'"></button>').join("")+"</span></div>"
+   +(chips?'<div class="bwtl">'+chips+"</div>":"")+(g?'<div class="bwtags">'+bwTags(((D.tipps.find((x)=>x.id===g.id)||{taps:{}}).taps[g.pid]||[])[g.i]?.[2])+"</div>":"")+"</div>"}
+function bwOverlayHtml(){
+  const t=bwTr(bwS.tid);if(!t)return"";const s=bwSum(t),live=bwS.mode==="live",ro=!bwCan();
+  return'<div class="bwh"><button type="button" class="btn" data-bwx="close" aria-label="Zurück">← Zurück</button><b class="bwtt">Training '+bwD(t.datum)+(bwTimes(t)?" · "+esc(bwTimes(t)):"")+"</b>"+bwChip(s.u)+'<span style="flex:1"></span><div class="seg" role="group" aria-label="Ansicht"><button type="button" data-bwmode="live" class="'+(live?"on":"")+'">Tippen</button><button type="button" data-bwmode="post" class="'+(live?"":"on")+'">Nachbereitung</button></div></div>'
+   +'<div class="bwsum">'+bwPM(s.tp,s.tm)+'<span class="note">'+(s.n?s.n+(s.n===1?" Tipp":" Tipps"):"noch keine Tipps")+" · "+s.rows.length+" Spieler"+(s.src==="a"?" · Urteil nach Ampel":"")+"</span></div>"
+   +(ro?'<p class="note" style="margin:8px 14px">Nur Ansicht: Mit deiner Rolle kannst du nichts eintragen.</p>':"")
+   +'<div class="bwl">'+(s.rows.length?s.rows.map(live?bwLiveRow:bwPostRow).join(""):'<p class="note" style="margin:8px 2px">Für dieses Training sind keine Spieler als „teilgenommen“ eingetragen. Das lässt sich im Menü „Training“ ändern.</p>')+"</div>"
+   +'<div class="bwfoot"><span class="note">'+(live?"Kreisauswahl, Entschuldigte und Verletzte sind ausgeblendet.":"Ampel und Schlagwörter sind freiwillig. Grau = keine Einschätzung.")+'</span><button type="button" class="btn bwdone" data-bwx="'+(live?"post":"close")+'">'+(live?"Fertig → Nachbereitung":"Fertig")+"</button></div>"}
+function bwRenderOv(){
+  const o=document.getElementById("bwov");if(!o)return;if(!bwTr(bwS.tid)){bwClose();return}
+  const l=o.querySelector(".bwl"),y=l?l.scrollTop:0;o.innerHTML=bwOverlayHtml();const l2=o.querySelector(".bwl");if(l2)l2.scrollTop=y;if(bwCan()===false)o.classList.add("bwro")}
+function bwOpen(tid,mode){
+  const t=bwTr(tid);if(!t)return;bwS.tid=tid;bwS.tag=null;bwS.mode=mode||(t.datum===today()?"live":"post");
+  let o=document.getElementById("bwov");if(!o){o=document.createElement("div");o.id="bwov";o.className="bwov";o.setAttribute("role","dialog");o.setAttribute("aria-label","Training bewerten");document.body.appendChild(o)}
+  document.body.style.overflow="hidden";bwRenderOv()}
+function bwClose(){const o=document.getElementById("bwov");if(o)o.remove();document.body.style.overflow="";bwS.tag=null;clearTimeout(bwTm);bwRender()}
+/* Startseite: Kachel am Trainingstag und bis zu drei Tage danach, falls noch nicht bewertet. */
+function bwTile(){
+  const h=document.getElementById("bwt");if(!h)return;if(!bwCan()||!D.ready){h.innerHTML="";return}
+  const t0=today(),from=addD(t0,-3),L=(D.trainings||[]).filter((t)=>t.datum>=from&&t.datum<=t0).sort((a,b)=>b.datum.localeCompare(a.datum));
+  const t=L.find((x)=>x.datum===t0)||L.find((x)=>!bwRated(x.id));
+  if(!t||(t.datum<t0&&bwRated(t.id))){h.innerHTML="";return}
+  const s=bwSum(t),past=t.datum<t0,sub=(past?bwWd(t.datum)+" "+bwD(t.datum):"Heute")+(bwTimes(t)?" · "+bwTimes(t):"")+" · "+s.rows.length+" Spieler da"+(s.u!==null?" · "+bwSg(s.tp)+" / "+bwSg(-s.tm)+" · "+BWU[s.u]:"");
+  h.innerHTML='<button type="button" class="bwgo" data-bwopen="'+t.id+'"><span class="bwic">🏃</span><span><b>'+(past?"Training vom "+bwWd(t.datum)+" nachtragen":"Training bewerten")+"</b><small>"+esc(sub)+"</small></span></button>"}
+/* Statistik in „Beteiligung“ */
+const bwStk=(c)=>{const k=c.g+c.n+c.s;if(!k)return"";const w=(x)=>(x/k*100).toFixed(1)+"%";return'<div class="bwstk" role="img" aria-label="'+c.g+" gut, "+c.n+" neutral, "+c.s+' nicht gut">'+(c.g?'<div class="bwg" style="width:'+w(c.g)+'">'+c.g+" gut</div>":"")+(c.n?'<div class="bwnn" style="width:'+w(c.n)+'">'+c.n+"</div>":"")+(c.s?'<div class="bws" style="width:'+w(c.s)+'">'+c.s+"</div>":"")+"</div>"};
+const bwBars=(L)=>L.length?'<div class="bwbars">'+L.slice(-24).map((x)=>{const h=8+Math.min(x.n,10)*4;return'<div class="bwcol" title="'+bwD(x.datum)+": "+(x.u===null?"":BWU[x.u])+", "+x.n+' Tipps">'+(x.u===1?'<i class="bwup" style="height:'+h+'px"></i>':x.u===-1?'<i class="bwdn" style="height:'+h+'px"></i>':'<i class="bwmid"></i>')+"</div>"}).join("")+"</div>":"";
+const bwTrend={up:"↗",flat:"→",down:"↘"};
+function bwStatHtml(){
+  if(!D.ready)return'<p class="note">Daten werden geladen …</p>';
+  const S=bwStats();
+  if(!S.rated)return'<div class="card"><p style="margin:0">Noch keine Bewertungen. Auf der Startseite erscheint am Trainingstag „Training bewerten“, im Menü „Training“ gibt es bei jedem Training einen Stern. Mit ➕ und ➖ gibst du Spielern im Training einen Tipp. Alles hier ist nur für das Trainerteam sichtbar.</p></div>';
+  const P=active().filter((p)=>S.pl[p.id]),Q=active().filter((p)=>!S.pl[p.id]);
+  const mTeam=S.ratedSums.map((s)=>({datum:s.t.datum,u:s.u,n:s.n}));
+  let h='<p class="note" style="margin:0 0 10px">Bewertung seit '+bwD(S.start)+" · "+S.rated+" von "+S.since+' Trainings bewertet · Trainings ohne Tipp zählen nicht mit.</p>';
+  h+='<div class="gr" style="margin:0 0 12px"><div class="card"><h3>Mannschaft · Trainings</h3>'+bwStk(S.team)+bwBars(mTeam)+'<p class="note" style="margin:6px 0 0">Balken nach oben = gutes Training, nach unten = nicht gut, Höhe = Zahl der Tipps.</p></div>';
+  h+='<div class="card tw" style="padding:0"><table id="bwtb"><tr><th style="text-align:left">Spieler</th><th>Gute Trainings</th><th>Plus / Minus</th><th>Trend</th></tr>'+P.map((p)=>{const x=S.pl[p.id];return'<tr class="bwtr'+(bwS.sel===p.id?" bwsel":"")+'" data-bwsel="'+p.id+'" tabindex="0"><td style="text-align:left">'+esc(nm(p))+"</td><td>"+x.c.g+" von "+x.k+(x.share!=null?" ("+Math.round(x.share*100)+" %)":"")+"</td><td>"+bwPM(x.pl,x.mi)+"</td><td>"+(x.enough?(x.trend?bwTrend[x.trend]:"–"):'<span class="note">zu wenig Daten</span>')+"</td></tr>"}).join("")+Q.map((p)=>'<tr><td style="text-align:left">'+esc(nm(p))+'</td><td colspan="3" class="note">noch keine Bewertung</td></tr>').join("")+"</table></div></div>";
+  const sp=bwS.sel&&S.pl[bwS.sel]?active().find((p)=>p.id===bwS.sel):null;
+  if(sp){const x=S.pl[sp.id],T=bwTagCount(sp.id),tg=(o,z)=>{const k=Object.keys(o).sort((a,b)=>o[b]-o[a]).map((a)=>esc(a)+" "+o[a]+"×");if(z)k.push("ohne Schlagwort "+z+"×");return k.join(" · ")||"–"};
+    h+='<div class="card" style="margin-bottom:12px"><h3>'+esc(nm(sp))+'</h3><div class="gr" style="margin:0"><div>'+bwStk(x.c)+bwBars(x.days.map((d)=>({datum:d.datum,u:d.u,n:d.pl+d.mi})))+'<p class="note" style="margin:6px 0 0">'+x.days.length+" bewertete Trainings · seit "+bwD(x.days[0].datum)+'</p></div><div><p style="margin:0 0 6px">Gesamt: '+bwPM(x.pl,x.mi)+"</p>"
+      +(x.enough&&x.share!=null&&x.teamShare!=null?'<p style="margin:0 0 6px">Gute Trainings: <b>'+Math.round(x.share*100)+' %</b> · Mannschaft in denselben Trainings: <b>'+Math.round(x.teamShare*100)+" %</b></p>":'<p class="note" style="margin:0 0 6px">Vergleich mit der Mannschaft und Trend erscheinen ab 5 bewerteten Trainings ('+x.days.length+" bisher).</p>")
+      +'<p class="note" style="margin:0 0 4px">Plus für: '+tg(T.p,T.p0)+'</p><p class="note" style="margin:0">Minus für: '+tg(T.m,T.m0)+"</p></div></div></div>"}
+  else h+='<p class="note" style="margin:0 0 12px">Auf einen Spieler tippen: Verlauf, Vergleich zur Mannschaft und Schlagwörter.</p>';
+  const can=bwCan();
+  h+='<div class="card tw" style="padding:0"><table><tr><th style="text-align:left">Training</th><th>Urteil</th><th>Plus / Minus</th>'+(can?"<th></th>":"")+"</tr>"+S.sums.slice().reverse().map((s)=>'<tr><td style="text-align:left">'+bwWd(s.t.datum).slice(0,2)+" "+bwD(s.t.datum)+"</td><td>"+bwChip(s.u)+"</td><td>"+(s.n?bwPM(s.tp,s.tm):"–")+"</td>"+(can?'<td><button type="button" class="btn" data-bwopen="'+s.t.id+'">'+(s.u===null?"bewerten":"öffnen")+"</button></td>":"")+"</tr>").join("")+"</table></div>";
+  return h}
+function bwSetView(v){bwS.view=v;const b=document.getElementById("a_b"),w=document.getElementById("a_w"),sg=document.getElementById("abseg");if(!b||!w)return;b.hidden=v!=="b";w.hidden=v!=="w";if(sg)[...sg.children].forEach((x)=>x.classList.toggle("on",x.dataset.bwv===v));if(v==="w")w.innerHTML=bwStatHtml()}
+/* Einstellungen (gelten für alle Trainer) */
+function bwSettings(){
+  const w=document.getElementById("bwwin"),t=document.getElementById("bwtags");if(!w||!t)return;const c=bwCfg(),ro=!bwCan();
+  if(document.activeElement!==w)w.value=String(c.win);if(document.activeElement!==t)t.value=c.tags.join(", ");w.disabled=t.disabled=ro}
+function bwSaveSettings(){if(!bwCan())return;const w=document.getElementById("bwwin"),t=document.getElementById("bwtags"),tags=t.value.split(/[,;\n]/).map((x)=>x.trim()).filter(Boolean).filter((x,i,a)=>a.indexOf(x)===i).slice(0,8);cfgSave({bw:{win:+w.value,tags:tags.length?tags:BWTAGS}})}
+function bwRender(){
+  try{bwTile()}catch(e){}
+  try{bwRenderOv()}catch(e){}
+  try{if(bwS.view==="w")bwSetView("w")}catch(e){}
+  try{bwSettings()}catch(e){}
+}
+document.addEventListener("click",(e)=>{
+  const t=e.target&&e.target.closest?e.target.closest("[data-bwopen],[data-bw],[data-bwx],[data-bwmode],[data-bwtag],[data-bwtap],[data-bwa],[data-bwv],[data-bwsel]"):null;if(!t)return;
+  const d=t.dataset;
+  if(d.bwopen!==undefined){bwOpen(d.bwopen);return}
+  if(d.bwv!==undefined){bwSetView(d.bwv);return}
+  if(d.bwsel!==undefined){bwS.sel=bwS.sel===d.bwsel?"":d.bwsel;bwSetView("w");return}
+  if(d.bwx!==undefined){if(d.bwx==="post"){bwS.mode="post";bwS.tag=null;bwRenderOv()}else bwClose();return}
+  if(d.bwmode!==undefined){bwS.mode=d.bwmode;bwS.tag=null;bwRenderOv();return}
+  if(d.bwtag!==undefined){bwSetTag(d.bwtag);return}
+  if(d.bwtap!==undefined){const [pid,id,i]=d.bwtap.split("|");bwS.tag=bwS.tag&&bwS.tag.id===id&&bwS.tag.i===+i&&bwS.tag.pid===pid?null:{pid,id,i:+i,live:false};bwRenderOv();return}
+  if(d.bwa!==undefined){const [pid,a]=d.bwa.split("|");bwSetAmp(pid,a);return}
+  if(d.bw!==undefined){const r=t.closest("[data-bwp]");if(!r)return;if(d.bw==="u")bwUndo(r.dataset.bwp);else bwTap(r.dataset.bwp,d.bw==="p"?1:-1)}
+});
+document.addEventListener("keydown",(e)=>{if(e.key==="Escape"&&document.getElementById("bwov"))bwClose();if((e.key==="Enter"||e.key===" ")&&e.target&&e.target.dataset&&e.target.dataset.bwsel!==undefined){e.preventDefault();e.target.click()}});
+document.addEventListener("change",(e)=>{if(e.target&&(e.target.id==="bwwin"||e.target.id==="bwtags"))bwSaveSettings()});
+window.bwDebug={sum:bwSum,stats:bwStats,taps:bwTaps,open:bwOpen,close:bwClose,tap:bwTap,state:bwS,setView:bwSetView,tile:bwTile,render:bwRender,cfg:bwCfg,tagCount:bwTagCount};
 </script>
 </body></html>
