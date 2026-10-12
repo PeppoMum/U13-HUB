@@ -5041,6 +5041,7 @@ const CSS=`.slov{position:fixed;inset:0;z-index:360;background:var(--bg);color:v
 .slgrp{font-weight:700;margin:14px 2px 6px}.slform{display:grid;grid-template-columns:1fr 1fr;gap:10px}.slform label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mu)}.slform .w2{grid-column:span 2}
 .slbew{display:flex;flex-wrap:wrap;gap:6px}.slbew button{width:44px;height:44px;border-radius:10px;border:1px solid var(--ln);background:var(--card);color:var(--tx);font:inherit;font-weight:700;cursor:pointer}.slbew button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
 .slbig{display:flex;gap:14px;align-items:center;width:100%;text-align:left;font:inherit;color:#fff;background:var(--ac);border:0;border-radius:16px;padding:16px 18px;cursor:pointer}.slbig b{font-size:18px;display:block}.slbig small{font-size:13px;opacity:.92}
+@media(max-height:520px){.slh{padding:6px 12px;gap:6px 8px}.slh .note{display:none}.slteams{padding:5px 12px}.sltab{padding:5px 11px}.sladd{padding:6px 12px}.slb{height:46px;font-size:30px}.slg{grid-template-columns:1fr 1fr}.slfoot{padding:6px 14px calc(6px + env(safe-area-inset-bottom,0px))}.slbody{padding:8px 12px 12px}}
 .slmsg{font-size:13px;margin:8px 0}.slmsg.er{color:var(--r)}.slmsg.ok{color:var(--g)}.slov .slform .note{font-size:12px}`;
 function css(){if(document.getElementById("slcss"))return;const s=document.createElement("style");s.id="slcss";s.textContent=CSS;document.head.appendChild(s)}
 
