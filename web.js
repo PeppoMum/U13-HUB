@@ -46,6 +46,7 @@ async function restBlob(id){
 const FSB=()=>"https://firestore.googleapis.com/v1/projects/"+encodeURIComponent(CFG.projectId)+"/databases/(default)/documents/";
 function toFs(v){if(v==null)return{nullValue:null};if(typeof v==="boolean")return{booleanValue:v};if(typeof v==="number")return Number.isInteger(v)?{integerValue:String(v)}:{doubleValue:v};if(Array.isArray(v))return{arrayValue:{values:v.map(toFs)}};if(typeof v==="object"){const f={};Object.keys(v).forEach((k)=>{f[k]=toFs(v[k])});return{mapValue:{fields:f}}}return{stringValue:String(v)}}
 const scoutGet=async()=>{let aus=false;try{const m=await restDoc("scout");aus=!!(m&&m.aus)}catch(e){}return{exists:true,data:()=>({kaderAus:aus})}};
+window.__scoutDb=()=>scoutDb;
 const scoutDb={doc:()=>({get:scoutGet}),collection:(c)=>({doc:(id)=>({get:scoutGet,set:async(o)=>{
   if(c!=="kinbox")throw{code:"unsupported"};
   const f={};Object.keys(o).forEach((k)=>{f[k]=toFs(o[k])});
@@ -176,7 +177,7 @@ async function afterLogin(){
     if(first)fs.doc("pub/scout").get().then((x)=>{if(!x.exists||!!(x.data()&&x.data().aus)!==aus)w()}).catch(()=>{});else w()},()=>{});
   document.addEventListener("click",async(ev)=>{const b=ev.target.closest&&ev.target.closest("[data-scn]");if(!b)return;
     if(!b.dataset.arm){b.dataset.arm="1";b.textContent="Wirklich neu erzeugen?";return}
-    const k=rndKey();try{await fs.doc("config/scout").set({k});scoutKey=k;const i=document.getElementById("sclink");if(i)i.value=window.__scoutLink();b.dataset.arm="";b.textContent="Neu erzeugen"}catch(e){b.textContent="Hat nicht geklappt"}});
+    const k=rndKey();try{await fs.doc("config/scout").set({k});scoutKey=k;const i=document.getElementById("sclink");if(i)i.value=window.__scoutLink();b.dataset.arm="";b.textContent="Neu erzeugen";document.dispatchEvent(new Event("u13scoutkey"))}catch(e){b.textContent="Hat nicht geklappt"}});
   if(owner)cards();
 }
 function cards(){

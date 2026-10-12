@@ -1813,7 +1813,8 @@ async function openKurz(alias){
   const N=window.__kurzNet,bad=()=>showAccess("Dieser Kurzlink ist nicht (mehr) aktiv. Bitte den Trainer fragen.");
   if(!N||!KZ_OK.test(alias)){bad();return}
   const aid=await kzId(alias);let doc;
-  try{doc=await N.get(aid)}catch(e){showAccess("Die Verbindung zum Server hat nicht geklappt. Bitte später noch einmal versuchen.");return}
+  try{doc=await N.get(aid)}catch(e){const s0=kzLs.get(alias);if(s0&&s0.i==="scout"&&s0.k){scEnter(s0.k,alias,false);return}showAccess("Die Verbindung zum Server hat nicht geklappt. Bitte später noch einmal versuchen.");return}
+  if(doc&&doc.v===2&&doc.i==="scout"&&doc.k){scEnter(doc.k,alias,true);return}
   if(doc&&doc.v===2&&doc.i&&doc.k){showViewer(doc.i,doc.k);return}
   if(!doc||!doc.w||!doc.s){bad();return}
   const st=kzLs.get(alias);
@@ -1835,7 +1836,16 @@ function kzAsk(alias,aid,doc,msg){
   };
   b.onclick=go;pi.onkeydown=(e)=>{if(e.key==="Enter")go()};pi.focus();
 }
-async function kzEnter(alias,aid,doc,p){await showViewer(p.i,p.k);kzFoot(alias,aid,doc,p)}
+async function kzEnter(alias,aid,doc,p){if(p.i==="scout"){scEnter(p.k,alias,false);return}await showViewer(p.i,p.k);kzFoot(alias,aid,doc,p)}
+/* Scouting-Kurzlink: Nach Name (und evtl. Passwort) öffnet sich dasselbe Eingabe-Raster wie beim langen Scouting-Link. Nur Schreiben, kein Lesen. */
+function scEnter(k,alias,keep){
+  window.__SCOUTKEY=k;
+  if(keep)kzLs.set(alias,{i:"scout",k});
+  const v=document.getElementById("vw2");if(v)v.remove();
+  const sd=window.__scoutDb&&window.__scoutDb();
+  if(!sd||typeof window.scoutMode!=="function"){showAccess("Das Scouting ist hier nicht verfügbar.");return}
+  window.scoutMode(sd);
+}
 function kzFoot(alias,aid,doc,p){
   let f=document.getElementById("kzf");if(f)f.remove();
   f=document.createElement("div");f.id="kzf";
@@ -2027,6 +2037,40 @@ async function kzCreate(pid,raw,open){
   return"";
 }
 async function kzRemove(pid){const l=L[pid]||{};if(!l.alias)return;await window.__kurzTr.del(await kzId(l.alias));await save("links",pid,{id:pid,key:l.key,aktiv:!!l.aktiv,...dzK(pid)})}
+/* ---------- Scouting-Kurzlink (Trainer): eigener Name, Passwort optional, jederzeit änderbar. Daten: Sammlung „scoutkz“ (nur Trainer mit vollem Zugriff). ---------- */
+const scKey=()=>{const u=(window.__scoutLink&&window.__scoutLink())||"",m=u.match(/#scout\.([A-Za-z0-9_-]{16,})$/);return m?m[1]:""};
+let scCur=null,scLoaded=false,scBusy=false;
+async function scPut(c,key){const Tr=window.__kurzTr,aid=await kzId(c.alias);
+  if(c.open){await Tr.put(aid,{s:"",w:"",v:2,i:"scout",k:key},c.t);return}
+  const n=await kzWrap(c.pw,{i:"scout",k:key,t:c.t});await Tr.put(aid,{s:n.s,w:n.w,v:0},c.t)}
+const scOn=()=>!!(window.__kurzTr&&window.__scoutNew&&window.__ROLE!=="lesen"&&window.__ROLE!=="scout"&&typeof db!=="undefined"&&db);
+window.__scKz={
+  on:scOn,
+  cur:()=>scCur,
+  loaded:()=>scLoaded,
+  url:()=>scCur?base()+scCur.alias:"",
+  async load(){if(!scOn()||scLoaded)return;try{const d=await db.doc("scoutkz/main").get();scCur=d&&d.exists&&d.data()&&d.data().alias?d.data():null}catch(e){scCur=null}scLoaded=true},
+  async create(raw,withPw){
+    const alias=String(raw||"").trim().toLowerCase();
+    if(!KZ_OK.test(alias)||KZ_RES.includes(alias))return"Der Name darf nur Kleinbuchstaben, Ziffern, - und _ enthalten und muss 4 bis 40 Zeichen lang sein.";
+    const key=scKey();if(!key)return"Der Scouting-Link ist noch nicht bereit. Bitte kurz warten und noch einmal versuchen.";
+    if(Object.keys(L).some((k)=>L[k].alias===alias))return"Diesen Namen gibt es schon.";
+    try{if(await window.__kurzNet.get(await kzId(alias)))return"Diesen Namen gibt es schon."}catch(e){return"Die Verbindung hat nicht geklappt."}
+    const c={alias,open:!withPw,pw:withPw?kzPw():"",t:newKey()};
+    try{await scPut(c,key);await save("scoutkz","main",c)}catch(e){return"Das hat nicht geklappt"+(e&&e.code?" ("+e.code+")":"")+"."}
+    scCur=c;scLoaded=true;return""},
+  async setPw(pw){if(!scCur)return"Kein Kurzlink angelegt.";pw=String(pw||"").trim();if(pw&&pw.length<6)return"Bitte mindestens 6 Zeichen wählen.";
+    const c={...scCur,open:false,pw:pw||kzPw()};
+    try{await scPut(c,scKey());await save("scoutkz","main",c)}catch(e){return"Das hat nicht geklappt."}
+    scCur=c;return""},
+  async setOpen(open){if(!scCur)return"Kein Kurzlink angelegt.";const c={...scCur,open:!!open,pw:open?"":kzPw()};
+    try{await scPut(c,scKey());await save("scoutkz","main",c)}catch(e){return"Das hat nicht geklappt."}
+    scCur=c;return""},
+  async remove(){if(!scCur)return"";try{await window.__kurzTr.del(await kzId(scCur.alias));await save("scoutkz","main",null)}catch(e){return"Das hat nicht geklappt."}scCur=null;return""},
+  async sync(){if(!scCur||!scOn())return;try{await scPut(scCur,scKey())}catch(e){}}
+};
+/* Wird der lange Scouting-Link neu erzeugt, bekommt der Kurzlink den neuen Schlüssel */
+document.addEventListener("u13scoutkey",()=>{setTimeout(()=>{window.__scKz.sync()},300)});
 function kzCell(pid){
   if(!window.__kurzTr||window.__ROLE==="lesen")return"";
   const l=L[pid]||{};if(!l.key)return"";
@@ -3565,10 +3609,10 @@ function tabObs(pl){const of=ks.of=ks.of||{v:"",km:"",s:"datum"},t0=td(),kmN=(o)
   let L0=KD.obs.filter((o)=>(!of.v||(o.verein||"").trim()===of.v)&&(of.km===""||(kmN(o)!=null&&kmN(o)<=+of.km)));
   const up=L0.filter((o)=>(o.datum||"")>=t0).sort((a,b)=>(a.datum||"").localeCompare(b.datum||"")||(a.zeit||"").localeCompare(b.zeit||"")),past=L0.filter((o)=>(o.datum||"")<t0).sort((a,b)=>(b.datum||"").localeCompare(a.datum||"")||(b.zeit||"").localeCompare(a.zeit||""));
   const L=of.s==="entf"?L0.slice().sort((a,b)=>{const x=kmN(a),y=kmN(b);if(x==null&&y==null)return 0;if(x==null)return 1;if(y==null)return-1;return x-y||(a.datum||"").localeCompare(b.datum||"")}):up.concat(past),cnt={};KD.obs.forEach((o)=>{if(o.status==="erledigt"){const k=(o.verein||"").toLowerCase();cnt[k]=(cnt[k]||0)+1}});
-  let h=(ks.oe?obsForm(pl):"")+'<div class="bar"><button class="btn" data-ka="onew" style="background:var(--ac);color:#fff;border-color:var(--ac)">＋ Spielbesuch planen</button><span class="note">Geplante Spielbesuche erscheinen intern in „Termine“ (nie im Elternplan).</span></div>'
+  let h=(ks.oe?obsForm(pl):"")+(window.slCard?window.slCard():"")+'<div class="bar"><button class="btn" data-ka="slnew" style="background:var(--ac);color:#fff;border-color:var(--ac)">▶ Spiel beobachten</button><button class="btn" data-ka="onew">＋ Spielbesuch planen</button><span class="note">Geplante Spielbesuche erscheinen intern in „Termine“ (nie im Elternplan).</span></div>'
    +'<div class="bar"><label class="note">Verein <select data-obf="v"><option value="">Alle Vereine</option>'+vs.map((v)=>'<option value="'+E(v)+'"'+(of.v===v?" selected":"")+">"+E(v)+"</option>").join("")+'</select></label><label class="note">Entfernung bis <input type="number" min="0" step="1" data-obf="km" value="'+E(of.km)+'" placeholder="km" style="width:80px"> km</label><label class="note">Sortierung <select data-obf="s"><option value="datum"'+(of.s==="datum"?" selected":"")+'>Datum (nächste zuerst)</option><option value="entf"'+(of.s==="entf"?" selected":"")+'>Entfernung (nächste zuerst)</option></select></label><span class="note">'+L.length+" von "+KD.obs.length+"</span></div>"
    +'<div class="card tw" style="padding:0"><table><tr><th style="text-align:left">Datum</th><th style="text-align:left">Verein</th><th style="text-align:left">Mannschaft</th><th>Entf.</th><th>Status</th><th style="text-align:left">Im Blick</th><th style="text-align:left">Notizen</th><th>Sichtungen</th><th></th></tr>'
-   +(L.length?L.map((o,i)=>(of.s!=="entf"&&up.length&&past.length&&i===up.length?'<tr><td colspan="9" class="note" style="background:var(--b2,transparent);padding:6px 12px;font-weight:700">Vergangene Spielbesuche</td></tr>':"")+'<tr><td class="kn">'+E(fd(o.datum))+(o.zeit?" "+E(o.zeit):"")+'</td><td class="kn"><b>'+E(o.verein)+'</b></td><td class="kn">'+(o.mannschaft?E(o.mannschaft):'<span class="note">unbekannt</span>')+"</td><td>"+E(o.entf)+"</td><td>"+stc(o,t0)+'</td><td class="kn">'+E(o.blick)+'</td><td class="kn">'+E(o.notiz)+"</td><td>"+(cnt[(o.verein||"").toLowerCase()]||0)+'</td><td style="white-space:nowrap"><button class="rm" data-ka="osf" data-id="'+o.id+'" title="Scoutingbogen dazu">📝</button><button class="rm" data-ka="oedit" data-id="'+o.id+'">✎</button><button class="rm'+(ks.arm==="o"+o.id?" arm":"")+'" data-ka="odel" data-id="'+o.id+'">'+(ks.arm==="o"+o.id?"Löschen?":"✕")+"</button></td></tr>").join(""):'<tr><td colspan="9" class="note" style="text-align:center;padding:20px">'+(KD.obs.length?"Keine Beobachtung passt zum Filter.":"Noch keine Spielbesuche geplant.")+'</td></tr>')+"</table></div>";
+   +(L.length?L.map((o,i)=>(of.s!=="entf"&&up.length&&past.length&&i===up.length?'<tr><td colspan="9" class="note" style="background:var(--b2,transparent);padding:6px 12px;font-weight:700">Vergangene Spielbesuche</td></tr>':"")+'<tr><td class="kn">'+E(fd(o.datum))+(o.zeit?" "+E(o.zeit):"")+'</td><td class="kn"><b>'+E(o.verein)+'</b></td><td class="kn">'+(o.mannschaft?E(o.mannschaft):'<span class="note">unbekannt</span>')+"</td><td>"+E(o.entf)+"</td><td>"+stc(o,t0)+'</td><td class="kn">'+E(o.blick)+'</td><td class="kn">'+E(o.notiz)+"</td><td>"+(cnt[(o.verein||"").toLowerCase()]||0)+'</td><td style="white-space:nowrap">'+(o.live?'<button class="rm" data-ka="slo" data-id="'+o.id+'" title="Beobachtung öffnen ('+E(window.slInfo(o))+')">👁</button>':'<button class="rm" data-ka="sls" data-id="'+o.id+'" title="Spiel jetzt beobachten (Plus/Minus je Nummer)">▶</button>')+'<button class="rm" data-ka="osf" data-id="'+o.id+'" title="Scoutingbogen dazu">📝</button><button class="rm" data-ka="oedit" data-id="'+o.id+'">✎</button><button class="rm'+(ks.arm==="o"+o.id?" arm":"")+'" data-ka="odel" data-id="'+o.id+'">'+(ks.arm==="o"+o.id?"Löschen?":"✕")+"</button></td></tr>").join(""):'<tr><td colspan="9" class="note" style="text-align:center;padding:20px">'+(KD.obs.length?"Keine Beobachtung passt zum Filter.":"Noch keine Spielbesuche geplant.")+'</td></tr>')+"</table></div>";
   return h}
 /* ---------- Status ---------- */
 function tabPipe(pl){
@@ -3588,8 +3632,23 @@ function tabPipe(pl){
 /* ---------- Eingang ---------- */
 const scLink=()=>window.__scoutLink?(window.__scoutLink()||"(Link wird erzeugt …)"):(window.__lkbase?window.__lkbase():"")+"#scout";
 function tabIn(pl){const L=KD.inbox.slice().sort((a,b)=>(b.at||"").localeCompare(a.at||"")),lnk=scLink();
-  return (L.length?L.map((x)=>{const dup=KD.pers.find((q)=>q.typ!=="eigen"&&K.normN(q)===K.normN(x));return'<div class="card" style="margin-bottom:8px"><div class="bar" style="margin:0"><b>'+E([x.vorname,x.name].filter(Boolean).join(" ")||"(ohne Namen)")+"</b> · "+E(x.verein||"")+" "+E(x.mannschaft||"")+" · Bew. "+E(x.bew==null?"–":x.bew)+' <span class="note">von '+E(x.von||"?")+", "+E(fd((x.datum||"")))+'</span><span style="flex:1"></span><button class="btn" data-ka="inok" data-id="'+x.id+'" style="background:var(--ac);color:#fff;border-color:var(--ac)">'+(dup?"Trotzdem neu anlegen":"Übernehmen")+'</button><button class="btn" data-ka="inx" data-id="'+x.id+'">Verwerfen</button></div><div class="note" style="margin-top:4px">'+E([x.pos,"Stärken: "+[].concat(x.st||[]).filter(Boolean).join(", "),"Schwächen: "+[].concat(x.sw||[]).filter(Boolean).join(", "),x.notiz].filter(Boolean).join(" · "))+(dup?'<div class="kwarn" style="margin-top:6px">⚠ Gibt es schon in der Liste: '+E(K.pfull(dup))+(dup.verein?" ("+E(dup.verein)+")":"")+". Besser den Eintrag verwerfen und die Angaben dort ergänzen.</div>":"")+"</div>"}).join(""):'<div class="card note">Kein Eintrag im Eingang.</div>')}
-TABF.lnk=function(pl){const lnk=scLink();return'<div class="card" style="margin-top:12px"><h3>Scouting-Link für Externe</h3><p class="note" style="margin-top:0">Dieser Link öffnet nur ein Eingabeformular (keine Datenbank). Die Person braucht keine Anmeldung. Wer den Link kennt, kann Meldungen schicken (nur Schreiben, kein Lesen). Gib ihn nur an Personen weiter, die scouten sollen.</p><input readonly id="sclink" value="'+E(lnk)+'" style="width:100%" onfocus="this.select()">'+(window.__scoutNew?'<div class="bar" style="margin:8px 0 0"><button class="btn" data-scn>Neu erzeugen</button><span class="note">Der bisherige Link wird dann ungültig.</span></div>':"")+'</div>'};
+  return (L.length?L.map((x)=>{const dup=(x.name||x.vorname)?KD.pers.find((q)=>q.typ!=="eigen"&&K.normN(q)===K.normN(x)):null;return'<div class="card" style="margin-bottom:8px"><div class="bar" style="margin:0"><b>'+E([x.vorname,x.name].filter(Boolean).join(" ")||(x.nr?"Nr. "+x.nr:"(ohne Namen)"))+"</b> · "+E(x.verein||"")+" "+E(x.mannschaft||"")+" · Bew. "+E(x.bew==null?"–":x.bew)+' <span class="note">von '+E(x.von||"?")+", "+E(fd((x.datum||"")))+'</span><span style="flex:1"></span><button class="btn" data-ka="inok" data-id="'+x.id+'" style="background:var(--ac);color:#fff;border-color:var(--ac)">'+(dup?"Trotzdem neu anlegen":"Übernehmen")+'</button><button class="btn" data-ka="inx" data-id="'+x.id+'">Verwerfen</button></div><div class="note" style="margin-top:4px">'+E([x.pos,"Stärken: "+[].concat(x.st||[]).filter(Boolean).join(", "),"Schwächen: "+[].concat(x.sw||[]).filter(Boolean).join(", "),x.notiz].filter(Boolean).join(" · "))+(dup?'<div class="kwarn" style="margin-top:6px">⚠ Gibt es schon in der Liste: '+E(K.pfull(dup))+(dup.verein?" ("+E(dup.verein)+")":"")+". Besser den Eintrag verwerfen und die Angaben dort ergänzen.</div>":"")+"</div>"}).join(""):'<div class="card note">Kein Eintrag im Eingang.</div>')}
+const skHtml=()=>{const z=window.__scKz;if(!z||!z.on())return"";
+  if(!z.loaded()){z.load().then(()=>force());return'<div class="note" style="margin-top:12px">Kurzlink wird geladen …</div>'}
+  const c=z.cur(),m=ks.skm?'<div class="note'+(ks.skerr?" kbad":"")+'" style="margin-top:6px">'+E(ks.skm)+"</div>":"",top='<div style="margin-top:14px;border-top:1px solid var(--ln);padding-top:12px"><b>Eigener Kurzlink</b>';
+  if(!c)return top+'<div class="note" style="margin:4px 0 8px">Statt des langen Links wählst du einen Namen, z. B. scouting-haltern. Ein Passwort ist optional und lässt sich jederzeit ändern.</div><div class="bar" style="margin:0"><input data-sk="alias" placeholder="z. B. scouting-haltern" maxlength="40" autocapitalize="off" style="width:62%;min-width:170px"><button class="btn" data-ka="skadd">Kurzlink anlegen</button></div><label class="note" style="display:flex;gap:6px;align-items:center;margin-top:6px"><input type="checkbox" data-sk="pw"> mit Passwort schützen</label>'+m+"</div>";
+  return top+'<div class="note" style="margin:4px 0">Kurzlink: <b>'+E(z.url())+'</b></div><div class="bar" style="margin:0 0 6px"><button class="btn" data-ka="skcp">Kurzlink kopieren</button><button class="btn'+(ks.arm==="skrm"?" arm":"")+'" data-ka="skrm">'+(ks.arm==="skrm"?"Wirklich entfernen?":"Kurzlink entfernen")+"</button></div>"
+   +(c.open?'<div class="note">Ohne Passwort: Jeder mit dem Kurzlink kann Meldungen schicken (nur Schreiben, nichts lesen).</div><div class="bar" style="margin:6px 0 0"><button class="btn" data-ka="skon">Passwort einschalten</button></div>'
+    :'<div class="note">Passwort: <b style="font-family:ui-monospace,Menlo,monospace;font-size:14px;user-select:all">'+E(c.pw)+'</b></div><div class="bar" style="margin:6px 0 0"><button class="btn" data-ka="skcpw">Passwort kopieren</button><button class="btn" data-ka="skrnd">Zufälliges neues Passwort</button><button class="btn" data-ka="skoff">Passwort entfernen</button></div><div class="bar" style="margin:6px 0 0"><input data-sk="newpw" placeholder="Eigenes neues Passwort (mind. 6 Zeichen)" autocomplete="off" style="width:62%;min-width:200px"><button class="btn" data-ka="skpw">Passwort ändern</button></div><div class="note">Nach einer Änderung brauchen alle das neue Passwort.</div>')+m+"</div>"};
+document.addEventListener("click",async(e)=>{const b=e.target.closest&&e.target.closest("[data-ka]");if(!b||!/^sk/.test(b.dataset.ka)||!b.closest("#k"))return;const z=window.__scKz;if(!z)return;
+  const a=b.dataset.ka,val=(q)=>{const i=document.querySelector('#k [data-sk="'+q+'"]');return i?i.value:""},done=(r,ok)=>{ks.skm=r||ok||"";ks.skerr=!!r;if(ks.arm==="skrm"&&a!=="skrm")ks.arm=null;force()};
+  const cp=async(t,w)=>{try{await navigator.clipboard.writeText(t);done("",w+" kopiert.")}catch(x){done("",w+": "+t)}};
+  if(a==="skadd"){const pw=document.querySelector('#k [data-sk="pw"]');done(await z.create(val("alias"),pw&&pw.checked),"Kurzlink angelegt.")}
+  else if(a==="skcp")cp(z.url(),"Kurzlink");else if(a==="skcpw")cp((z.cur()||{}).pw||"","Passwort");
+  else if(a==="skpw")done(await z.setPw(val("newpw")),"Neues Passwort gilt ab jetzt.");else if(a==="skrnd")done(await z.setPw(""),"Neues zufälliges Passwort gilt ab jetzt.");
+  else if(a==="skoff")done(await z.setOpen(true),"Passwort entfernt. Der Kurzlink öffnet jetzt ohne Passwort.");else if(a==="skon")done(await z.setOpen(false),"Passwort eingeschaltet.");
+  else if(a==="skrm"){if(ks.arm==="skrm"){ks.arm=null;done(await z.remove(),"Kurzlink entfernt. Der lange Link funktioniert weiter.")}else{ks.arm="skrm";force()}}});
+TABF.lnk=function(pl){const lnk=scLink();return'<div class="card" style="margin-top:12px"><h3>Scouting-Link für Externe</h3><p class="note" style="margin-top:0">Dieser Link öffnet das Beobachtungs-Raster und ein Meldeformular (keine Datenbank). Die Person braucht keine Anmeldung. Wer den Link kennt, kann Meldungen schicken (nur Schreiben, kein Lesen). Gib ihn nur an Personen weiter, die scouten sollen.</p><input readonly id="sclink" value="'+E(lnk)+'" style="width:100%" onfocus="this.select()">'+(window.__scoutNew?'<div class="bar" style="margin:8px 0 0"><button class="btn" data-scn>Neu erzeugen</button><span class="note">Der bisherige Link wird dann ungültig.</span></div>':"")+skHtml()+'</div>'};
 TABF.obs=tabObs;TABF.pipe=tabPipe;TABF.in=tabIn;
 /* ---------- Kalender-Integration ---------- */
 window.__kobsEv=()=>(D.config&&D.config.kaderAus)?[]:KD.obs.filter((o)=>o.datum&&o.status!=="entfallen").map((o)=>({id:"vk"+o.id,virt:true,kobs:true,datum:o.datum,bis:null,typ:"Sonstiges",titel:"Spielbeobachtung: "+(o.verein||"?")+(o.mannschaft?" ("+o.mannschaft+")":""),beginn:o.zeit||"",treffen:"",ende:"",eltern:false}));
@@ -3613,7 +3672,7 @@ function sfSave(pl){const s=ks.sf,m=document.getElementById("sfm");try{if(s.von)
   if(s.obsId){const ob=KD.obs.find((x)=>x.id===s.obsId);if(ob){const n={...ob,status:"erledigt"};KD.obs[KD.obs.indexOf(ob)]=n;sv("kobs",n.id,n)}}
   else if(s.verein){const ob={id:nid("ko"),verein:s.verein,mannschaft:s.mannschaft,datum:s.datum,zeit:"",entf:"",status:"erledigt",blick:"",notiz:"",personIds:[]};KD.obs.push(ob);sv("kobs",ob.id,ob)}
   ks.sf=null;ks.tab="in";force();calRef()}
-function doInbox(pl,x){const p=newPers(pl,{vorname:x.vorname||"",name:x.name||"",verein:x.verein||"",mannschaft:x.mannschaft||"",nr:x.nr||"",geb:x.geb||"",telM:x.telM||"",telV:x.telV||"",adresse:x.adresse||"",fuss:x.fuss||"",staerken:[].concat(x.st||[]).filter(Boolean).join("; "),schwaechen:[].concat(x.sw||[]).filter(Boolean).join("; "),notiz:x.notiz||"",beob:[{id:nid("b"),datum:x.datum||td(),anlass:"Spielbeobachtung",verein:x.verein||"",bew:x.bew==null?"":x.bew,notiz:"Gemeldet von "+(x.von||"?")}]});
+function doInbox(pl,x){const p=newPers(pl,{vorname:x.vorname||"",name:x.name||(x.vorname?"":(x.nr?"Nr. "+x.nr:"")),verein:x.verein||"",mannschaft:x.mannschaft||"",nr:x.nr||"",geb:x.geb||"",telM:x.telM||"",telV:x.telV||"",adresse:x.adresse||"",fuss:x.fuss||"",staerken:[].concat(x.st||[]).filter(Boolean).join("; "),schwaechen:[].concat(x.sw||[]).filter(Boolean).join("; "),notiz:x.notiz||"",beob:[{id:nid("b"),datum:x.datum||td(),anlass:"Spielbeobachtung",verein:x.verein||"",bew:x.bew==null?"":x.bew,notiz:"Gemeldet von "+(x.von||"?")}]});
   const AL={tw:"torw",iv:"innenv",av:"außenv",zm:"zentral",fl:"flügel",st:"stürm",zdm:"zentral",zom:"zentral",lv:"außenv",rv:"außenv",lf:"flügel",rf:"flügel",ra:"flügel",la:"flügel",mf:"mittel",ab:"abwehr",an:"angriff"};
   const mapPos=(n)=>{const q=n.toLowerCase().trim(),e=pl.pos.find((y)=>y.name.toLowerCase()===q)||pl.pos.find((y)=>y.name.toLowerCase().startsWith(q)&&q.length>=3)||(AL[q]&&pl.pos.find((y)=>y.name.toLowerCase().includes(AL[q])));return e?e.name:n};
   (x.posn||[]).forEach((n,i)=>setP(p,"pos."+mapPos(n),i===0?2:1));if(x.kr)Object.keys(x.kr).forEach((k)=>setP(p,"kr."+k,x.kr[k]));if(x.rolle||x.prio){p.plans=p.plans||{};const mm=p.plans[pl.id]=p.plans[pl.id]||{phase:pl.phasen[0]&&pl.phasen[0].id||"",next:{}};if(x.rolle)mm.rolle=x.rolle;if(x.prio)mm.prio=x.prio}savePers(cleanPers(p,pl));sv("kinbox",x.id,null);KD.inbox=KD.inbox.filter((i)=>i.id!==x.id)}
@@ -3686,12 +3745,20 @@ function scoutMode(dbh){if(window.__scin)return;window.__scin=true;
   let nm="";try{nm=localStorage.getItem("u13scoutname")||""}catch(e){}
   const S={bew:null,done:0};
   const box=document.createElement("div");box.id="ksc";document.body.appendChild(box);
-  const draw=()=>{box.innerHTML='<h2>Scouting-Eingabe</h2><p class="sub">Neue Spieler melden. Du siehst hier keine Datenbank, die Meldung geht direkt an den Trainer.</p>'+(S.done?'<div class="card" style="border-color:var(--g);margin-bottom:12px"><b class="kok">✓ Gespeichert</b> ('+S.done+' in dieser Sitzung). Nächster Spieler:</div>':"")
+  const hub=()=>{const dr=window.slExtDraft&&window.slExtDraft();if(window.slCss)window.slCss();
+    box.innerHTML='<h2>Scouting</h2><p class="sub">Du siehst hier keine Datenbank. Alles, was du einträgst, geht nur an den Trainer.</p>'
+     +(dr&&dr.open?'<div class="card" style="border-color:var(--ac);margin-bottom:12px"><b>Angefangene Beobachtung</b><div class="note" style="margin:4px 0 8px">'+E(dr.title)+" · "+E(fd(dr.datum))+" · "+dr.n+' bewertet, noch nicht gesendet</div><button class="btn" data-sx="resume" style="background:var(--ac);color:#fff;border-color:var(--ac)">Fortsetzen</button></div>':"")
+     +'<button class="slbig" data-sx="start"><span style="font-size:30px">▶</span><span><b>Spiel beobachten</b><small>Rückennummern mit Plus und Minus bewerten, danach Bögen ausfüllen</small></span></button>'
+     +'<div style="margin-top:14px"><button class="btn" data-sx="single">Einen einzelnen Spieler direkt melden</button></div>'};
+  const draw=()=>{if(!S.single&&window.slOpenExt){hub();return}drawForm()};
+  window.slOnClose=()=>{if(!S.single)draw()};
+  const drawForm=()=>{box.innerHTML=(window.slOpenExt?'<div class="bar"><button class="btn" data-sx="hub">◂ Zurück</button></div>':"")+'<h2>Scouting-Eingabe</h2><p class="sub">Neue Spieler melden. Du siehst hier keine Datenbank, die Meldung geht direkt an den Trainer.</p>'+(S.done?'<div class="card" style="border-color:var(--g);margin-bottom:12px"><b class="kok">✓ Gespeichert</b> ('+S.done+' in dieser Sitzung). Nächster Spieler:</div>':"")
     +'<div class="card"><div class="kg"><label>Dein Name<input id="sc_von" value="'+E(nm)+'"></label><label>Datum<input type="date" id="sc_datum" value="'+td()+'"></label><label>Verein<input id="sc_verein"></label><label>Mannschaft<input id="sc_mann" placeholder="z. B. U12 2"></label><label>Rückennummer<input id="sc_nr" inputmode="numeric"></label><label>Vorname<input id="sc_vor"></label><label>Nachname<input id="sc_name"></label><label>Position(en), Hauptposition zuerst<input id="sc_pos" placeholder="z. B. ZM, Flügel"></label><label>Geburtsdatum (optional)<input type="date" id="sc_geb"></label></div>'
     +'<div class="note"><b>Bewertung</b> <span id="sc_l"></span></div><div class="kb">'+Array.from({length:11},(_,i)=>'<button type="button" data-sb="'+i+'">'+i+'</button>').join("")+'</div><div class="note">10 NLZ · 9 Regionalliga · 8 Westfalenliga · 6/7 Landesliga · 4/5 Bezirksliga · 0–3 Kreisliga</div>'
     +'<div class="kg" style="margin-top:12px"><label style="grid-column:span 2">Stärken'+[1,2,3].map((i)=>'<input class="sc_st" placeholder="'+i+'." style="margin-top:4px">').join("")+'</label><label style="grid-column:span 2">Schwächen'+[1,2,3].map((i)=>'<input class="sc_sw" placeholder="'+i+'." style="margin-top:4px">').join("")+'</label><label style="grid-column:span 4">Notiz (z. B. Kontaktdaten, Eindruck)<textarea id="sc_notiz" rows="3"></textarea></label></div><div id="sc_m" class="note"></div><button class="btn" id="sc_go" style="background:var(--ac);color:#fff;border-color:var(--ac);width:100%;padding:14px;font-size:16px">Absenden</button></div>';
     S.bew=null};
-  draw();
+  if(document.readyState==='complete')draw();else window.addEventListener('load',()=>draw());
+  box.addEventListener("click",(e)=>{const x=e.target.closest("[data-sx]");if(!x)return;const a=x.dataset.sx;if(a==="single"){S.single=true;draw()}else if(a==="hub"){S.single=false;draw()}else if(a==="start")window.slExtStart();else if(a==="resume")window.slOpenExt()});
   box.addEventListener("click",async(e)=>{const b=e.target.closest("[data-sb]");if(b){const v=+b.dataset.sb;S.bew=S.bew===v?null:v;box.querySelectorAll("[data-sb]").forEach((x)=>x.classList.toggle("on",+x.dataset.sb===S.bew));document.getElementById("sc_l").textContent=S.bew!=null?"· "+LIGA(S.bew):"";return}
     if(e.target.id==="sc_go"){const g=(i)=>document.getElementById(i).value.trim(),m=document.getElementById("sc_m");if(!(g("sc_vor")||g("sc_name"))){m.textContent="Bitte einen Namen eintragen.";m.className="note kbad";return}
       try{localStorage.setItem("u13scoutname",g("sc_von"))}catch(x){}nm=g("sc_von");
@@ -4912,5 +4979,256 @@ document.addEventListener("click",(e)=>{
 document.addEventListener("keydown",(e)=>{if(e.key==="Escape"&&document.getElementById("bwov"))bwClose();if((e.key==="Enter"||e.key===" ")&&e.target&&e.target.dataset&&e.target.dataset.bwsel!==undefined){e.preventDefault();e.target.click()}});
 document.addEventListener("change",(e)=>{if(e.target&&(e.target.id==="bwwin"||e.target.id==="bwtags"))bwSaveSettings()});
 window.bwDebug={sum:bwSum,stats:bwStats,taps:bwTaps,open:bwOpen,close:bwClose,tap:bwTap,state:bwS,setView:bwSetView,tile:bwTile,render:bwRender,cfg:bwCfg,tagCount:bwTagCount};
+</script><script>/* ===== Spiel beobachten: Live-Raster mit Plus/Minus je Rückennummer, danach Nachbereitung mit einem Bogen je Spieler =====
+   Zwei Betriebsarten, ein Code:
+   - "app": für Trainer in der App. Die Beobachtung steckt als Feld „live“ im Spielbesuch (Sammlung kobs) und wird laufend gespeichert.
+     Aus der Nachbereitung entstehen Einträge im Eingang oder Beobachtungen bei bekannten Spielern.
+   - "ext": für Externe über den Scouting-Link. Alles bleibt zuerst auf dem Gerät (localStorage); erst „Absenden“ legt je Spieler
+     einen Eintrag im Eingang an (nur Schreiben, wie bisher).
+   live = { v, von, ph:"b"(beobachten)|"n"(nachbereiten)|"f"(fertig), teams:[{id,v,m}], pl:[{id,t,nr,name,h,note}], res:{spielerId:{a,ref,bg,sent}} }
+   h = Verlauf der Tipps als Text, z. B. "++-+" (so lässt sich der letzte Tipp zurücknehmen). */
+(function(){
+if(window.__slInit)return;window.__slInit=true;
+const E=(s)=>String(s==null?"":s).replace(/[&<>"']/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const nid=(p)=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+const td=()=>typeof today==="function"?today():new Date().toISOString().slice(0,10);
+const fd=(d)=>d?d.slice(8,10)+"."+d.slice(5,7)+"."+d.slice(0,4):"";
+const clone=(o)=>JSON.parse(JSON.stringify(o));
+const LIGA=(b)=>b==null?"":b>=10?"NLZ":b>=9?"Regionalliga":b>=8?"Westfalenliga":b>=6?"Landesliga":b>=4?"Bezirksliga":"Kreisliga";
+const LSKEY="u13sl.ext";
+const K=()=>window.__kader||null;
+const tn=(t)=>[t.v,t.m].filter(Boolean).join(" ")||"Mannschaft";
+const cnt=(p)=>{let a=0,m=0;for(const c of (p.h||"")){if(c==="+")a++;else if(c==="-")m++}return[a,m]};
+const bil=(p)=>{const c=cnt(p);return"+"+c[0]+" −"+c[1]};
+const saldo=(p)=>{const c=cnt(p);return c[0]-c[1]};
+const rated=(p)=>(p.h||"").length>0||!!String(p.note||"").trim();
+const nrKey=(nr)=>{const n=parseInt(nr,10);return isNaN(n)?[1,String(nr)]:[0,n]};
+const cmpNr=(a,b)=>{const x=nrKey(a.nr),y=nrKey(b.nr);return x[0]-y[0]||(x[0]===0?x[1]-y[1]:String(x[1]).localeCompare(String(y[1]),"de"))};
+const lsGet=(k)=>{try{return JSON.parse(localStorage.getItem(k)||"null")}catch(e){return null}};
+const lsSet=(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+
+let X=null,A=null,ui={view:"b",tab:null,edit:{},arm:null,tf:null,dr:null,pid:null,su:null,msg:"",busy:false,hl:null},root=null,tmr=null;
+
+/* ---------- Speichern ---------- */
+function persist(now){
+  if(!X||!A)return;
+  if(A.mode==="ext"){lsSet(LSKEY,X);return}
+  clearTimeout(tmr);
+  const go=()=>{tmr=null;const k=K();if(!k||!X)return;const c=clone(X),i=k.KD.obs.findIndex((o)=>o.id===c.id);if(i>=0)k.KD.obs[i]=c;else k.KD.obs.push(c);k.sv("kobs",c.id,c)};
+  if(now)go();else tmr=setTimeout(go,350);
+}
+const flush=()=>{if(tmr){clearTimeout(tmr);persist(true)}};
+window.addEventListener("pagehide",flush);document.addEventListener("visibilitychange",()=>{if(document.hidden)flush()});
+
+/* ---------- Darstellung ---------- */
+const CSS=`.slov{position:fixed;inset:0;z-index:360;background:var(--bg);color:var(--tx);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);font-size:15px}
+.slov *{box-sizing:border-box}.slh{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:10px 14px;background:var(--card);border-bottom:1px solid var(--ln)}.slh b{font-size:16px;min-width:0;overflow-wrap:anywhere}.slh .note{font-size:12px}
+.slbody{flex:1;overflow:auto;padding:10px 12px 18px}.slfoot{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));background:var(--card);border-top:1px solid var(--ln)}
+.slov .slpri{background:var(--ac)!important;color:#fff!important;border-color:var(--ac)!important;font-weight:700;padding:11px 16px}.slov .btn{font-family:inherit}
+.slteams{display:flex;gap:6px;overflow-x:auto;padding:8px 12px;background:var(--card);border-bottom:1px solid var(--ln);-webkit-overflow-scrolling:touch}
+.sltab{flex:none;max-width:60vw;font:inherit;font-size:14px;padding:7px 12px;border-radius:99px;border:1px solid var(--ln);background:var(--bg);color:var(--tx);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sltab.on{background:var(--ac);border-color:var(--ac);color:#fff}.sltab small{opacity:.8;margin-left:4px}
+.sladd{display:flex;gap:8px;align-items:center;padding:10px 12px;background:var(--bg)}.sladd input{width:120px;font-size:18px;padding:10px 12px;font-family:inherit}
+.slg{display:grid;grid-template-columns:1fr;gap:10px}@media(min-width:680px){.slg{grid-template-columns:1fr 1fr}}@media(min-width:1000px){.slg{grid-template-columns:1fr 1fr 1fr}}
+.slp{background:var(--card);border:1px solid var(--ln);border-radius:16px;padding:10px 12px}.slp.hl{outline:3px solid var(--ac)}
+.slt{display:flex;align-items:center;gap:8px;margin-top:4px}.slnr{font-size:30px;font-weight:800;line-height:1;min-width:52px;text-align:center}.slnm{flex:1;min-width:0;font-size:13px;color:var(--mu);overflow-wrap:anywhere}.slbil{font-weight:700;font-size:17px;white-space:nowrap;min-width:78px;padding-left:8px}
+.slic{background:none;border:0;color:var(--mu);font-size:19px;width:34px;height:36px;cursor:pointer;font-family:inherit}.slic.arm{color:var(--r);font-size:13px;width:auto}
+.slbt{display:flex;gap:10px;align-items:center}.slb{flex:1;height:56px;border-radius:14px;border:1px solid var(--ln);font-family:inherit;font-weight:800;font-size:34px;line-height:1;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.slb.slpl{background:var(--gs);color:var(--g);border-color:var(--g)}.slb.slmi{background:var(--rs);color:var(--r);border-color:var(--r)}.slb:active{transform:scale(.96)}
+.slpn{margin-top:8px;display:flex;flex-direction:column;gap:6px}.slpn input,.slpn textarea,.slbody input,.slbody textarea,.slbody select{font:inherit;font-size:15px;padding:8px 10px;width:100%;border-radius:10px;border:1px solid var(--ln);background:var(--bg);color:var(--tx)}
+.slsn{font-size:13px;color:var(--mu);margin-top:6px;overflow-wrap:anywhere;white-space:pre-wrap}
+.slrow{background:var(--card);border:1px solid var(--ln);border-radius:14px;padding:10px 12px;margin-bottom:8px}.slrow.off{opacity:.6}.slrt{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}.slrt b{font-size:18px}
+.slch{font-size:12px;padding:3px 9px;border-radius:99px;background:var(--grs);color:var(--mu);white-space:nowrap}.slch.ok{background:var(--gs);color:var(--g);font-weight:600}.slch.no{background:var(--rs);color:var(--r)}
+.slgrp{font-weight:700;margin:14px 2px 6px}.slform{display:grid;grid-template-columns:1fr 1fr;gap:10px}.slform label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mu)}.slform .w2{grid-column:span 2}
+.slbew{display:flex;flex-wrap:wrap;gap:6px}.slbew button{width:44px;height:44px;border-radius:10px;border:1px solid var(--ln);background:var(--card);color:var(--tx);font:inherit;font-weight:700;cursor:pointer}.slbew button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.slbig{display:flex;gap:14px;align-items:center;width:100%;text-align:left;font:inherit;color:#fff;background:var(--ac);border:0;border-radius:16px;padding:16px 18px;cursor:pointer}.slbig b{font-size:18px;display:block}.slbig small{font-size:13px;opacity:.92}
+.slmsg{font-size:13px;margin:8px 0}.slmsg.er{color:var(--r)}.slmsg.ok{color:var(--g)}.slov .slform .note{font-size:12px}`;
+function css(){if(document.getElementById("slcss"))return;const s=document.createElement("style");s.id="slcss";s.textContent=CSS;document.head.appendChild(s)}
+
+const L=()=>X&&X.live;
+const team=(id)=>L().teams.find((t)=>t.id===id);
+const curTeam=()=>team(ui.tab)||L().teams[0];
+const title=()=>{const T=L().teams;return T.length===2?tn(T[0])+" – "+tn(T[1]):T.length===1?tn(T[0]):T.length+" Mannschaften"};
+const gegner=(t)=>{const T=L().teams;return T.length===2?tn(T.find((x)=>x.id!==t.id)):""};
+
+function hdr(inner,sub){return'<div class="slh">'+inner+"</div>"+(sub||"")}
+function setupHtml(){const s=ui.su,ext=A.mode==="ext",vl=(!ext&&K()&&K().vList)?'<datalist id="slvl">'+K().vList().map((v)=>'<option value="'+E(v.name)+'">').join("")+"</datalist>":"";
+  return hdr('<b>Spiel beobachten</b><span style="flex:1"></span><button class="btn" data-sl="setx">Abbrechen</button>')
+   +'<div class="slbody"><div class="slform">'
+   +(ext?'<label class="w2">Dein Name<input data-su="von" value="'+E(s.von)+'" autocomplete="name"></label>':"")
+   +'<label class="w2">Datum<input type="date" data-su="datum" value="'+E(s.datum)+'"></label>'
+   +'<div class="w2 note"><b>Heimmannschaft</b></div><label>Verein<input data-su="hv" list="slvl" autocomplete="off" value="'+E(s.hv)+'"></label><label>Mannschaft<input data-su="hm" value="'+E(s.hm)+'" placeholder="z. B. U12 2"></label>'
+   +'<div class="w2 note"><b>Gastmannschaft</b> (leer lassen, wenn du nur eine Mannschaft beobachtest)</div><label>Verein<input data-su="gv" list="slvl" autocomplete="off" value="'+E(s.gv)+'"></label><label>Mannschaft<input data-su="gm" value="'+E(s.gm)+'" placeholder="z. B. U12 1"></label>'
+   +"</div>"+vl+'<p class="note">Turnier? Weitere Mannschaften ergänzt du danach jederzeit mit „+ Mannschaft“.</p><div class="slmsg er">'+E(ui.msg)+'</div></div>'
+   +'<div class="slfoot"><span></span><button class="btn slpri" data-sl="setgo">Los geht’s</button></div>'}
+function teamsBar(){const T=L().teams,c=curTeam();
+  return'<div class="slteams">'+T.map((t)=>'<button class="sltab'+(t.id===c.id?" on":"")+'" data-sl="tab" data-id="'+t.id+'">'+E(tn(t))+"<small>"+L().pl.filter((p)=>p.t===t.id).length+"</small></button>").join("")+'<button class="sltab" data-sl="tadd">＋ Mannschaft</button></div>'}
+function teamForm(){const f=ui.tf;if(!f)return"";const vl=(A.mode!=="ext"&&K()&&K().vList)?'<datalist id="slvl">'+K().vList().map((v)=>'<option value="'+E(v.name)+'">').join("")+"</datalist>":"";
+  return'<div class="slrow"><div class="slform"><label>Verein<input data-tf="v" list="slvl" autocomplete="off" value="'+E(f.v)+'"></label><label>Mannschaft<input data-tf="m" value="'+E(f.m)+'" placeholder="z. B. U12 2"></label></div>'+vl+'<div class="slrt" style="margin-top:8px"><button class="btn slpri" data-sl="tsave">'+(f.id?"Speichern":"Mannschaft hinzufügen")+'</button><button class="btn" data-sl="tcancel">Abbrechen</button>'+(f.id&&!L().pl.some((p)=>p.t===f.id)&&L().teams.length>1?'<button class="btn" data-sl="tdel">Mannschaft entfernen</button>':"")+"</div></div>"}
+function cardHtml(p){const c=cnt(p),open=!!ui.edit[p.id];
+  return'<div class="slp'+(ui.hl===p.id?" hl":"")+'" data-p="'+p.id+'"><div class="slbt"><span class="slnr">'+E(p.nr)+'</span><button class="slb slmi" data-sl="m" aria-label="Minus">−</button><button class="slb slpl" data-sl="p" aria-label="Plus">+</button></div>'
+   +'<div class="slt"><span class="slbil">+'+c[0]+" −"+c[1]+'</span><span class="slnm">'+(p.name?E(p.name):"")+'</span><button class="slic" data-sl="undo" title="Letzten Tipp zurücknehmen" aria-label="Letzten Tipp zurücknehmen">↶</button><button class="slic" data-sl="edit" title="Name und Notiz" aria-label="Name und Notiz">✎</button><button class="slic'+(ui.arm==="d"+p.id?" arm":"")+'" data-sl="del" aria-label="Entfernen">'+(ui.arm==="d"+p.id?"Entfernen?":"✕")+"</button></div>"
+   +(open?'<div class="slpn"><input data-pf="name" placeholder="Name, falls bekannt" value="'+E(p.name)+'" autocomplete="off"><textarea data-pf="note" rows="2" placeholder="Notiz (z. B. linker Fuß, sehr schnell)">'+E(p.note)+"</textarea></div>":(p.note?'<div class="slsn">'+E(p.note)+"</div>":""))+"</div>"}
+function rasterHtml(){const t=curTeam(),P=L().pl.filter((p)=>p.t===t.id).sort(cmpNr),a=P.reduce((s,p)=>s+cnt(p)[0],0),m=P.reduce((s,p)=>s+cnt(p)[1],0);
+  return hdr('<b>'+E(title())+'</b><span class="note">'+E(fd(X.datum))+" · "+P.length+(P.length===1?" Spieler":" Spieler")+" · +"+a+" −"+m+'</span><span style="flex:1"></span><button class="btn" data-sl="close">Schließen</button><button class="btn slpri" data-sl="done">Fertig ▸</button>',teamsBar())
+   +'<div class="sladd"><input id="slnr" inputmode="numeric" placeholder="Nummer" maxlength="12" autocomplete="off" enterkeyhint="done"><button class="btn slpri" data-sl="addp">＋ Spieler</button><span class="note">'+E(tn(t))+"</span></div>"
+   +'<div class="slbody" id="slbody">'+teamForm()+(P.length?'<div class="slg">'+P.map(cardHtml).join("")+"</div>":'<p class="note" style="margin:18px 4px">Noch kein Spieler in dieser Mannschaft. Oben die Rückennummer eingeben und auf „＋ Spieler“ tippen.</p>')
+   +'<div style="margin-top:14px"><button class="btn" data-sl="tedit">Mannschaft umbenennen</button></div></div>'}
+function stTxt(p){const r=L().res[p.id];if(!r)return rated(p)?["offen",""]:["ohne Bewertung",""];
+  if(A.mode==="ext")return r.sent?["gesendet ✓","ok"]:r.a==="k"?["Bogen ausgefüllt","ok"]:r.a==="s"?["nur Bilanz","ok"]:["nicht melden","no"];
+  return r.a==="k"?["im Eingang","ok"]:r.a==="z"?["bei bekanntem Spieler","ok"]:["verworfen","no"]}
+function rowHtml(p){const t=team(p.t),s=stTxt(p),r=L().res[p.id],ext=A.mode==="ext";
+  return'<div class="slrow'+(rated(p)?"":" off")+'" data-p="'+p.id+'"><div class="slrt"><b>Nr. '+E(p.nr)+"</b>"+(p.name?"<span>"+E(p.name)+"</span>":"")+'<span class="slbil">'+bil(p)+'</span><span class="slch '+s[1]+'">'+s[0]+"</span></div>"+(p.note?'<div class="slsn">'+E(p.note)+"</div>":"")
+   +'<div class="slrt" style="margin-top:8px"><button class="btn'+(r?"":" slpri")+'" data-sl="bogen" data-id="'+p.id+'">'+(r&&(r.a==="k"||r.a==="z")?"Bogen ändern":"Bogen ausfüllen")+"</button>"
+   +(ext?'<button class="btn" data-sl="'+(r&&r.a==="s"?"none":"onlyb")+'" data-id="'+p.id+'">'+(r&&r.a==="s"?"Nicht melden":"Nur Bilanz melden")+"</button>":'<button class="btn" data-sl="verw" data-id="'+p.id+'">Verwerfen</button>')+"</div></div>"}
+function nachHtml(){const ext=A.mode==="ext",T=L().teams,P=L().pl,offen=P.filter((p)=>rated(p)&&!L().res[p.id]).length,sendN=P.filter(sendable).length;
+  const body=T.map((t)=>{const Q=P.filter((p)=>p.t===t.id),R=Q.filter(rated).sort((a,b)=>saldo(b)-saldo(a)||cmpNr(a,b)),U=Q.filter((p)=>!rated(p)).sort(cmpNr);if(!Q.length)return"";
+    return'<div class="slgrp">'+E(tn(t))+"</div>"+R.map(rowHtml).join("")+(U.length?'<details><summary class="note" style="cursor:pointer;margin:4px 2px 8px">Ohne Bewertung ('+U.length+")</summary>"+U.map(rowHtml).join("")+"</details>":"")}).join("");
+  return hdr('<b>Nachbereitung</b><span class="note">'+E(title())+" · "+E(fd(X.datum))+'</span><span style="flex:1"></span><button class="btn" data-sl="back">◂ Beobachten</button>')
+   +'<div class="slbody"><p class="note" style="margin:2px 2px 10px">'+(ext?"Für jeden Spieler kannst du einen Bogen ausfüllen (Name, Position, Stärken …). Ohne Bogen wird nur die Bilanz mit deiner Notiz gemeldet.":"Für jeden Spieler einen Bogen ausfüllen oder verwerfen. Aus dem Bogen wird ein Eintrag im Eingang oder eine Beobachtung bei einem bekannten Spieler.")+"</p>"+(body||'<p class="note">Keine Spieler erfasst.</p>')+'<div class="slmsg '+(ui.msgOk?"ok":"er")+'">'+E(ui.msg)+"</div></div>"
+   +'<div class="slfoot"><span class="note">'+(ext?sendN+(sendN===1?" Spieler wird gesendet":" Spieler werden gesendet"):(offen?offen+" noch offen":"alles bearbeitet"))+"</span>"+(ext?'<button class="btn slpri" data-sl="send"'+(ui.busy||!sendN?" disabled":"")+">"+(ui.busy?"Wird gesendet …":"Absenden")+"</button>":'<button class="btn slpri" data-sl="finish">Abschließen</button>')+"</div>"}
+function bogenHtml(){const p=L().pl.find((x)=>x.id===ui.pid),d=ui.dr,t=team(p.t),ext=A.mode==="ext",k=K(),pl=!ext&&k&&k.plan?k.plan():null;
+  const known=!ext&&k?k.KD.pers.filter((q)=>q.typ!=="eigen").slice().sort((a,b)=>k.pname(a).localeCompare(k.pname(b),"de")):[];
+  const nxt=nextOpen(p.id);
+  return hdr('<b>Nr. '+E(p.nr)+" · "+E(tn(t))+'</b><span class="slbil" style="font-size:18px">'+bil(p)+'</span><span style="flex:1"></span><button class="btn" data-sl="bx">Zur Liste</button>')
+   +'<div class="slbody">'+(p.note?'<div class="slsn" style="margin:0 0 10px">Deine Live-Notiz: '+E(p.note)+"</div>":"")
+   +(known.length?'<label class="note" style="display:block;margin-bottom:10px">Gibt es den Spieler schon in der Datenbank?<select data-f="ref"><option value="">Nein, neu anlegen</option>'+known.map((q)=>'<option value="'+q.id+'"'+(d.ref===q.id?" selected":"")+">"+E(k.pfull(q)+(q.verein?" ("+q.verein+")":""))+"</option>").join("")+"</select></label>":"")
+   +'<div class="slform"><label>Vorname<input data-f="vorname" value="'+E(d.vorname)+'" autocomplete="off"></label><label>Nachname<input data-f="name" value="'+E(d.name)+'" autocomplete="off"></label>'
+   +'<label class="w2">Positionen, Hauptposition zuerst<input data-f="pos" value="'+E(d.pos)+'" placeholder="z. B. ZM, Flügel"></label><label class="w2">Geburtsdatum (optional)<input type="date" data-f="geb" value="'+E(d.geb)+'"></label></div>'
+   +'<div class="note" style="margin-top:12px"><b>Bewertung (optional)</b> '+(d.bew!=null?"· "+LIGA(d.bew):"")+'</div><div class="slbew">'+Array.from({length:11},(_,i)=>'<button type="button" data-sl="bew" data-v="'+i+'" class="'+(d.bew===i?"on":"")+'">'+i+"</button>").join("")+'</div><div class="note">10 NLZ · 9 Regionalliga · 8 Westfalenliga · 6/7 Landesliga · 4/5 Bezirksliga · 0–3 Kreisliga</div>'
+   +'<div class="slform" style="margin-top:12px"><label>Stärken'+[0,1,2].map((i)=>'<input data-f="st.'+i+'" value="'+E(d.st[i])+'" placeholder="'+(i+1)+'." style="margin-top:4px">').join("")+"</label><label>Schwächen"+[0,1,2].map((i)=>'<input data-f="sw.'+i+'" value="'+E(d.sw[i])+'" placeholder="'+(i+1)+'." style="margin-top:4px">').join("")+"</label>"
+   +'<label class="w2">Notiz<textarea data-f="notiz" rows="3">'+E(d.notiz)+"</textarea></label>"
+   +(pl?'<label>Einschätzung'+optSel("rolle",pl.rollen,d.rolle)+"</label><label>Priorität"+optSel("prio",pl.prios,d.prio)+"</label>":"")+"</div>"
+   +'<div class="slmsg er">'+E(ui.msg)+"</div></div>"
+   +'<div class="slfoot"><button class="btn" data-sl="bskip">Überspringen</button><button class="btn slpri" data-sl="bsave">'+(nxt?"Speichern & weiter":"Speichern")+"</button></div>"}
+const optSel=(f,list,cur)=>'<select data-f="'+f+'"><option value="">–</option>'+(list||[]).map((x)=>'<option value="'+E(x.id)+'"'+(cur===x.id?" selected":"")+">"+E(x.name)+"</option>").join("")+"</select>";
+function doneHtml(){return hdr("<b>Gesendet</b>")+'<div class="slbody"><div class="slrow"><b>Danke!</b><p style="margin:6px 0 0">Alle Meldungen sind beim Trainer angekommen.</p></div></div><div class="slfoot"><span></span><button class="btn slpri" data-sl="newobs">Neue Beobachtung</button></div>'}
+
+function draw(){
+  if(!root)return;
+  const bd=root.querySelector(".slbody"),sc=bd?bd.scrollTop:0,v=ui.view;
+  root.innerHTML=v==="setup"?setupHtml():v==="b"?rasterHtml():v==="n"?nachHtml():v==="g"?bogenHtml():doneHtml();
+  const nb=root.querySelector(".slbody");if(nb&&v!=="setup"&&ui.keepScroll!==false)nb.scrollTop=sc;ui.keepScroll=true;
+}
+function show(){css();if(!root){root=document.createElement("div");root.className="slov";root.id="slov";document.body.appendChild(root);document.body.style.overflow="hidden"}draw()}
+function hide(){flush();if(root){root.remove();root=null}document.body.style.overflow="";X=null;A=null;ui={view:"b",tab:null,edit:{},arm:null,tf:null,dr:null,pid:null,su:null,msg:"",busy:false,hl:null};try{const k=K();k&&k.force&&k.force();typeof renderTermine==="function"&&renderTermine();window.slOnClose&&window.slOnClose()}catch(e){}}
+
+/* ---------- Logik ---------- */
+function newDraft(p){const r=L().res[p.id],bg=r&&r.bg;if(bg)return clone(bg);
+  const parts=String(p.name||"").trim().split(/\s+/).filter(Boolean),vor=parts.length>1?parts[0]:"",nam=parts.length>1?parts.slice(1).join(" "):(parts[0]||"");
+  return{vorname:vor,name:nam,pos:"",geb:"",bew:null,st:["","",""],sw:["","",""],notiz:p.note||"",rolle:"",prio:"",ref:""}}
+const sendable=(p)=>{const r=L().res[p.id];return!!r&&r.a!=="v"&&!r.sent||(!r&&rated(p)&&A.mode==="ext")};
+function nextOpen(afterId){const P=sortedForNach(),i=P.findIndex((p)=>p.id===afterId);return P.slice(i+1).concat(P.slice(0,i)).find((p)=>rated(p)&&!L().res[p.id])||null}
+function sortedForNach(){const o=[];L().teams.forEach((t)=>L().pl.filter((p)=>p.t===t.id&&rated(p)).sort((a,b)=>saldo(b)-saldo(a)||cmpNr(a,b)).forEach((p)=>o.push(p)));return o}
+function notizText(p,d){const t=team(p.t),g=gegner(t),body=String(d?d.notiz:p.note||"").trim();
+  return(["Spielbeobachtung "+fd(X.datum)+": "+bil(p)+(g?" ("+tn(t)+" gegen "+g+")":" ("+tn(t)+")")].concat(body?[body]:[]).join("\n")).slice(0,3800)}
+function kinboxOf(p,d,id){const t=team(p.t),posn=String(d.pos||"").split(/[,;\/]/).map((x)=>x.trim()).filter(Boolean),o={id,at:new Date().toISOString(),von:L().von||"",datum:X.datum,verein:t.v||"",mannschaft:t.m||"",nr:String(p.nr),vorname:d.vorname||"",name:d.name||"",pos:posn.join(", "),posn,geb:d.geb||"",bew:d.bew==null?null:d.bew,st:(d.st||[]).filter(Boolean),sw:(d.sw||[]).filter(Boolean),notiz:notizText(p,d)};return o}
+function saveBogen(go){
+  const p=L().pl.find((x)=>x.id===ui.pid),d=ui.dr,k=K();
+  if(A.mode==="ext"){L().res[p.id]={a:"k",bg:clone(d)}}
+  else if(d.ref){const pr=k.KD.pers.find((q)=>q.id===d.ref);if(!pr){ui.msg="Der Spieler wurde nicht gefunden.";draw();return}
+    const c=clone(pr);c.beob=(c.beob||[]).concat([{id:nid("b"),datum:X.datum,anlass:"Spielbeobachtung",verein:team(p.t).v||pr.verein||"",bew:d.bew==null?"":d.bew,notiz:notizText(p,d)}]);k.savePers(c);L().res[p.id]={a:"z",ref:pr.id,bg:clone(d)}}
+  else{const old=L().res[p.id],ex=old&&old.a==="k"&&k.KD.inbox.find((i)=>i.id===old.ref),id=ex?ex.id:nid("ki"),o=kinboxOf(p,d,id);if(d.rolle)o.rolle=d.rolle;if(d.prio)o.prio=d.prio;
+    const i=k.KD.inbox.findIndex((x)=>x.id===id);if(i>=0)k.KD.inbox[i]=o;else k.KD.inbox.push(o);k.sv("kinbox",id,o);L().res[p.id]={a:"k",ref:id,bg:clone(d)}}
+  persist(true);ui.msg="";
+  const nx=go?nextOpen(p.id):null;
+  if(nx){ui.pid=nx.id;ui.dr=newDraft(nx);ui.keepScroll=false}else ui.view="n";
+  draw();
+}
+async function send(){
+  if(ui.busy)return;const P=L().pl.filter(sendable);if(!P.length)return;
+  ui.busy=true;ui.msg="";draw();let fail=0,db=null;
+  try{db=(window.__scoutDb&&window.__scoutDb())||await (window.claude&&window.claude.use?window.claude.use("db"):null)}catch(e){db=null}
+  for(const p of P){
+    const r=L().res[p.id]||(L().res[p.id]={a:"s"}),d=r.bg||{vorname:"",name:String(p.name||""),pos:"",geb:"",bew:null,st:[],sw:[],notiz:p.note||""},o=kinboxOf(p,d,"kl_"+p.id);
+    if(window.__SCOUTKEY)o.k=window.__SCOUTKEY;
+    try{if(!db)throw{code:"offline"};await db.collection("kinbox").doc(o.id).set(o);r.sent=1}
+    catch(e){if(e&&e.code==="http-409")r.sent=1;else{fail++;ui.lastErr=e&&e.code||""}}
+    persist(true);
+  }
+  ui.busy=false;
+  if(!fail){L().ph="f";persist(true);ui.view="done";ui.msg=""}
+  else{ui.msgOk=false;ui.msg=fail+(fail===1?" Meldung":" Meldungen")+" konnte"+(fail===1?"":"n")+" nicht gesendet werden"+(navigator.onLine===false||ui.lastErr==="offline"?" (keine Verbindung). Alles bleibt auf diesem Gerät gespeichert, bitte später noch einmal auf „Absenden“ tippen.":ui.lastErr==="permission-denied"?". Bitte beim Trainer einen neuen Link holen (er wurde vielleicht erneuert).":". Bitte später noch einmal versuchen.")}
+  draw();
+}
+function addPlayer(){
+  const inp=root.querySelector("#slnr");if(!inp)return;const nr=inp.value.trim();if(!nr)return;const t=curTeam(),ex=L().pl.find((p)=>p.t===t.id&&String(p.nr).toLowerCase()===nr.toLowerCase());
+  if(ex){ui.hl=ex.id;draw();const el=root.querySelector('[data-p="'+ex.id+'"]');el&&el.scrollIntoView({block:"center"});setTimeout(()=>{ui.hl=null;if(root)draw()},1200);return}
+  L().pl.push({id:nid("sp"),t:t.id,nr,name:"",h:"",note:""});persist();draw();const i2=root.querySelector("#slnr");i2&&i2.focus()}
+function tap(id,c){const p=L().pl.find((x)=>x.id===id);if(!p)return;p.h=(p.h||"")+c;persist();try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}draw()}
+
+document.addEventListener("click",(e)=>{
+  const b=e.target.closest&&e.target.closest("[data-sl]");if(!b||!root||!root.contains(b))return;
+  const a=b.dataset.sl,id=b.dataset.id,card=b.closest("[data-p]"),pid=id||(card&&card.dataset.p);
+  switch(a){
+   case"setx":hide();break;
+   case"setgo":{const s=ui.su;if(!(s.hv||s.hm)){ui.msg="Bitte mindestens die Heimmannschaft eintragen.";draw();break}
+     if(A.mode==="ext"&&!s.von.trim()){ui.msg="Bitte deinen Namen eintragen.";draw();break}
+     try{if(s.von)localStorage.setItem("u13scoutname",s.von)}catch(x){}
+     const live={v:1,von:s.von||"",ph:"b",teams:[],pl:[],res:{}};
+     [["hv","hm"],["gv","gm"]].forEach((q)=>{if(s[q[0]]||s[q[1]])live.teams.push({id:nid("t"),v:s[q[0]].trim(),m:s[q[1]].trim()})});
+     const base=s.base;
+     if(A.mode==="ext")X={id:nid("ko"),datum:s.datum||td(),live};
+     else{X=base?clone(base):{id:nid("ko"),verein:"",mannschaft:"",datum:s.datum||td(),zeit:"",entf:"",status:"erledigt",blick:"",notiz:"",personIds:[]};
+       X.datum=s.datum||X.datum;X.status="erledigt";if(s.hv||!X.verein){X.verein=s.hv.trim()||s.hm.trim()||X.verein;X.mannschaft=s.hv?s.hm.trim():X.mannschaft}
+       const g=[s.gv,s.gm].filter(Boolean).join(" ").trim();if(g&&!/Gegen /.test(X.notiz||""))X.notiz=((X.notiz?X.notiz+" · ":"")+"Gegen "+g);X.live=live}
+     ui.tab=live.teams[0].id;ui.view="b";ui.msg="";persist(true);draw();setTimeout(()=>{const i=root&&root.querySelector("#slnr");i&&i.focus()},50);break}
+   case"close":hide();break;
+   case"done":L().ph="n";persist(true);ui.view="n";ui.msg="";draw();break;
+   case"back":L().ph="b";persist(true);ui.view="b";draw();break;
+   case"tab":ui.tab=id;ui.tf=null;draw();break;
+   case"tadd":ui.tf={id:null,v:"",m:""};draw();{const i=root.querySelector("[data-tf=v]");i&&i.focus()}break;
+   case"tedit":{const t=curTeam();ui.tf={id:t.id,v:t.v,m:t.m};draw();break}
+   case"tcancel":ui.tf=null;draw();break;
+   case"tsave":{const f=ui.tf;if(!(f.v.trim()||f.m.trim()))break;if(f.id){const t=team(f.id);t.v=f.v.trim();t.m=f.m.trim()}else{const t={id:nid("t"),v:f.v.trim(),m:f.m.trim()};L().teams.push(t);ui.tab=t.id}ui.tf=null;persist();draw();break}
+   case"tdel":{const f=ui.tf;L().teams=L().teams.filter((t)=>t.id!==f.id);ui.tab=L().teams[0].id;ui.tf=null;persist();draw();break}
+   case"addp":addPlayer();break;
+   case"p":tap(pid,"+");break;case"m":tap(pid,"-");break;
+   case"undo":{const p=L().pl.find((x)=>x.id===pid);if(p&&p.h){p.h=p.h.slice(0,-1);persist();draw()}break}
+   case"edit":ui.edit[pid]=!ui.edit[pid];draw();break;
+   case"del":if(ui.arm==="d"+pid){L().pl=L().pl.filter((x)=>x.id!==pid);delete L().res[pid];ui.arm=null;persist();draw()}else{ui.arm="d"+pid;draw();setTimeout(()=>{if(ui.arm==="d"+pid){ui.arm=null;if(root)draw()}},3000)}break;
+   case"bogen":{const p=L().pl.find((x)=>x.id===id);ui.pid=p.id;ui.dr=newDraft(p);ui.view="g";ui.msg="";ui.keepScroll=false;draw();break}
+   case"bx":ui.view="n";draw();break;
+   case"bew":{const v=+b.dataset.v;ui.dr.bew=ui.dr.bew===v?null:v;draw();break}
+   case"bsave":saveBogen(true);break;
+   case"bskip":{const p=L().pl.find((x)=>x.id===ui.pid);if(!L().res[p.id])L().res[p.id]=A.mode==="ext"?{a:"s"}:{a:"v"};persist(true);const nx=nextOpen(p.id);if(nx){ui.pid=nx.id;ui.dr=newDraft(nx);ui.keepScroll=false}else ui.view="n";draw();break}
+   case"verw":L().res[id]={a:"v"};persist(true);draw();break;
+   case"onlyb":L().res[id]={a:"s"};persist(true);draw();break;
+   case"none":L().res[id]={a:"v"};persist(true);draw();break;
+   case"finish":L().ph="f";persist(true);hide();break;
+   case"send":send();break;
+   case"newobs":lsSet(LSKEY,null);hide();if(window.slExtStart)window.slExtStart();break;
+  }
+});
+document.addEventListener("input",(e)=>{
+  const t=e.target;if(!root||!root.contains(t))return;
+  if(t.dataset.su!=null){ui.su[t.dataset.su]=t.value;return}
+  if(t.dataset.tf!=null){ui.tf[t.dataset.tf]=t.value;return}
+  if(t.dataset.pf!=null){const c=t.closest("[data-p]"),p=L().pl.find((x)=>x.id===c.dataset.p);if(p){p[t.dataset.pf]=t.value;persist();if(t.dataset.pf==="name"){const n=c.querySelector(".slnm");if(n)n.textContent=t.value}}return}
+  if(t.dataset.f!=null){const f=t.dataset.f,m=f.match(/^(st|sw)\.(\d)$/);if(m)ui.dr[m[1]][+m[2]]=t.value;else ui.dr[f]=t.value}
+});
+document.addEventListener("change",(e)=>{const t=e.target;if(root&&root.contains(t)&&t.dataset.f==="ref"){ui.dr.ref=t.value;draw()}});
+document.addEventListener("keydown",(e)=>{if(e.key==="Enter"&&root&&e.target&&e.target.id==="slnr"){e.preventDefault();addPlayer()}});
+
+/* ---------- Einstieg ---------- */
+function openSetup(mode,base){
+  A=mode==="ext"?{mode:"ext"}:{mode:"app"};
+  const nm=(()=>{try{return localStorage.getItem("u13scoutname")||""}catch(e){return""}})();
+  ui=Object.assign(ui,{view:"setup",su:{von:nm,datum:(base&&base.datum)||td(),hv:(base&&base.verein)||"",hm:(base&&base.mannschaft)||"",gv:"",gm:"",base:base||null},msg:""});
+  show();
+}
+function resume(obj,mode){A={mode};X=obj;ui=Object.assign(ui,{view:L().ph==="n"?"n":"b",tab:L().teams[0]&&L().teams[0].id,msg:""});show()}
+window.slCss=css;
+window.slOpenNew=()=>openSetup("app",null);
+window.slOpenFrom=(id)=>{const k=K();if(!k)return;const o=k.KD.obs.find((x)=>x.id===id);if(!o)return;if(o.live){resume(clone(o),"app");return}openSetup("app",o)};
+window.slOpenExt=()=>{const d=lsGet(LSKEY);if(d&&d.live&&d.live.ph!=="f"){resume(d,"ext");return}openSetup("ext",null)};
+window.slExtStart=()=>openSetup("ext",null);
+window.slExtDraft=()=>{const d=lsGet(LSKEY);if(!d||!d.live)return null;const n=(d.live.pl||[]).filter(rated).length,sent=d.live.ph==="f";return{n,sent,title:(d.live.teams||[]).map(tn).join(" – "),datum:d.datum,open:!sent}};
+window.slCard=()=>{const k=K();if(!k)return"";const o=k.KD.obs.filter((x)=>x.live&&x.live.ph!=="f");if(!o.length)return"";
+  return o.map((x)=>{const n=x.live.pl.length,r=x.live.pl.filter(rated).length;return'<div class="card" style="margin-bottom:10px;border-color:var(--ac)"><div class="bar" style="margin:0"><b>Beobachtung läuft: '+E(x.live.teams.map(tn).join(" – "))+'</b><span class="note">'+E(fd(x.datum))+" · "+n+" Spieler, "+r+' bewertet · '+(x.live.ph==="n"?"Nachbereitung":"Beobachten")+'</span><span style="flex:1"></span><button class="btn" data-ka="slo" data-id="'+x.id+'" style="background:var(--ac);color:#fff;border-color:var(--ac)">Fortsetzen</button></div></div>'}).join("")};
+window.slInfo=(o)=>{if(!o||!o.live)return"";const n=o.live.pl.length,r=o.live.pl.filter(rated).length,off=o.live.pl.filter((p)=>rated(p)&&!o.live.res[p.id]).length;return n+" Spieler, "+r+" bewertet"+(o.live.ph==="f"?"":off?", "+off+" offen":"")};
+window.slHasLive=(o)=>!!(o&&o.live);
+document.addEventListener("click",(e)=>{const b=e.target.closest&&e.target.closest("[data-ka]");if(!b||(root&&root.contains(b)))return;const a=b.dataset.ka;
+  if(a==="slnew"){e.preventDefault();window.slOpenNew()}else if(a==="slo"||a==="sls"){e.preventDefault();window.slOpenFrom(b.dataset.id)}});
+})();
 </script>
 </body></html>
