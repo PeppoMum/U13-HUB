@@ -275,6 +275,7 @@ html[data-design="ruhig"][data-theme="dark"]{--onac:#0f1311}html[data-design="gl
 <div class="card" id="bwcard" style="margin-bottom:12px"><h3>Training bewerten</h3><p class="note" style="margin:0 0 8px">Plus und Minus pro Spieler im Training. Die Einstellungen gelten für alle Trainer. Die Bewertung ist nur für das Trainerteam sichtbar, nie in Profil, Links oder Exporten.</p><div class="bar" style="margin:0"><label>Doppeltipps: zwei Trainer geben dasselbe Vorzeichen innerhalb von <select id="bwwin"><option value="0">Aus (jeder Tipp zählt)</option><option value="5">5 Minuten</option><option value="10">10 Minuten</option><option value="15">15 Minuten</option><option value="20">20 Minuten</option></select> – dann zählt es einmal</label></div><label class="note" style="display:block;margin-top:8px">Schlagwörter (mit Komma getrennt, höchstens 8)<br><input id="bwtags" style="width:100%;max-width:520px" autocomplete="off"></label></div>
 <div class="gr" style="margin-top:0"><div class="card"><h3>Saison</h3><label class="note">Saison (z. B. 2026/27)<br><input id="esa" style="width:120px" autocomplete="off"></label> <label class="note" style="margin-left:12px">Mannschaft (z. B. U13)<br><input id="emn" style="width:90px" autocomplete="off"></label><p class="note" id="emsg" style="margin:8px 0 0">Die Saison bestimmt die zwölf Monate im Bereich Training (Juli bis Juni).</p></div>
 <div class="card"><h3>Zählende Abwesenheiten</h3><p class="note" style="margin-top:0">Diese Status zählen bei der gewichteten Trainingsbeteiligung als Fehlen. Die übrigen werden nicht gezählt.</p><div id="ezl"></div></div></div>
+<div class="card" id="fgcard" style="margin-top:12px"><h3>Farbgrenzen</h3><p class="note" style="margin-top:0">Ab welchem Wert die Farben Rot, Orange, Gelb und Grün erscheinen – in der Saisonübersicht, im Profil, in den Diagrammen und in den Exporten. Die Warnung ⚠ bei der Spielzeit gilt unter der Rot-Grenze. Voreinstellung: Beteiligung 80 / 85 / 90, Spielzeit 50 / 60 / 70.</p><div id="fgbox"></div><div class="bar" style="margin:10px 0 0"><button class="btn" id="fgreset">Voreinstellung wiederherstellen</button><span class="note" id="fgmsg"></span></div></div>
 <div class="card" style="margin-top:12px"><h3>Spielformen</h3><p class="note" style="margin-top:0">Die Voreinstellung „gewichtet" gilt für neue Spiele. Bestehende Spiele behalten ihre Gewichtung.</p><div class="tw"><table id="efm"></table></div>
 <div class="bar" style="margin:12px 0 0"><label>Kürzel <input id="efk" style="width:90px" autocomplete="off"></label><label>Name <input id="efn" style="width:170px" autocomplete="off"></label><label><input type="checkbox" id="efg" checked> gewichtet</label><button class="btn" id="efa">＋ Spielform hinzufügen</button><span class="note" id="efm2"></span></div></div>
 <div class="card" style="margin-top:12px"><h3>Spielarten</h3><p class="note" style="margin-top:0">Jedes Spiel hat eine Spielart. „Gewertet“ bestimmt, ob das Ergebnis in der Bilanz zählt. Beim Anlegen eines Spiels werden Wertung, Spielform und Spielerzahl daraus vorbelegt und lassen sich pro Spiel ändern.</p><div class="tw"><table id="ear"></table></div>
@@ -390,16 +391,25 @@ html[data-design="ruhig"][data-theme="dark"]{--onac:#0f1311}html[data-design="gl
   }
 
   /* Farbcodierung: 1 rot, 2 orange, 3 gelb, 4 grün (Grenzen aus Deinen Vorgaben). */
-  const farbeSpielzeit = (x) => (x == null ? 0 : x < 0.5 ? 1 : x < 0.6 ? 2 : x < 0.7 ? 3 : 4);
-  const farbeTraining = (x) => (x == null ? 0 : x < 0.8 ? 1 : x < 0.85 ? 2 : x < 0.9 ? 3 : 4);
+  /* Die Grenzen (in Prozent) sind einstellbar (config.farbgrenzen); ohne Einstellung gelten die Voreinstellungen. */
+  const GR_STD = { t: [80, 85, 90], s: [50, 60, 70] };
+  let GR = { t: GR_STD.t.slice(), s: GR_STD.s.slice() };
+  const grOk = (a) => Array.isArray(a) && a.length === 3 && a.every((v, i) => Number.isInteger(v) && v >= 1 && v <= 99 && (i === 0 || v > a[i - 1]));
+  const setGrenzen = (c) => { const x = c && typeof c === "object" ? c : {}; GR = { t: grOk(x.t) ? x.t.slice() : GR_STD.t.slice(), s: grOk(x.s) ? x.s.slice() : GR_STD.s.slice() }; };
+  const grenzen = () => ({ t: GR.t.slice(), s: GR.s.slice() });
+  const grenzenStd = () => ({ t: GR_STD.t.slice(), s: GR_STD.s.slice() });
+  const grTexte = (k) => { const a = GR[k]; return ["< " + a[0] + " %", a[0] + "–<" + a[1] + " %", a[1] + "–<" + a[2] + " %", "≥ " + a[2] + " %"]; };
+  const farbe = (x, a) => (x == null ? 0 : x < a[0] / 100 ? 1 : x < a[1] / 100 ? 2 : x < a[2] / 100 ? 3 : 4);
+  const farbeSpielzeit = (x) => farbe(x, GR.s);
+  const farbeTraining = (x) => farbe(x, GR.t);
 
   /* Alles für alle belegten, aktiven Spieler + Team-Kennzahlen (Saisonübersicht). */
   function saison(db, refMonat) {
     const zl = db.einstellungen.zaehlendeAbwesenheiten;
     const rows = db.spieler.filter((p) => p.aktiv && p.name).map((p) => {
       const sp = spielStats(p.id, db.spiele), tr = trainStats(p.id, db.trainings, zl, refMonat);
-      /* Warnung: Feldspieler unter 50 % Spielzeit (Saison oder letzte 2 Monate), aber nur wenn er in den letzten 2 Monaten im Kader stand */
-      const lowS = sp.gewichtet != null && sp.gewichtet < 0.5, lowL = sp.l2mGewichtet != null && sp.l2mGewichtet < 0.5;
+      /* Warnung: Feldspieler unter der ersten (roten) Spielzeit-Grenze, voreingestellt 50 % (Saison oder letzte 2 Monate), aber nur wenn er in den letzten 2 Monaten im Kader stand */
+      const lowS = sp.gewichtet != null && sp.gewichtet < GR.s[0] / 100, lowL = sp.l2mGewichtet != null && sp.l2mGewichtet < GR.s[0] / 100;
       const warn = !p.torwart && sp.l2mKader > 0 && (lowS || lowL) ? { saison: lowS, l2m: lowL } : null;
       return { spieler: p, spiel: sp, training: tr, warnSpielzeit: warn,
                farbeSpielzeit: p.torwart ? 0 : farbeSpielzeit(sp.gewichtet), farbeTraining: farbeTraining(tr.gewichtet) };
@@ -448,7 +458,7 @@ html[data-design="ruhig"][data-theme="dark"]{--onac:#0f1311}html[data-design="gl
     return arten.map((a) => { const st = statistik(spiele, a); return { art: a, spiele: st.spiele, gewertet: st.gewertet, punkte: st.punkte, tore: st.tore, gt: st.gt }; });
   }
 
-  const api = { hook, erreicht, zeitErfasst, spielStats, trainStats, saison, farbeSpielzeit, farbeTraining, ergebnis, statistik, nachArt };
+  const api = { hook, erreicht, zeitErfasst, spielStats, trainStats, saison, farbeSpielzeit, farbeTraining, setGrenzen, grenzen, grenzenStd, grTexte, ergebnis, statistik, nachArt };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.U13 = api;
 })(typeof window !== "undefined" ? window : globalThis);
 </script>
@@ -530,7 +540,7 @@ function qFlush(){if(!db)return;OQ.forEach((it)=>{if(!it.busy)qPush(it)})}
 function qRestore(){try{JSON.parse(localStorage.getItem(QK)||"[]").forEach((x)=>{if(x&&x.coll&&x.id)OQ.set(x.coll+"/"+x.id,{coll:x.coll,id:x.id,data:x.data||null,ts:x.ts||0})})}catch(e){}if(OQ.size){setSt("Speichert "+OQ.size+" offline vorgenommene Änderung(en) …","busy");qFlush()}}
 /* ---------- Saisonübersicht ---------- */
 const CC={1:"var(--r)",2:"var(--o)",3:"var(--y)",4:"var(--g)"};
-$("#lg").dataset.x="1";$("#lg").innerHTML=["Beteiligung gewichtet|< 80 %|80–<85 %|85–<90 %|≥ 90 %","Spielzeit gewichtet|< 50 %|50–<60 %|60–<70 %|≥ 70 %"].map((s)=>{const a=s.split("|");return"<i><b>"+a[0]+"</b></i>"+a.slice(1).map((q,j)=>'<i><span class="sq" style="background:'+CC[j+1]+'"></span>'+q+"</i>").join("")}).join("")+"<i>60T = letzte 60 Tage</i><i>Torhüter: Spielzeit ohne Farbe</i><i>Trend: grau bis ±5 Prozentpunkte, darüber grün oder rot</i><i id='lgx'></i>";
+const lgFill=()=>{const G=[["Beteiligung gewichtet","t"],["Spielzeit gewichtet","s"]];$("#lg").dataset.x="1";$("#lg").innerHTML=G.map((g)=>"<i><b>"+g[0]+"</b></i>"+U13.grTexte(g[1]).map((q,j)=>'<i><span class="sq" style="background:'+CC[j+1]+'"></span>'+q+"</i>").join("")).join("")+"<i>60T = letzte 60 Tage</i><i>Torhüter: Spielzeit ohne Farbe</i><i>Trend: grau bis ±5 Prozentpunkte, darüber grün oder rot</i><i id='lgx'></i>"};lgFill();
 const KEY={g:(r)=>r.spiel.gewichtet,a:(r)=>r.spiel.abs,k:(r)=>r.spiel.imKader,m:(r)=>r.spiel.minuten,b:(r)=>r.training.gewichtet,x:(r)=>r.training.abs,l:(r)=>r.training.l2mGewichtet,sl:(r)=>r.spiel.l2mGewichtet,st:(r)=>r.spiel.trend};
 const TREND=5; // Schwelle in Prozentpunkten: darunter grau, ab +5 grün, ab -5 rot
 const trendCls=(t)=>{if(t==null)return 0;const v=Math.round(t*100);return v>=TREND?4:v<=-TREND?1:0};
@@ -559,7 +569,7 @@ function renderSaison(){
   {const wT=wkAvg(D.trainings.filter(U13.erreicht).map((t)=>t.datum));$("#kp").innerHTML=[[T.spiele,"Spiele"],[mn(T.avgMinuten),"Ø Minuten / Spieler"],[pc(T.avgGewichtet),"Ø Spielzeit gewichtet"],[pc(T.avgL2mGewichtet),"Ø Spielzeit gewichtet · letzte 60 Tage"],[T.trainings,"Trainingseinheiten","Ø "+wkTxt(wT)+" pro Woche (nur Wochen mit Training)"],[pc(T.avgBeteiligung),"Ø Beteiligung gewichtet"],[pc(T.avgAnwesenheit),"Ø Beteiligung absolut"],[pc(T.avgL2mBeteiligung),"Ø Beteiligung gewichtet · letzte 60 Tage"]].map((a)=>'<div class="card kpi"><b>'+a[0]+"</b><span>"+a[1]+"</span>"+(a[2]?'<span class="note" style="display:block">'+a[2]+"</span>":"")+"</div>").join("")}
   const sp=VIEW!=="tr",tt=VIEW!=="sp",H1=["Kader","a","v","n","Minuten","gewichtet","abs.","im Kader","60T gew.","60T abs.","Trend"],H2=["Teilgen.","e","u","v","t","gew.","abs.","60T gew.","60T abs.","Trend"];
   const mk=(key,cf,tw0)=>R.filter((r)=>KEY[key](r)!=null).sort((a,b)=>KEY[key](b)-KEY[key](a)).map((r)=>({l:nm(r.spieler),v:KEY[key](r),c:(tw0&&r.spieler.torwart)?"var(--gr)":(CC[cf(r)]||"var(--gr)")}));
-  $("#ch").innerHTML=(tt?colChart(mk("b",(r)=>r.farbeTraining,false),[80,85,90],"Beteiligung gewichtet in %","Farben wie in der Tabelle"):"")+(sp?colChart(mk("g",(r)=>r.farbeSpielzeit,true),[50,60,70],"Spielzeit gewichtet in %","Farben wie in der Tabelle · Torhüter grau (ohne Farbcodierung)"):"");
+  $("#ch").innerHTML=(tt?colChart(mk("b",(r)=>r.farbeTraining,false),U13.grenzen().t,"Beteiligung gewichtet in %","Farben wie in der Tabelle"):"")+(sp?colChart(mk("g",(r)=>r.farbeSpielzeit,true),U13.grenzen().s,"Spielzeit gewichtet in %","Farben wie in der Tabelle · Torhüter grau (ohne Farbcodierung)"):"");
   $("#tb").innerHTML='<tr><th></th><th></th>'+(tt?'<th class="g t2" colspan="10">TRAINING</th>':"")+(sp?'<th class="g" colspan="11">SPIELE</th>':"")+'</tr><tr><th>#</th><th style="text-align:left">Spieler</th>'+(tt?H2:[]).concat(sp?H1:[]).map((h)=>"<th"+(["e","u","v","t","n","a"].includes(h)?' class="cn"':"")+">"+h+"</th>").join("")+"</tr>"+R.map((r,i)=>{const s=r.spiel,q=r.training;return'<tr data-pid="'+r.spieler.id+'" style="cursor:pointer"><td>'+(i+1)+"</td><td>"+esc(nm(r.spieler))+(r.spiel.eingeschr?'<span class="note" title="Spiele mit „Fit für“ berücksichtigt: '+r.spiel.eingeschr+'"> *</span>':"")+"</td>"+(tt?"<td>"+q.x+'</td><td class="cn">'+q.e+'</td><td class="cn">'+q.u+'</td><td class="cn">'+q.v+'</td><td class="cn">'+q.t+"</td>"+bar(q.gewichtet,r.farbeTraining)+bar(q.abs)+bar(q.l2mGewichtet)+bar(q.l2mAbs)+"<td>"+tr(q.trend)+"</td>":"")+(sp?"<td>"+s.kader+'</td><td class="cn">'+s.t+'</td><td class="cn">'+s.v+'</td><td class="cn">'+s.n+"</td><td>"+mn(s.minuten)+"</td>"+bar(s.gewichtet,r.farbeSpielzeit)+bar(s.abs)+bar(s.imKader)+bar(s.l2mGewichtet,r.farbeSpielzeit?(U13.farbeSpielzeit(s.l2mGewichtet)):0)+bar(s.l2mAbs)+"<td>"+tr(s.trend)+"</td>":"")+"</tr>"}).join("");
   {const lx=$("#lgx");if(lx)lx.textContent=R.some((r)=>r.spiel.eingeschr)?"* = Spiele mit „Fit für“ (verletzungs-/fitnessbedingt) berücksichtigt":""}
   renderScatter();
@@ -795,7 +805,7 @@ function renderProfile(){
   const avg=(f)=>{const v=S.rows.map(f).filter((x)=>x!=null);return v.length?v.reduce((x,y)=>x+y,0)/v.length:null};
   $("#pc").innerHTML=[["Spielzeit gewichtet",sp.gewichtet,avg((r)=>r.spiel.gewichtet),tw?0:1,cS],["Spielzeit absolut",sp.abs,avg((r)=>r.spiel.abs)],["Beteiligung gewichtet",q.gewichtet,avg((r)=>r.training.gewichtet),1,cT],["Beteiligung absolut",q.abs,avg((r)=>r.training.abs)]].map((x)=>{const col=x[3]===undefined?"var(--vi)":(x[3]&&x[4]?CC[x[4]]:"var(--nb)");return'<div style="margin:9px 0"><div class="row" style="border:0;padding:0"><span>'+x[0]+"</span><span>"+pc(x[1])+" · Ø "+pc(x[2])+'</span></div><div class="tk"><i style="width:'+((x[1]||0)*100)+"%;background:"+col+'"></i></div><div class="tk t"><i style="width:'+((x[2]||0)*100)+'%"></i></div></div>'}).join("")+'<div class="note">Farbbalken = Spieler · grau = Team-Ø</div>';
   const M=seasonMonths(),ML=["Jul","Aug","Sep","Okt","Nov","Dez","Jan","Feb","Mär","Apr","Mai","Jun"],mv=M.map((m)=>{const ts=D.trainings.filter((t)=>t.datum.slice(0,7)===m);return ts.length?U13.trainStats(p.id,ts,zl,m).gewichtet:null});
-  $("#pm").innerHTML=barsSvg(mv,ML,(v)=>CC[U13.farbeTraining(v)],[80,85,90])+'<div class="leg" style="margin:8px 0 0">'+["< 80 %","80–<85 %","85–<90 %","≥ 90 %"].map((q,j)=>'<i><span class="sq" style="background:'+CC[j+1]+'"></span>'+q+"</i>").join("")+'</div><div class="note">Zahl über der Säule = Beteiligung in Prozent. Monate ohne Training bleiben leer.</div>';
+  $("#pm").innerHTML=barsSvg(mv,ML,(v)=>CC[U13.farbeTraining(v)],U13.grenzen().t)+'<div class="leg" style="margin:8px 0 0">'+U13.grTexte("t").map((q,j)=>'<i><span class="sq" style="background:'+CC[j+1]+'"></span>'+q+"</i>").join("")+'</div><div class="note">Zahl über der Säule = Beteiligung in Prozent. Monate ohne Training bleiben leer.</div>';
   $("#pv").innerHTML="<b>Spiele</b>"+segs([["k",sp.kader,"im Kader"],["t",sp.t,"abwesend"],["v",sp.v,"verletzt"],["n",sp.n,"nicht nominiert"]])+"<b>Training</b>"+segs([["x",q.x,"teilgenommen"],["e",q.e,"entschuldigt"],["u",q.u,"unentschuldigt"],["v",q.v,"verletzt"],["t",q.t,"terminl. verhindert"]])+'<div class="note">Schmale Segmente zeigen nur die Zahl, Details beim Darüberfahren.</div>';
 }
 $("#ps").onchange=(e)=>{PID=e.target.value;renderProfile()};$("#pmode").onclick=(e)=>{const b=e.target.closest("button");if(b){PM=b.dataset.pm;renderProfile()}};
@@ -892,7 +902,7 @@ function sub(coll,key,map){
   sub("players","spieler",(a,b)=>a.slot-b.slot);sub("games","spiele",(a,b)=>a.nr-b.nr);sub("trainings","trainings",(a,b)=>a.datum.localeCompare(b.datum));sub("events","events");sub("dienste","dienste");sub("todos","todos");sub("tipps","tipps");window.__ROLE!=="scout"&&db.collection("notes").onSnapshot((x)=>{D.notizen=x.docs.map((d)=>({id:d.id,...d.data()}));renderNotes();renderProfile();typeof renderStart==="function"&&renderStart()},()=>{});
   try{db.doc("config/sicherung").onSnapshot((s)=>{D.sicherung=s&&s.exists?s.data():null;D.sicherungGot=true;typeof bkwRender==="function"&&bkwRender()},()=>{D.sicherungGot=true})}catch(e){}
   try{db.doc("prefs/"+(window.__ACCT||"main")).onSnapshot((s)=>{window.__dzPrefs&&window.__dzPrefs(s.exists?s.data():null)},()=>{})}catch(e){}
-  db.doc("config/main").onSnapshot((s)=>{D.config=s.exists?s.data():null;window.__dzSync&&window.__dzSync();renderSaison();renderLogo();renderTrain();typeof renderSettings==="function"&&renderSettings();renderGames();typeof renderQ==="function"&&renderQ();typeof renderLinks==="function"&&renderLinks();typeof renderPlan==="function"&&renderPlan();typeof renderKader==="function"&&renderKader();if(D.ready&&$("#st").className.indexOf("busy")<0&&!window.__renderErr)setSt("Synchron","ok")},()=>{});
+  db.doc("config/main").onSnapshot((s)=>{D.config=s.exists?s.data():null;U13.setGrenzen(D.config&&D.config.farbgrenzen);lgFill();window.__dzSync&&window.__dzSync();renderSaison();renderLogo();renderTrain();typeof renderSettings==="function"&&renderSettings();renderGames();typeof renderQ==="function"&&renderQ();typeof renderLinks==="function"&&renderLinks();typeof renderPlan==="function"&&renderPlan();typeof renderKader==="function"&&renderKader();if(D.ready&&$("#st").className.indexOf("busy")<0&&!window.__renderErr)setSt("Synchron","ok")},()=>{});
 })();
 </script>
 <script>/* ---------- A4-Export (ohne Fremdbibliotheken: SVG -> Bild -> PNG / JPG / PDF) ---------- */
@@ -962,8 +972,8 @@ function xSaison(){
   const kw=(W-2*M-8*(K.length-1))/Math.max(K.length,1);
   K.forEach((a,i)=>{const kx=M+i*(kw+8);s.r(kx,84,kw,50,XC.card,9,1,XC.ln);s.t(kx+9,105,a[0],16,XC.tx,{b:1});xwrap(a[1],kw-14,8,0).slice(0,2).forEach((ln,j)=>s.t(kx+9,120+j*10,ln,8,XC.mu))});
   /* Legende */
-  let lx=M;const ly=150;[["Beteiligung gewichtet",["< 80 %","80–<85 %","85–<90 %","≥ 90 %"]],["Spielzeit gewichtet",["< 50 %","50–<60 %","60–<70 %","≥ 70 %"]]].forEach((g)=>{s.t(lx,ly,g[0],8.5,XC.tx,{b:1});lx+=xtw(g[0],8.5,1)+8;g[1].forEach((q,j)=>{s.r(lx,ly-8,9,9,XA[j+1],2);s.t(lx+13,ly,q,8.5,XC.mu);lx+=xtw(q,8.5)+25});lx+=10});
-  s.t(lx,ly,"Torhüter: Spielzeit ohne Farbe · Trend: grau bis ±5 Prozentpunkte · ⚠ unter 50 %",8.5,XC.mu);
+  let lx=M;const ly=150;[["Beteiligung gewichtet",U13.grTexte("t")],["Spielzeit gewichtet",U13.grTexte("s")]].forEach((g)=>{s.t(lx,ly,g[0],8.5,XC.tx,{b:1});lx+=xtw(g[0],8.5,1)+8;g[1].forEach((q,j)=>{s.r(lx,ly-8,9,9,XA[j+1],2);s.t(lx+13,ly,q,8.5,XC.mu);lx+=xtw(q,8.5)+25});lx+=10});
+  s.t(lx,ly,"Torhüter: Spielzeit ohne Farbe · Trend: grau bis ±5 Prozentpunkte · ⚠ unter "+U13.grenzen().s[0]+" %",8.5,XC.mu);
   /* Tabelle */
   const cs0=[["#",20,"c"],["Spieler",100,"l"],["Kader",30],["n",22],["v",22],["t",22],["Minuten",40],["gewichtet",50],["abs.",50],["im Kader",50],["60T gew.",50],["60T abs.",50],["Trend",54],["Teilgen.",44],["e",22],["u",22],["v",22],["t",22],["gew.",50],["abs.",50],["60T gew.",50],["60T abs.",50],["Trend",54]];
   const cs=cs0.slice(0,2).concat(cs0.slice(13),cs0.slice(2,13)),ni=(k)=>k>=13?k-11:k>=2?k+10:k;
@@ -987,8 +997,8 @@ function xSaison(){
   /* Säulendiagramme */
   const mk=(key,cf,tw0)=>R.filter((r)=>KEY[key](r)!=null).sort((a,b)=>KEY[key](b)-KEY[key](a)).map((r)=>({l:nm(r.spieler),v:KEY[key](r),c:(tw0&&r.spieler.torwart)?XC.gr:(XA[cf(r)]||XC.gr)}));
   const cw=(W-2*M-14)/2,cy=H-M-chartH;
-  xcols(s,M,cy,cw,chartH,mk("b",(r)=>r.farbeTraining,false),[80,85,90],"Beteiligung gewichtet in %","",true);
-  xcols(s,M+cw+14,cy,cw,chartH,mk("g",(r)=>r.farbeSpielzeit,true),[50,60,70],"Spielzeit gewichtet in %","Torhüter grau (ohne Farbcodierung)",true);
+  xcols(s,M,cy,cw,chartH,mk("b",(r)=>r.farbeTraining,false),U13.grenzen().t,"Beteiligung gewichtet in %","",true);
+  xcols(s,M+cw+14,cy,cw,chartH,mk("g",(r)=>r.farbeSpielzeit,true),U13.grenzen().s,"Spielzeit gewichtet in %","Torhüter grau (ohne Farbcodierung)",true);
   return{svg:s.done(),W,H,name:"Beteiligung_U13_"+today()};
 }
 /* ---------- Zusatzkennzahlen (optionale dritte Seite der Saisonübersicht, A4 quer) ---------- */
@@ -1012,8 +1022,8 @@ function xZusatz(){
     [mx!=null?mx+" von "+n:"–","Bestbesuchtes Training",mx!=null?ext(bestL):"noch kein Training"],
     [mi!=null?mi+" von "+n:"–","Schwächstbesuchtes Training",mi!=null?ext(worstL):"noch kein Training"],
     [st.mitErgebnis?d1(st.tore/st.mitErgebnis)+" : "+d1(st.gt/st.mitErgebnis):"–","Ø Tore : Gegentore pro Spiel",st.mitErgebnis?"aus "+st.mitErgebnis+" gewerteten Spielen mit Ergebnis":"noch keine Ergebnisse"],
-    [String(lowS),"Spieler mit Warnung Spielzeit","unter 50 % Spielzeit (Saison oder letzte 60 Tage)"],
-    [String(lowT),"Spieler unter 80 % Beteiligung","gewichtete Trainingsbeteiligung in der Saison"]];
+    [String(lowS),"Spieler mit Warnung Spielzeit","unter "+U13.grenzen().s[0]+" % Spielzeit (Saison oder letzte 60 Tage)"],
+    [String(lowT),"Spieler unter "+U13.grenzen().t[0]+" % Beteiligung","gewichtete Trainingsbeteiligung in der Saison"]];
   const cols=4,gap=16,kw=(W-2*M-gap*(cols-1))/cols,kh=186;
   K.forEach((a,i)=>{const kx=M+(i%cols)*(kw+gap),ky=100+Math.floor(i/cols)*(kh+gap);s.r(kx,ky,kw,kh,XC.card,10,1,XC.ln);s.t(kx+20,ky+76,a[0],40,XC.tx,{b:1});xwrap(a[1],kw-40,12,1).slice(0,2).forEach((ln,j)=>s.t(kx+20,ky+108+j*15,ln,12,XC.tx,{b:1}));xwrap(a[2],kw-40,10).slice(0,3).forEach((ln,j)=>s.t(kx+20,ky+142+j*13,ln,10,XC.mu))});
   return{svg:s.done(),W,H,name:"Zusatzkennzahlen_U13_"+today()};
@@ -1026,7 +1036,7 @@ function xProfil(pid){
   xhead(s,W,p.vorname+" "+p.name,"",M,p.foto,((p.vorname[0]||"")+(p.name[0]||"")));
   {let cx=M+64;const stm=stammOf(p);(p.positionen||[]).slice().sort((a1,b1)=>stm.includes(b1)-stm.includes(a1)).forEach((k)=>{const w=xtw(k,9.5,1)+14,st=stm.includes(k);s.r(cx,51,w,16,st?XC.ac:XC.avbg,8);s.t(cx+w/2,62.5,k,9.5,st?XC.bg:(XC.itx||XC.ac),{b:1,an:"middle"});cx+=w+5});
    const sb=(p.geburtsdatum?"geboren "+dlong(p.geburtsdatum)+(a!==""?" ("+a+" Jahre)":""):"")+(tw?(p.geburtsdatum?" · ":"")+"Torhüter":"");if(sb)s.t(cx+((p.positionen||[]).length?3:0),63,sb,10.5,XC.mu)}
-  if(R.warnSpielzeit){const pr=(v)=>v==null?"–":Math.round(v*100)+" %";s.t(W-M,78,"⚠ Spielzeit unter 50 %: Saison "+pr(sp.gewichtet)+" · letzte 60 Tage "+pr(sp.l2mGewichtet),10,XC.r,{an:"end",b:1})}
+  if(R.warnSpielzeit){const pr=(v)=>v==null?"–":Math.round(v*100)+" %";s.t(W-M,78,"⚠ Spielzeit unter "+U13.grenzen().s[0]+" %: Saison "+pr(sp.gewichtet)+" · letzte 60 Tage "+pr(sp.l2mGewichtet),10,XC.r,{an:"end",b:1})}
   /* Kennzahlen */
   const t0=xtrend(q.trend),t1=xtrend(sp.trend),K=[[mn(sp.minuten),"Minuten gesamt",0],[pc(sp.imKader),"Spielzeit im Kader",0],[sp.kader+" von "+sp.spiele,"Spiele im Kader",0],[pc(sp.gewichtet),"Spielzeit gewichtet (o. Twin/Halle)",cS],[pc(q.gewichtet),"Beteiligung gewichtet",cT],[pc(q.abs),"Beteiligung absolut",0],[pc(q.l2mGewichtet),"Beteiligung letzte 60 Tage (gewichtet)",q.l2mGewichtet==null?0:U13.farbeTraining(q.l2mGewichtet)],[t0.s,"Trainings-Trend (letzte 60 Tage)",t0.k,t0.c]],kw=(W-2*M-30)/4;
   const KS=[[sp.kader+" von "+sp.spiele,"Spiele dabei",0],[mn(sp.minuten),"Minuten gespielt",0],[pc(q.gewichtet),"Training: Beteiligung gewichtet",cT],[pc(q.abs),"Training: Beteiligung absolut",0]];
@@ -1049,7 +1059,7 @@ function xProfil(pid){
     card("Absolute Trainingsdaten",(sx,x,y,w)=>{let h=xrows(sx,x,y,w,[["Trainingseinheiten gesamt",q.einheiten],["Anwesenheiten",q.x]]);const txt="Für die gewichtete Beteiligung zählen als Fehlen: "+(["e","u","v","t"].filter((k)=>zl[k]).map((k)=>SL[k]).join(" und ")||"keine Abwesenheit")+". Nicht gezählt werden: "+(["e","u","v","t"].filter((k)=>!zl[k]).map((k)=>SL[k]).join(" und ")||"keine")+".";xwrap(txt,w,8.5).forEach((ln,i)=>sx.t(x,y+h+14+i*11,ln,8.5,XC.mu));return h+8+xwrap(txt,w,8.5).length*11}),
     card("Vergleich mit Team-Ø",(sx,x,y,w)=>{const it=[["Spielzeit gewichtet",sp.gewichtet,avg((r)=>r.spiel.gewichtet),tw?XC.nb:(cS?XA[cS]:XC.nb)],["Spielzeit absolut",sp.abs,avg((r)=>r.spiel.abs),XC.bk],["Beteiligung gewichtet",q.gewichtet,avg((r)=>r.training.gewichtet),cT?XA[cT]:XC.gr],["Beteiligung absolut",q.abs,avg((r)=>r.training.abs),XC.bk]];let cy=y;it.forEach((z)=>{sx.t(x,cy+10,z[0],10,XC.tx);sx.t(x+w,cy+10,pc(z[1])+" · Ø "+pc(z[2]),10,XC.tx,{an:"end",b:1});sx.r(x,cy+15,w,7,XC.track,3.5);sx.r(x,cy+15,w*Math.min(z[1]||0,1),7,z[3],3.5);sx.r(x,cy+24,w,4,XC.track,2);sx.r(x,cy+24,w*Math.min(z[2]||0,1),4,XC.mu,2);cy+=38});sx.t(x,cy+4,"Farbbalken = Spieler · grau = Team-Ø",8.5,XC.mu);return cy+10-y}),
     card("Trainingsbeteiligung gewichtet pro Monat",(sx,x,y,w)=>{const M2=seasonMonths(),ML=["Jul","Aug","Sep","Okt","Nov","Dez","Jan","Feb","Mär","Apr","Mai","Jun"],items=M2.map((m,i)=>{const ts=D.trainings.filter((t)=>t.datum.slice(0,7)===m),v=ts.length?U13.trainStats(p.id,ts,zl,m).gewichtet:null;return{l:ML[i],v,c:XA[U13.farbeTraining(v)]||XC.gr}}),h=150;const inner=XS(w,h);
-      const L=26,T=18,B=18,pw=w-L,ph=h-T-B,slot=pw/12,bw=Math.min(slot*.68,22);[80,85,90].forEach((t,i)=>{const ly=y+T+ph-t/100*ph;sx.l(x+L-3,ly,x+w,ly,XC.ln,1);if(i!==1)sx.t(x+L-5,ly+3,t,8,XC.mu,{an:"end"})});
+      const L=26,T=18,B=18,pw=w-L,ph=h-T-B,slot=pw/12,bw=Math.min(slot*.68,22);U13.grenzen().t.forEach((t,i)=>{const ly=y+T+ph-t/100*ph;sx.l(x+L-3,ly,x+w,ly,XC.ln,1);if(i!==1)sx.t(x+L-5,ly+3,t,8,XC.mu,{an:"end"})});
       items.forEach((it,i)=>{const bx=x+L+i*slot+(slot-bw)/2;if(it.v==null)sx.r(bx,y+T+ph-1.5,bw,1.5,XC.ln,0);else{const bh=Math.min(it.v,1)*ph;sx.r(bx,y+T+ph-bh,bw,bh,it.c,3);sx.t(bx+bw/2,y+T+ph-bh-3,Math.round(it.v*100),8.5,XC.tx,{an:"middle",b:1})}sx.t(bx+bw/2,y+T+ph+12,it.l,8.5,XC.mu,{an:"middle"})});return h+2}),
     card("Verteilung Spiele & Training",(sx,x,y,w)=>{const SC={k:[XC.bgk,XC.g,"im Kader"],n:[XC.bgn,XC.o,"nicht nominiert"],v:[XC.bgv,XC.gr,"verletzt"],t:[XC.bgt,"#3b82f6","terminl. verhindert"],x:[XC.bgk,XC.g,"teilgenommen"],e:[XC.bge,XC.y,"entschuldigt"],u:[XC.bgu,XC.r,"unentschuldigt"]};let cy=y;
       [["Spiele",[["k",sp.kader],["t",sp.t],["v",sp.v],["n",sp.n]]],["Training",[["x",q.x],["e",q.e],["u",q.u],["v",q.v],["t",q.t]]]].forEach((g)=>{sx.t(x,cy+10,g[0],10,XC.tx,{b:1});const tot=g[1].reduce((a2,b)=>a2+b[1],0);let bx=x;if(tot)g[1].forEach((z)=>{if(!z[1])return;const bw=w*z[1]/tot,c=(g[0]==="Spiele"&&z[0]==="t"?[SC.t[0],SC.t[1],"abwesend"]:SC[z[0]]);sx.r(bx,cy+16,bw,22,c[0],0);if(z[1]/tot>.06)sx.t(bx+bw/2,cy+31,z[1]/tot>.2?c[2]+" "+z[1]:z[1],9,c[1],{an:"middle",b:1});bx+=bw});let lx=x;g[1].forEach((z)=>{if(!z[1])return;const c=(g[0]==="Spiele"&&z[0]==="t"?[SC.t[0],SC.t[1],"abwesend"]:SC[z[0]]);sx.r(lx,cy+45,8,8,c[1],2);sx.t(lx+11,cy+52,c[2]+" ("+z[1]+")",8,XC.mu);lx+=xtw(c[2]+" ("+z[1]+")",8)+22});cy+=66});return cy-y})
@@ -1241,7 +1251,7 @@ let fArm=null,aArm=null;
 const zlNow=()=>({e:true,u:true,v:false,t:false,...((D.config&&D.config.zaehlendeAbwesenheiten)||{})});
 function renderSettings(){
   const root=$("#e");if(root.hidden===false&&root.contains(document.activeElement)&&document.activeElement.tagName==="INPUT"&&document.activeElement.type!=="checkbox")return;
-  renderPos();renderStamm();renderArten();renderHints();
+  renderPos();renderStamm();renderArten();renderHints();renderFarben();
   $("#esa").value=(D.config&&D.config.saison)||"2026/27";if(document.activeElement!==$("#emn"))$("#emn").value=mann();
   const zl=zlNow();$("#ezl").innerHTML=["e","u","v","t"].map((k)=>'<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" data-zl="'+k+'"'+(zl[k]?" checked":"")+'><span><b>'+k+"</b> "+ZL_LABEL[k]+"</span></label>").join("");
   const used={};D.spiele.forEach((g)=>used[g.form]=(used[g.form]||0)+1);
@@ -1439,6 +1449,25 @@ $("#lkh").addEventListener("click",(e)=>{
   if(hnArm){hnArm=null;renderHints()}
 });
 renderHints();
+
+/* ---------- Farbgrenzen (frei einstellbar, Voreinstellung 80/85/90 und 50/60/70) ---------- */
+function renderFarben(){
+  const box=$("#fgbox");if(!box)return;const G=U13.grenzen(),FG=[["t","Trainingsbeteiligung (gewichtet)"],["s","Spielzeit (gewichtet)"]],FG_C=["var(--r)","var(--o)","var(--y)","var(--g)"];
+  box.innerHTML=FG.map(([k,t])=>{const a=G[k],sq=(i)=>'<span class="sq" style="background:'+FG_C[i]+'"></span> ',inp=(i)=>'<input type="number" min="1" max="99" step="1" inputmode="numeric" data-fg="'+k+i+'" value="'+a[i]+'" style="width:64px"> %';
+    return '<div data-fgk="'+k+'" style="margin:10px 0 14px"><b>'+t+'</b><div class="bar" style="margin:6px 0 0;gap:6px 18px">'
+      +'<span>'+sq(0)+'Rot unter '+inp(0)+'</span>'
+      +'<span>'+sq(1)+'Orange ab <span data-fgab="'+k+'0">'+a[0]+'</span> bis unter '+inp(1)+'</span>'
+      +'<span>'+sq(2)+'Gelb ab <span data-fgab="'+k+'1">'+a[1]+'</span> bis unter '+inp(2)+'</span>'
+      +'<span>'+sq(3)+'Grün ab <span data-fgab="'+k+'2">'+a[2]+'</span> %</span></div></div>'}).join("");
+}
+const fgRead=(k)=>[0,1,2].map((i)=>{const e=document.querySelector('[data-fg="'+k+i+'"]');return e&&e.value.trim()!==""?Number(e.value):NaN});
+$("#e").addEventListener("input",(e)=>{const t=e.target;if(!t.dataset||!t.dataset.fg)return;const k=t.dataset.fg[0],v=fgRead(k);[0,1,2].forEach((i)=>{const s=document.querySelector('[data-fgab="'+k+i+'"]');if(s&&Number.isFinite(v[i]))s.textContent=v[i]})});
+$("#e").addEventListener("change",(e)=>{
+  const t=e.target;if(!t.dataset||!t.dataset.fg)return;const k=t.dataset.fg[0],v=fgRead(k),m=$("#fgmsg");
+  if(!v.every((x,i)=>Number.isInteger(x)&&x>=1&&x<=99&&(i===0||x>v[i-1]))){m.textContent="Bitte ganze Zahlen von 1 bis 99, jede größer als die davor (zum Beispiel 80, 85, 90).";m.className="note warn";return}
+  m.textContent="";m.className="note";cfgSave({farbgrenzen:{...U13.grenzen(),[k]:v}});m.textContent="Gespeichert.";setTimeout(()=>{if(m.textContent==="Gespeichert.")m.textContent=""},2500)});
+$("#e").addEventListener("click",(e)=>{
+  if(e.target.id!=="fgreset")return;const c={...(D.config||{})};delete c.farbgrenzen;save("config","main",c);const m=$("#fgmsg");m.className="note";m.textContent="Voreinstellung wiederhergestellt."});
 </script>
 <script>/* ---------- A4-Export: Training, einzelne Spiele, alle Spiele ---------- */
 function xstc(c){return({x:[XC.bgk,XC.g],e:[XC.bge,XC.y],u:[XC.bgu,XC.r],v:[XC.bgv,XC.gr],t:[XC.bgt,"#3b82f6"],k:[XC.bgk,XC.g],K:["#8b5cf633","#8b5cf6"],n:[XC.bgn,XC.o]})[c]||[XC.track,XC.mu]}
@@ -2370,7 +2399,7 @@ function renderStart(){
   todo.push(...tdo.map((x)=>tdRow(x,true)));
   const tnotes=(D.notizen||[]).filter((n)=>n.pid==="team"&&n.art!=="ziel"&&n.art!=="beobachtung"&&n.ort!=="allg").sort((a,b)=>(b.datum||"").localeCompare(a.datum||"")).slice(0,5);
   const WN=S?S.rows.filter((r)=>r.warnSpielzeit).sort((x,y)=>(Math.min(x.spiel.gewichtet??1,x.spiel.l2mGewichtet??1))-(Math.min(y.spiel.gewichtet??1,y.spiel.l2mGewichtet??1))):[];
-  const wnMin=!!wnGet(),wnHtml=WN.length?'<div class="card" style="grid-column:1/-1;'+(wnMin?'padding:8px 14px;':'border-color:var(--r);')+'"><h3 data-wnt="1" style="cursor:pointer;margin:0;'+(wnMin?'color:var(--mu);font-weight:600':'color:var(--r)')+'" title="'+(wnMin?"Anzeigen":"Minimieren")+'">'+(wnMin?'▸':'▾')+' ⚠ Spielzeit unter 50 % ('+WN.length+')'+(wnMin?' <span class="note" style="text-transform:none;letter-spacing:0;font-weight:400">– '+esc(WN.map((r)=>nm(r.spieler)).join(", "))+'</span>':'')+'</h3>'+(wnMin?'':'<div style="margin-top:10px"></div>')+(wnMin?[]:WN).map((r)=>{const s=r.spiel,pr=(x)=>x==null?"–":Math.round(x*100)+" %",bad=(f)=>f?'<b class="dn">':"<b>";return'<div class="row"><span>'+esc(nm(r.spieler))+'</span><span class="note">Saison '+bad(r.warnSpielzeit.saison)+pr(s.gewichtet)+"</b> · letzte 60 Tage "+bad(r.warnSpielzeit.l2m)+pr(s.l2mGewichtet)+'</b> <button class="rm" data-pid="'+r.spieler.id+'">Profil</button></span></div>'}).join("")+(wnMin?"":'<p class="note" style="margin:8px 0 0">Spielzeit gewichtet, ohne Torhüter. Keine Warnung, wenn der Spieler in den letzten 60 Tagen nicht im Kader stand.</p>')+'</div>':"";
+  const wnMin=!!wnGet(),wnHtml=WN.length?'<div class="card" style="grid-column:1/-1;'+(wnMin?'padding:8px 14px;':'border-color:var(--r);')+'"><h3 data-wnt="1" style="cursor:pointer;margin:0;'+(wnMin?'color:var(--mu);font-weight:600':'color:var(--r)')+'" title="'+(wnMin?"Anzeigen":"Minimieren")+'">'+(wnMin?'▸':'▾')+' ⚠ Spielzeit unter '+U13.grenzen().s[0]+' % ('+WN.length+')'+(wnMin?' <span class="note" style="text-transform:none;letter-spacing:0;font-weight:400">– '+esc(WN.map((r)=>nm(r.spieler)).join(", "))+'</span>':'')+'</h3>'+(wnMin?'':'<div style="margin-top:10px"></div>')+(wnMin?[]:WN).map((r)=>{const s=r.spiel,pr=(x)=>x==null?"–":Math.round(x*100)+" %",bad=(f)=>f?'<b class="dn">':"<b>";return'<div class="row"><span>'+esc(nm(r.spieler))+'</span><span class="note">Saison '+bad(r.warnSpielzeit.saison)+pr(s.gewichtet)+"</b> · letzte 60 Tage "+bad(r.warnSpielzeit.l2m)+pr(s.l2mGewichtet)+'</b> <button class="rm" data-pid="'+r.spieler.id+'">Profil</button></span></div>'}).join("")+(wnMin?"":'<p class="note" style="margin:8px 0 0">Spielzeit gewichtet, ohne Torhüter. Keine Warnung, wenn der Spieler in den letzten 60 Tagen nicht im Kader stand.</p>')+'</div>':"";
   $("#hg").innerHTML=wnHtml+'<div class="card"><h3>Nächste Termine</h3>'+(up.length?up.map(evLine).join(""):'<p class="note">Keine Termine. Unter „Termine“ anlegen.</p>')+'</div><div class="card"><h3>Zu erledigen</h3>'+(todo.length?todo.join(""):'<p class="note">Alles erledigt ✓</p>')+(tdd.length?'<p class="note" style="margin:8px 0 0">'+tdd.length+' erledigt · <button class="rm" data-tdc="1">aufräumen</button></p>':"")+'</div><div class="card"><h3>Nächste Geburtstage</h3>'+(bd.length?bd.map((b)=>'<div class="row"><span>'+esc(bdn(b.p))+'</span><span class="note">'+esc(ddm(b.datum))+" · wird "+b.alter+"</span></div>").join(""):'<p class="note">Keine Geburtstage hinterlegt. Geburtsdaten unter „Stammdaten“ eintragen.</p>')+'</div><div class="card"><h3>Notizen</h3>'+tnotes.map((n)=>'<div class="row"><span style="white-space:pre-wrap;overflow-wrap:anywhere;min-width:0"><b>'+esc(ddm(n.datum))+"</b> · "+esc(n.text)+(n.autor?' <span class="note">(von '+esc(n.autor)+")</span>":"")+'</span><button class="rm'+(snArm===n.id?" arm":"")+'" data-snd="'+n.id+'" title="Notiz löschen">'+(snArm===n.id?"Löschen?":"✕")+"</button></div>").join("")+thn.map((x)=>tdRow(x,false)).join("")+(hin.length?hin.map((e)=>'<div class="row"><span><b>'+esc(ddm(e.datum))+(e.bis&&e.bis>e.datum?" – "+esc(ddm(e.bis)):"")+"</b> · "+esc(e.titel||e.typ)+"</span></div>").join(""):thn.length||tnotes.length?"":'<p class="note">Keine Notizen. Unter „Notizen“ anlegen.</p>')+"</div>";
   $("#hn").innerHTML=[["a","👥","Beteiligung"],["q","🏆","Bilanz"],["p","👤","Profil"],["n","📝","Notizen"],["t","🏃","Training"],["g","⚽","Spiele"],["m","📅","Termine"],["w","🎯","Schwerpunkte"],["s","🗂","Stammdaten"],["k","🧩","Kader"],["e","⚙️","Einstellungen"]].map((a)=>'<button class="btn" data-go="'+a[0]+'" style="padding:12px 10px">'+a[1]+" "+a[2]+"</button>").join("");
 }
