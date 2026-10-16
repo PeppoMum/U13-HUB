@@ -244,6 +244,12 @@ nav button .em{display:inline-flex;justify-content:center;align-items:center}
 #hn .btn{display:flex;align-items:center;justify-content:center;gap:8px}
 #hn .tic{display:inline-flex}
 #hn .tic svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+/* Handy: „Mehr“ statt Wischen */
+@media(max-width:760px){nav button.mobx{display:none!important}html.mobnav nav button[data-s="h"]{position:static!important;box-shadow:none!important}html.mobnav nav button[data-s="h"]:not(.on){background:none!important}html.mobnav nav{width:auto!important;max-width:none!important;left:8px!important;right:8px!important;bottom:calc(6px + env(safe-area-inset-bottom,0px))!important;border-radius:26px!important;padding:6px 4px!important}html.mobnav nav button{font-size:10.5px!important;flex:1 1 0!important;min-width:0!important;padding-left:2px!important;padding-right:2px!important}.mobsheet{position:fixed;z-index:400;left:12px;right:12px;background:var(--card);border:1px solid var(--ln);border-radius:20px;padding:10px;display:grid;gap:6px;box-shadow:0 12px 40px rgba(0,0,0,.35);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);max-height:70vh;overflow-y:auto}.mobsheet[hidden]{display:none}.mobsheet button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border:1px solid var(--ln);background:var(--card);color:var(--tx);font:inherit;font-size:15px;border-radius:14px;padding:8px 10px;cursor:pointer;text-align:center}.mobsheet button.on{background:var(--acs);color:var(--ac);font-weight:600;border-color:var(--ac)}#mobsheetB{bottom:calc(84px + env(safe-area-inset-bottom,0px));grid-template-columns:repeat(2,minmax(0,1fr));overflow-x:hidden;padding:12px;gap:8px}#mobsheetB button{justify-content:flex-start;min-height:52px;padding:10px 14px;font-size:16px}}
+/* Start: Kacheln entfallen, die Menüleiste reicht */
+#hn{display:none!important}
+/* Vereinsfarben: Menü oben zentriert */
+@media(min-width:761px){html[data-design="kobalt"] nav{justify-content:safe center}}
 #lkco{display:none!important}</style>
 <div class="app">
 <nav><h1>U13 · <span id="sais">2026/27</span></h1><small>Teamzentrale</small>
@@ -4322,7 +4328,7 @@ setInterval(()=>{subscribe();auto()},3000);
 </script>
 <script>/* ---------- WhatsApp-Bild fürs Training (4:5): Teilnehmer + Schwerpunkt ---------- */
 function xWaTraining(d){
-  const W=1080,H=1350,M=72,PAD=38,BL="#1f6fe0",s=XS(W,H),IW=W-2*M-2*PAD;
+  const W=1080,H=1350,M=72,PAD=38,BL=XC.kb?XC.ac:"#1f6fe0",s=XS(W,H),IW=W-2*M-2*PAD;
   const e=(()=>{const L=evAllM().filter((x)=>x.typ==="Training"&&x.datum===d);return L.find((x)=>x.schwerpunkt||x.detail||x.ctask)||L[0]||{datum:d}})();
   const act=active(),tt=D.trainings.find((x)=>x.datum===d),a=tt?anw(act,tt):null,cnt=(c)=>tt?act.filter((p)=>(tt.spieler||{})[p.id]===c).length:0;
   const chips=[];
@@ -4357,17 +4363,19 @@ function xWaTraining(d){
 async function waOpen(d){
   if(window.__RO)return;
   let blob,url;
-  try{xTheme(false);const r=xWaTraining(d),cv=await xRaster(r.svg,r.W,r.H,1);blob=await xBlob(cv,"image/png");url=URL.createObjectURL(blob)}catch(err){setSt("Bild konnte nicht erstellt werden","err");return}
-  const name="Training_"+d+".png",file=(()=>{try{return new File([blob],name,{type:"image/png"})}catch(e){return null}})();
+  const gen=async()=>{xTheme(false);const r=xWaTraining(d),cv=await xRaster(r.svg,r.W,r.H,1);const b=await xBlob(cv,"image/png");if(url)URL.revokeObjectURL(url);blob=b;url=URL.createObjectURL(b)};
+  try{await gen()}catch(err){setSt("Bild konnte nicht erstellt werden","err");return}
+  const name="Training_"+d+".png";let file=(()=>{try{return new File([blob],name,{type:"image/png"})}catch(e){return null}})();
   const can=!!(file&&navigator.canShare&&navigator.share&&navigator.canShare({files:[file]}));
   const o=document.createElement("div");o.id="waov";o.style.cssText="position:fixed;inset:0;z-index:99;background:rgba(0,0,0,.72);display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px;overflow:auto";
   o.innerHTML='<div style="background:var(--card);color:var(--tx);border-radius:12px;padding:10px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;max-width:100%"><b>Training '+esc(WK[wday(d)]+" "+ddm(d))+' · Bild für WhatsApp</b>'
-    +(can?'<button class="btn" id="wasend" style="background:var(--ac);color:#fff">An WhatsApp senden</button>':"")+'<a class="btn" id="wasave" download="'+esc(name)+'" href="'+url+'" style="text-decoration:none">Bild speichern</a><button class="btn" id="waclose">Schließen</button></div>'
+    +(window.__xdzHtml||"")+(can?'<button class="btn" id="wasend" style="background:var(--ac);color:#fff">An WhatsApp senden</button>':"")+'<a class="btn" id="wasave" download="'+esc(name)+'" href="'+url+'" style="text-decoration:none">Bild speichern</a><button class="btn" id="waclose">Schließen</button></div>'
     +(can?"":'<div style="color:#fff;font-size:13px;max-width:560px;text-align:center">Auf diesem Gerät gibt es keinen direkten Senden-Knopf. Bild speichern und in WhatsApp als Foto anhängen.</div>')
     +'<img alt="Vorschau" src="'+url+'" style="max-width:min(100%,560px);height:auto;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.4)">';
   const close=()=>{o.remove();setTimeout(()=>URL.revokeObjectURL(url),3000)};
   o.querySelector("#waclose").onclick=close;o.addEventListener("click",(e)=>{if(e.target===o)close()});
   const sb=o.querySelector("#wasend");if(sb)sb.onclick=async()=>{try{await navigator.share({files:[file],title:"Training "+ddm(d)})}catch(e){}};
+  o.addEventListener("change",async(e)=>{if(!(e.target.classList&&e.target.classList.contains("xdz")))return;await new Promise((r)=>setTimeout(r,0));try{await gen();o.querySelector("img").src=url;const a=o.querySelector("#wasave");if(a)a.href=url;file=(()=>{try{return new File([blob],name,{type:"image/png"})}catch(x){return null}})()}catch(x){setSt("Bild konnte nicht erstellt werden","err")}});
   document.body.appendChild(o)}
 document.addEventListener("click",(e)=>{const t=e.target.closest&&e.target.closest("[data-wa]");if(!t)return;e.preventDefault();e.stopPropagation();waOpen(t.dataset.wa)},true);
 
@@ -4418,7 +4426,7 @@ async function spOpen(gid){
   if(window.__RO)return;const g=(D.spiele||[]).find((x)=>x.id===gid);if(!g)return;
   const o=document.createElement("div");o.id="spov";o.style.cssText="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.72);display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px;overflow:auto";
   o.innerHTML='<div style="background:var(--card);color:var(--tx);border-radius:12px;padding:10px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;max-width:100%"><b>Spielvorbereitung (A4)</b><label class="note">Modus <select id="spth"><option value="light">Hell</option><option value="dark">Dunkel</option></select></label>'+(window.__xdzHtml||"")+'<div class="seg" id="spf"><button data-f="pdf">PDF</button><button data-f="png">PNG</button><button data-f="jpg">JPG</button></div><button class="btn" id="spx">Schließen</button></div><img id="spim" alt="Vorschau" style="max-width:min(100%,620px);height:auto;border-radius:6px;background:#fff;box-shadow:0 8px 30px rgba(0,0,0,.4)">';
-  document.body.appendChild(o);try{const xz=o.querySelector(".xdz");if(xz){xz.value=window.__dz&&window.__dz.get()==="glas"?"glas":"ruhig";xz.dispatchEvent(new Event("change",{bubbles:true}))}}catch(e){}
+  document.body.appendChild(o);try{const xz=o.querySelector(".xdz");if(xz){xz.value=window.__xdes?window.__xdes():"kobalt";xz.dispatchEvent(new Event("change",{bubbles:true}))}}catch(e){}
   let url=null;const rend=async()=>{try{xTheme($("#spth").value==="dark");const r=xSpielPage(gid),cv=await xRaster(r.svg,r.W,r.H,1.4),b=await xBlob(cv,"image/png");if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(b);$("#spim").src=url}catch(e){setSt("Vorschau konnte nicht erstellt werden","err")}};
   $("#spth").onchange=rend;o.addEventListener("change",(e)=>{if(e.target.classList&&e.target.classList.contains("xdz"))setTimeout(rend,0)});$("#spx").onclick=()=>{o.remove();if(url)URL.revokeObjectURL(url)};
   $("#spf").onclick=(e)=>{const b=e.target.closest("button");if(!b)return;xThemeOv=$("#spth").value;xRunPages(()=>[xSpielPage(gid)],b.dataset.f,"Spielvorbereitung_"+(g.datum||"")+"_"+String(g.gegner||"").replace(/[^A-Za-z0-9]+/g,""),false)};
@@ -4446,7 +4454,7 @@ function siText(x,o){
   return L.join("\n")}
 function xWaSpiel(gid,o){
   const x=siData(gid);if(!x)return null;o=o||{};const ort0=String(o.ort!=null?o.ort:x.ort).trim(),ort=ort0&&x.home?"Heimspiel, "+ort0:ort0,note=String(o.note!=null?o.note:x.note).trim();
-  const W=1080,H=1350,M=72,PAD=38,IW=W-2*M-2*PAD,s=XS(W,H),BL="#1f6fe0",d=x.datum;
+  const W=1080,H=1350,M=72,PAD=38,IW=W-2*M-2*PAD,s=XS(W,H),BL=XC.kb?XC.ac:"#1f6fe0",d=x.datum;
   const it=(tx,px,py,z)=>s.raw('<text x="'+px+'" y="'+py+'" font-size="'+z+'" font-style="italic" fill="'+XC.tx+'">'+esc(tx)+"</text>");
   const vsL=xwrap(siTitle(x," – "),W-2*M,60,1);
   let k=1,lay=null;
@@ -4483,7 +4491,7 @@ async function siOpen(gid){
     +'<textarea id="sitx" rows="9" readonly '+inp+' aria-label="Text für WhatsApp"></textarea></div>'
     +'<img id="siim" alt="Vorschau" style="max-width:min(100%,560px);height:auto;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.4)">';
   document.body.appendChild(o);
-  try{const xz=o.querySelector(".xdz");if(xz){xz.value=window.__dz&&window.__dz.get()==="glas"?"glas":"ruhig";xz.dispatchEvent(new Event("change",{bubbles:true}))}}catch(e){}
+  try{const xz=o.querySelector(".xdz");if(xz){xz.value=window.__xdes?window.__xdes():"kobalt";xz.dispatchEvent(new Event("change",{bubbles:true}))}}catch(e){}
   let url=null,blob=null,file=null,tmr=null;const vals=()=>({ort:$("#siort").value.trim(),note:$("#sinote").value});
   const rend=async()=>{const v=vals();$("#sitx").value=siText(x,v);$("#siwa").href="https://wa.me/?text="+encodeURIComponent($("#sitx").value);
     try{xTheme(false);const r=xWaSpiel(gid,v),cv=await xRaster(r.svg,r.W,r.H,1);blob=await xBlob(cv,"image/png");if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(blob);$("#siim").src=url;
@@ -4546,9 +4554,9 @@ window.__dz={icon,names:NAMES,get:()=>cur,set,sync:fromConfig,linkDefault,wrap,a
 window.__dzSync=fromConfig;window.__dzSavePrefs=savePrefs;window.__dzPrefs=(p)=>{pf=p;pfSeen=true;applyPrefs(p);window.__gcP=(p&&p.gc)||window.__gcP||null;window.__vnP=(p&&p.vn)||window.__vnP||null;window.__gcOnPrefs&&window.__gcOnPrefs();window.__vnOnPrefs&&window.__vnOnPrefs()};
 
 /* ---------- A4-Export: Design wählbar ---------- */
-function xdes(){const v=ls("u13xdes")||mem.x;return v==="glas"||v==="ruhig"?v:(cur==="glas"?"glas":"ruhig")}
+function xdes(){const v=ls("u13xdes")||mem.x;return v==="glas"||v==="ruhig"||v==="kobalt"?v:"kobalt"}
 window.__xdes=xdes;const xset=(v)=>{mem.x=v;ls("u13xdes",v);document.querySelectorAll(".xdz").forEach((s)=>s.value=v)};
-const XDZ='<label class="note">Design <select class="xdz" aria-label="Design des Exports"><option value="ruhig">Klar &amp; ruhig</option><option value="glas">Liquid Glass</option></select></label>';
+const XDZ='<label class="note">Design <select class="xdz" aria-label="Design des Exports"><option value="kobalt">Vereinsfarben</option><option value="ruhig">Klar &amp; ruhig</option><option value="glas">Liquid Glass</option></select></label>';
 document.querySelectorAll("select.xth,select.xthp").forEach((s)=>{const l=s.closest("label")||s;if(l.nextElementSibling&&l.nextElementSibling.querySelector&&l.nextElementSibling.querySelector(".xdz"))return;l.insertAdjacentHTML("afterend",XDZ)});
 window.__xdzHtml=XDZ;
 document.addEventListener("change",(e)=>{if(e.target&&e.target.classList&&e.target.classList.contains("xdz"))xset(e.target.value)});
@@ -4560,14 +4568,17 @@ const RU={light:{bg:"#fbfbf9",tx:"#14201b",mu:"#6d7872",ln:"#e4e7e2",card:"#f3f5
           dark:{bg:"#0f1311",tx:"#e9eeeb",mu:"#88948e",ln:"#252c28",card:"#171c19",stripe:"#141916",track:"#252c28",avbg:"#16302a",ac:"#4cc79c",nb:"#4cc79c"}};
 const GL={light:{bg:"#d6e6ff",tx:"#14171c",mu:"rgba(20,23,28,.64)",ln:"rgba(255,255,255,.92)",card:"rgba(255,255,255,.62)",stripe:"rgba(255,255,255,.35)",track:"rgba(20,23,28,.1)",avbg:"rgba(10,132,255,.16)",ac:"#0a84ff",nb:"#0a6ad6",itx:"#14171c",bk:"#14171c"},
           dark:{bg:"#0e0f12",tx:"#f3f3f5",mu:"rgba(243,243,245,.64)",ln:"rgba(255,255,255,.14)",card:"rgba(255,255,255,.07)",stripe:"rgba(255,255,255,.04)",track:"rgba(255,255,255,.12)",avbg:"rgba(127,178,255,.2)",ac:"#7fb2ff",nb:"#7fb2ff",itx:"#f3f3f5",bk:"#f3f3f5"}};
+const KB={light:{bg:"#ffffff",tx:"#000000",mu:"#596273",ln:"#DDE3EE",card:"#F2F5FA",stripe:"#F6F8FC",track:"#E3E8F1",avbg:"#DCE7F7",ac:"#004AAD",nb:"#004AAD",r:"#FF3131",kb:1},
+          dark:{bg:"#000000",tx:"#ffffff",mu:"#9AA3B2",ln:"#23262D",card:"#101114",stripe:"#0A0B0D",track:"#23262D",avbg:"rgba(43,116,224,.22)",ac:"#2B74E0",nb:"#2B74E0",r:"#FF5A5A",kb:1}};
 const pal=(kind,dark)=>{const m=dark?"dark":"light",d=xdes();let p=Object.assign({},CL[m]);
+  if(d==="kobalt")return Object.assign(p,KB[m]);
   if(d==="ruhig"&&kind!=="plan")Object.assign(p,RU[m],kind==="saison"?{ac:CL[m].ac,nb:CL[m].nb,avbg:CL[m].avbg}:{});
   if(d==="glas"){Object.assign(p,GL[m]);if(kind==="saison")Object.assign(p,{ac:CL[m].ac,nb:CL[m].nb});if(kind==="plan")Object.assign(p,{ac:GL[m].tx})}
   if((d==="ruhig"||d==="glas")&&kind!=="plan"&&kind!=="saison"){const k=accKey(d);if(k!=="std"){const c=ACC[k],h=dark?c.d:c.l,n=parseInt(h.slice(1),16);p.ac=h;p.nb=h;p.avbg="rgba("+(n>>16)+","+(n>>8&255)+","+(n&255)+","+(dark?.2:.14)+")"}}
   if(d==="glas"){const g=glKey(),A={dicht:[.85,.13],klar:[.38,.04]}[g];if(A)p.card="rgba(255,255,255,"+A[dark?1:0]+")"}
   p.itx=p.itx||undefined;return p};
 let dk=false;
-const apply=(kind)=>{const p=pal(kind,dk);delete XC.itx;Object.assign(XC,p);XC.dk=dk;XA[1]=XC.r;XA[2]=XC.o;XA[3]=XC.y;XA[4]=XC.g};
+const apply=(kind)=>{const p=pal(kind,dk);delete XC.itx;delete XC.kb;Object.assign(XC,p);XC.dk=dk;XA[1]=XC.r;XA[2]=XC.o;XA[3]=XC.y;XA[4]=XC.g};
 const oT=xTheme;xTheme=function(dark){dk=!!dark;oT(dark);apply("other")};
 const kindOf=(fn,kind)=>{const o=window[fn];if(typeof o!=="function")return;window[fn]=function(){const keep=Object.assign({},XC),dk0=dk;if(kind==="wa")dk=false;apply(kind);try{return o.apply(this,arguments)}finally{dk=dk0;Object.keys(XC).forEach((k)=>{if(!(k in keep))delete XC[k]});Object.assign(XC,keep)}}};
 ["xMonthPage","xWeekPage","xFocusPage"].forEach((f)=>kindOf(f,"plan"));["xSaison","xScatterPage","xZusatz"].forEach((f)=>kindOf(f,"saison"));kindOf("xWaTraining","wa");kindOf("xWaSpiel","wa");
@@ -4578,6 +4589,34 @@ const oX=XS;XS=function(W,H,nobg){const s=oX(W,H,nobg),d0=s.done;
   s.done=function(){let o=d0();if(!nobg&&xdes()==="glas"){const c=dk?[["8%","4%","#3a3446"],["95%","14%","#2c3a36"],["55%","100%","#3a3030"]]:[["8%","4%","#bcd7ff"],["95%","14%","#e3d2ff"],["55%","100%","#bff0dd"]],b=dk?"#0e0f12":"#d6e6ff";
     const g="<defs>"+c.map((a,i)=>'<radialGradient id="gl'+i+'" cx="'+a[0]+'" cy="'+a[1]+'" r="'+(i===1?45:55)+'%"><stop offset="0" stop-color="'+a[2]+'"/><stop offset="1" stop-color="'+b+'" stop-opacity="0"/></radialGradient>').join("")+"</defs>"+c.map((a,i)=>'<rect width="'+W+'" height="'+H+'" fill="url(#gl'+i+')"/>').join("");
     o=o.replace(/(<rect width="\d+" height="\d+" fill="[^"]*"\/>)/,"$1"+g)}return o};return s};
+})();
+/* Handy: Menüs mit „Mehr“ statt verstecktem Wischen */
+(function(){
+  const W=window;const ph=()=>W.innerWidth<=760;let sigB="";
+  const mk=(id)=>{let e=document.getElementById(id);if(!e){e=document.createElement("div");e.id=id;e.className="mobsheet";e.hidden=true;document.body.appendChild(e)}return e};
+  function bottom(){
+    const nav=document.querySelector("body > .app > nav")||document.querySelector("nav");if(!nav)return;
+    const bs=[...nav.querySelectorAll("button[data-s]")];bs.forEach((b)=>b.classList.remove("mobx"));
+    const more0=nav.querySelector("#mobmore");if(more0)more0.remove();
+    const sh=mk("mobsheetB");
+    if(!ph()){document.documentElement.classList.remove("mobnav");sh.hidden=true;return}
+    const vis=bs.filter((b)=>b.offsetParent!==null||getComputedStyle(b).display!=="none");
+    if(vis.length<=5){document.documentElement.classList.remove("mobnav");return}
+    document.documentElement.classList.add("mobnav");
+    const act=vis.find((b)=>b.classList.contains("on"));let keep=vis.slice(0,4);if(act&&keep.indexOf(act)<0)keep[3]=act;
+    const rest=vis.filter((b)=>keep.indexOf(b)<0);rest.forEach((b)=>b.classList.add("mobx"));
+    const m=document.createElement("button");m.type="button";m.id="mobmore";m.innerHTML='<span class="em">⋯</span><span>Mehr</span>';
+    nav.appendChild(m);
+    sh.innerHTML=rest.map((b)=>'<button type="button" data-mb="'+b.dataset.s+'">'+((W.__dz&&W.__dz.icon)?W.__dz.icon(b.dataset.s):"")+'<span>'+[...b.childNodes].filter((n)=>n.nodeType===3).map((n)=>n.nodeValue).join("").trim().replace(/\s+/g," ")+'</span></button>').join("");
+    m.onclick=(e)=>{e.stopPropagation();sh.hidden=!sh.hidden};
+    sh.onclick=(e)=>{const x=e.target.closest("[data-mb]");if(!x)return;sh.hidden=true;const b=nav.querySelector('button[data-s="'+x.dataset.mb+'"]');if(b)b.click()};
+  }
+    const tick=()=>{try{const nav=document.querySelector("body > .app > nav")||document.querySelector("nav");
+    const sb=ph()+"|"+(nav?[...nav.querySelectorAll("button[data-s]:not(.mobx)")].map((b)=>b.dataset.s+(b.classList.contains("on")?"*":"")).join(","):"")+"|"+(nav?nav.querySelectorAll("button.mobx").length:0)+"|"+(document.body.className||"");
+    if(sb!==sigB){bottom();sigB=sb}}catch(e){}};
+  W.addEventListener("resize",()=>{sigB="";tick()});
+  document.addEventListener("click",(e)=>{if(!e.target.closest(".mobsheet,#mobmore"))document.querySelectorAll(".mobsheet").forEach((x)=>x.hidden=true)});
+  setInterval(tick,600);setTimeout(tick,300);
 })();
 </script><script>/* ---------- Kalender-Abgleich: Termine -> eigener Google-Kalender (erscheint in Apple Kalender) ---------- */
 const GC_TZ="Europe/Berlin",GC_API="https://www.googleapis.com/calendar/v3",GC_SCOPE="https://www.googleapis.com/auth/calendar.app.created";
