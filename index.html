@@ -11,6 +11,7 @@
 nav{background:var(--card);border-right:1px solid var(--ln);padding:18px 12px;position:sticky;top:env(safe-area-inset-top,0px);height:100vh}
 nav h1{font-size:19px;line-height:1.2;margin:0 8px 2px}nav small{display:block;color:var(--mu);margin:0 8px 18px}
 nav button{display:flex;gap:10px;width:100%;border:0;background:none;color:var(--tx);font:inherit;padding:9px 10px;border-radius:9px;cursor:pointer;text-align:left}
+nav button[hidden]{display:none!important}
 nav button.on{background:var(--acs);color:var(--ac);font-weight:600}
 main{padding:22px 26px 40px;min-width:0}
 h2{font-size:28px;line-height:1.2;margin:0 0 6px}.sub{color:var(--mu);margin:0 0 16px}h3{font-size:15px;margin:0 0 10px;color:var(--mu);text-transform:uppercase;letter-spacing:.4px}
@@ -253,7 +254,7 @@ nav button .em{display:inline-flex;justify-content:center;align-items:center}
 #lkco{display:none!important}</style>
 <div class="app">
 <nav><h1>U13 · <span id="sais">2026/27</span></h1><small>Teamzentrale</small>
-<button data-s="h" class="on">🏠 Start</button><button data-s="a">👥 Beteiligung</button><button data-s="q">🏆 Bilanz</button><button data-s="p">👤 Profil</button><button data-s="n">📝 Notizen</button><button data-s="t">🏃 Training</button><button data-s="g">⚽ Spiele</button><button data-s="m">📅 Termine</button><button data-s="w">🎯 Schwerpunkte</button><button data-s="s">🗂 Stammdaten</button><button data-s="k">🧩 Kader</button><button data-s="e">⚙️ Einstellungen</button></nav>
+<button data-s="h" class="on">🏠 Start</button><button data-s="a">👥 Beteiligung</button><button data-s="q">🏆 Bilanz</button><button data-s="p">👤 Profil</button><button data-s="n">📝 Notizen</button><button data-s="t">🏃 Training</button><button data-s="g">⚽ Spiele</button><button data-s="liga" hidden>🏅 Liga</button><button data-s="m">📅 Termine</button><button data-s="w">🎯 Schwerpunkte</button><button data-s="s">🗂 Stammdaten</button><button data-s="k">🧩 Kader</button><button data-s="e">⚙️ Einstellungen</button></nav>
 <main>
 <div class="top"><button class="logo" id="logo" type="button" title="Vereinslogo einfügen" aria-label="Vereinslogo einfügen">Logo<br>einfügen</button><button class="rm" id="logox" hidden title="Logo entfernen">✕</button><div><b style="font-size:22px;line-height:1.2"><span id="mann2">U13</span> · <span id="sais2"></span></b><div class="note" style="font-size:14px">Teamzentrale</div></div><span style="flex:1"></span><select id="th" aria-label="Darstellung" title="Darstellung"><option value="">Darstellung: Auto</option><option value="light">Hell</option><option value="dark">Dunkel</option></select><span class="pill" id="st">Verbinde …</span></div><div id="lkw" class="lkw" role="alert" hidden></div><div id="ccw" class="lkw lkw-y" role="alert" hidden></div><div id="bkw" class="lkw lkw-y" role="status" hidden></div><input type="file" id="fi" accept="image/*" hidden>
 <section id="h"><h2>Übersicht</h2><p class="sub" id="hsub"></p><div id="vnh" style="margin:0 0 8px"></div><div id="bwt"></div><div id="htd" style="margin:0 0 14px"></div>
@@ -262,6 +263,7 @@ nav button .em{display:inline-flex;justify-content:center;align-items:center}
 <div class="bar"><span class="note" style="min-width:110px">Monatsplan (A4)</span><select id="hmm" aria-label="Monat"></select><div class="seg" id="hxmo"><button data-f="png">PNG</button><button data-f="jpg">JPG</button><button data-f="pdf">PDF</button></div></div>
 <div class="bar"><span class="note" style="min-width:110px">Wochenplan (A4)</span><input type="date" id="hmw" aria-label="Woche (beliebiger Tag)"><span class="note" id="hmk"></span><div class="seg" id="hxwo"><button data-f="png">PNG</button><button data-f="jpg">JPG</button><button data-f="pdf">PDF</button></div></div></div>
 </section>
+<section id="liga" hidden></section>
 <section id="m" hidden><h2>Termine</h2><p class="sub" id="msub"></p>
 <div class="card" style="margin-bottom:14px"><h3>Neu anlegen</h3><div class="bar" style="margin:0"><button class="btn" id="mnew" style="background:var(--ac);color:#fff;border-color:var(--ac)">＋ Termin</button><button class="btn" id="mser">🔁 Serie</button><button class="btn" id="mdn">＋ Dienst</button><button class="btn" id="mtd">＋ To-Do / Hinweis</button></div>
 <div id="med" hidden></div><div id="mse" hidden></div><div id="pn_d" hidden><h3 style="margin-top:14px">Dienst</h3><p class="note" style="margin-top:0">Material-, Leibchen-, Obst-&Gemüse-Dienst usw. – erscheinen im Wochenplan. Trikotnummern in den Stammdaten (Spalte „Nr.“).</p><div id="df"></div></div>
@@ -295,7 +297,7 @@ nav button .em{display:inline-flex;justify-content:center;align-items:center}
 <div class="bar"><button class="btn" id="bprev" aria-label="Vorheriger Monat">◀</button><select id="ms" aria-label="Monat"></select><button class="btn" id="bnext" aria-label="Nächster Monat">▶</button><span style="flex:1"></span><label>Neues Training am <input type="date" id="nd"></label><button class="btn" id="ad" style="background:var(--ac);color:#fff;border-color:var(--ac)">＋ Training hinzufügen</button></div><div class="bar"><label class="note">Modus <select class="xth"><option value="light">Hell</option><option value="dark">Dunkel</option></select></label><span class="note">A4-Export (quer) · dieser Monat</span><div class="seg" id="xtm"><button data-f="png">PNG</button><button data-f="jpg">JPG</button><button data-f="pdf">PDF</button></div><span class="note">ganze Saison</span><div class="seg" id="xts"><button data-f="png">PNG</button><button data-f="jpg">JPG</button><button data-f="pdf">PDF</button></div></div>
 <div class="leg" id="l1"></div><div class="card tw" style="padding:0"><table id="tg"></table></div><p class="note" id="tn"></p></section>
 <section id="g" hidden><h2>Spiele</h2><p class="sub" id="gsub"></p><div class="bar"><button class="btn" id="ng" style="background:var(--ac);color:#fff;border-color:var(--ac)">＋ Neues Spiel</button><button class="btn" id="gmb" type="button">☑ Kader-Übersicht</button><span style="flex:1"></span><label class="note">Modus <select class="xth"><option value="light">Hell</option><option value="dark">Dunkel</option></select></label><span class="note">A4-Export aller Spiele (quer)</span><div class="seg" id="xga"><button data-f="png">PNG</button><button data-f="jpg">JPG</button><button data-f="pdf">PDF</button></div></div>
-<div class="card tw" id="gm" hidden style="padding:0;margin-bottom:12px"><table id="gmt"></table></div><p class="note" id="gmn" hidden style="margin:-6px 0 12px">Klick auf ein Feld schaltet weiter: k = im Kader, a = abwesend (krank, Urlaub, Termin …), v = verletzt, n = nicht nominiert, · = kein Eintrag. Minuten und Details pflegst du im jeweiligen Spiel.</p><div class="leg" id="l2"></div><div class="card tw" style="padding:0"><table id="gl"></table></div><div id="gd" hidden></div></section>
+<div id="fdg"></div><div class="card tw" id="gm" hidden style="padding:0;margin-bottom:12px"><table id="gmt"></table></div><p class="note" id="gmn" hidden style="margin:-6px 0 12px">Klick auf ein Feld schaltet weiter: k = im Kader, a = abwesend (krank, Urlaub, Termin …), v = verletzt, n = nicht nominiert, · = kein Eintrag. Minuten und Details pflegst du im jeweiligen Spiel.</p><div class="leg" id="l2"></div><div class="card tw" style="padding:0"><table id="gl"></table></div><div id="gd" hidden></div></section>
 <section id="q" hidden><h2>Bilanz</h2><p class="sub" id="qsub"></p>
 <div class="bar"><label>Spielart <select id="qf"></select></label><span style="flex:1"></span><label class="note">Modus <select class="xth"><option value="light">Hell</option><option value="dark">Dunkel</option></select></label><span class="note">A4-Export (quer)</span><div class="seg" id="xq"><button data-f="png">PNG</button><button data-f="jpg">JPG</button><button data-f="pdf">PDF</button></div></div>
 <div class="kpis" id="qk"></div><div class="gr" id="qc" style="margin-top:0"></div></section>
@@ -311,6 +313,7 @@ nav button .em{display:inline-flex;justify-content:center;align-items:center}
 <section id="e" hidden><h2>Einstellungen</h2><p class="sub">Änderungen werden sofort gespeichert und gelten in allen Auswertungen</p>
 <div class="seg etb" id="etb" role="group" aria-label="Bereich der Einstellungen"><button data-et="l" class="on">Hinweise &amp; Links</button><button data-et="m">Mannschaft</button><button data-et="p">Persönlich</button><button data-et="s">Sicherung</button></div>
 <div class="etp" id="etp-m">
+<div id="fdcardw"></div>
 <div class="card" id="kadsw" style="margin-bottom:12px"><h3>Kader-Modul</h3><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="kadon" checked> Kader (Kaderplanung &amp; Scouting) einblenden</label><p class="note" style="margin:6px 0 0">Ausgeblendet ist der Kader für alle weg (auch Co-Trainer, Kalender, Scouting-Link). Die Daten bleiben erhalten.</p></div>
 <div class="card" id="bwcard" style="margin-bottom:12px"><h3>Training bewerten</h3><p class="note" style="margin:0 0 8px">Plus und Minus pro Spieler im Training. Die Einstellungen gelten für alle Trainer. Die Bewertung ist nur für das Trainerteam sichtbar, nie in Profil, Links oder Exporten.</p><div class="bar" style="margin:0"><label>Doppeltipps: zwei Trainer geben dasselbe Vorzeichen innerhalb von <select id="bwwin"><option value="0">Aus (jeder Tipp zählt)</option><option value="5">5 Minuten</option><option value="10">10 Minuten</option><option value="15">15 Minuten</option><option value="20">20 Minuten</option></select> – dann zählt es einmal</label></div><label class="note" style="display:block;margin-top:8px">Schlagwörter (mit Komma getrennt, höchstens 8)<br><input id="bwtags" style="width:100%;max-width:520px" autocomplete="off"></label></div>
 <div class="gr" style="margin-top:0"><div class="card"><h3>Saison</h3><label class="note">Saison (z. B. 2026/27)<br><input id="esa" style="width:120px" autocomplete="off"></label> <label class="note" style="margin-left:12px">Mannschaft (z. B. U13)<br><input id="emn" style="width:90px" autocomplete="off"></label><p class="note" id="emsg" style="margin:8px 0 0">Die Saison bestimmt die zwölf Monate im Bereich Training (Juli bis Juni).</p></div>
@@ -504,7 +507,7 @@ nav button .em{display:inline-flex;justify-content:center;align-items:center}
 </script>
 <script>
 const $=(q)=>document.querySelector(q),POS=["TW","IV","AV","FL","ZM","ST"],pc=(x)=>x==null?"–":(x*100).toFixed(1).replace(".",",")+" %",mn=(x)=>String(Math.round(x));
-const SECS=["h","a","p","t","g","q","n","m","w","s","k","e"];
+const SECS=["h","a","p","t","g","liga","q","n","m","w","s","k","e"];
 const D={spieler:[],spiele:[],trainings:[],notizen:[],events:[],dienste:[],todos:[],tipps:[],config:null,ready:false};let db=null;
 const nm=(p)=>window.__ANON?p.vorname+" "+p.name:p.vorname+" "+(p.name||"")[0]+".";
 function applyTheme(v){if(v)document.documentElement.setAttribute("data-theme",v);else document.documentElement.removeAttribute("data-theme")}
@@ -1868,9 +1871,9 @@ async function showViewer(pid,key){
   if(!blob){showAccess("Dieser Link ist nicht (mehr) aktiv. Bitte den Trainer fragen.");return}
   let d;try{d=await unseal(key,blob)}catch(e){showAccess("Dieser Link ist nicht (mehr) gültig. Bitte den Trainer fragen.");return}
   useBg();dzApply(d);const v=shell(),cur=document.documentElement.getAttribute("data-theme")||"";
-  v.innerHTML='<div class="vh">'+(d.l?'<img alt="" src="'+esc(d.l)+'">':"")+'<div><b style="font-size:22px;line-height:1.2">'+(d.n?"Hey "+esc(d.n)+"!":"Hey!")+'</b><div class="note" style="font-size:14px">Deine '+esc(d.m||"U13")+'-Zentrale · Saison '+esc(d.s||"")+'</div></div><span style="flex:1"></span><select id="vth" aria-label="Darstellung"><option value="">Darstellung: Auto</option><option value="light">Hell</option><option value="dark">Dunkel</option></select></div>'+hnHtml(hnItems(d.hn,"alle"))+(d.t?'<div class="seg" id="vtab" style="margin-bottom:14px"><button data-v="p" class="on">Profil</button><button data-v="t">Terminplan</button></div>':"")+'<div id="vprof">'+d.h+'</div>'+(d.t?'<div id="vplan" hidden></div>':"")+'<div class="vf">Stand: '+esc(dt(d.u))+' · Persönlicher Link, bitte nicht weitergeben.</div>';
+  v.innerHTML='<div class="vh">'+(d.l?'<img alt="" src="'+esc(d.l)+'">':"")+'<div><b style="font-size:22px;line-height:1.2">'+(d.n?"Hey "+esc(d.n)+"!":"Hey!")+'</b><div class="note" style="font-size:14px">Deine '+esc(d.m||"U13")+'-Zentrale · Saison '+esc(d.s||"")+'</div></div><span style="flex:1"></span><select id="vth" aria-label="Darstellung"><option value="">Darstellung: Auto</option><option value="light">Hell</option><option value="dark">Dunkel</option></select></div>'+hnHtml(hnItems(d.hn,"alle"))+((d.t||d.li)?'<div class="seg" id="vtab" style="margin-bottom:14px"><button data-v="p" class="on">Profil</button>'+(d.t?'<button data-v="t">Terminplan</button>':"")+(d.li?'<button data-v="l">Liga</button>':"")+'</div>':"")+'<div id="vprof">'+d.h+'</div>'+(d.t?'<div id="vplan" hidden></div>':"")+(d.li?'<div id="vliga" hidden></div>':"")+'<div class="vf">Stand: '+esc(dt(d.u))+' · Persönlicher Link, bitte nicht weitergeben.</div>';
   bgPick();const s=document.getElementById("vth");s.value=cur;s.onchange=()=>{applyTheme(s.value);try{s.value?localStorage.setItem("u13theme",s.value):localStorage.removeItem("u13theme")}catch(e){}};
-  if(d.t){const tb=document.getElementById("vtab");let ready=false;tb.onclick=(e)=>{const b=e.target.closest("button");if(!b)return;tb.querySelectorAll("button").forEach((x)=>x.classList.toggle("on",x===b));const pl=b.dataset.v==="t";document.getElementById("vprof").hidden=pl;document.getElementById("vplan").hidden=!pl;if(pl&&!ready){ready=true;vPlan(document.getElementById("vplan"),{...d.t,s:d.s,lg:d.l,hn:d.hn})}}}
+  if(d.t||d.li){const tb=document.getElementById("vtab");let ready=false;tb.onclick=(e)=>{const b=e.target.closest("button");if(!b)return;tb.querySelectorAll("button").forEach((x)=>x.classList.toggle("on",x===b));const v=b.dataset.v,pe=document.getElementById("vplan"),le=document.getElementById("vliga");document.getElementById("vprof").hidden=v!=="p";if(pe)pe.hidden=v!=="t";if(le){le.hidden=v!=="l";if(v==="l"&&!le.innerHTML&&window.__FD)le.innerHTML=window.__FD.view(d.li)}if(v==="t"&&!ready&&pe){ready=true;vPlan(pe,{...d.t,s:d.s,lg:d.l,hn:d.hn})}}}
   document.getElementById("vprof").addEventListener("click",(e)=>{const b=e.target.closest("#pmode button");if(!b)return;const w=b.closest("[data-m]");w.dataset.m=b.dataset.pm;w.querySelectorAll("#pmode button").forEach((x)=>x.classList.toggle("on",x===b))});
   document.title="TuS Haltern U13 · Teamzentrale";
 }
@@ -1962,7 +1965,7 @@ const fingerprintParts=async()=>{
   const notes=D.notizen.filter((n)=>n.art!=="beobachtung"&&(full||n.sichtbar)).sort((a,b)=>a.id<b.id?-1:1);
   const evs=full?D.events:evAll().map((e)=>{const q={};Object.keys(e).sort().forEach((k)=>{if(k==="id"||k==="virt"||k==="trainId"||k==="schwerpunkt"||k==="ctask"||(k==="detail"&&e.typ==="Training"))return;const v=e[k];if(v===""||v==null||(k==="eltern"&&v!==false))return;q[k]=v});return q}).sort((a,b)=>JSON.stringify(a)<JSON.stringify(b)?-1:1);
   const gs=D.spiele.filter(U13.erreicht).map((g)=>{const q={...g};delete q.live;return q}),ts=D.trainings.filter(U13.erreicht);
-  const a=(await sha(JSON.stringify([D.spieler,evs,D.dienste,notes,full?D.todos:null,cfg]))).slice(0,16),s=(await sha(JSON.stringify([gs,ts]))).slice(0,16);
+  const a=(await sha(JSON.stringify([D.spieler,evs,D.dienste,notes,full?D.todos:null,cfg]))).slice(0,16),s=(await sha(JSON.stringify((window.__FD&&window.__FD.sig())?[gs,ts,window.__FD.sig()]:[gs,ts]))).slice(0,16);
   return{a,s}};
 const fingerprint=async()=>{const f=await fingerprintParts();return f.a+f.s};
 function profileHtml(pid){
@@ -2073,8 +2076,8 @@ const dzOf=(id)=>{const v=(L[id]||{}).dz;return v==="glas"||v==="ruhig"||v==="ko
 const daOf=(dz)=>window.__dz?__dz.accOf(dz):"",dgOf=(dz)=>dz==="glas"&&window.__dz?__dz.glOf():"std";
 const dzSig=()=>JSON.stringify(Object.keys(L).sort().filter((k)=>L[k].aktiv&&L[k].key).map((k)=>[k,dzOf(k),daOf(dzOf(k)),dgOf(dzOf(k))]));
 async function buildSnap(){
-  const TP=planSnap(),HN=(D.config&&D.config.hinweise)||[],out={v:1,u:new Date().toISOString(),p:{},k:{}},logo=lgR(),sa=(D.config&&D.config.saison)||"";
-  for(const p of active()){const l=L[p.id];if(!l||!l.aktiv||!l.key)continue;out.p[p.id]=await seal(l.key,{h:profileHtml(p.id),l:logo,s:sa,m:mann(),u:out.u,t:TP,n:p.vorname,hn:HN,dz:dzOf(p.id),da:daOf(dzOf(p.id)),dg:dgOf(dzOf(p.id))});out.k[p.id]=await sha8(l.key)}
+  const FDS=window.__FD?window.__FD.snap():null,TP=planSnap(),HN=(D.config&&D.config.hinweise)||[],out={v:1,u:new Date().toISOString(),p:{},k:{}},logo=lgR(),sa=(D.config&&D.config.saison)||"";
+  for(const p of active()){const l=L[p.id];if(!l||!l.aktiv||!l.key)continue;out.p[p.id]=await seal(l.key,{h:profileHtml(p.id),l:logo,s:sa,m:mann(),u:out.u,t:TP,n:p.vorname,hn:HN,li:FDS,dz:dzOf(p.id),da:daOf(dzOf(p.id)),dg:dgOf(dzOf(p.id))});out.k[p.id]=await sha8(l.key)}
   out.bg=await bgSnap();out.dzs=dzSig();out.x={};out.xk={};
   for(const k of ["full","anon","plan","demo"]){const l=L["x"+k];if(!l||!l.aktiv||!l.key)continue;out.x[k]=await seal(l.key,k==="plan"?{k,u:out.u,t:TP,l:logo,s:sa,m:mann(),hn:HN,dz:dzOf("x"+k),da:daOf(dzOf("x"+k)),dg:dgOf(dzOf("x"+k))}:{k,u:out.u,db:extData(k),dz:dzOf("x"+k),da:daOf(dzOf("x"+k)),dg:dgOf(dzOf("x"+k))});out.xk[k]=await sha8(l.key)}
   {const f=await fingerprintParts();out.fp=f.a+f.s;out.fa=f.a;out.fs=f.s}return out;
@@ -4527,7 +4530,7 @@ function inject(){let st=document.getElementById("dzdyn");if(!st){st=document.cr
   st.textContent=css}
 
 /* Symbole der Menüpunkte (Emoji) in eigene Hüllen setzen, damit sie in den neuen Designs am Rechner wegfallen können */
-const ICO={"h": "<path d=\"M4 11.5 12 4l8 7.5\"/><path d=\"M6 10.5V20h12v-9.5\"/><path d=\"M10 20v-5h4v5\"/>", "a": "<circle cx=\"9\" cy=\"8\" r=\"3.2\"/><path d=\"M3 19.5c.4-3.3 2.8-5.2 6-5.2s5.6 1.9 6 5.2\"/><circle cx=\"17\" cy=\"9\" r=\"2.4\"/><path d=\"M17.5 14.4c2.2.2 3.8 1.7 4.2 4.1\"/>", "q": "<path d=\"M5 20V11M12 20V4M19 20v-6\"/>", "p": "<circle cx=\"12\" cy=\"8\" r=\"3.6\"/><path d=\"M4.5 20c.5-4 3.6-6.2 7.5-6.2s7 2.2 7.5 6.2\"/>", "n": "<path d=\"M6 3.5h8l4 4V20.5H6z\"/><path d=\"M14 3.5v4h4\"/><path d=\"M9 12h6M9 16h6\"/>", "t": "<circle cx=\"12\" cy=\"13.5\" r=\"7\"/><path d=\"M12 9.5v4l2.6 1.6M9.5 3h5\"/>", "g": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"m12 8 3.4 2.5-1.3 4h-4.2l-1.3-4z\"/><path d=\"M12 8V3.6M15.4 10.5l4-1.3M14.1 14.5l2.5 3.4M9.9 14.5l-2.5 3.4M8.6 10.5l-4-1.3\"/>", "m": "<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15.5\" rx=\"2.5\"/><path d=\"M3.5 10h17M8 3v4M16 3v4\"/>", "w": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><circle cx=\"12\" cy=\"12\" r=\"4.5\"/><circle cx=\"12\" cy=\"12\" r=\".8\" fill=\"currentColor\"/>", "s": "<rect x=\"4\" y=\"4\" width=\"16\" height=\"16\" rx=\"2.5\"/><path d=\"M4 10h16M10 4v16\"/>", "k": "<rect x=\"4\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"4\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"/>", "e": "<path d=\"M4 7h8M18 7h2M4 12h3M13 12h7M4 17h9M19 17h1\"/><circle cx=\"15\" cy=\"7\" r=\"2.2\"/><circle cx=\"10\" cy=\"12\" r=\"2.2\"/><circle cx=\"16\" cy=\"17\" r=\"2.2\"/>", "uebersicht": "<rect x=\"4\" y=\"4\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"13\" y=\"4\" width=\"7\" height=\"5\" rx=\"1.5\"/><rect x=\"13\" y=\"11\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"4\" y=\"15\" width=\"7\" height=\"5\" rx=\"1.5\"/>", "personen": "<path d=\"M12 3.5 19 6v5.5c0 4.3-3 7.4-7 9-4-1.6-7-4.7-7-9V6z\"/>", "teams": "<path d=\"M6 21V4M6 5h11l-2 4 2 4H6\"/>", "datenschutz": "<rect x=\"5\" y=\"10.5\" width=\"14\" height=\"10\" rx=\"2.5\"/><path d=\"M8 10.5V8a4 4 0 0 1 8 0v2.5\"/>", "mannschaft": "<circle cx=\"9\" cy=\"8\" r=\"3.2\"/><path d=\"M3 19.5c.4-3.3 2.8-5.2 6-5.2s5.6 1.9 6 5.2\"/><circle cx=\"17\" cy=\"9\" r=\"2.4\"/><path d=\"M17.5 14.4c2.2.2 3.8 1.7 4.2 4.1\"/>", "fach": "<path d=\"M6 3.5h8l4 4V20.5H6z\"/><path d=\"M14 3.5v4h4\"/><path d=\"M9 12h6M9 16h6\"/>", "planung": "<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15.5\" rx=\"2.5\"/><path d=\"M3.5 10h17M8 3v4M16 3v4\"/>", "kader": "<rect x=\"4\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"4\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"/>", "einstellungen": "<path d=\"M4 7h8M18 7h2M4 12h3M13 12h7M4 17h9M19 17h1\"/><circle cx=\"15\" cy=\"7\" r=\"2.2\"/><circle cx=\"10\" cy=\"12\" r=\"2.2\"/><circle cx=\"16\" cy=\"17\" r=\"2.2\"/>"},icon=(k)=>ICO[k]?'<svg viewBox="0 0 24 24" aria-hidden="true">'+ICO[k]+'</svg>':"";
+const ICO={"liga": "<path d=\"M8 4h8v5a4 4 0 0 1-8 0z\"/><path d=\"M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4\"/><path d=\"M12 13v4M9 20h6M10 17h4\"/>", "h": "<path d=\"M4 11.5 12 4l8 7.5\"/><path d=\"M6 10.5V20h12v-9.5\"/><path d=\"M10 20v-5h4v5\"/>", "a": "<circle cx=\"9\" cy=\"8\" r=\"3.2\"/><path d=\"M3 19.5c.4-3.3 2.8-5.2 6-5.2s5.6 1.9 6 5.2\"/><circle cx=\"17\" cy=\"9\" r=\"2.4\"/><path d=\"M17.5 14.4c2.2.2 3.8 1.7 4.2 4.1\"/>", "q": "<path d=\"M5 20V11M12 20V4M19 20v-6\"/>", "p": "<circle cx=\"12\" cy=\"8\" r=\"3.6\"/><path d=\"M4.5 20c.5-4 3.6-6.2 7.5-6.2s7 2.2 7.5 6.2\"/>", "n": "<path d=\"M6 3.5h8l4 4V20.5H6z\"/><path d=\"M14 3.5v4h4\"/><path d=\"M9 12h6M9 16h6\"/>", "t": "<circle cx=\"12\" cy=\"13.5\" r=\"7\"/><path d=\"M12 9.5v4l2.6 1.6M9.5 3h5\"/>", "g": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"m12 8 3.4 2.5-1.3 4h-4.2l-1.3-4z\"/><path d=\"M12 8V3.6M15.4 10.5l4-1.3M14.1 14.5l2.5 3.4M9.9 14.5l-2.5 3.4M8.6 10.5l-4-1.3\"/>", "m": "<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15.5\" rx=\"2.5\"/><path d=\"M3.5 10h17M8 3v4M16 3v4\"/>", "w": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><circle cx=\"12\" cy=\"12\" r=\"4.5\"/><circle cx=\"12\" cy=\"12\" r=\".8\" fill=\"currentColor\"/>", "s": "<rect x=\"4\" y=\"4\" width=\"16\" height=\"16\" rx=\"2.5\"/><path d=\"M4 10h16M10 4v16\"/>", "k": "<rect x=\"4\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"4\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"/>", "e": "<path d=\"M4 7h8M18 7h2M4 12h3M13 12h7M4 17h9M19 17h1\"/><circle cx=\"15\" cy=\"7\" r=\"2.2\"/><circle cx=\"10\" cy=\"12\" r=\"2.2\"/><circle cx=\"16\" cy=\"17\" r=\"2.2\"/>", "uebersicht": "<rect x=\"4\" y=\"4\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"13\" y=\"4\" width=\"7\" height=\"5\" rx=\"1.5\"/><rect x=\"13\" y=\"11\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"4\" y=\"15\" width=\"7\" height=\"5\" rx=\"1.5\"/>", "personen": "<path d=\"M12 3.5 19 6v5.5c0 4.3-3 7.4-7 9-4-1.6-7-4.7-7-9V6z\"/>", "teams": "<path d=\"M6 21V4M6 5h11l-2 4 2 4H6\"/>", "datenschutz": "<rect x=\"5\" y=\"10.5\" width=\"14\" height=\"10\" rx=\"2.5\"/><path d=\"M8 10.5V8a4 4 0 0 1 8 0v2.5\"/>", "mannschaft": "<circle cx=\"9\" cy=\"8\" r=\"3.2\"/><path d=\"M3 19.5c.4-3.3 2.8-5.2 6-5.2s5.6 1.9 6 5.2\"/><circle cx=\"17\" cy=\"9\" r=\"2.4\"/><path d=\"M17.5 14.4c2.2.2 3.8 1.7 4.2 4.1\"/>", "fach": "<path d=\"M6 3.5h8l4 4V20.5H6z\"/><path d=\"M14 3.5v4h4\"/><path d=\"M9 12h6M9 16h6\"/>", "planung": "<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15.5\" rx=\"2.5\"/><path d=\"M3.5 10h17M8 3v4M16 3v4\"/>", "kader": "<rect x=\"4\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"4\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"/>", "einstellungen": "<path d=\"M4 7h8M18 7h2M4 12h3M13 12h7M4 17h9M19 17h1\"/><circle cx=\"15\" cy=\"7\" r=\"2.2\"/><circle cx=\"10\" cy=\"12\" r=\"2.2\"/><circle cx=\"16\" cy=\"17\" r=\"2.2\"/>"},icon=(k)=>ICO[k]?'<svg viewBox="0 0 24 24" aria-hidden="true">'+ICO[k]+'</svg>':"";
 function wrap(){document.querySelectorAll("nav button[data-s]").forEach((b)=>{if(b.querySelector(".em"))return;const t=b.firstChild;if(t&&t.nodeType===3){const m=t.nodeValue.match(/^(\S+)\s+([\s\S]*)$/);if(m&&!/^[A-Za-z0-9ÄÖÜäöü]/.test(m[1])){const s=document.createElement("span");s.className="em";if(b.dataset.s&&ICO[b.dataset.s])s.innerHTML=icon(b.dataset.s);else s.textContent=m[1]+" ";b.insertBefore(s,t);t.nodeValue=m[2]}}})}
 function set(d,keep){if(!NAMES[d])d="ruhig";cur=d;root.setAttribute("data-design",d);if(!keep)ls("u13design",d);inject();wrap();sync()}
 function sync(){const a=document.getElementById("dzapp"),l=document.getElementById("dzlnk"),c=cfg();if(a&&document.activeElement!==a)a.value=cur;if(l&&document.activeElement!==l)l.value=["glas","kobalt"].includes(c.linkDesign)?c.linkDesign:"ruhig";
@@ -5340,6 +5343,288 @@ window.slInfo=(o)=>{if(!o||!o.live)return"";const n=o.live.pl.length,r=o.live.pl
 window.slHasLive=(o)=>!!(o&&o.live);
 document.addEventListener("click",(e)=>{const b=e.target.closest&&e.target.closest("[data-ka]");if(!b||(root&&root.contains(b)))return;const a=b.dataset.ka;
   if(a==="slnew"){e.preventDefault();window.slOpenNew()}else if(a==="slo"||a==="sls"){e.preventDefault();window.slOpenFrom(b.dataset.id)}});
+})();
+</script>
+<script>/* ===== FUSSBALL.DE in der Mannschaftsapp =====
+   Ein Hilfsprogramm („Abholer“, läuft bei GitHub) holt Spielplan, Ergebnisse und Tabelle von FUSSBALL.DE und legt sie in der Sammlung „fussball“ ab
+   (ein Dokument je Mannschaft bei FUSSBALL.DE, dazu „_index“ mit dem Stand). Die App liest diese Daten nur (die Regeln verbieten das Schreiben).
+   Der Link steht in den Einstellungen: D.config.fd = {team, liga}.
+   Dieses Stück macht: Verknüpfen (Einstellungen), Reiter „Liga“, Abgleich unter „Spiele“, Liga im Spielerlink. */
+(function(){
+"use strict";
+const W=window;
+const E=(s)=>String(s==null?"":s).replace(/[&<>"']/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const FD=W.__FD={docs:{},idx:null,loaded:false,wk:false,done:{},items:[],open:false,mkEv:{}};
+const q=(s,r)=>(r||document).querySelector(s);
+const pad=(n)=>String(n).padStart(2,"0");
+const WT=["So","Mo","Di","Mi","Do","Fr","Sa"];
+const wd=(iso)=>WT[new Date(iso+"T12:00:00").getDay()];
+const dl=(iso)=>iso?wd(iso)+" "+iso.slice(8,10)+"."+iso.slice(5,7)+".":"";
+const dd=(iso)=>iso?iso.slice(8,10)+"."+iso.slice(5,7)+".":"";
+const todayIso=()=>{const d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())};
+const addDays=(iso,n)=>{const d=new Date(iso+"T12:00:00");d.setDate(d.getDate()+n);return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())};
+const daysBetween=(a,b)=>Math.round((new Date(b+"T12:00:00")-new Date(a+"T12:00:00"))/864e5);
+const standTxt=(iso)=>{if(!iso)return"";const d=new Date(iso);if(isNaN(d))return"";const t=new Date(),y=new Date(t.getTime()-864e5);
+  const w=d.toDateString()===t.toDateString()?"heute":d.toDateString()===y.toDateString()?"gestern":d.getDate()+"."+(d.getMonth()+1)+".";return w+", "+pad(d.getHours())+":"+pad(d.getMinutes())+" Uhr"};
+FD.standTxt=standTxt;
+const ID_RE=/team-id\/([A-Za-z0-9]{16,})/;
+FD.idOf=(s)=>{s=String(s||"").trim();const m=ID_RE.exec(s);if(m)return m[1].toUpperCase();return/^[A-Za-z0-9]{16,}$/.test(s)?s.toUpperCase():""};
+const key=(s)=>String(s||"").toLowerCase().replace(/[^a-z0-9äöüß]+/g,"");
+const sameName=(a,b)=>!!key(a)&&key(a)===key(b);
+/* Ähnlichkeit von Gegnernamen: „SV Beispiel 2“ ≈ „Beispiel II“ ≈ „Beispiel“, aber ≠ „Beispiel 1“ */
+const STOP=new Set("sv fc tus tsv sc vfl bv sg jsg jfv spvgg fsv dj djk rw bw rot weiss weiß blau gelb grün gruen schwarz ev tura von der die am im an e v u".split(" "));
+const ROM={i:"1",ii:"2",iii:"3",iv:"4",v:"5"};
+function toks(s){const t=String(s||"").toLowerCase().replace(/[^a-z0-9äöüß ]+/g," ").split(/\s+/).filter(Boolean);const dig=[],sig=[];
+  t.forEach((x)=>{if(/^\d+$/.test(x))dig.push(x);else if(ROM[x])dig.push(ROM[x]);else if(x.length>=3&&!STOP.has(x)&&!/^u\d+$/.test(x))sig.push(x)});return{dig,sig}}
+function sameOpp(a,b){const A=toks(a),B=toks(b);if(!A.sig.length||!B.sig.length)return key(a)!==""&&key(a)===key(b);
+  if(A.dig.length&&B.dig.length&&A.dig.join()!==B.dig.join())return false;
+  const sh=A.sig.filter((x)=>B.sig.some((y)=>x===y||(x.length>4&&y.length>4&&(x.indexOf(y)===0||y.indexOf(x)===0)))).length;return sh>=1&&sh/Math.min(A.sig.length,B.sig.length)>=.5}
+FD.sameOpp=sameOpp;
+
+/* ---------- Daten ---------- */
+const app=()=>typeof D!=="undefined"&&D&&D.config!==undefined;
+FD.cfg=()=>(typeof D!=="undefined"&&D&&D.config&&D.config.fd)||{};
+FD.tid=()=>FD.idOf(FD.cfg().team);
+FD.aktiv=()=>true;
+FD.cur=()=>FD.aktiv()&&FD.tid()?FD.docs[FD.tid()]||null:null;
+FD.docOfTeam=(tid)=>FD.aktiv()?Object.values(FD.docs).find((d)=>(d.tids||[]).indexOf(tid)>=0)||null:null;
+FD.on=()=>FD.aktiv()&&!!FD.tid();
+FD.hasLiga=()=>{const d=FD.cur();return !!(d&&(d.tabelle||[]).length)};
+FD.platz=(d)=>{if(!d||!(d.tabelle||[]).length)return null;const r=d.tabelle.find((x)=>sameName(x.team,d.eigen))||d.tabelle.find((x)=>sameOpp(x.team,d.eigen)&&key(d.eigen).length>3);return r?{p:r.p,n:d.tabelle.length,row:r}:null};
+const opp=(f)=>f.h?f.gast:f.heim;
+const haOf=(f)=>f.h?"H":"A";
+const off=(f)=>/abgesagt|ausgefallen|abgesetzt|annulliert|nicht ausgetragen|spielausfall|absetzung/i.test(f.st||"");
+const mine=(f)=>f.ht==null||f.gt==null?null:(f.h?+f.ht:+f.gt);
+const theirs=(f)=>f.ht==null||f.gt==null?null:(f.h?+f.gt:+f.ht);
+const canWrite=()=>!!(W.__webFs&&W.__ROLE!=="lesen"&&W.__ROLE!=="scout");
+FD.canLink=canWrite;
+
+function start(){
+  const fs=W.__webFs;if(!fs)return;
+  try{fs.collection("fussball").onSnapshot((s)=>{const m={};let ix=null;s.docs.forEach((d)=>{if(d.id==="_index")ix=d.data();else m[d.id]=d.data()});FD.docs=m;FD.idx=ix;FD.loaded=true;poll(true)},()=>{FD.loaded=true})}catch(e){}
+  setInterval(poll,1200);
+}
+
+/* ---------- Gestaltung ---------- */
+const CSS='.fdp{margin:0 0 12px;padding:10px 14px}.fdh{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}.fdbadge{font-size:10px;font-weight:700;letter-spacing:.04em;padding:2px 7px;border-radius:99px;background:var(--acs);color:var(--ac);white-space:nowrap}'
++'.fdchip{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px;background:var(--acs);color:var(--ac);white-space:nowrap}.fdn{display:inline-block;min-width:18px;text-align:center;font-size:12px;font-weight:700;padding:0 6px;border-radius:99px;background:var(--o);color:#fff;margin-left:6px}'
++'.fdl{margin-top:10px;display:grid;gap:8px}.fdi{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid var(--ln);border-radius:12px;background:var(--bg)}.fdi .fdit{flex:1 1 260px;min-width:0;overflow-wrap:anywhere}.fdib{display:flex;flex-wrap:wrap;gap:6px}'
++'.fdi.o{border-color:var(--o);background:var(--os)}.fdi .fdk{font-weight:700}.fdsub{display:block;font-size:12px;color:var(--mu)}'
++'#gl .fdo{display:block;font-size:12px;color:var(--mu);font-weight:400;overflow-wrap:anywhere;white-space:normal;max-width:240px}#gl .fdb{font-size:9px;font-weight:700;letter-spacing:.03em;padding:1px 5px;border-radius:99px;background:var(--acs);color:var(--ac);margin-left:6px;vertical-align:middle;white-space:nowrap}#gl .fdx{font-size:11px;font-weight:600;padding:1px 7px;border-radius:99px;background:var(--os);color:var(--o);margin-left:6px;white-space:nowrap}'
++'.fdt{width:100%;border-collapse:separate;border-spacing:0}.fdt th,.fdt td{padding:11px 8px;text-align:center;border-bottom:1px solid var(--ln);white-space:nowrap;font-variant-numeric:tabular-nums}.fdt th{font-size:12px;color:var(--mu);font-weight:600;padding-block:6px}.fdt td.t,.fdt th.t{text-align:left;white-space:normal;overflow-wrap:anywhere}.fdt td.t b{font-weight:600}.fdt .fdsub{display:none;font-size:12px;color:var(--mu);margin-top:2px}.fdt td.pn{width:42px}.fdt td.pn span{display:inline-block;min-width:26px;line-height:26px;border-radius:99px;color:var(--mu);font-size:13px}.fdt tr.me td{background:var(--acs)}.fdt tr.me td.t b{font-weight:800}.fdt tr.me td.pn span{background:var(--ac);color:#fff;font-weight:700}.fdt tr.me td:first-child{box-shadow:inset 5px 0 0 var(--ac)}.fdt td.df.pos{color:var(--g)}.fdt td.df.neg{color:var(--r)}.fdt td.pk span{display:inline-block;min-width:34px;line-height:26px;border-radius:8px;background:var(--ln);font-weight:700}.fdt tr.me td.pk span{background:var(--ac);color:#fff}.fdtk{display:flex;align-items:center;gap:14px;margin:0 0 12px}.fdtn{font-size:44px;line-height:1;color:var(--ac)}.fdtl{font-weight:700;font-size:16px}'
++'@media(max-width:700px){.fdt .c-sun{display:none}.fdt th,.fdt td{padding:10px 5px}.fdtn{font-size:40px}}'
++'.fdg{display:grid;grid-template-columns:78px minmax(0,1fr) auto;gap:2px 10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--ln)}.fdg:last-child{border-bottom:0}.fdg .fdd b{display:block;font-size:14px}.fdg .fdd span{font-size:12px;color:var(--mu)}.fdg .fdm{min-width:0;overflow-wrap:anywhere}.fdg .fdm .note{display:block;font-size:12px}.fdg .fdres{text-align:right;font-weight:700;white-space:nowrap}'
++'.fdha{display:inline-block;min-width:18px;text-align:center;font-size:11px;font-weight:700;padding:0 5px;border-radius:5px;background:var(--grs);color:var(--mu);margin-right:6px}.fdr{display:inline-block;width:20px;height:20px;line-height:20px;text-align:center;font-size:11px;font-weight:700;border-radius:50%;margin-left:6px;color:#fff;vertical-align:middle}.fdr.S{background:var(--g)}.fdr.U{background:var(--y)}.fdr.N{background:var(--r)}.fdg.x .fdm{opacity:.65}.fdxt{font-size:12px;font-weight:600;color:var(--o)}'
++'.fdwk{margin:0 0 12px;padding:0}.fdwk>button{all:unset;box-sizing:border-box;display:flex;width:100%;gap:8px;align-items:center;padding:10px 14px;cursor:pointer;font-size:14px}.fdwk>button:focus-visible{outline:2px solid var(--ac);outline-offset:-2px}.fdwk .fdwb{padding:0 14px 10px}.fdwk .fdwr{display:grid;grid-template-columns:70px 44px minmax(0,1fr);gap:2px 8px;padding:5px 0;border-top:1px solid var(--ln);align-items:baseline}.fdwk .fdwr:first-child{border-top:0}.fdwk .fdwr .note{grid-column:3}.fdpl{display:flex;align-items:center;gap:10px;margin:8px 0 2px}.fdpn{font-size:30px;line-height:1;font-weight:800;color:var(--ac);min-width:2ch;font-variant-numeric:tabular-nums}.fdpr{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}.fdseg{display:flex;gap:2px;height:8px}.fdseg i{flex:1;min-width:3px;border-radius:2px;background:var(--ln)}.fdseg i.me{background:var(--ac);transform:scaleY(1.5)}.fdpr .note{font-size:11px;margin:0}.fdsr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}'
++'.vtc .fdtile{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}@media(max-width:560px){.fdg{grid-template-columns:64px minmax(0,1fr) auto}}';
+function css(){if(document.getElementById("fdcss"))return;const s=document.createElement("style");s.id="fdcss";s.textContent=CSS;document.head.appendChild(s)}
+css();
+
+/* ---------- Anzeige von Tabelle und Spielplan (App und Spielerlink) ---------- */
+function tabHtml(tab,eigen){
+  if(!tab||!tab.length)return'<div class="note">Keine Tabelle vorhanden.</div>';
+  const me=tab.find((r)=>sameName(r.team,eigen)),n=tab.length;
+  const sg=(v)=>(v>0?"+":"")+E(v);
+  const kopf=me?'<div class="fdtk"><b class="fdtn">'+E(me.p)+'.</b><div><div class="fdtl">von '+n+' Mannschaften</div><div class="note">'+E(me.pkt)+(Number(me.pkt)===1?" Punkt":" Punkte")+' aus '+E(me.sp)+' Spielen · Tore '+E(me.tore)+'</div></div></div>':"";
+  return kopf+'<div class="tw"><table class="fdt"><thead><tr><th>Pl.</th><th class="t">Mannschaft</th><th>Sp</th><th class="c-sun">S</th><th class="c-sun">U</th><th class="c-sun">N</th><th class="c-sun">Tore</th><th>Diff</th><th>Pkt</th></tr></thead><tbody>'
+  +tab.map((r)=>'<tr class="'+(sameName(r.team,eigen)?"me":"")+'"><td class="pn"><span>'+E(r.p)+'</span></td><td class="t"><b>'+E(r.team)+'</b></td><td>'+E(r.sp)+'</td><td class="c-sun">'+E(r.s)+'</td><td class="c-sun">'+E(r.u)+'</td><td class="c-sun">'+E(r.n)+'</td><td class="c-sun">'+E(r.tore)+'</td><td class="df'+(r.diff>0?" pos":r.diff<0?" neg":"")+'">'+sg(r.diff)+'</td><td class="pk"><span>'+E(r.pkt)+'</span></td></tr>').join("")+'</tbody></table></div>'}
+function gameRow(f){
+  const m=mine(f),t=theirs(f),res=m==null?"":'<span>'+m+':'+t+'</span><i class="fdr '+(m>t?"S":m<t?"N":"U")+'" title="'+(m>t?"Sieg":m<t?"Niederlage":"Unentschieden")+'">'+(m>t?"S":m<t?"N":"U")+'</i>';
+  return'<div class="fdg'+(off(f)?" x":"")+'"><div class="fdd"><b>'+E(dl(f.d))+'</b><span>'+E(f.z?f.z+" Uhr":"")+'</span></div><div class="fdm"><span class="fdha" title="'+(f.h?"Heimspiel":"Auswärtsspiel")+'">'+(f.h?"H":"A")+'</span><b>'+E(opp(f))+'</b>'+(f.ort?'<span class="note">'+E(f.ort)+'</span>':"")+(f.wett?'<span class="note">'+E(f.wett)+'</span>':"")+'</div><div class="fdres">'+(res||(f.st?'<span class="fdxt">'+E(f.st)+'</span>':""))+(res&&f.st?'<span class="fdxt" style="display:block">'+E(f.st)+'</span>':"")+'</div></div>'}
+/* li = {u: Stand, e: eigener Name, t: Tabelle, g: Spiele, lt/ll: Links}; Zeitpunkt „heute“ kommt vom Gerät */
+FD.view=(li,o)=>{o=o||{};if(!li)return"";const T=todayIso(),g=(li.g||[]).slice().sort((a,b)=>(a.d+a.z).localeCompare(b.d+b.z)),ko=g.filter((x)=>x.d>=T),ge=g.filter((x)=>x.d<T).reverse();
+  const lk=[li.lt?'<a href="'+E(li.lt)+'" target="_blank" rel="noopener noreferrer">Mannschaft bei FUSSBALL.DE</a>':"",li.ll?'<a href="'+E(li.ll)+'" target="_blank" rel="noopener noreferrer">Liga bei FUSSBALL.DE</a>':""].filter(Boolean).join(" · ");
+  return'<div class="card" style="margin-bottom:12px"><h3 style="margin-top:0">Tabelle</h3>'+tabHtml(li.t,li.e)+'</div>'
+  +'<div class="card" style="margin-bottom:12px"><h3 style="margin-top:0">Nächste Spiele</h3>'+(ko.length?ko.map(gameRow).join(""):'<div class="note">Keine weiteren Spiele bei FUSSBALL.DE eingetragen.</div>')+'</div>'
+  +(ge.length?'<div class="card" style="margin-bottom:12px"><h3 style="margin-top:0">Ergebnisse</h3>'+ge.map(gameRow).join("")+'</div>':"")
+  +'<p class="note">Quelle: FUSSBALL.DE'+(li.u?" · Stand "+E(standTxt(li.u)):"")+(lk?" · "+lk:"")+'</p>'};
+/* Schnappschuss für Spielerlinks (nur Tabelle und Spiele, keine Daten der Mannschaft) */
+FD.snap=()=>{const d=FD.cur();if(!d||!(d.tabelle||[]).length)return null;const c=FD.cfg();
+  return{u:d.abgeholt||"",e:d.eigen||"",t:d.tabelle,g:(d.spiele||[]).map((f)=>({d:f.d,z:f.z,h:f.h,heim:f.heim,gast:f.gast,ht:f.ht,gt:f.gt,st:f.st,ort:f.ort,wett:f.wett})),lt:/^https:\/\/www\.fussball\.de\//.test(c.team||"")?c.team:"",ll:/^https:\/\/www\.fussball\.de\//.test(c.liga||"")?c.liga:""}};
+FD.sig=()=>{const d=FD.cur();return d&&(d.tabelle||[]).length?(d.hash||"")+"|"+(d.eigen||""):""};
+if(!W.__WEB||W.__VIEWER||W.__SCOUT||W.__CO)return;
+const setHtml=(el,h)=>{if(!el)return false;if(el.__fdh===h)return false;el.__fdh=h;el.innerHTML=h;return true};
+const focusIn=(el)=>{const a=document.activeElement;return !!(el&&a&&el.contains(a)&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))};
+
+/* ---------- Einstellungen: Verknüpfung ---------- */
+function cardHtml(){
+  const c=FD.cfg(),can=canWrite(),d=FD.cur(),id=FD.tid(),pl=FD.platz(d);
+  let st;
+  if(!FD.aktiv())st='<span class="note">Die Anbindung ist ausgeschaltet.</span>';
+  else if(!c.team)st='<span class="note">Noch nicht verknüpft.</span>';
+  else if(!id)st='<span class="note" style="color:var(--o)">Im Link fehlt der Teil „team-id/…“. Bitte den Link der Mannschaftsseite einfügen.</span>';
+  else if(!d)st='<span class="note">Verknüpft. Die erste Abholung kommt beim nächsten Durchgang des Abholers (er läuft mehrmals täglich).'+(FD.loaded?"":" Daten werden geladen …")+'</span>';
+  else{const n=(d.spiele||[]).length,tn=(d.tabelle||[]).length,andere=(d.tids||[]).filter(()=>false);
+    st='<div>Zuletzt abgeholt: <b>'+E(standTxt(d.abgeholt)||"–")+'</b> · '+n+' Spiele · '+(tn?'Tabelle mit '+tn+' Mannschaften':'keine Tabelle')+'</div>'
+     +(d.eigen?'<div class="note">Eigene Mannschaft bei FUSSBALL.DE: „'+E(d.eigen)+'“'+(pl?' · Platz '+pl.p+' von '+pl.n:"")+'</div>':"")
+     +(d.fehler?'<div class="note" style="color:var(--o)">Letzter Abruf nicht ganz geglückt: '+E(d.fehler)+'</div>':"")
+     +(andere.length?'<div class="note">Dieselbe Mannschaft ist auch verknüpft bei: '+E(andere.join(", "))+' (wird nur einmal abgeholt).</div>':"")}
+  return'<div class="card" style="margin-bottom:12px"><h3>FUSSBALL.DE</h3><p class="note" style="margin-top:0">Spielplan, Ergebnisse, Spielorte und Tabelle von FUSSBALL.DE. Die Daten werden mehrmals täglich automatisch geholt und hier angezeigt. Nichts wird ungefragt überschrieben: Änderungen am Spielplan schlägt die App unter „Spiele“ zur Übernahme vor.</p>'
+  +'<div class="grid"><label class="note" style="flex:1 1 320px">Link zur Mannschaft bei FUSSBALL.DE<br><input id="fdl1" style="width:100%" value="'+E(c.team||"")+'" placeholder="https://www.fussball.de/mannschaft/…/team-id/…" autocomplete="off"'+(can&&FD.aktiv()?"":" disabled")+'></label>'
+  +'<label class="note" style="flex:1 1 320px">Link zur Liga (optional)<br><input id="fdl2" style="width:100%" value="'+E(c.liga||"")+'" placeholder="https://www.fussball.de/spieltagsuebersicht/…" autocomplete="off"'+(can&&FD.aktiv()?"":" disabled")+'></label></div>'
+  +(can&&FD.aktiv()?'<div class="bar" style="margin:10px 0 0"><button class="btn" id="fds" style="background:var(--ac);color:#fff;border-color:var(--ac)">Speichern</button>'+(c.team?'<button class="btn" id="fdr">Verknüpfung entfernen</button>':"")+'<span class="note" id="fdm"></span></div>':"")
+  +'<div style="margin-top:10px">'+st+'</div>'
+  +'<p class="note" style="margin-bottom:0">Den Link findest du auf FUSSBALL.DE, wenn du die Mannschaft öffnest (Adresszeile des Browsers). Mannschaften ohne Liga (z. B. Spielfeste) brauchen keine Verknüpfung; dann gibt es keinen Reiter „Liga“.</p></div>'}
+function renderCard(force){const el=q("#fdcardw");if(!el||!app()||!D.ready)return;if(!force&&focusIn(el))return;setHtml(el,cardHtml())}
+document.addEventListener("click",async(e)=>{
+  const el=q("#fdcardw");if(!el||!el.contains(e.target))return;
+  const m=q("#fdm",el),say=(t,bad)=>{if(m){m.textContent=t;m.style.color=bad?"var(--o)":""}};
+  if(e.target.id==="fds"){
+    const t=q("#fdl1",el).value.trim(),l=q("#fdl2",el).value.trim();
+    if(!t){say("Bitte den Link der Mannschaft einfügen (oder „Verknüpfung entfernen“ wählen).",1);return}
+    if(!/^https:\/\/www\.fussball\.de\//i.test(t)){say("Der Link muss mit https://www.fussball.de/ beginnen.",1);return}
+    if(!FD.idOf(t)){say("Im Link fehlt der Teil „team-id/…“. Bitte die Seite der Mannschaft öffnen (nicht die der Liga) und den Link von dort kopieren.",1);return}
+    if(l&&!/^https:\/\/www\.fussball\.de\//i.test(l)){say("Der Liga-Link muss mit https://www.fussball.de/ beginnen.",1);return}
+    await cfgSave({fd:{team:t,liga:l,am:new Date().toISOString()}});say("Gespeichert.");setTimeout(()=>renderCard(true),50);return}
+  if(e.target.id==="fdr"){
+    if(!e.target.dataset.arm){e.target.dataset.arm="1";e.target.textContent="Wirklich entfernen?";return}
+    await cfgSave({fd:null});setTimeout(()=>renderCard(true),50)}
+});
+
+/* ---------- Reiter „Liga“ ---------- */
+function ligaHtml(){const d=FD.cur(),c=FD.cfg();if(!d||!(d.tabelle||[]).length)return'<h2>Liga</h2><p class="sub">Für diese Mannschaft liegt keine Tabelle vor.</p>';
+  const li=FD.snap();const pl=FD.platz(d);
+  return'<h2>Liga</h2><p class="sub">'+(pl?'<span class="fdchip">Platz '+pl.p+' von '+pl.n+'</span> · ':"")+'Quelle FUSSBALL.DE · Stand '+E(standTxt(d.abgeholt))+'</p>'+(d.fehler?'<div class="note" style="color:var(--o);margin:0 0 10px">Letzter Abruf nicht ganz geglückt: '+E(d.fehler)+' – angezeigt wird der letzte gute Stand.</div>':"")+FD.view(li)}
+function renderLiga(){const s=q("#liga");if(!s||s.hidden)return;setHtml(s,ligaHtml())}
+function navUpdate(){const b=q('nav button[data-s="liga"]');if(!b)return;const show=FD.on()&&FD.hasLiga();if(b.hidden===show)b.hidden=!show;const s=q("#liga");if(!show&&s&&!s.hidden&&typeof go==="function")go("h")}
+
+/* ---------- Abgleich unter „Spiele“ ---------- */
+const evOf=(g)=>(D.events||[]).find((e)=>e.spielId===g.id);
+const newId=()=>"e"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+function artFor(f){const A=arten(),c=f.wett||"",find=(re)=>A.find((a)=>re.test(a.name));let a,liga=true;
+  if(/freundschaft|testspiel|vorbereitung/i.test(c)){a=find(/freundschaft|test/i)||find(/leistung/i);liga=false}
+  else if(/turnier|hallen|cup|festival|spielfest/i.test(c)){a=find(/turnier/i);liga=false}
+  if(!a)a=find(/meister|liga|punkt/i)||A[0];return{name:a?a.name:"Meisterschaft",liga}}
+/* Ereignis (Termin) zu einem Spiel anlegen bzw. ergänzen; Schutz gegen doppeltes Anlegen, bis die Datenbank antwortet */
+function patchEv(g,patch){const ev=evOf(g);
+  if(ev){const n={...ev,...patch};Object.keys(n).forEach((k)=>{if(n[k]===undefined)delete n[k]});save("events",ev.id,n);return}
+  if(FD.mkEv[g.id]&&Date.now()-FD.mkEv[g.id]<20000)return;FD.mkEv[g.id]=Date.now();
+  const n={id:newId(),datum:g.datum,bis:null,typ:g.art,gegner:g.gegner||"",ha:g.ha||"",spielId:g.id,eltern:true,...patch};Object.keys(n).forEach((k)=>{if(n[k]===undefined)delete n[k]});save("events",n.id,n)}
+function resultPatch(f){const m=mine(f);return m==null?{}:{tore:m,gt:theirs(f)}}
+/* Spiel mit FUSSBALL.DE verbinden und angeben, was übernommen wird */
+function apply(g,f,o){o=o||{};const ev=evOf(g),gp={},ep={};
+  if(o.link)gp.fd=f.id;
+  if(o.gegner)gp.gegner=opp(f);else if(o.link&&!g.gegner)gp.gegner=opp(f);
+  if(o.ha||(o.link&&!g.ha))gp.ha=haOf(f);
+  if(o.datum){gp.datum=f.d;ep.datum=f.d;ep.unsicher=undefined;ep.unsGrund=undefined}
+  if(o.zeit&&f.z)ep.beginn=f.z;else if(f.z&&!(ev&&ev.beginn)&&(o.link||o.quiet))ep.beginn=f.z;
+  const cur=(ev&&ev.ort)||"";if(f.ort&&cur!==f.ort&&(!cur||cur===g.fdOrt||o.ort)){ep.ort=f.ort;gp.fdOrt=f.ort}
+  if(o.result){Object.assign(gp,resultPatch(f))}
+  if(o.gegner||o.ha||o.datum)Object.assign(ep,{gegner:o.gegner?opp(f):undefined,ha:o.ha?haOf(f):undefined});
+  Object.keys(ep).forEach((k)=>{if(ep[k]===undefined&&!["unsicher","unsGrund"].includes(k))delete ep[k]});
+  if(Object.keys(gp).length)save("games",g.id,{...g,...gp});
+  if(Object.keys(ep).length)patchEv({...g,...gp},ep)}
+function createGame(f){const a=artFor(f),g=mkGame({datum:f.d,typ:a.name,gegner:opp(f),ha:haOf(f)});
+  g.fd=f.id;if(a.liga)g.wertung=true;if(f.ort)g.fdOrt=f.ort;Object.assign(g,resultPatch(f));save("games",g.id,g);
+  patchEv(g,{beginn:f.z||"",ort:f.ort||""});return g}
+
+function diffs(){
+  const doc=FD.cur();if(!doc||!app()||!D.ready)return{items:[],auto:[],hidden:0};
+  const T=todayIso(),ign=new Set((D.config&&D.config.fdIgn)||[]),fgs=(doc.spiele||[]).filter((x)=>x.d).slice().sort((a,b)=>(a.d+a.z).localeCompare(b.d+b.z)),games=D.spiele.slice();
+  const byFd=new Map();games.forEach((g)=>{if(g.fd)byFd.set(g.fd,g)});
+  const claimed=new Set(),items=[],auto=[];let hidden=0;
+  const K=(kind,f)=>kind+":"+f.id+":"+f.d+":"+(f.z||"")+":"+(f.ht==null?"":f.ht+"-"+f.gt);
+  const add=(it)=>{if(ign.has(it.key)){hidden++;return}items.push(it)};
+  const txt=(f)=>dl(f.d)+(f.z?" "+f.z+" Uhr":"")+" · "+(f.h?"Heim gegen ":"Auswärts gegen ")+opp(f);
+  /* 1) bereits verknüpfte Spiele */
+  fgs.forEach((f)=>{const g=byFd.get(f.id);if(!g)return;claimed.add(g.id);
+    const ev=evOf(g),ha=haOf(f);
+    if(off(f)){if(g.datum>=T)add({kind:"status",key:K("status",f),f,g,html:'<span class="fdk">Abgesagt?</span> Spiel '+E(g.nr)+' gegen '+E(g.gegner)+' am '+E(dl(g.datum))+': FUSSBALL.DE meldet „'+E(f.st)+'“.',btn:[]});return}
+    const dDiff=f.d!==g.datum,zDiff=!!(f.z&&ev&&ev.beginn&&f.z!==ev.beginn),hDiff=!!(g.ha&&g.ha!=="N"&&g.ha!==ha);
+    if(dDiff||zDiff||hDiff){
+      const bis='Bei euch: '+dl(g.datum)+(ev&&ev.beginn?" "+ev.beginn+" Uhr":"")+(g.ha?" ("+({H:"Heim",A:"Auswärts",N:"Neutral"}[g.ha]||g.ha)+")":"")+'. FUSSBALL.DE: '+txt(f)+'.';
+      add({kind:"verlegt",key:K("verlegt",f),f,g,html:'<span class="fdk">'+(dDiff?"Verlegt?":"Geändert")+'</span> Spiel '+E(g.nr)+' gegen '+E(g.gegner)+'<span class="fdsub">'+E(bis)+'</span>',btn:[["ok","Übernehmen"]]})}
+    else{const o={quiet:1};if((f.z&&!(ev&&ev.beginn))||(f.ort&&((ev&&ev.ort)||"")!==f.ort&&(!(ev&&ev.ort)||ev.ort===g.fdOrt)))auto.push({key:"q:"+f.id+":"+(f.z||"")+":"+(f.ort||""),g,f,o})}
+    const m=mine(f);
+    if(m!=null&&f.d<=T){
+      if(g.tore==null&&g.gt==null)auto.push({key:"r:"+f.id+":"+f.ht+"-"+f.gt,g,f,o:{result:1}});
+      else if(g.tore!==m||g.gt!==theirs(f))add({kind:"ergebnis",key:K("ergebnis",f),f,g,html:'<span class="fdk">Ergebnis anders</span> Spiel '+E(g.nr)+' gegen '+E(g.gegner)+'<span class="fdsub">Bei euch '+E(g.tore==null?"–":g.tore)+':'+E(g.gt==null?"–":g.gt)+', laut FUSSBALL.DE '+m+':'+theirs(f)+'.</span>',btn:[["ok","Übernehmen"]]})}
+  });
+  /* 2) noch nicht verknüpft: gleicher Tag + gleicher Gegner = sicher dasselbe Spiel */
+  const rest=[];
+  fgs.forEach((f)=>{if(byFd.has(f.id))return;if(off(f))return;
+    const ex=games.find((g)=>!g.fd&&!claimed.has(g.id)&&g.datum===f.d&&sameOpp(g.gegner,opp(f)));
+    if(ex){claimed.add(ex.id);auto.push({key:"l:"+f.id+":"+ex.id,g:ex,f,o:{link:1,result:mine(f)!=null&&ex.tore==null&&ex.gt==null&&f.d<=T}});return}
+    rest.push(f)});
+  /* 3) Rest: Spiel am selben Tag (fragen), verlegtes Spiel (fragen) oder neu */
+  const neu=[];
+  rest.forEach((f)=>{
+    const free=()=>games.filter((g)=>!g.fd&&!claimed.has(g.id)),same=free().filter((g)=>g.datum===f.d);
+    if(same.length){add({kind:"konflikt",key:K("konflikt",f),f,cands:same,html:'<span class="fdk">Dieser Tag ist schon belegt</span><span class="fdsub" style="color:inherit">FUSSBALL.DE: '+E(txt(f))+(f.wett?' ('+E(f.wett)+')':"")+'</span><span class="fdsub">Bei euch gibt es am selben Tag: '+same.map((g)=>"Spiel "+g.nr+(g.gegner?" gegen "+E(g.gegner):" (Gegner noch offen)")).join("; ")+'. Ist das dasselbe Spiel?</span>',btn:same.map((g)=>["join:"+g.id,same.length>1?"Mit Spiel "+g.nr+" verbinden":"Verbinden und übernehmen"]).concat([["add","Zusätzlich anlegen"]])});return}
+    const mv=free().find((g)=>g.datum!==f.d&&sameOpp(g.gegner,opp(f))&&g.tore==null&&Math.abs(daysBetween(g.datum,f.d))<=75&&(!g.ha||g.ha==="N"||g.ha===haOf(f)));
+    if(mv){claimed.add(mv.id);add({kind:"verlegt-neu",key:K("verlegt-neu",f),f,g:mv,html:'<span class="fdk">Verlegt?</span> Spiel '+E(mv.nr)+' gegen '+E(mv.gegner)+'<span class="fdsub">Bei euch: '+E(dl(mv.datum))+'. FUSSBALL.DE: '+E(txt(f))+'. Gleiches Spiel, neuer Termin?</span>',btn:[["move","Verbinden und Termin übernehmen"],["add","Stattdessen neu anlegen"]]});return}
+    neu.push(f)});
+  neu.forEach((f)=>add({kind:"neu",key:K("neu",f),f,html:'<span class="fdk">Neu bei FUSSBALL.DE</span> '+E(txt(f))+'<span class="fdsub">'+E(artFor(f).name)+(f.wett?' · '+E(f.wett):"")+(f.ort?' · '+E(f.ort):"")+(mine(f)!=null?' · Ergebnis '+mine(f)+':'+theirs(f):"")+'</span>',btn:[["add","Anlegen"]]}));
+  items.sort((a,b)=>(a.f.d+(a.f.z||"")).localeCompare(b.f.d+(b.f.z||"")));
+  return{items,auto,hidden}}
+FD.diffs=diffs;
+
+function runAuto(auto){if(!canWrite()||!auto.length)return;const now=Date.now();
+  auto.forEach((a)=>{if(FD.done[a.key]&&now-FD.done[a.key]<120000)return;FD.done[a.key]=now;try{apply(a.g,a.f,a.o)}catch(e){}})}
+function panelHtml(){
+  if(!FD.aktiv())return"";const d=FD.cur(),can=canWrite();
+  if(!FD.cfg().team)return can?'<div class="card fdp"><div class="fdh"><span class="fdbadge">FUSSBALL.DE</span><span class="note" style="flex:1">Spielplan, Ergebnisse und Tabelle automatisch übernehmen.</span><button class="btn" data-fda="cfg">Verknüpfen …</button></div></div>':"";
+  if(!d)return'<div class="card fdp"><div class="fdh"><span class="fdbadge">FUSSBALL.DE</span><span class="note">'+(FD.loaded?"Verknüpft – die erste Abholung steht noch aus.":"Daten werden geladen …")+'</span></div></div>';
+  const df=diffs(),pl=FD.platz(d),n=df.items.length;
+  let h='<div class="card fdp"><div class="fdh"><span class="fdbadge">FUSSBALL.DE</span>'+(pl?'<span class="fdchip">Platz '+pl.p+' von '+pl.n+'</span>':"")+'<span class="note" style="flex:1">Stand '+E(standTxt(d.abgeholt))+(d.fehler?' · <span style="color:var(--o)">letzter Abruf mit Problem</span>':"")+'</span><button class="btn" data-fda="tog" aria-expanded="'+(FD.open?"true":"false")+'">Mit FUSSBALL.DE abgleichen'+(n?'<span class="fdn">'+n+'</span>':"")+'</button></div>';
+  if(FD.open){
+    h+='<div class="fdl">';
+    if(!n)h+='<div class="note">Alles abgeglichen – keine Unterschiede zu FUSSBALL.DE.'+(df.hidden?' ('+df.hidden+' ausgeblendet)':"")+'</div>';
+    const neuN=df.items.filter((x)=>x.kind==="neu").length;
+    if(neuN>1&&can)h+='<div class="bar" style="margin:0"><button class="btn" data-fda="alle">Alle '+neuN+' neuen Spiele anlegen</button><span class="note">Spielart wird nach dem Wettbewerb gewählt, Meisterschaft ist gewertet.</span></div>';
+    df.items.forEach((it,i)=>{h+='<div class="fdi'+(it.kind==="konflikt"||it.kind==="verlegt"||it.kind==="verlegt-neu"||it.kind==="status"?" o":"")+'"><div class="fdit">'+it.html+'</div>'+(can?'<div class="fdib">'+it.btn.map((b)=>'<button class="btn" data-fda="'+E(b[0])+'" data-k="'+E(it.key)+'">'+E(b[1])+'</button>').join("")+'<button class="btn" data-fda="ign" data-k="'+E(it.key)+'" title="Diesen Hinweis ausblenden">Ausblenden</button></div>':"")+'</div>'});
+    if(df.hidden&&n)h+='<div class="note">'+df.hidden+' ausgeblendet · <a href="#" data-fda="show">wieder einblenden</a></div>';
+    else if(df.hidden&&!n)h+='<div class="note"><a href="#" data-fda="show">Ausgeblendete Hinweise wieder einblenden</a></div>';
+    h+='</div>'}
+  FD.items=df.items;return h+'</div>'}
+function renderPanel(){const el=q("#fdg");if(!el)return;if(!D.ready){setHtml(el,"");return}const h=panelHtml();if(!FD.open||!focusIn(el))setHtml(el,h)}
+document.addEventListener("click",async(e)=>{
+  const b=e.target.closest("[data-fda]");if(!b||!q("#fdg")||!q("#fdg").contains(b))return;e.preventDefault();
+  const a=b.dataset.fda;
+  if(a==="tog"){FD.open=!FD.open;q("#fdg").__fdh=null;renderPanel();return}
+  if(a==="cfg"){if(typeof go==="function")go("e");if(typeof etab==="function")etab("m");return}
+  if(a==="show"){await cfgSave({fdIgn:[]});setTimeout(()=>renderPanel(),80);return}
+  if(!canWrite())return;
+  if(a==="alle"){FD.items.filter((x)=>x.kind==="neu").forEach((x)=>createGame(x.f));setTimeout(poll,300);return}
+  const it=FD.items.find((x)=>x.key===b.dataset.k);if(!it)return;
+  if(a==="ign"){const l=((D.config&&D.config.fdIgn)||[]).concat([it.key]).slice(-300);await cfgSave({fdIgn:l})}
+  else if(a==="ok"){apply(it.g,it.f,it.kind==="ergebnis"?{result:1}:{datum:1,zeit:1,ha:1,result:it.f.d<=todayIso()&&it.g.tore==null})}
+  else if(a==="add"){createGame(it.f)}
+  else if(a==="move"){apply(it.g,it.f,{link:1,datum:1,zeit:1,ha:1,result:it.f.d<=todayIso()&&it.g.tore==null})}
+  else if(a.indexOf("join:")===0){const g=D.spiele.find((x)=>x.id===a.slice(5));if(g)apply(g,it.f,{link:1,gegner:1,ha:1,zeit:1,ort:1,result:it.f.d<=todayIso()&&g.tore==null&&g.gt==null})}
+  setTimeout(poll,300)});
+
+/* Zusätze in der Spieleliste: Hinweis „FUSSBALL.DE“, Anstoß und Ort */
+function decorate(){
+  if(!FD.on()||!app())return;const doc=FD.cur(),T=todayIso();
+  document.querySelectorAll("#gl tr[data-g]").forEach((tr)=>{
+    const g=D.spiele.find((x)=>x.id===tr.dataset.g);if(!g)return;const td=tr.children[1];if(!td||td.querySelector(".fdb,.fdo"))return;
+    const ev=evOf(g),f=g.fd&&doc&&(doc.spiele||[]).find((x)=>x.id===g.fd);let add="";
+    if(g.fd)add+='<span class="fdb" title="Mit FUSSBALL.DE verknüpft">FUSSBALL.DE</span>';
+    if(f&&off(f)&&g.datum>=T)add+='<span class="fdx" title="Laut FUSSBALL.DE">'+E(f.st)+'</span>';
+    const info=[ev&&ev.beginn&&g.datum>=T?ev.beginn+" Uhr":"",ev&&ev.ort&&g.datum>=T?ev.ort:""].filter(Boolean).join(" · ");
+    if(add)td.insertAdjacentHTML("beforeend",add);
+    if(info)td.insertAdjacentHTML("beforeend",'<span class="fdo">'+E(info)+'</span>')})}
+if(typeof renderGames==="function"){const r0=renderGames;renderGames=function(){const r=r0.apply(this,arguments);try{decorate()}catch(e){}return r}}
+/* Verknüpfung mit FUSSBALL.DE geht beim Speichern im Spiel-Editor nicht verloren */
+if(typeof gRead==="function"){const g0=gRead;gRead=function(){const r=g0.apply(this,arguments);try{const old=D.spiele.find((x)=>x.id===r.id);if(old){if(old.fd)r.fd=old.fd;if(old.fdOrt)r.fdOrt=old.fdOrt}}catch(e){}return r}}
+/* Im geöffneten Spiel: Verknüpfung anzeigen und lösen */
+if(typeof openGame==="function"){const o0=openGame;openGame=function(id){const r=o0.apply(this,arguments);try{const g=id&&D.spiele.find((x)=>x.id===id);if(g&&g.fd&&FD.on()){const m=q("#gmsg");if(m)m.insertAdjacentHTML("beforebegin",'<div class="bar" id="fdlk"><span class="fdbadge">FUSSBALL.DE</span><span class="note">Dieses Spiel ist mit FUSSBALL.DE verknüpft.</span>'+(canWrite()?'<button class="btn" id="fdun">Verknüpfung lösen</button>':"")+'</div>')}}catch(e){}return r}}
+document.addEventListener("click",(e)=>{if(e.target.id!=="fdun")return;const g=D.spiele.find((x)=>x.id===gOpen);if(!g||!canWrite())return;const n={...g};delete n.fd;delete n.fdOrt;save("games",g.id,n);e.target.parentNode.remove();
+  const l=((D.config&&D.config.fdIgn)||[]);setTimeout(poll,300)});
+
+/* ---------- Takt ---------- */
+function poll(){try{
+  if(!app()||!D.ready)return;
+  navUpdate();renderCard();renderLiga();renderPanel();
+  if(FD.on()&&FD.cur()){const df=diffs();runAuto(df.auto)}
+  const sg=JSON.stringify([FD.aktiv(),Object.keys(FD.docs).map((k)=>[k,FD.docs[k].abgeholt,FD.docs[k].hash]),FD.idx&&FD.idx.stand]);
+  if(sg!==FD.lastSig){const first=FD.lastSig==null;FD.lastSig=sg;void first}
+}catch(e){}}
+FD.poll=poll;FD.refresh=()=>poll(true);
+const nav=q("nav");if(nav)nav.addEventListener("click",(e)=>{if(e.target.closest('button[data-s="liga"]'))setTimeout(()=>{const s=q("#liga");if(s)s.__fdh=null;renderLiga()},0);if(e.target.closest('button[data-s="g"]'))setTimeout(()=>{const s=q("#fdg");if(s)s.__fdh=null;renderPanel()},0)});
+/* Start, sobald Anmeldung und Rolle feststehen (Scouting-Zugang liest nichts) */
+let tries=0;const boot=setInterval(()=>{if(W.__webFs&&W.__ROLE){clearInterval(boot);if(W.__ROLE!=="scout")start()}else if(++tries>600)clearInterval(boot)},500);
 })();
 </script>
 </body></html>
