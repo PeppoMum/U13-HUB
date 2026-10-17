@@ -1955,7 +1955,7 @@ function kzFoot(alias,aid,doc,p){
 
 /* ---------- Trainer: Schlüssel, Schnappschuss, Veröffentlichen ---------- */
 const L={};window.__links=L;let started=false,tok=0,armed=null;
-const base=()=>window.__WEB_BASE||BASE_DEFAULT;window.__lkbase=base;
+const base=()=>window.__WEB_BASE||BASE_DEFAULT;window.__lkbase=base;const kzBase=()=>window.__WEB_BASE0||base();   /* Kurzlinks hängen immer direkt an der Grundadresse (ohne ?t=…) */
 const linkOf=(pid,key)=>base()+"#"+pid+"."+key;
 const FP_INT=["trainerToDos","trainerToDosM","kaderAus","linkBasis","sicherung","bw"];
 /* Zwei Stände: A = was Eltern sofort im Plan bzw. im Profil lesen (Termine, Dienste, Hinweise, Kontakte, sichtbare Notizen, Spielerdaten),
@@ -2190,7 +2190,7 @@ window.__scKz={
   on:scOn,
   cur:()=>scCur,
   loaded:()=>scLoaded,
-  url:()=>scCur?base()+scCur.alias:"",
+  url:()=>scCur?kzBase()+scCur.alias:"",
   async load(){if(!scOn()||scLoaded)return;try{const d=await db.doc("scoutkz/main").get();scCur=d&&d.exists&&d.data()&&d.data().alias?d.data():null}catch(e){scCur=null}scLoaded=true},
   async create(raw,withPw){
     const alias=String(raw||"").trim().toLowerCase();
@@ -2218,7 +2218,7 @@ function kzCell(pid){
   const l=L[pid]||{};if(!l.key)return"";
   if(!l.alias)return'<div data-kid="'+pid+'" style="margin-top:6px;white-space:normal"><input data-kzin placeholder="Kurzlink-Name, z. B. max-muster" maxlength="40" autocapitalize="off" style="width:62%;min-width:170px"> <button class="btn" data-kzadd>Kurzlink anlegen</button>'+(pid==="xplan"?'<label class="note" style="display:flex;gap:6px;align-items:center;margin-top:4px"><input type="checkbox" data-kzpwc> mit Passwort schützen (sonst öffnet jeder, der den Kurzlink kennt, die Terminpläne)</label>':"")+"</div>";
   const aid=kzA[l.alias],doc=aid&&SNAP.a?SNAP.a[aid]:null,own=!!(doc&&doc.v===1),key="kz"+pid;
-  return'<div data-kid="'+pid+'" style="margin-top:6px;white-space:normal"><div class="note">Kurzlink: <b>'+esc(base()+l.alias)+"</b></div><div class=\"note\">"+(l.open?"Ohne Passwort – jeder mit dem Kurzlink kann die Terminpläne sehen":own?"Passwort: <b>eigenes Passwort gewählt</b> (nicht einsehbar)":doc?"Passwort: <b style=\"font-family:ui-monospace,Menlo,monospace;font-size:14px;user-select:all\">"+esc(l.pw||"")+"</b>":"Kurzlink wird eingerichtet …")+'</div><div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn" data-kzcl>Kurzlink kopieren</button>'+(own||l.open?"":'<button class="btn" data-kzcpw>Passwort kopieren</button>')+(l.open||pid==="xplan"||!kzStd.pw||l.pw===kzStd.pw&&!own?"":'')+(l.open?'<button class="btn" data-kzon>Passwort aktivieren</button>':'<button class="btn'+(armed===key?" arm":"")+'" data-kzrs title="Es wird ein neues, nur für diesen Link geltendes Passwort erzeugt; das bisherige gilt nicht mehr">'+(armed===key?"Wirklich zurücksetzen?":"Passwort zurücksetzen")+"</button>"+(pid==="xplan"?'<button class="btn" data-kzoff>Passwort entfernen</button>':""))+'<button class="btn'+(armed==="kr"+pid?" arm":"")+'" data-kzrm>'+(armed==="kr"+pid?"Wirklich entfernen?":"Kurzlink entfernen")+"</button></div></div>"}
+  return'<div data-kid="'+pid+'" style="margin-top:6px;white-space:normal"><div class="note">Kurzlink: <b>'+esc(kzBase()+l.alias)+"</b></div><div class=\"note\">"+(l.open?"Ohne Passwort – jeder mit dem Kurzlink kann die Terminpläne sehen":own?"Passwort: <b>eigenes Passwort gewählt</b> (nicht einsehbar)":doc?"Passwort: <b style=\"font-family:ui-monospace,Menlo,monospace;font-size:14px;user-select:all\">"+esc(l.pw||"")+"</b>":"Kurzlink wird eingerichtet …")+'</div><div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn" data-kzcl>Kurzlink kopieren</button>'+(own||l.open?"":'<button class="btn" data-kzcpw>Passwort kopieren</button>')+(l.open||pid==="xplan"||!kzStd.pw||l.pw===kzStd.pw&&!own?"":'')+(l.open?'<button class="btn" data-kzon>Passwort aktivieren</button>':'<button class="btn'+(armed===key?" arm":"")+'" data-kzrs title="Es wird ein neues, nur für diesen Link geltendes Passwort erzeugt; das bisherige gilt nicht mehr">'+(armed===key?"Wirklich zurücksetzen?":"Passwort zurücksetzen")+"</button>"+(pid==="xplan"?'<button class="btn" data-kzoff>Passwort entfernen</button>':""))+'<button class="btn'+(armed==="kr"+pid?" arm":"")+'" data-kzrm>'+(armed==="kr"+pid?"Wirklich entfernen?":"Kurzlink entfernen")+"</button></div></div>"}
 async function kzCopy(txt,what){const m=T("lkm");try{await navigator.clipboard.writeText(txt);m.textContent=what+" kopiert."}catch(e){m.textContent=what+": "+txt}m.className="note"}
 
 function renderCo(){
@@ -2352,7 +2352,7 @@ document.addEventListener("click",async(e)=>{
   const pid=w.dataset.kid,l=L[pid]||{},m=T("lkm");
   if(e.target.closest("[data-kzon]")||e.target.closest("[data-kzoff]")){const off=!!e.target.closest("[data-kzoff]");try{await kzSet(pid,l.alias,l.key,l.aktiv,off);m.className="note";m.textContent=off?"Passwort entfernt. Der Kurzlink öffnet jetzt ohne Passwort.":"Passwort aktiviert."}catch(x){m.className="note warn";m.textContent="Das hat nicht geklappt."}return}
   if(e.target.closest("[data-kzadd]")){const i=w.querySelector("[data-kzin]"),c=w.querySelector("[data-kzpwc]"),r=await kzCreate(pid,i.value,pid==="xplan"&&!(c&&c.checked));m.className=r?"note warn":"note";m.textContent=r||"Kurzlink angelegt.";return}
-  if(e.target.closest("[data-kzcl]")){kzCopy(base()+l.alias,"Kurzlink");return}
+  if(e.target.closest("[data-kzcl]")){kzCopy(kzBase()+l.alias,"Kurzlink");return}
   if(e.target.closest("[data-kzcpw]")){kzCopy(l.pw||"","Passwort");return}
   if(e.target.closest("[data-kzrs]")){const k="kz"+pid;if(armed===k){armed=null;try{await kzSet(pid,l.alias,l.key,l.aktiv);m.className="note";m.textContent="Neues Passwort erzeugt. Das bisherige gilt nicht mehr."}catch(x){m.className="note warn";m.textContent="Das hat nicht geklappt."}}else{armed=k;renderLinks()}return}
   if(e.target.closest("[data-kzrm]")){const k="kr"+pid;if(armed===k){armed=null;try{await kzRemove(pid);m.className="note";m.textContent="Kurzlink entfernt. Der lange Link funktioniert weiter."}catch(x){m.className="note warn";m.textContent="Das hat nicht geklappt."}}else{armed=k;renderLinks()}return}
