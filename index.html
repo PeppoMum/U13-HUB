@@ -2113,7 +2113,7 @@ async function kzCreate(pid,raw,open){
   if(!l.key)return"Bitte zuerst den Link aktivieren.";
   if(Object.keys(L).some((k)=>k!==pid&&L[k].alias===alias))return"Diesen Namen gibt es schon.";
   try{if(await window.__kurzNet.get(await kzId(alias)))return"Diesen Namen gibt es schon."}catch(e){return"Die Verbindung hat nicht geklappt."}
-  try{await kzSet(pid,alias,l.key,l.aktiv,open,!open&&pid!=="xplan"&&kzStd.pw?kzStd.pw:undefined)}catch(e){return"Das hat nicht geklappt"+(e&&e.code?" ("+e.code+")":"")+"."}
+  try{await kzSet(pid,alias,l.key,l.aktiv,open,undefined)}catch(e){return"Das hat nicht geklappt"+(e&&e.code?" ("+e.code+")":"")+"."}
   return"";
 }
 async function kzRemove(pid){const l=L[pid]||{};if(!l.alias)return;await window.__kurzTr.del(await kzId(l.alias));await save("links",pid,{id:pid,key:l.key,aktiv:!!l.aktiv,...dzK(pid)})}
@@ -2133,10 +2133,6 @@ async function kzFreeAlias(b0){
     if(await window.__kurzNet.get(await kzId(c)))continue;
     return c}
   throw new Error("kein freier Name")}
-async function kzStdEnsure(){
-  if(kzStd.pw)return kzStd.pw;
-  try{const s0=await db.doc("scoutkz/std").get(),v0=s0&&s0.exists&&(typeof s0.data==="function"?s0.data():s0);if(v0&&v0.pw){kzStd.pw=v0.pw;return v0.pw}}catch(e){}
-  const pw=kzPw();await save("scoutkz","std",{pw,auto:kzStd.auto!==false,am:new Date().toISOString()});kzStd.pw=pw;return pw}
 let kzAutoBusy=false,kzAutoNext=0;
 function kzAutoKick(){
   if(kzAutoBusy||Date.now()<kzAutoNext||!kzStd.loaded||kzStd.auto===false||!kzCanW()||!D.ready)return;
@@ -2145,10 +2141,10 @@ function kzAutoKick(){
   kzAutoBusy=true;
   (async()=>{try{
     await new Promise((r)=>setTimeout(r,400+Math.random()*2400));   /* mehrere Geräte gleichzeitig: Zufallspause, danach neu prüfen */
-    const pw=await kzStdEnsure();let n=0;
+    let n=0;
     for(const p of todo){const l=L[p.id]||{};if(!l.key||!l.aktiv||l.alias)continue;
       const alias=await kzFreeAlias(kzPrefix()+kzSlug(p.vorname)+kzSlug(p.name));
-      await kzSet(p.id,alias,l.key,l.aktiv,false,pw);L[p.id]={...(L[p.id]||{}),alias};n++}
+      await kzSet(p.id,alias,l.key,l.aktiv,false);L[p.id]={...(L[p.id]||{}),alias};n++}
     const x2=L.xplan||{};if(plan&&x2.key&&x2.aktiv&&!x2.alias){await kzSet("xplan",await kzFreeAlias(kzPrefix()+"terminplaene"),x2.key,x2.aktiv,true);n++}
     const m=T("lkm");if(m&&n){m.className="note";m.textContent=n+(n===1?" Kurzlink":" Kurzlinks")+" automatisch angelegt."}
   }catch(e){kzAutoNext=Date.now()+30000;try{console.warn("Kurzlink-Automatik:",e&&(e.code||e.message))}catch(_){}}
@@ -2159,12 +2155,9 @@ function renderStd(){
   const el=T("kzstd");if(!el)return;
   if(!kzCanW()||!kzStd.loaded){el.innerHTML="";return}
   if(document.activeElement&&document.activeElement.id==="kzstdin")return;
-  const h='<div class="card" id="kzstdc" style="margin:10px 0"><h4 style="margin:0 0 6px">Kurzlinks und Standard-Passwort</h4>'
-   +'<label class="note" style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" id="kzauto" '+(kzStd.auto!==false?"checked":"")+'> <span>Kurzlinks automatisch anlegen: Spieler <b>'+esc(kzPrefix())+'vornamename</b> (z. B. '+esc(kzPrefix())+'loganfrost), Terminplan <b>'+esc(kzPrefix())+'terminplaene</b></span></label>'
-   +'<div class="note" style="margin-top:8px">Standard-Passwort für neue Spielerlinks: '+(kzStd.pw?'<b style="font-family:ui-monospace,Menlo,monospace;font-size:14px;user-select:all">'+esc(kzStd.pw)+'</b> <button class="btn" id="kzstdcp">Kopieren</button>':"<i>wird beim ersten Kurzlink erzeugt</i>")+'</div>'
-   +'<div class="bar" style="margin:6px 0 0"><input id="kzstdin" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Neues Standard-Passwort (mind. 12 Zeichen)" style="flex:1;min-width:220px"><button class="btn" id="kzstdsv">Speichern und für alle übernehmen</button><button class="btn" id="kzstdnew">Zufälliges Passwort</button></div>'
-   +'<div class="bar" style="margin:6px 0 0"><button class="btn" id="kzindiv" title="Jeder Spieler bekommt ein eigenes, zufälliges Passwort">Jedem Spieler ein eigenes Passwort geben</button></div>'
-   +'<p class="note warn" style="margin:8px 0 0;white-space:normal">Bitte beachten: Mit einem gemeinsamen Passwort kann jede Familie, die es kennt, auch die Links anderer Spieler öffnen, denn die Namen lassen sich leicht erraten. Sicherer ist ein eigenes Passwort je Spieler. Familien können ihr Passwort im Link selbst ändern.</p><div class="note" id="kzstdm"></div></div>';
+  const h='<div class="card" id="kzstdc" style="margin:10px 0"><h4 style="margin:0 0 6px">Kurzlinks</h4>'
+   +'<label class="note" style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" id="kzauto" '+(kzStd.auto!==false?"checked":"")+'> <span>Kurzlinks automatisch anlegen: Spieler <b>'+esc(kzPrefix())+'vornamename</b> (z. B. '+esc(kzPrefix())+'loganfrost), Terminplan <b>'+esc(kzPrefix())+'terminplaene</b>. Jeder Spielerlink bekommt sein eigenes, zufälliges Passwort (steht in der Tabelle, Familien können es im Link selbst ändern).</span></label>'
+   +'<div class="bar" style="margin:8px 0 0"><button class="btn" id="kzindiv" title="Jeder Spielerlink bekommt ein neues, eigenes Passwort">Allen Spielerlinks neue, eigene Passwörter geben</button></div><div class="note" id="kzstdm"></div></div>';
   if(el.__h!==h){el.__h=h;el.innerHTML=h}}
 async function kzApplyStd(pw,all){
   const m=T("kzstdm"),say=(t,bad)=>{if(m){m.className="note"+(bad?" warn":"");m.textContent=t}};
@@ -2179,10 +2172,6 @@ document.addEventListener("click",async(e)=>{
   const b=e.target.closest&&e.target.closest("#kzstdc button");if(!b)return;
   const m=T("kzstdm"),say=(t,bad)=>{if(m){m.className="note"+(bad?" warn":"");m.textContent=t}};
   try{
-    if(b.id==="kzstdcp"){try{await navigator.clipboard.writeText(kzStd.pw);say("Passwort kopiert.")}catch(x){say("Kopieren hat nicht geklappt – bitte markieren und mit Cmd+C kopieren.",1)}return}
-    if(b.id==="kzstdnew"){T("kzstdin").value=kzPw();return}
-    if(b.id==="kzstdsv"){const pw=T("kzstdin").value.trim();if(pw.length<KZ_MIN){say("Bitte mindestens "+KZ_MIN+" Zeichen wählen.",1);return}
-      b.disabled=true;await save("scoutkz","std",{pw,auto:kzStd.auto!==false,am:new Date().toISOString()});kzStd.pw=pw;T("kzstdin").value="";await kzApplyStd(pw,false);b.disabled=false;renderStd();return}
     if(b.id==="kzindiv"){if(!b.dataset.arm){b.dataset.arm="1";b.textContent="Wirklich? Alle bisherigen Passwörter gelten dann nicht mehr";return}b.disabled=true;await kzApplyStd("",true);b.disabled=false;b.dataset.arm="";b.textContent="Jedem Spieler ein eigenes Passwort geben"}
   }catch(x){say("Das hat nicht geklappt.",1)}
 });
@@ -2229,7 +2218,7 @@ function kzCell(pid){
   const l=L[pid]||{};if(!l.key)return"";
   if(!l.alias)return'<div data-kid="'+pid+'" style="margin-top:6px;white-space:normal"><input data-kzin placeholder="Kurzlink-Name, z. B. max-muster" maxlength="40" autocapitalize="off" style="width:62%;min-width:170px"> <button class="btn" data-kzadd>Kurzlink anlegen</button>'+(pid==="xplan"?'<label class="note" style="display:flex;gap:6px;align-items:center;margin-top:4px"><input type="checkbox" data-kzpwc> mit Passwort schützen (sonst öffnet jeder, der den Kurzlink kennt, die Terminpläne)</label>':"")+"</div>";
   const aid=kzA[l.alias],doc=aid&&SNAP.a?SNAP.a[aid]:null,own=!!(doc&&doc.v===1),key="kz"+pid;
-  return'<div data-kid="'+pid+'" style="margin-top:6px;white-space:normal"><div class="note">Kurzlink: <b>'+esc(base()+l.alias)+"</b></div><div class=\"note\">"+(l.open?"Ohne Passwort – jeder mit dem Kurzlink kann die Terminpläne sehen":own?"Passwort: <b>eigenes Passwort gewählt</b> (nicht einsehbar)":doc?"Passwort: <b style=\"font-family:ui-monospace,Menlo,monospace;font-size:14px;user-select:all\">"+esc(l.pw||"")+"</b>":"Kurzlink wird eingerichtet …")+'</div><div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn" data-kzcl>Kurzlink kopieren</button>'+(own||l.open?"":'<button class="btn" data-kzcpw>Passwort kopieren</button>')+(l.open||pid==="xplan"||!kzStd.pw||l.pw===kzStd.pw&&!own?"":'<button class="btn" data-kzstd title="Dieser Link bekommt wieder das gemeinsame Standard-Passwort">Standard-Passwort setzen</button>')+(l.open?'<button class="btn" data-kzon>Passwort aktivieren</button>':'<button class="btn'+(armed===key?" arm":"")+'" data-kzrs title="Es wird ein neues, nur für diesen Link geltendes Passwort erzeugt; das bisherige gilt nicht mehr">'+(armed===key?"Wirklich zurücksetzen?":"Passwort zurücksetzen")+"</button>"+(pid==="xplan"?'<button class="btn" data-kzoff>Passwort entfernen</button>':""))+'<button class="btn'+(armed==="kr"+pid?" arm":"")+'" data-kzrm>'+(armed==="kr"+pid?"Wirklich entfernen?":"Kurzlink entfernen")+"</button></div></div>"}
+  return'<div data-kid="'+pid+'" style="margin-top:6px;white-space:normal"><div class="note">Kurzlink: <b>'+esc(base()+l.alias)+"</b></div><div class=\"note\">"+(l.open?"Ohne Passwort – jeder mit dem Kurzlink kann die Terminpläne sehen":own?"Passwort: <b>eigenes Passwort gewählt</b> (nicht einsehbar)":doc?"Passwort: <b style=\"font-family:ui-monospace,Menlo,monospace;font-size:14px;user-select:all\">"+esc(l.pw||"")+"</b>":"Kurzlink wird eingerichtet …")+'</div><div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn" data-kzcl>Kurzlink kopieren</button>'+(own||l.open?"":'<button class="btn" data-kzcpw>Passwort kopieren</button>')+(l.open||pid==="xplan"||!kzStd.pw||l.pw===kzStd.pw&&!own?"":'')+(l.open?'<button class="btn" data-kzon>Passwort aktivieren</button>':'<button class="btn'+(armed===key?" arm":"")+'" data-kzrs title="Es wird ein neues, nur für diesen Link geltendes Passwort erzeugt; das bisherige gilt nicht mehr">'+(armed===key?"Wirklich zurücksetzen?":"Passwort zurücksetzen")+"</button>"+(pid==="xplan"?'<button class="btn" data-kzoff>Passwort entfernen</button>':""))+'<button class="btn'+(armed==="kr"+pid?" arm":"")+'" data-kzrm>'+(armed==="kr"+pid?"Wirklich entfernen?":"Kurzlink entfernen")+"</button></div></div>"}
 async function kzCopy(txt,what){const m=T("lkm");try{await navigator.clipboard.writeText(txt);m.textContent=what+" kopiert."}catch(e){m.textContent=what+": "+txt}m.className="note"}
 
 function renderCo(){
@@ -2363,7 +2352,6 @@ document.addEventListener("click",async(e)=>{
   const pid=w.dataset.kid,l=L[pid]||{},m=T("lkm");
   if(e.target.closest("[data-kzon]")||e.target.closest("[data-kzoff]")){const off=!!e.target.closest("[data-kzoff]");try{await kzSet(pid,l.alias,l.key,l.aktiv,off);m.className="note";m.textContent=off?"Passwort entfernt. Der Kurzlink öffnet jetzt ohne Passwort.":"Passwort aktiviert."}catch(x){m.className="note warn";m.textContent="Das hat nicht geklappt."}return}
   if(e.target.closest("[data-kzadd]")){const i=w.querySelector("[data-kzin]"),c=w.querySelector("[data-kzpwc]"),r=await kzCreate(pid,i.value,pid==="xplan"&&!(c&&c.checked));m.className=r?"note warn":"note";m.textContent=r||"Kurzlink angelegt.";return}
-  if(e.target.closest("[data-kzstd]")){try{await kzSet(pid,l.alias,l.key,l.aktiv,false,kzStd.pw);m.className="note";m.textContent="Dieser Link hat jetzt das Standard-Passwort."}catch(x){m.className="note warn";m.textContent="Das hat nicht geklappt."}return}
   if(e.target.closest("[data-kzcl]")){kzCopy(base()+l.alias,"Kurzlink");return}
   if(e.target.closest("[data-kzcpw]")){kzCopy(l.pw||"","Passwort");return}
   if(e.target.closest("[data-kzrs]")){const k="kz"+pid;if(armed===k){armed=null;try{await kzSet(pid,l.alias,l.key,l.aktiv);m.className="note";m.textContent="Neues Passwort erzeugt. Das bisherige gilt nicht mehr."}catch(x){m.className="note warn";m.textContent="Das hat nicht geklappt."}}else{armed=k;renderLinks()}return}
