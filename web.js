@@ -71,6 +71,15 @@ window.__webSnap=async function(pid){
 
 /* ---------- Anmeldung ---------- */
 let fb=null,fs=null,auth=null;
+/* Gemeinsames Gerät: nichts dauerhaft speichern (Anmeldung gilt nur bis zum Schließen, kein Offline-Speicher). Abmelden räumt immer auf. */
+const SHARED=(()=>{try{return localStorage.getItem("u13shared")==="1"}catch(e){return false}})();
+async function wipeLocal(){
+  try{await fs.terminate()}catch(e){}
+  try{await fs.clearPersistence()}catch(e){}
+  try{Object.keys(localStorage).filter((k)=>/^(u13v:|u13rolle$|u13role$|u13kz\.)/.test(k)).forEach((k)=>localStorage.removeItem(k))}catch(e){}
+}
+async function signOutClean(){try{await auth.signOut()}catch(e){}await wipeLocal();location.reload()}
+
 function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement("script");s.src=src;s.async=false;s.onload=res;s.onerror=()=>rej(new Error("Konnte "+src+" nicht laden"));document.head.appendChild(s)})}
 const CSS='#u13login{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--bg,#f4f5f7);color:var(--tx,#1c1f24);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;overflow:auto}'
 +'#u13login .lc{width:100%;max-width:400px;background:var(--card,#fff);border:1px solid var(--ln,#e5e7eb);border-radius:16px;padding:22px 20px;box-shadow:0 8px 30px rgba(0,0,0,.08)}'
@@ -82,7 +91,7 @@ const CSS='#u13login{position:fixed;inset:0;z-index:9999;display:flex;align-item
 +'#u13login .ms{min-height:20px;font-size:13px;margin:4px 0 10px}#u13login .ms.er{color:var(--r,#d64545)}#u13login .ms.ok{color:var(--g,#22a06b)}'
 +'#u13login .or{display:flex;align-items:center;gap:10px;color:var(--mu,#6b7280);font-size:12px;margin:10px 0}#u13login .or:before,#u13login .or:after{content:"";flex:1;border-top:1px solid var(--ln,#e5e7eb)}'
 +'#u13out{margin-left:10px;font:inherit;font-size:13px;padding:3px 9px;border-radius:8px;border:1px solid var(--ln,#e5e7eb);background:var(--card,#fff);color:var(--tx,#1c1f24);cursor:pointer;vertical-align:middle}';
-const ERR={"auth/invalid-credential":"E-Mail oder Passwort stimmt nicht.","auth/wrong-password":"E-Mail oder Passwort stimmt nicht.","auth/user-not-found":"E-Mail oder Passwort stimmt nicht.","auth/invalid-email":"Diese E-Mail-Adresse ist ungültig.","auth/email-already-in-use":"Zu dieser E-Mail gibt es schon ein Konto. Bitte anmelden.","auth/weak-password":"Das Passwort ist zu kurz (mindestens 6 Zeichen).","auth/too-many-requests":"Zu viele Versuche. Bitte kurz warten und erneut versuchen.","auth/network-request-failed":"Keine Verbindung zum Server.","auth/popup-closed-by-user":"Die Anmeldung wurde abgebrochen.","auth/cancelled-popup-request":"Die Anmeldung wurde abgebrochen.","auth/unauthorized-domain":"Diese Internetadresse ist in Firebase noch nicht freigegeben (Authentication → Einstellungen → Autorisierte Domains).","auth/operation-not-allowed":"Diese Anmeldeart ist in Firebase noch nicht eingeschaltet.","auth/missing-password":"Bitte ein Passwort eingeben.","auth/missing-email":"Bitte eine E-Mail-Adresse eingeben."};
+const ERR={"auth/invalid-credential":"E-Mail oder Passwort stimmt nicht.","auth/wrong-password":"E-Mail oder Passwort stimmt nicht.","auth/user-not-found":"E-Mail oder Passwort stimmt nicht.","auth/invalid-email":"Diese E-Mail-Adresse ist ungültig.","auth/email-already-in-use":"Zu dieser E-Mail gibt es schon ein Konto. Bitte anmelden.","auth/weak-password":"Das Passwort ist zu schwach (mindestens 10 Zeichen, am besten mehrere Wörter).","auth/too-many-requests":"Zu viele Versuche. Bitte kurz warten und erneut versuchen.","auth/network-request-failed":"Keine Verbindung zum Server.","auth/popup-closed-by-user":"Die Anmeldung wurde abgebrochen.","auth/cancelled-popup-request":"Die Anmeldung wurde abgebrochen.","auth/unauthorized-domain":"Diese Internetadresse ist in Firebase noch nicht freigegeben (Authentication → Einstellungen → Autorisierte Domains).","auth/operation-not-allowed":"Diese Anmeldeart ist in Firebase noch nicht eingeschaltet.","auth/missing-password":"Bitte ein Passwort eingeben.","auth/missing-email":"Bitte eine E-Mail-Adresse eingeben."};
 const errTxt=(e)=>ERR[e&&e.code]||("Das hat nicht geklappt"+(e&&(e.code||e.message)?" ("+(e.code||e.message)+")":"")+".");
 let ov=null;
 function overlay(html){
@@ -94,27 +103,29 @@ const hideOverlay=()=>{if(ov){ov.remove();ov=null}};
 function showSetup(){overlay('<div class="ms er" style="font-size:15px">Die Verbindung zu Firebase ist noch nicht eingerichtet.</div><p class="sb">Bitte die Datei <b>firebase-config.js</b> mit den Werten aus dem Firebase-Projekt ausfüllen (siehe Anleitung) und die Dateien erneut hochladen.</p>')}
 function showDenied(email){
   const o=overlay('<div class="ms er" style="font-size:15px">Dieses Konto ist nicht freigegeben.</div><p class="sb">Angemeldet als <b>'+E(email)+'</b>. Zugriff haben nur Personen, die der Besitzer unter Einstellungen → Mannschaft → „Zugang zur App“ freigegeben hat.</p><button id="u13so">Abmelden</button>');
-  o.querySelector("#u13so").onclick=()=>auth.signOut().then(()=>location.reload());
+  o.querySelector("#u13so").onclick=()=>signOutClean();
 }
 function showVerify(user){
   return new Promise((res)=>{
     const o=overlay('<p>Bitte die E-Mail-Adresse <b>'+E(user.email)+'</b> bestätigen. Wir haben dir dazu eine Nachricht geschickt (auch im Spam-Ordner nachsehen).</p><div class="ms" id="vm"></div><button class="pr" id="vok">Ich habe bestätigt</button><button id="vre">Nachricht noch einmal senden</button><button class="ln" id="vso">Abmelden</button>'),m=o.querySelector("#vm");
     o.querySelector("#vok").onclick=async()=>{try{await user.reload();if(auth.currentUser&&auth.currentUser.emailVerified){await auth.currentUser.getIdToken(true);res()}else{m.className="ms er";m.textContent="Noch nicht bestätigt. Bitte zuerst auf den Link in der E-Mail klicken."}}catch(e){m.className="ms er";m.textContent=errTxt(e)}};
     o.querySelector("#vre").onclick=async()=>{try{await user.sendEmailVerification();m.className="ms ok";m.textContent="Gesendet."}catch(e){m.className="ms er";m.textContent=errTxt(e)}};
-    o.querySelector("#vso").onclick=()=>auth.signOut().then(()=>location.reload());
+    o.querySelector("#vso").onclick=()=>signOutClean();
   });
 }
 function showLogin(){
   return new Promise((res)=>{
-    const o=overlay('<button class="pr" id="lg">Mit Google anmelden</button><div class="or">oder mit E-Mail</div><input id="le" type="email" autocomplete="username" placeholder="E-Mail" inputmode="email"><input id="lp" type="password" autocomplete="current-password" placeholder="Passwort"><div class="ms" id="lm"></div><button class="pr" id="li">Anmelden</button><button id="lr">Konto anlegen</button><button class="ln" id="lf">Passwort vergessen?</button>'),m=o.querySelector("#lm"),em=o.querySelector("#le"),pw=o.querySelector("#lp");
+    const o=overlay('<button class="pr" id="lg">Mit Google anmelden</button><div class="or">oder mit E-Mail</div><input id="le" type="email" autocomplete="username" placeholder="E-Mail" inputmode="email"><input id="lp" type="password" autocomplete="current-password" placeholder="Passwort"><label class="note" style="display:flex;gap:8px;align-items:flex-start;margin:6px 0 10px;font-size:12.5px"><input type="checkbox" id="lsh" style="width:auto;margin:3px 0 0"><span>Gemeinsames Gerät (Schule, Verein, fremdes Gerät): nichts auf diesem Gerät speichern</span></label><div class="ms" id="lm"></div><button class="pr" id="li">Anmelden</button><button id="lr">Konto anlegen</button><button class="ln" id="lf">Passwort vergessen?</button>'),m=o.querySelector("#lm"),em=o.querySelector("#le"),pw=o.querySelector("#lp");
     const msg=(t,k)=>{m.className="ms"+(k?" "+k:"");m.textContent=t||""};
     const busy=(b)=>o.querySelectorAll("button").forEach((x)=>{x.disabled=b});
     const run=async(f)=>{busy(true);msg("");try{await f()}catch(e){msg(errTxt(e),"er")}busy(false)};
     o.querySelector("#lg").onclick=()=>run(async()=>{const p=new fb.auth.GoogleAuthProvider();try{await auth.signInWithPopup(p)}catch(e){if(e&&(e.code==="auth/popup-blocked"||e.code==="auth/operation-not-supported-in-this-environment")){await auth.signInWithRedirect(p);return}throw e}});
     o.querySelector("#li").onclick=()=>run(async()=>{await auth.signInWithEmailAndPassword(em.value.trim(),pw.value)});
-    o.querySelector("#lr").onclick=()=>run(async()=>{const c=await auth.createUserWithEmailAndPassword(em.value.trim(),pw.value);try{await c.user.sendEmailVerification()}catch(e){}});
+    o.querySelector("#lr").onclick=()=>run(async()=>{if(pw.value.length<10){msg("Bitte ein Passwort mit mindestens 10 Zeichen wählen (am besten mehrere Wörter).","er");return}const c=await auth.createUserWithEmailAndPassword(em.value.trim(),pw.value);try{await c.user.sendEmailVerification()}catch(e){}});
     o.querySelector("#lf").onclick=()=>run(async()=>{if(!em.value.trim()){msg("Bitte oben die E-Mail-Adresse eintragen.","er");return}await auth.sendPasswordResetEmail(em.value.trim());msg("Nachricht zum Zurücksetzen wurde gesendet.","ok")});
     pw.addEventListener("keydown",(e)=>{if(e.key==="Enter")o.querySelector("#li").click()});
+    const sh=o.querySelector("#lsh");sh.checked=SHARED;sh.onchange=()=>{try{sh.checked?localStorage.setItem("u13shared","1"):localStorage.removeItem("u13shared")}catch(e){}location.reload()};
+    try{if(sessionStorage.getItem("u13expired")){sessionStorage.removeItem("u13expired");msg("Aus Sicherheitsgründen bitte neu anmelden.","ok")}}catch(e){}
     const un=auth.onAuthStateChanged((u)=>{if(u){un();res()}});
   });
 }
@@ -133,7 +144,8 @@ async function start(){
     for(const f of["firebase-app-compat.js","firebase-auth-compat.js","firebase-firestore-compat.js"])await loadScript(SDK+f);
   }catch(e){overlay('<div class="ms er">Die Firebase-Bausteine konnten nicht geladen werden. Bitte die Internetverbindung prüfen und die Seite neu laden.</div>');return new Promise(()=>{})}
   fb=window.firebase;fb.initializeApp(CFG);auth=fb.auth();fs=fb.firestore();
-  try{await fs.enablePersistence({synchronizeTabs:true})}catch(e){}
+  if(SHARED){try{await auth.setPersistence(fb.auth.Auth.Persistence.SESSION)}catch(e){}try{await fs.clearPersistence()}catch(e){}}
+  else{try{await fs.enablePersistence({synchronizeTabs:true})}catch(e){}}
   let u=await firstUser();
   if(!u){await showLogin();u=auth.currentUser}
   if(needsVerify(u)){try{await u.reload()}catch(e){}u=auth.currentUser;if(needsVerify(u)){await showVerify(u);u=auth.currentUser}}
@@ -156,12 +168,12 @@ const denied=(e)=>!!(e&&/permission|denied|insufficient/i.test(String(e.code)+" 
 async function afterLogin(){
   let owner=null;
   try{await fs.doc("ownercheck/x").get();owner=true}catch(e){if(denied(e))owner=false}
-  try{if(owner===null)owner=localStorage.getItem("u13role")!=="co";else localStorage.setItem("u13role",owner?"owner":"co")}catch(e){if(owner===null)owner=true}
+  try{if(owner===null)owner=localStorage.getItem("u13role")==="owner";else if(!SHARED)localStorage.setItem("u13role",owner?"owner":"co")}catch(e){if(owner===null)owner=false}
   window.__webOwner=owner;
   let role="voll";
   if(!owner){
-    try{const em=((auth.currentUser&&auth.currentUser.email)||"").toLowerCase(),me=await fs.doc("trainer/"+em).get();role=(me.exists&&me.data()&&me.data().rolle)||"voll";try{localStorage.setItem("u13rolle",role)}catch(e){}}
-    catch(e){try{role=localStorage.getItem("u13rolle")||"voll"}catch(x){role="voll"}}
+    try{const em=((auth.currentUser&&auth.currentUser.email)||"").toLowerCase(),me=await fs.doc("trainer/"+em).get();role=(me.exists&&me.data()&&me.data().rolle)||"voll";if(!SHARED)try{localStorage.setItem("u13rolle",role)}catch(e){}}
+    catch(e){try{role=localStorage.getItem("u13rolle")||"lesen"}catch(x){role="lesen"}}
   }
   window.__ROLE=owner?"voll":role;window.__ACCT=(((auth.currentUser&&auth.currentUser.email)||"")+"").toLowerCase().replace(/[^a-z0-9@._-]/g,"_")||"main";
   if(!owner)document.body.classList.add("co");
@@ -207,7 +219,7 @@ function cards(){
   };put();
 }
 function addSignOut(){
-  const put=()=>{if(!document.getElementById("u13css")){const st=document.createElement("style");st.id="u13css";st.textContent=CSS;document.head.appendChild(st)}const t=document.querySelector(".top .note")||document.querySelector(".top");if(!t||document.getElementById("u13out"))return;const b=document.createElement("button");b.id="u13out";b.type="button";b.textContent="Abmelden";b.title=(auth.currentUser&&auth.currentUser.email)||"";b.onclick=()=>auth.signOut().then(()=>location.reload());t.appendChild(b)};
+  const put=()=>{if(!document.getElementById("u13css")){const st=document.createElement("style");st.id="u13css";st.textContent=CSS;document.head.appendChild(st)}const t=document.querySelector(".top .note")||document.querySelector(".top");if(!t||document.getElementById("u13out"))return;const b=document.createElement("button");b.id="u13out";b.type="button";b.textContent="Abmelden";b.title=(auth.currentUser&&auth.currentUser.email)||"";b.onclick=()=>signOutClean();t.appendChild(b)};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",put);else put();setTimeout(put,800);
 }
 
