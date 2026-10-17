@@ -106,6 +106,7 @@ body.scoutonly nav button:not([data-s="k"]){display:none!important}body.scoutonl
 body.kaus nav button[data-s="k"],body.kaus #hn [data-go="k"],body.kaus #k{display:none!important}
 #htd .kpi.htile{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center;gap:2px 24px;padding:14px 20px}#htd .kpi.htile>*{grid-column:1;min-width:0}#htd .kpi.htile>b{font-size:26px;line-height:1.15;margin:2px 0}#htd .kpi.htile>.hbtn{grid-column:2;grid-row:1/span 3;display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-self:center}@media(max-width:760px){#htd .kpi.htile{grid-template-columns:minmax(0,1fr)!important}#htd .kpi.htile>.hbtn{grid-column:1;grid-row:auto;justify-content:flex-start;margin-top:8px}#htd .kpi.htile>.hbtn .btn{flex:1 1 140px}}
 html{scroll-padding-top:calc(var(--vnh,0px) + var(--demoh,0px) + 70px)}
+@media(max-width:760px){main section>p.sub,main .sub.note{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer}main section>p.sub.open,main .sub.note.open{display:block}details.mfold{flex:1 1 100%;margin:0}details.mfold>summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border:1px solid var(--ln);border-radius:99px;background:var(--card);color:var(--tx);font-size:14px}details.mfold>summary::-webkit-details-marker{display:none}details.mfold>summary::after{content:"▾";font-size:12px;color:var(--mu)}details.mfold[open]>summary::after{content:"▴"}details.mfold>.bar{margin:10px 0 0}}
 /* ===== Demo-Designs: nur Optik, Inhalte und Funktionen bleiben unverändert ===== */
 .em{display:inline}
 
@@ -506,6 +507,26 @@ nav button .em{display:inline-flex;justify-content:center;align-items:center}
   const api = { hook, erreicht, zeitErfasst, spielStats, trainStats, saison, farbeSpielzeit, farbeTraining, setGrenzen, grenzen, grenzenStd, grTexte, ergebnis, statistik, nachArt };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.U13 = api;
 })(typeof window !== "undefined" ? window : globalThis);
+
+/* Handy-Feinschliff: Erklärtexte antippbar einklappen, Export und Darstellung unter einem Knopf */
+(function(){
+  if(typeof document==="undefined")return;
+  const ph=()=>window.innerWidth<=760;
+  document.addEventListener("click",(e)=>{const p=e.target.closest&&e.target.closest("p.sub");if(p&&ph()&&!e.target.closest("a,button"))p.classList.toggle("open")});
+  const isExp=(c)=>c.nodeType===1&&((c.matches(".seg")&&c.querySelector("[data-f]"))||c.querySelector("select.xth,select.xthp,select.xdz"));
+  function fold(){
+    if(!ph())return;
+    document.querySelectorAll(".bar").forEach((b)=>{
+      if(b.closest("details.mfold")||b.dataset.mf)return;
+      const kids=[...b.children],mark=new Set();
+      kids.forEach((c,i)=>{if(isExp(c)){mark.add(c);const pr=kids[i-1];if(pr&&!isExp(pr)&&(pr.matches("span.note,label.note")||/Export|Saison|Monat|Quer/i.test(pr.textContent||""))&&!pr.querySelector("button,input,select")&&(pr.textContent||"").length<60)mark.add(pr)}});
+      if(!mark.size){b.dataset.mf="0";return}
+      b.dataset.mf="1";
+      const d=document.createElement("details");d.className="mfold";d.innerHTML='<summary>Export &amp; Darstellung</summary><div class="bar"></div>';
+      const box=d.querySelector(".bar");kids.forEach((c)=>{if(mark.has(c))box.appendChild(c)});b.appendChild(d)});
+  }
+  setInterval(fold,800);
+})();
 </script>
 <script>
 const $=(q)=>document.querySelector(q),POS=["TW","IV","AV","FL","ZM","ST"],pc=(x)=>x==null?"–":(x*100).toFixed(1).replace(".",",")+" %",mn=(x)=>String(Math.round(x));
