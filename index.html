@@ -453,7 +453,7 @@ nav button .em{display:inline-flex;justify-content:center;align-items:center}
 
   /* Alles für alle belegten, aktiven Spieler + Team-Kennzahlen (Saisonübersicht). */
   function saison(db, refMonat) {
-    const zl = db.einstellungen.zaehlendeAbwesenheiten;
+    const zl = (db.einstellungen && db.einstellungen.zaehlendeAbwesenheiten) || { e: true, u: true, v: false, t: false }; // neue Mannschaften haben noch keine eigene Einstellung
     const rows = db.spieler.filter((p) => p.aktiv && p.name).map((p) => {
       const sp = spielStats(p.id, db.spiele), tr = trainStats(p.id, db.trainings, zl, refMonat);
       /* Warnung: Feldspieler unter der ersten (roten) Spielzeit-Grenze, voreingestellt 50 % (Saison oder letzte 2 Monate), aber nur wenn er in den letzten 2 Monaten im Kader stand */
@@ -1055,7 +1055,7 @@ function xcols(s,x,y,w,h,items,lines,title,sub,rot){
   if(sub)s.t(x+w-12,y+20,sub,8,XC.mu,{an:"end"});
 }
 /* Durchschnitt pro Woche: nur Kalenderwochen, in denen es mindestens einen Eintrag gab */
-function wkAvg(dates){const d=dates.filter(Boolean),w=new Set(d.map((x)=>monday(x)));return{n:d.length,wochen:w.size,avg:w.size?d.length/w.size:null}}
+function wkAvg(dates){const d=dates.filter(Boolean),w=new Set(d.map((x)=>{const t=new Date(x+"T12:00:00");t.setDate(t.getDate()-((t.getDay()+6)%7));return t.getFullYear()+"-"+t.getMonth()+"-"+t.getDate()}));return{n:d.length,wochen:w.size,avg:w.size?d.length/w.size:null}}
 function wkTxt(a){return a.avg==null?"–":(Math.round(a.avg*10)/10).toLocaleString("de-DE")}
 /* ---------- Saisonübersicht (A4 quer) ---------- */
 function xSaison(){
@@ -1791,7 +1791,10 @@ function xStatsPage(){
 xbtn("#xq",(f)=>xRunPages(()=>[xStatsPage()],f,"Bilanz_"+today(),true));
 renderQ();
 </script>
-<script>/* Spielerlinks: pro Spieler ein verschlüsselter Profil-Stand in der Seite, ein geheimer Schlüssel im Link (nach dem #). */
+<script>/* Kurze Rückmeldung nach einer Aktion (6 bis 8 Sekunden, antippen schließt) */
+window.__toast=(t,bad)=>{let el=document.getElementById("u13toast");if(!el){el=document.createElement("div");el.id="u13toast";el.setAttribute("role","status");el.setAttribute("aria-live","polite");el.style.cssText="position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:200;max-width:min(92vw,520px);padding:11px 16px;border-radius:12px;font-size:14px;line-height:1.35;box-shadow:0 6px 24px rgba(0,0,0,.35);cursor:pointer";el.onclick=()=>{el.hidden=true};document.body.appendChild(el)}
+  el.textContent=t;el.style.background=bad?"var(--r)":"var(--ac)";el.style.color="#fff";el.hidden=false;clearTimeout(window.__toastT);window.__toastT=setTimeout(()=>{el.hidden=true},String(t).length>60?8000:6000)};
+/* Spielerlinks: pro Spieler ein verschlüsselter Profil-Stand in der Seite, ein geheimer Schlüssel im Link (nach dem #). */
 (function(){
 const LT="@@L"+"T@@",OP="<scr"+"ipt",CL="</scr"+"ipt>";
 const SRC0=OP+' type="text/plain" id="src">'+CL,SNAP0=OP+' type="application/json" id="snap">{}'+CL;
@@ -2037,7 +2040,7 @@ function demoSettings(){
   const lkct=document.getElementById("lkct");
   if(lkct)lkct.innerHTML='<tr><th style="text-align:left">Trainer</th><th>Aktiv</th><th style="text-align:left">Link</th><th style="text-align:left">Stand</th></tr>'+((D0.config&&D0.config.staff)||[]).filter((s)=>!s.owner).map((s,i)=>'<tr><td style="text-align:left">'+esc(s.name)+'</td><td><input type="checkbox" checked disabled></td><td style="text-align:left">'+inp("trainer"+(i+1))+'</td><td style="text-align:left"><span class="pill">Demo</span></td></tr>').join("");
   const lkxt=document.getElementById("lkxt");
-  if(lkxt)lkxt.innerHTML='<tr><th style="text-align:left">Link</th><th>Aktiv</th><th style="text-align:left">Adresse</th><th style="text-align:left">Stand</th></tr>'+[["Vollansicht","voll"],["Struktur (anonym)","anon"],["Nur Terminpläne","plan"],["Demo","demo"]].map((r)=>'<tr><td style="text-align:left"><b>'+r[0]+'</b></td><td><input type="checkbox" '+(r[1]==="voll"?"":"checked ")+'disabled></td><td style="text-align:left">'+inp(r[1])+'</td><td style="text-align:left"><span class="pill">Demo</span></td></tr>').join("");
+  if(lkxt)lkxt.innerHTML='<tr><th style="text-align:left">Link</th><th>Aktiv</th><th style="text-align:left">Adresse</th><th style="text-align:left">Stand</th></tr>'+[["Vollansicht","voll"],["Struktur (anonym)","anon"],["Teamlink","plan"],["Demo","demo"]].map((r)=>'<tr><td style="text-align:left"><b>'+r[0]+'</b></td><td><input type="checkbox" '+(r[1]==="voll"?"":"checked ")+'disabled></td><td style="text-align:left">'+inp(r[1])+'</td><td style="text-align:left"><span class="pill">Demo</span></td></tr>').join("");
   const lkm=document.getElementById("lkm");if(lkm)lkm.textContent="Demo: Alle Links hier sind Platzhalter und funktionieren nicht.";
 }
 /* Demo-Kaderplanung: komplett erfundene Daten, nichts aus dem echten Kader */
@@ -2167,7 +2170,7 @@ async function kzRemove(pid){const l=L[pid]||{};if(!l.alias)return;await window.
 /* ---------- Standard-Passwort und automatische Kurzlinks ----------
    Standard-Passwort: ein Passwort für alle Spielerlinks der Mannschaft (Trainer ändern es hier; jeder Link kann ein eigenes bekommen, Familien können es selbst ändern).
    Es liegt NICHT im Programmtext, sondern nur in der Datenbank (Sammlung scoutkz, Dokument std: nur Trainer mit Schreibrecht).
-   Automatisch: sobald ein Spielerlink aktiv ist, entsteht der Kurzlink  <Mannschaft><Vorname><Name>  (z. B. d1loganfrost), für den Terminplan  <Mannschaft>terminplaene. */
+   Automatisch: sobald ein Spielerlink aktiv ist, entsteht der Kurzlink  <Mannschaft><Vorname><Name>  (z. B. d1loganfrost), für den Teamlink  <Mannschaft>team. */
 const kzStd={pw:"",auto:true,loaded:false};
 const kzSlug=(s)=>String(s||"").toLowerCase().replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]/g,"");
 const kzPrefix=()=>kzSlug(window.__TID||mann()||"u13");
@@ -2191,7 +2194,7 @@ function kzAutoKick(){
     for(const p of todo){const l=L[p.id]||{};if(!l.key||!l.aktiv||l.alias)continue;
       const alias=await kzFreeAlias(kzPrefix()+kzSlug(p.vorname)+kzSlug(p.name));
       await kzSet(p.id,alias,l.key,l.aktiv,false);L[p.id]={...(L[p.id]||{}),alias};n++}
-    const x2=L.xplan||{};if(plan&&x2.key&&x2.aktiv&&!x2.alias){await kzSet("xplan",await kzFreeAlias(kzPrefix()+"terminplaene"),x2.key,x2.aktiv,true);n++}
+    const x2=L.xplan||{};if(plan&&x2.key&&x2.aktiv&&!x2.alias){await kzSet("xplan",await kzFreeAlias(kzPrefix()+"team"),x2.key,x2.aktiv,true);n++}
     const m=T("lkm");if(m&&n){m.className="note";m.textContent=n+(n===1?" Kurzlink":" Kurzlinks")+" automatisch angelegt."}
   }catch(e){kzAutoNext=Date.now()+30000;try{console.warn("Kurzlink-Automatik:",e&&(e.code||e.message))}catch(_){}}
   finally{kzAutoBusy=false;renderLinks();setTimeout(kzAutoKick,1500)}})()}
@@ -2202,8 +2205,8 @@ function renderStd(){
   if(!kzCanW()||!kzStd.loaded){el.innerHTML="";return}
   if(document.activeElement&&document.activeElement.id==="kzstdin")return;
   const h='<div class="card" id="kzstdc" style="margin:10px 0"><h4 style="margin:0 0 6px">Kurzlinks</h4>'
-   +'<label class="note" style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" id="kzauto" '+(kzStd.auto!==false?"checked":"")+'> <span>Kurzlinks automatisch anlegen: Spieler <b>'+esc(kzPrefix())+'vornamename</b> (z. B. '+esc(kzPrefix())+'loganfrost), Terminplan <b>'+esc(kzPrefix())+'terminplaene</b>. Jeder Spielerlink bekommt sein eigenes, zufälliges Passwort (steht in der Tabelle, Familien können es im Link selbst ändern).</span></label>'
-   +'<div class="bar" style="margin:8px 0 0"><button class="btn" id="kzindiv" title="Jeder Spielerlink bekommt ein neues, eigenes Passwort">Allen Spielerlinks neue, eigene Passwörter geben</button></div><div class="note" id="kzstdm"></div></div>';
+   +'<label class="note" style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" id="kzauto" '+(kzStd.auto!==false?"checked":"")+'> <span>Kurzlinks automatisch anlegen: Spieler <b>'+esc(kzPrefix())+'vornamename</b> (z. B. '+esc(kzPrefix())+'loganfrost), Teamlink <b>'+esc(kzPrefix())+'team</b>. Jeder Spielerlink bekommt sein eigenes, zufälliges Passwort (steht in der Tabelle, Familien können es im Link selbst ändern).</span></label>'
+   +'<div class="bar" style="margin:8px 0 0"><button class="btn" id="kzindiv" title="Jeder Spielerlink bekommt ein neues, eigenes Passwort">Allen Spielerlinks neue, eigene Passwörter geben</button> <button class="btn" id="kzfix" title="Entfernt Zahlen am Ende (z. B. d1loganfrost2) und stellt den Terminplan auf Teamlink um">Kurzlink-Namen bereinigen</button></div><div class="note" id="kzstdm"></div></div>';
   if(el.__h!==h){el.__h=h;el.innerHTML=h}}
 async function kzApplyStd(pw,all){
   const m=T("kzstdm"),say=(t,bad)=>{if(m){m.className="note"+(bad?" warn":"");m.textContent=t}};
@@ -2219,6 +2222,15 @@ document.addEventListener("click",async(e)=>{
   const m=T("kzstdm"),say=(t,bad)=>{if(m){m.className="note"+(bad?" warn":"");m.textContent=t}};
   try{
     if(b.id==="kzindiv"){if(!b.dataset.arm){b.dataset.arm="1";b.textContent="Wirklich? Alle bisherigen Passwörter gelten dann nicht mehr";return}b.disabled=true;await kzApplyStd("",true);b.disabled=false;b.dataset.arm="";b.textContent="Jedem Spieler ein eigenes Passwort geben"}
+    if(b.id==="kzfix"){b.disabled=true;let n=0,skip=0;
+      try{const pre=kzPrefix(),items=active().map((p)=>({id:p.id,target:pre+kzSlug(p.vorname)+kzSlug(p.name)})).concat([{id:"xplan",target:pre+"team",plan:true}]);
+        for(const it of items){const l=L[it.id]||{};if(!l.alias||!l.key||l.alias===it.target)continue;
+          const dirty=it.plan?/terminplaene\d*$/.test(l.alias)||new RegExp("^"+it.target+"\\d+$").test(l.alias):new RegExp("^"+it.target+"\\d+$").test(l.alias);if(!dirty)continue;
+          const aid=kzA[l.alias],doc=aid&&SNAP.a?SNAP.a[aid]:null;if(doc&&doc.v===1){skip++;continue}
+          const na=it.target;if(!KZ_OK.test(na)||KZ_RES.includes(na)||Object.keys(L).some((k)=>k!==it.id&&L[k].alias===na)){skip++;continue}
+          const old=l.alias;await kzSet(it.id,na,l.key,l.aktiv,!!l.open,l.open?undefined:l.pw);await window.__kurzTr.del(await kzId(old));L[it.id]={...(L[it.id]||{}),alias:na};n++}
+        say(n?n+(n===1?" Kurzlink":" Kurzlinks")+" bereinigt. Die alten Adressen gelten nicht mehr."+(skip?" "+skip+" konnten nicht geändert werden (Name belegt oder eigenes Passwort der Familie).":""):(skip?skip+" konnten nicht geändert werden (Name belegt oder eigenes Passwort der Familie).":"Alle Kurzlink-Namen sind schon sauber."),skip&&!n)
+      }catch(x){say("Das hat nicht geklappt.",1)}b.disabled=false}
   }catch(x){say("Das hat nicht geklappt.",1)}
 });
 document.addEventListener("change",async(e)=>{
@@ -2264,7 +2276,7 @@ function kzCell(pid){
   const l=L[pid]||{};if(!l.key)return"";
   if(!l.alias)return'<div data-kid="'+pid+'" style="margin-top:6px;white-space:normal"><input data-kzin placeholder="Kurzlink-Name, z. B. max-muster" maxlength="40" autocapitalize="off" style="width:62%;min-width:170px"> <button class="btn" data-kzadd>Kurzlink anlegen</button>'+(pid==="xplan"?'<label class="note" style="display:flex;gap:6px;align-items:center;margin-top:4px"><input type="checkbox" data-kzpwc> mit Passwort schützen (sonst öffnet jeder, der den Kurzlink kennt, die Terminpläne)</label>':"")+"</div>";
   const aid=kzA[l.alias],doc=aid&&SNAP.a?SNAP.a[aid]:null,own=!!(doc&&doc.v===1),key="kz"+pid;
-  return'<div data-kid="'+pid+'" style="margin-top:6px;white-space:normal"><div class="note">Kurzlink: <b>'+esc(kzBase()+l.alias)+"</b></div><div class=\"note\">"+(l.open?"Ohne Passwort – jeder mit dem Kurzlink kann die Terminpläne sehen":own?"Passwort: <b>eigenes Passwort gewählt</b> (nicht einsehbar)":doc?"Passwort: <b style=\"font-family:ui-monospace,Menlo,monospace;font-size:14px;user-select:all\">"+esc(l.pw||"")+"</b>":"Kurzlink wird eingerichtet …")+'</div><div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn" data-kzcl>Kurzlink kopieren</button>'+(own||l.open?"":'<button class="btn" data-kzcpw>Passwort kopieren</button>')+(l.open||pid==="xplan"||!kzStd.pw||l.pw===kzStd.pw&&!own?"":'')+(l.open?'<button class="btn" data-kzon>Passwort aktivieren</button>':'<button class="btn'+(armed===key?" arm":"")+'" data-kzrs title="Es wird ein neues, nur für diesen Link geltendes Passwort erzeugt; das bisherige gilt nicht mehr">'+(armed===key?"Wirklich zurücksetzen?":"Passwort zurücksetzen")+"</button>"+(pid==="xplan"?'<button class="btn" data-kzoff>Passwort entfernen</button>':""))+'<button class="btn'+(armed==="kr"+pid?" arm":"")+'" data-kzrm>'+(armed==="kr"+pid?"Wirklich entfernen?":"Kurzlink entfernen")+"</button></div></div>"}
+  return'<div data-kid="'+pid+'" style="margin-top:6px;white-space:normal"><div class="note">Kurzlink: <b>'+esc(kzBase()+l.alias)+"</b></div><div class=\"note\">"+(l.open?"Ohne Passwort – jeder mit dem Kurzlink kann die Terminpläne sehen":own?"Passwort: <b>eigenes Passwort gewählt</b> (nicht einsehbar)":doc?"Passwort: <b style=\"font-family:ui-monospace,Menlo,monospace;font-size:14px;user-select:all\">"+esc(l.pw||"")+"</b>":"Kurzlink wird eingerichtet …")+'</div><div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn" data-kzcl>Kurzlink kopieren</button>'+(pid==="xplan"&&/terminplaene\d*$/.test(l.alias)?'<button class="btn'+(armed==="km"+pid?" arm":"")+'" data-kzmig title="Der alte Kurzlink funktioniert danach nicht mehr">'+(armed==="km"+pid?"Wirklich? Der alte Link gilt dann nicht mehr":"Auf "+esc(kzPrefix())+"team umstellen")+"</button>":"")+(own||l.open?"":'<button class="btn" data-kzcpw>Passwort kopieren</button>')+(l.open||pid==="xplan"||!kzStd.pw||l.pw===kzStd.pw&&!own?"":'')+(l.open?'<button class="btn" data-kzon>Passwort aktivieren</button>':'<button class="btn'+(armed===key?" arm":"")+'" data-kzrs title="Es wird ein neues, nur für diesen Link geltendes Passwort erzeugt; das bisherige gilt nicht mehr">'+(armed===key?"Wirklich zurücksetzen?":"Passwort zurücksetzen")+"</button>"+(pid==="xplan"?'<button class="btn" data-kzoff>Passwort entfernen</button>':""))+'<button class="btn'+(armed==="kr"+pid?" arm":"")+'" data-kzrm>'+(armed==="kr"+pid?"Wirklich entfernen?":"Kurzlink entfernen")+"</button></div></div>"}
 async function kzCopy(txt,what){const m=T("lkm");try{await navigator.clipboard.writeText(txt);m.textContent=what+" kopiert."}catch(e){m.textContent=what+": "+txt}m.className="note"}
 
 function renderCo(){
@@ -2287,7 +2299,7 @@ async function lkHealth(){
     if(!(await test(l.key,SNAP.p[p.id])))E.push("Link von "+nm(p)+" lässt sich nicht öffnen (Inhalt beschädigt).")}
   if(nOn.length)E.push((nOn.length===1?"Der Link von ":nOn.length+" Spielerlinks (")+nOn.slice(0,4).join(", ")+(nOn.length>4?" u. a.":"")+(nOn.length===1?" ist aktiv, aber noch nicht online":") sind aktiv, aber noch nicht online")+" – sie zeigen „Link ungültig“.");
   for(const k of ["full","anon","plan","demo"]){const l=L["x"+k]||{};if(!l.aktiv||!l.key)continue;
-    const nmx={full:"Vollansicht",anon:"Anonyme Ansicht",plan:"Terminplan",demo:"Demo"}[k],want=await sha8(l.key),pub=(SNAP.xk||{})[k];
+    const nmx={full:"Vollansicht",anon:"Anonyme Ansicht",plan:"Teamlink",demo:"Demo"}[k],want=await sha8(l.key),pub=(SNAP.xk||{})[k];
     if(!pub||pub!==want||!(SNAP.x||{})[k]){xMiss++;E.push("Link „"+nmx+"“ ist aktiv, aber noch nicht online.");continue}
     if(!(await test(l.key,SNAP.x[k])))E.push("Link „"+nmx+"“ lässt sich nicht öffnen (Inhalt beschädigt).")}
   if(my!==lkTok)return;
@@ -2330,7 +2342,7 @@ async function renderLinks(){if(window.__DEMO)return;
   const pend=cur.filter((r)=>r.want!==r.pub).length+xr.filter((r)=>r.want!==r.pub).length+orphan,stale=!!SNAP.fp&&SNAP.fp!==fp||(!SNAP.fp&&pubIds.length>0),on=cur.filter((r)=>r.want&&r.want===r.pub).length;
   $("#lks").innerHTML=(SNAP.u?"Letzter Stand online: <b>"+esc(dt(SNAP.u))+"</b> · ":"Noch nichts veröffentlicht · ")+"<b>"+on+"</b> Link(s) online"+(pend||stale?' · <span class="warn">⚠ '+(pend?"Link-Änderungen":"")+(pend&&stale?" und ":"")+(stale?"neuere Daten":"")+(window.__WEB?" noch nicht online – wird automatisch übernommen.":" noch nicht online – bitte „Alle Links aktualisieren“ klicken.")+"</span>":' · <span class="up">alles aktuell</span>');
   const xe=$("#lkxt");
-  if(xe){const XN={full:["Vollansicht","Alles sichtbar, nur lesend (inkl. Namen, Fotos, Notizen, To-Dos, Kontakte)"],plan:["Nur Terminpläne","Monats- und Wochenplan zum Ansehen, ohne Anmeldung – keine Spielerprofile, Notizen oder To-Dos"],demo:["Demo (Zufallsdaten)","Ganze App mit komplett zufällig erzeugten Daten (Namen, Beteiligung, Ergebnisse, Lorem-ipsum-Notizen) – ohne Konto, nur lesend, nichts davon echt"],anon:["Struktur (anonym)","Spieler 1…n mit Rückennummer, ohne Fotos, Geburtstage, Kontakte, Notizen, To-Dos und interne Termine"]};
+  if(xe){const XN={full:["Vollansicht","Alles sichtbar, nur lesend (inkl. Namen, Fotos, Notizen, To-Dos, Kontakte)"],plan:["Teamlink","Terminplan (Monat und Woche) der Mannschaft zum Ansehen, ohne Anmeldung – keine Spielerprofile, Notizen oder To-Dos"],demo:["Demo (Zufallsdaten)","Ganze App mit komplett zufällig erzeugten Daten (Namen, Beteiligung, Ergebnisse, Lorem-ipsum-Notizen) – ohne Konto, nur lesend, nichts davon echt"],anon:["Struktur (anonym)","Spieler 1…n mit Rückennummer, ohne Fotos, Geburtstage, Kontakte, Notizen, To-Dos und interne Termine"]};
     if(!(document.activeElement&&document.activeElement.matches&&document.activeElement.matches("[data-xln],[data-kzin]")))xe.innerHTML='<tr><th style="text-align:left">Link</th><th>Aktiv</th><th>Design</th><th style="text-align:left">Adresse</th><th></th><th style="text-align:left">Stand</th></tr>'+xr.map((r)=>{const st=r.want&&r.want===r.pub?'<span class="pill ok">online</span>':r.want?'<span class="pill busy">geht beim Aktualisieren online</span>':r.pub?'<span class="pill busy">wird beim Aktualisieren abgeschaltet</span>':'<span class="pill">aus</span>';
       return'<tr data-x="'+r.k+'"><td style="text-align:left"><b>'+XN[r.k][0]+'</b><div class="note" style="white-space:normal;max-width:260px">'+XN[r.k][1]+'</div></td><td><input type="checkbox" data-xak '+(r.l.aktiv?"checked":"")+'></td><td>'+dzSel(r.l)+'</td><td style="text-align:left">'+(r.l.key?'<input readonly data-xln value="'+esc(linkOf(r.k,r.l.key))+'" style="width:100%;min-width:230px">'+kzCell("x"+r.k):'<span class="note">noch kein Link</span>')+'</td><td style="white-space:nowrap">'+(r.l.key?'<button class="btn" data-xcp>Kopieren</button> <button class="btn'+(armed==="x"+r.k?" arm":"")+'" data-xnw title="Der bisherige Link wird ungültig">'+(armed==="x"+r.k?"Wirklich neu?":"Neu erzeugen")+"</button>":"")+'</td><td style="text-align:left">'+st+"</td></tr>"}).join("");
   }
@@ -2398,6 +2410,8 @@ document.addEventListener("click",async(e)=>{
   const pid=w.dataset.kid,l=L[pid]||{},m=T("lkm");
   if(e.target.closest("[data-kzon]")||e.target.closest("[data-kzoff]")){const off=!!e.target.closest("[data-kzoff]");try{await kzSet(pid,l.alias,l.key,l.aktiv,off);m.className="note";m.textContent=off?"Passwort entfernt. Der Kurzlink öffnet jetzt ohne Passwort.":"Passwort aktiviert."}catch(x){m.className="note warn";m.textContent="Das hat nicht geklappt."}return}
   if(e.target.closest("[data-kzadd]")){const i=w.querySelector("[data-kzin]"),c=w.querySelector("[data-kzpwc]"),r=await kzCreate(pid,i.value,pid==="xplan"&&!(c&&c.checked));m.className=r?"note warn":"note";m.textContent=r||"Kurzlink angelegt.";return}
+  if(e.target.closest("[data-kzmig]")){const k="km"+pid;if(armed!==k){armed=k;renderLinks();return}armed=null;
+    try{const old=l.alias,na=await kzFreeAlias(kzPrefix()+"team");await kzSet(pid,na,l.key,l.aktiv,!!l.open,l.open?undefined:l.pw);await window.__kurzTr.del(await kzId(old));m.className="note";m.textContent="Umgestellt: "+kzBase()+na+". Der alte Kurzlink gilt nicht mehr."}catch(x){m.className="note warn";m.textContent="Das hat nicht geklappt."}return}
   if(e.target.closest("[data-kzcl]")){kzCopy(kzBase()+l.alias,"Kurzlink");return}
   if(e.target.closest("[data-kzcpw]")){kzCopy(l.pw||"","Passwort");return}
   if(e.target.closest("[data-kzrs]")){const k="kz"+pid;if(armed===k){armed=null;try{await kzSet(pid,l.alias,l.key,l.aktiv);m.className="note";m.textContent="Neues Passwort erzeugt. Das bisherige gilt nicht mehr."}catch(x){m.className="note warn";m.textContent="Das hat nicht geklappt."}}else{armed=k;renderLinks()}return}
@@ -3578,6 +3592,9 @@ function tabSet(pl){const jg=jgOf(pl.stufe,pl.saison);
   h+='<div class="card" style="margin-top:10px"><div class="bar" style="margin:0"><div><h3 style="margin:0">Listen anpassen</h3><div class="note">Wahrscheinlichkeit, Kaderstatus, Rolle, Phasen, Prioritäten und Bewertungskriterien. Die Voreinstellung passt für die meisten Fälle.</div></div><span style="flex:1"></span><button class="btn" data-ka="cust">'+(ks.cust?"Einklappen ▴":"Anzeigen ▾")+"</button></div></div>";
   if(ks.cust)h+=listEd(pl,"wk","Wahrscheinlichkeit (Zusage / Bleiben)","wk")+listEd(pl,"status","Kaderstatus (eigene Spieler)","z")+listEd(pl,"rollen","Rolle / Scouting-Ampel","")+listEd(pl,"phasen","Phasen der Kontaktaufnahme","phase")+listEd(pl,"prios","Prioritäten","")+listEd(pl,"krit","Optionale Bewertungskriterien","krit")+'<div class="card" style="margin-top:10px"><button class="btn'+(ks.arm==="lreset"?" arm":"")+'" data-ka="lreset">'+(ks.arm==="lreset"?"Wirklich zurücksetzen? (Spieler behalten ihre Einträge)":"Alle Listen auf Standard zurücksetzen")+"</button></div>";
   h+=TABF.lnk?TABF.lnk(pl):"";
+  {const AR=(window.__kArch||[]);h+='<div class="card" style="margin-top:12px"><h3>Archiv</h3><p class="note" style="margin-top:0">Beim Saisonwechsel wandern die Planungen der beendeten Saison automatisch ins Archiv. Du kannst eine Planung auch jetzt schon dorthin schieben. Sie bleibt erhalten und lässt sich jederzeit wieder aktivieren.</p>'
+    +'<button class="btn'+(ks.arm==="archplan"?" arm":"")+'" data-ka="archplan">'+(ks.arm==="archplan"?"Wirklich ins Archiv verschieben?":"Diese Planung ins Archiv verschieben")+'</button>'
+    +(AR.length?'<div style="margin-top:10px">'+AR.map((x)=>'<div class="kr" style="margin:4px 0"><span style="flex:1"><b>'+E(x.name||x.stufe||"")+'</b> <span class="note">'+E(x.saison||"")+'</span></span><button class="btn" data-ka="unarch" data-id="'+E(x.id)+'">Wieder aktivieren</button></div>').join("")+'</div>':'<p class="note" style="margin:8px 0 0">Das Archiv ist noch leer.</p>')+'</div>'}
   h+='<div class="card" style="margin-top:12px"><h3>Kader-Modul</h3><p class="note" style="margin-top:0">Blendet den ganzen Kader-Bereich aus (Menü, Startseite, Kalender-Spielbesuche, Scouting-Link) – für alle, auch Co-Trainer. Die Daten bleiben erhalten. Wieder einblenden: Hauptmenü → Einstellungen → „Kader-Modul“.</p><button class="btn" data-ka="kaus">Kader ausblenden</button></div>';
   h+='<div class="card" style="margin-top:14px;border-color:var(--r)"><button class="btn'+(ks.arm==="delplan"?" arm":"")+'" data-ka="delplan" style="color:var(--r)">'+(ks.arm==="delplan"?"Wirklich löschen? (Spieler bleiben in der Datenbank)":"Diese Planung löschen")+"</button></div>";
   return h}
@@ -3894,6 +3911,8 @@ function clickA(e){const xb=e.target.closest("[data-kx]");if(xb){window.__kxRun(
    case"la":pl[d.k].push(d.k==="krit"?{id:nid("k"),name:"Neu"}:d.k==="status"||d.k==="phasen"?{id:nid("l"),name:"Neu",c:"gr",z:0}:{id:nid("l"),name:"Neu",c:"gr"});savePlan(pl);ks.cust=true;force();break;
    case"ld":pl[d.k].splice(+d.i,1);savePlan(pl);ks.cust=true;force();break;
    case"own":{D.spieler.filter((s)=>s.name&&s.aktiv!==false&&!KD.pers.some((p)=>p.sid===s.id&&mem(p,pl))).forEach((s)=>{const ex=KD.pers.find((p)=>p.sid===s.id),p=ex?clone(ex):newPers(pl,{typ:"eigen",sid:s.id,plans:{}});p.plans=p.plans||{};p.plans[pl.id]={status:pl.status[0]?pl.status[0].id:"",rolle:"",next:{}};savePers(p)});force();break}
+   case"archplan":if(ks.arm==="archplan"){const o={...pl,arch:true,archAt:new Date().toISOString()};sv("kplan",pl.id,o);KD.plans=KD.plans.filter((x)=>x.id!==pl.id);(window.__kArch=window.__kArch||[]).push(o);ks.pid=null;ks.arm=null;force();if(window.__toast)window.__toast("Planung „"+(pl.name||pl.stufe)+"“ ist jetzt im Archiv.")}else{ks.arm="archplan";force()}break;
+   case"unarch":{const o=(window.__kArch||[]).find((x)=>x.id===d.id);if(o){const n={...o};delete n.arch;delete n.archAt;sv("kplan",n.id,n);window.__kArch=window.__kArch.filter((x)=>x.id!==n.id);KD.plans.push(n);ks.pid=n.id;force();if(window.__toast)window.__toast("Planung „"+(n.name||n.stufe)+"“ ist wieder aktiv.")}break}
    case"delplan":if(ks.arm==="delplan"){sv("kplan",pl.id,null);KD.plans=KD.plans.filter((x)=>x.id!==pl.id);ks.pid=null;ks.arm=null;force()}else{ks.arm="delplan";force()}break;
    case"onew":R(()=>{ks.oe="new";ks.od={id:nid("ko"),verein:"",mannschaft:"",datum:td(),zeit:"",entf:"",status:"geplant",blick:"",notiz:"",personIds:[]}});break;
    case"oedit":R(()=>{ks.oe=d.id;ks.od=clone(KD.obs.find((x)=>x.id===d.id))});break;
@@ -3923,7 +3942,7 @@ function changeA(e){const t=e.target,pl=P0();if(!t.closest||!t.closest("#k"))ret
 K.after=()=>{};
 function initKader(dbh){if(window.__kinit)return;window.__kinit=true;
   const root=$k("#k");root.addEventListener("click",clickA);root.addEventListener("change",changeA);root.addEventListener("input",(e)=>{const t=e.target;if(t.dataset&&(t.dataset.dp||t.dataset.sf||t.dataset.od||t.dataset.dl)&&t.type!=="checkbox"&&!t.tagName.match(/SELECT/)){/* Entwurf mitführen, ohne neu zu zeichnen */changeA(e)}});
-  const S=(c,k)=>dbh.collection(c).onSnapshot((s)=>{const nd=K.mergeSnap(c,s.docs),key=(L)=>JSON.stringify(L.slice().sort((x,y)=>String(x.id).localeCompare(String(y.id))));if(window["__kg"+k]&&key(nd)===key(KD[k]||[])){KD[k]=nd;return}window["__kg"+k]=1;KD[k]=nd;renderKader();if(k==="obs")calRef()},(er)=>{if(er&&(er.code==="permission_denied"||/denied|not_granted|forbidden/i.test(String(er.code)))){document.body.classList.add("nok");document.querySelectorAll('nav button[data-s="k"]').forEach((x)=>{x.style.display="none"});const r=$k("#k");if(r)r.hidden=true}});
+  const S=(c,k)=>dbh.collection(c).onSnapshot((s)=>{let nd=K.mergeSnap(c,s.docs);if(c==="kplan"){window.__kArch=nd.filter((x)=>x.arch);nd=nd.filter((x)=>!x.arch)}const key=(L)=>JSON.stringify(L.slice().sort((x,y)=>String(x.id).localeCompare(String(y.id))));if(window["__kg"+k]&&key(nd)===key(KD[k]||[])){KD[k]=nd;return}window["__kg"+k]=1;KD[k]=nd;renderKader();if(k==="obs")calRef()},(er)=>{if(er&&(er.code==="permission_denied"||/denied|not_granted|forbidden/i.test(String(er.code)))){document.body.classList.add("nok");document.querySelectorAll('nav button[data-s="k"]').forEach((x)=>{x.style.display="none"});const r=$k("#k");if(r)r.hidden=true}});
   S("kplan","plans");S("kperson","pers");S("kobs","obs");S("kinbox","inbox")}
 
 /* ---------- Scouting-Eingabe (nur Schreiben) über #scout ---------- */
@@ -4395,11 +4414,13 @@ async function wzRun(){
     const keepG=D.spiele.filter((g)=>!oldD(g.datum)).sort((a,b)=>(a.datum||"").localeCompare(b.datum||"")||a.nr-b.nr);
     keepG.forEach((g,i)=>{const sp={};let ch=g.nr!==i+1;Object.keys(g.spieler||{}).forEach((p)=>{if(drop2.has(p))ch=true;else sp[p]=g.spieler[p]});if(ch)jobs.push(save("games",g.id,{...g,nr:i+1,spieler:sp}))});
     D.trainings.filter((t)=>!oldD(t.datum)).forEach((t)=>{const sp={};let ch=false;Object.keys(t.spieler||{}).forEach((p)=>{if(drop2.has(p))ch=true;else sp[p]=t.spieler[p]});if(ch)jobs.push(save("trainings",t.id,{...t,spieler:sp}))});
+    /* Kaderplanungen der beendeten Saison ins Archiv */
+    {const sy=(s)=>+String(s||"").slice(0,4)||0,oy=sy(old);if(oy)KDs().plans.filter((p)=>!p.arch&&sy(p.saison)&&sy(p.saison)<=oy&&p.id!==z.plan).forEach((p)=>jobs.push(save("kplan",p.id,{...p,arch:true,archAt:new Date().toISOString()})))}
     jobs.push(save("config","main",{...(D.config||{}),saison:z.saison.trim(),mannschaft:z.mann.trim()}));
     await Promise.all(jobs);
     try{PID=null;cm=null;armed=null;gOpen=null;$("#gd").hidden=true;nEdit=null}catch(e){}
     BK.wzDone="Fertig. Die Saison "+old+" ist archiviert, die Saison "+z.saison.trim()+" ("+z.mann.trim()+") läuft mit "+(keepIds.size+newC.length)+" Spielern. Danach unter „Hinweise &amp; Links“ auf „Jetzt sofort aktualisieren“ klicken und in den Stammdaten die neuen Spieler prüfen.";
-    BK.wz=null;
+    BK.wz=null;if(window.__toast)window.__toast("Saisonwechsel fertig: Saison "+z.saison.trim()+" läuft.");
   }catch(e){z.run=false;z.arm=false;z.msg="";BK.wz=z;wzRender();const m=$b("#wzm");if(m){m.className="note warn";m.textContent="Der Wechsel ist nicht vollständig durchgelaufen ("+((e&&(e.code||e.message))||"Fehler")+"). Das Archiv und ein Sicherungsstand sind angelegt. Bitte Seite neu laden und prüfen, sonst über „Wiederherstellen“ zurückgehen."}BK.busy=false;return}
   BK.busy=false;wzRender();bkRender();
 }
