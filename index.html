@@ -300,7 +300,7 @@ nav button .em{display:inline-flex;justify-content:center;align-items:center}
 <div class="card empty" id="pempty" hidden>Noch keine Spieler. Unter „Stammdaten“ anlegen.</div></section>
 <section id="t" hidden><h2>Training</h2><p class="sub">Ein Monat pro Ansicht · Klick auf ein Feld schaltet den Status weiter · Änderungen werden sofort gespeichert · Zukünftige Trainings und Spiele lassen sich schon eintragen, sie zählen in Statistiken und Exporten erst ab ihrem Datum</p>
 <div class="bar"><button class="btn" id="bprev" aria-label="Vorheriger Monat">◀</button><select id="ms" aria-label="Monat"></select><button class="btn" id="bnext" aria-label="Nächster Monat">▶</button><span style="flex:1"></span><label>Neues Training am <input type="date" id="nd"></label><button class="btn" id="ad" style="background:var(--ac);color:#fff;border-color:var(--ac)">＋ Training hinzufügen</button></div><div class="bar"><label class="note">Modus <select class="xth"><option value="light">Hell</option><option value="dark">Dunkel</option></select></label><span class="note">A4-Export (quer) · dieser Monat</span><div class="seg" id="xtm"><button data-f="png">PNG</button><button data-f="jpg">JPG</button><button data-f="pdf">PDF</button></div><span class="note">ganze Saison</span><div class="seg" id="xts"><button data-f="png">PNG</button><button data-f="jpg">JPG</button><button data-f="pdf">PDF</button></div></div>
-<div class="leg" id="l1"></div><div class="card tw" style="padding:0"><table id="tg"></table></div><p class="note" id="tn"></p></section>
+<div id="tax"></div><div class="leg" id="l1"></div><div class="card tw" style="padding:0"><table id="tg"></table></div><p class="note" id="tn"></p></section>
 <section id="g" hidden><h2>Spiele</h2><p class="sub" id="gsub"></p><div class="bar"><button class="btn" id="ng" style="background:var(--ac);color:#fff;border-color:var(--ac)">＋ Neues Spiel</button><button class="btn" id="gmb" type="button">☑ Kader-Übersicht</button><span style="flex:1"></span><label class="note">Modus <select class="xth"><option value="light">Hell</option><option value="dark">Dunkel</option></select></label><span class="note">A4-Export aller Spiele (quer)</span><div class="seg" id="xga"><button data-f="png">PNG</button><button data-f="jpg">JPG</button><button data-f="pdf">PDF</button></div></div>
 <div id="fdg"></div><div class="card tw" id="gm" hidden style="padding:0;margin-bottom:12px"><table id="gmt"></table></div><p class="note" id="gmn" hidden style="margin:-6px 0 12px">Klick auf ein Feld schaltet weiter: k = im Kader, a = abwesend (krank, Urlaub, Termin …), v = verletzt, n = nicht nominiert, · = kein Eintrag. Minuten und Details pflegst du im jeweiligen Spiel.</p><div class="leg" id="l2"></div><div class="card tw" style="padding:0"><table id="gl"></table></div><div id="gd" hidden></div></section>
 <section id="q" hidden><h2>Bilanz</h2><p class="sub" id="qsub"></p>
@@ -370,6 +370,8 @@ nav button .em{display:inline-flex;justify-content:center;align-items:center}
   const heute = () => { const n = new Date(); return n.getFullYear() + "-" + String(n.getMonth() + 1).padStart(2, "0") + "-" + String(n.getDate()).padStart(2, "0"); };
   /* Optionaler Zusatz: U13.kickoff(x) liefert die Anstoßzeit eines Spiels in Minuten (oder null). Am Spieltag zählt das Spiel erst ab Anstoß. */
   const hook = { kickoff: null };
+  /* Ein Training zählt erst, wenn für mindestens einen Spieler ein Status eingetragen ist (vergangene, noch leere Trainings bleiben außen vor) */
+  const erfasst = (t) => Object.values((t && t.spieler) || {}).some(Boolean);
   const erreicht = (x) => {
     if (!x.datum) return true;
     const h = heute();
@@ -420,7 +422,7 @@ nav button .em{display:inline-flex;justify-content:center;align-items:center}
   /* Trainingskennzahlen. zaehlend = { e:true, u:true, v:false, t:false }.
      Letzte 60 Tage: vom Datum des letzten Trainings aus gerechnet (dieser Tag zählt mit). Der 4. Wert (früher Bezugsmonat) wird nicht mehr gebraucht. */
   function trainStats(pid, trainings, zaehlend) {
-    const ts = trainings.filter(erreicht).sort((a, b) => a.datum.localeCompare(b.datum));
+    const ts = trainings.filter((t) => erreicht(t) && erfasst(t)).sort((a, b) => a.datum.localeCompare(b.datum));
     const ref = ts.length ? ts[ts.length - 1].datum : null, von = ref ? tageZurueck(ref, 59) : null;
     const in60 = (t) => !!ref && t.datum >= von && t.datum <= ref;
     const calc = (list) => {
@@ -464,7 +466,7 @@ nav button .em{display:inline-flex;justify-content:center;align-items:center}
     });
     const avg = (f) => { const v = rows.map(f).filter((x) => x != null); return v.length ? sum(v) / v.length : null; };
     return { rows, team: {
-      spiele: db.spiele.filter(erreicht).length, trainings: db.trainings.filter(erreicht).length,
+      spiele: db.spiele.filter(erreicht).length, trainings: db.trainings.filter((t) => erreicht(t) && erfasst(t)).length,
       gesamtMinuten: sum(rows.map((r) => r.spiel.minuten)),
       avgMinuten: avg((r) => r.spiel.minuten), avgAbs: avg((r) => r.spiel.abs), avgGewichtet: avg((r) => r.spiel.gewichtet),
       avgBeteiligung: avg((r) => r.training.gewichtet), avgAnwesenheit: avg((r) => r.training.abs),
@@ -633,7 +635,7 @@ function renderSaison(){
   if(!D.ready||!has){$("#kp").innerHTML="";$("#tb").innerHTML='<tr><td class="empty" style="text-align:center">'+(D.ready?"Noch keine Spieler. Unter „Stammdaten“ anlegen.":"Daten werden geladen …")+"</td></tr>";$("#asub").textContent="";return}
   const S=U13.saison({spieler:D.spieler.filter((p)=>p.aktiv!==false),spiele:D.spiele,trainings:D.trainings,einstellungen:D.config||{zaehlendeAbwesenheiten:{e:true,u:true,v:false,t:false}}});
   const k=$("#so").value,o=+$("#od").value,R=S.rows.slice().sort((a,b)=>o*((KEY[k](b)??-1)-(KEY[k](a)??-1))*-1);
-  const T=S.team;$("#asub").textContent=S.rows.length+" Spieler · "+T.spiele+" Spiele · "+T.trainings+" Trainingseinheiten";
+  const T=S.team;$("#asub").textContent=S.rows.length+" Spieler · "+T.spiele+" Spiele · "+T.trainings+" Trainingseinheiten"+auswTxt(T);
   {const wT=wkAvg(D.trainings.filter(U13.erreicht).map((t)=>t.datum));$("#kp").innerHTML=[[T.spiele,"Spiele"],[mn(T.avgMinuten),"Ø Minuten / Spieler"],[pc(T.avgGewichtet),"Ø Spielzeit gewichtet"],[pc(T.avgL2mGewichtet),"Ø Spielzeit gewichtet · letzte 60 Tage"],[T.trainings,"Trainingseinheiten","Ø "+wkTxt(wT)+" pro Woche (nur Wochen mit Training)"],[pc(T.avgBeteiligung),"Ø Beteiligung gewichtet"],[pc(T.avgAnwesenheit),"Ø Beteiligung absolut"],[pc(T.avgL2mBeteiligung),"Ø Beteiligung gewichtet · letzte 60 Tage"]].map((a)=>'<div class="card kpi"><b>'+a[0]+"</b><span>"+a[1]+"</span>"+(a[2]?'<span class="note" style="display:block">'+a[2]+"</span>":"")+"</div>").join("")}
   const sp=VIEW!=="tr",tt=VIEW!=="sp",H1=["Kader","a","v","n","Minuten","gewichtet","abs.","im Kader","60T gew.","60T abs.","Trend"],H2=["Teilgen.","e","u","v","t","gew.","abs.","60T gew.","60T abs.","Trend"];
   const mk=(key,cf,tw0)=>R.filter((r)=>KEY[key](r)!=null).sort((a,b)=>KEY[key](b)-KEY[key](a)).map((r)=>({l:nm(r.spieler),v:KEY[key](r),c:(tw0&&r.spieler.torwart)?"var(--gr)":(CC[cf(r)]||"var(--gr)")}));
@@ -686,6 +688,19 @@ const mname=(m)=>new Date(+m.slice(0,4),+m.slice(5)-1,1).toLocaleDateString("de-
 const active=()=>D.spieler.filter((p)=>p.name&&p.aktiv!==false);
 let cm=null,armed=null;
 function today(){const n=new Date();return n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0")+"-"+String(n.getDate()).padStart(2,"0")}
+/* Vollzählige Trainings: Steht bei einem vergangenen Training für alle Spieler „anwesend“, fragt die App nach, ob das stimmt. Es zählt in jedem Fall; „Stimmt“ blendet den Hinweis für dieses Training aus (Feld bst). */
+function axList(){const P=typeof active==="function"?active():[],td0=today();if(!P.length)return[];
+  return D.trainings.filter((t)=>t.datum<td0&&!t.bst&&(()=>{const e=P.map((p)=>(t.spieler||{})[p.id]).filter(Boolean);return e.length>=3&&e.every((x)=>x==="x"||x==="K")})()).sort((a,b)=>b.datum.localeCompare(a.datum))}
+function axNum(t){const P=active();return P.map((p)=>(t.spieler||{})[p.id]).filter(Boolean).length}
+function renderAx(){const el=$("#tax");if(!el)return;const L=axList();if(!L.length){el.innerHTML="";return}
+  const fdx=(d)=>d.slice(8)+"."+d.slice(5,7)+".",wdx=(d)=>["So","Mo","Di","Mi","Do","Fr","Sa"][new Date(d+"T12:00:00").getDay()];
+  el.innerHTML='<div class="card" style="margin:0 0 12px;border-left:4px solid var(--y,#d9a400)"><b>Waren wirklich alle da?</b><p class="note" style="margin:4px 0 8px">Bei diesen Trainings steht für alle Spieler „anwesend“, so wie es die App vorbelegt. Sie zählen so in der Statistik. Wenn es stimmt, tippe „Stimmt“, dann verschwindet der Hinweis. Sonst ändere die Fehlenden in der Tabelle.</p>'
+    +L.slice(0,6).map((t)=>'<div class="bar" style="margin:0 0 6px"><span>'+wdx(t.datum)+", "+fdx(t.datum)+" · alle "+axNum(t)+' waren anwesend</span><span style="flex:1"></span><button class="btn" data-axok="'+esc(t.id)+'">Stimmt</button></div>').join("")
+    +(L.length>6?'<div class="note">und '+(L.length-6)+' weitere</div>':"")+(L.length>1?'<div class="bar" style="margin:6px 0 0"><button class="btn" data-axall="1">Alle '+L.length+' stimmen</button></div>':"")+"</div>"}
+document.addEventListener("click",(e)=>{const b=e.target.closest("[data-axok],[data-axall]");if(!b)return;const ids=b.dataset.axall?axList().map((t)=>t.id):[b.dataset.axok];ids.forEach((id)=>{const t=D.trainings.find((x)=>x.id===id);if(t){t.bst=true;save("trainings",t.id,t)}});renderAx();try{typeof renderHome==="function"&&renderHome()}catch(x){}});
+/* Ab wann und woraus die Statistik rechnet: Training seit dem ersten erfassten Training, Spielzeit aus den Spielen mit eingetragenen Minuten */
+function auswTxt(T){const tr=D.trainings.filter(U13.erreicht).map((t)=>t.datum).filter(Boolean).sort(),k=D.spiele.filter((g)=>g.dauer>0&&U13.erreicht(g)&&Object.values(g.spieler||{}).some((s)=>s&&s.status==="k"&&(+s.minuten||0)>0)).length;
+  return(tr.length?" · Training seit "+tr[0].slice(8)+"."+tr[0].slice(5,7)+"."+tr[0].slice(0,4):"")+(T.spiele?" · Spielzeit aus "+k+" von "+T.spiele+" Spielen"+(k>0&&k<4?" (noch wenige, einzelne Werte schwanken stark)":""):"")}
 function renderTrain(){
   const MS=seasonMonths(),sel=$("#ms");
   if(sel.dataset.y!==MS[0]){sel.innerHTML=MS.map((m)=>'<option value="'+m+'">'+mname(m)+"</option>").join("");sel.dataset.y=MS[0]}
@@ -706,7 +721,7 @@ function renderTrain(){
   $("#tg").innerHTML=ts.length?h:'<tr><td class="empty" style="text-align:center">Noch keine Trainings in '+mname(cm)+'. Oben ein Datum wählen und „Training hinzufügen“.</td></tr>';
   if(scW&&scW.scrollLeft!==scX)scW.scrollLeft=scX;if(Math.abs(window.scrollY-scY)>1)window.scrollTo(window.scrollX,scY);
   $("#tn").textContent=ts.length?ts.length+" Trainingseinheiten in "+mname(cm)+". Neue Trainings sind zunächst für alle Spieler auf x gesetzt.":"";
-  try{trList(cols,P,ts)}catch(e){}
+  try{trList(cols,P,ts)}catch(e){}try{renderAx()}catch(e){}
 }
 let tlSel=null,tlTab=true;
 function trList(cols,P,ts){
@@ -735,7 +750,7 @@ $("#ad").onclick=()=>{
   const v=$("#nd").value,M=seasonMonths();if(!v)return;
   if(!M.includes(v.slice(0,7))){$("#tn").textContent="Dieses Datum liegt außerhalb der Saison ("+mname(M[0])+" bis "+mname(M[11])+").";return}
   if(D.trainings.some((t)=>t.datum===v)){cm=v.slice(0,7);renderTrain();$("#tn").textContent="Für diesen Tag gibt es schon ein Training.";return}
-  const sp={};active().forEach((p)=>sp[p.id]="x");save("trainings","t"+v,{id:"t"+v,datum:v,spieler:sp});cm=v.slice(0,7);renderTrain();
+  const sp={};if(v>=today())active().forEach((p)=>sp[p.id]="x");save("trainings","t"+v,{id:"t"+v,datum:v,spieler:sp});cm=v.slice(0,7);renderTrain();
 };
 $("#tg").addEventListener("click",(e)=>{
   const d=e.target.closest("[data-del]");
@@ -2645,7 +2660,7 @@ function syncEv(o,old){
     let t=o.trainId&&D.trainings.find((x)=>x.id===o.trainId);
     if(t&&t.datum!==o.datum){const n=D.trainings.find((x)=>x.datum===o.datum);if(n)t=n;else{const sp={...t.spieler},nt={id:"t"+o.datum,datum:o.datum,spieler:sp};save("trainings",nt.id,nt);save("trainings",t.id,null);D.trainings.push(nt);t=nt}}
     if(!t)t=D.trainings.find((x)=>x.datum===o.datum);
-    if(!t){const sp={};active().forEach((q)=>sp[q.id]="x");t={id:"t"+o.datum,datum:o.datum,spieler:sp};save("trainings",t.id,t);D.trainings.push(t)}
+    if(!t){const sp={};if(o.datum>=today())active().forEach((q)=>sp[q.id]="x");/* vergangene Trainings starten leer: sie zählen erst, wenn die Anwesenheit eingetragen ist */t={id:"t"+o.datum,datum:o.datum,spieler:sp};save("trainings",t.id,t);D.trainings.push(t)}
     o.trainId=t.id;delete o.spielId;
   }else if(isGameTyp(o.typ)){
     let g=o.spielId&&D.spiele.find((x)=>x.id===o.spielId);
