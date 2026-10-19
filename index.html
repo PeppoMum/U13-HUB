@@ -2540,7 +2540,7 @@ const whoTag=(x)=>x.wer?'<span class="tag" style="margin-right:6px">'+esc(x.wer=
 const bdn=(p)=>p.vorname+(p.name?" "+p.name:"");
 function bdays(from,to){const out=[];staffList().forEach((s)=>{if(!s.geb)return;const w=String(s.name).trim().split(/\s+/),p={vorname:w[0],name:w.slice(1).join(" ")};for(let y=+from.slice(0,4);y<=+to.slice(0,4);y++){const d=y+s.geb.slice(4);if(d>=from&&d<=to)out.push({p,datum:d,alter:y-(+s.geb.slice(0,4))})}});active().forEach((p)=>{if(!p.geburtsdatum)return;for(let y=+from.slice(0,4);y<=+to.slice(0,4);y++){const d=y+p.geburtsdatum.slice(4);if(d>=from&&d<=to)out.push({p,datum:d,alter:y-(+p.geburtsdatum.slice(0,4))})}});return out.sort((a,b)=>a.datum.localeCompare(b.datum))}
 const busy=(sel)=>{const r=$(sel),a=document.activeElement;return!!(r&&!r.hidden&&a&&r.contains(a)&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&a.type!=="checkbox")};
-let mMonth=null,wMonth=null,mArm=null,dArm=null,dSel=[],dPast=false,dEdit=null;
+const mSel=new Set();let mMonth=null,wMonth=null,mArm=null,dArm=null,dSel=[],dPast=false,dEdit=null;
 const curMonth=()=>{const t=today().slice(0,7);return seasonMonths().includes(t)?t:seasonMonths()[0]};
 const monthOpts=(cur)=>seasonMonths().map((m)=>'<option value="'+m+'"'+(m===cur?" selected":"")+">"+mname(m)+"</option>").join("");
 const inMonth=(e,m)=>e.datum<=monthEnd(m)&&(e.bis||e.datum)>=m+"-01";
@@ -2660,9 +2660,11 @@ function renderTermine(){
   const all=evAllM().filter((e)=>inMonth(e,mMonth)),ids=(D.events||[]);
   $("#msub").textContent=all.length+" Termine in "+mname(mMonth)+" · Spiele aus dem Bereich „Spiele“ erscheinen automatisch";
   $("#ml").innerHTML='<i>Eltern = erscheint im Elternexport</i><i>intern = nur in der Trainerfassung</i>';
+  {let b=$("#msb");if(!b){b=document.createElement("div");b.id="msb";b.className="bar";b.style.margin="0 0 8px";$("#mt").closest(".card").parentNode.insertBefore(b,$("#mt").closest(".card"))}
+   const n=[...mSel].filter((i)=>all.some((e)=>e.id===i)).length;b.hidden=!n;b.innerHTML=n?'<span class="note">'+n+' ausgewählt</span><button class="btn" id="msd" style="color:var(--r)">Ausgewählte löschen</button><button class="btn" id="msn">Auswahl aufheben</button>':""}
   $("#mt").innerHTML=all.length?'<tr><th>Datum</th><th>Art</th><th>Gegner / Aktion</th><th>Treffen / Anstoß</th><th>Ort</th><th>Elternexport</th><th></th></tr>'+all.map((e)=>{
     const wk=[0,6].includes(wday(e.datum)),tx=isGameTyp(e.typ)?matchup(e):(e.titel||""),act=(e)=>e.kobs?'<button class="rm ic" data-kgo="1" title="Im Kader öffnen" aria-label="Im Kader öffnen">'+IC.go+'</button>':((e.virt?'<button class="rm ic" data-ee="'+e.id+'" title="Bearbeiten" aria-label="Bearbeiten">'+IC.ed+'</button>'+(e.trainId?'<button class="rm ic" data-vt="1" title="In Training öffnen" aria-label="In Training öffnen">'+IC.go+'</button>':'<button class="rm ic" data-vg="'+e.spielId+'" title="Im Bereich Spiele öffnen" aria-label="Im Bereich Spiele öffnen">'+IC.go+'</button>'):'<button class="rm ic" data-ee="'+e.id+'" title="Bearbeiten" aria-label="Bearbeiten">'+IC.ed+'</button>'+(e.linked?(e.spielId?'<button class="rm ic" data-vg="'+e.spielId+'" title="Im Bereich Spiele öffnen" aria-label="Im Bereich Spiele öffnen">'+IC.go+'</button>':'<button class="rm ic" data-vt="1" title="In Training öffnen" aria-label="In Training öffnen">'+IC.go+'</button>'):""))+'<button class="rm ic'+(mArm===e.id?" arm":"")+'" data-ed="'+e.id+'" title="Löschen" aria-label="Löschen">'+(mArm===e.id?(trAtt(e)?"Mit Anwesenheit löschen?":"Wirklich löschen?"):IC.del)+"</button>"),actions=(isGameTyp(e.typ)&&e.spielId&&!window.__RO?'<button class="rm ic" data-si="'+e.spielId+'" title="Spielinfo für WhatsApp" aria-label="Spielinfo für WhatsApp">📲</button>':"")+(e.typ==="Training"?'<button class="rm ic" data-wa="'+e.datum+'" title="Bild für WhatsApp" aria-label="Bild für WhatsApp">📲</button>':"")+act(e)+(e._m||[]).map(act).join("");
-    return'<tr class="'+(wk?"mwe":"")+'" style="'+(wk?"font-weight:600":"")+'"><td style="text-align:center">'+esc(WK[wday(e.datum)]+" "+ddm(e.datum))+(e.bis&&e.bis>e.datum?" – "+esc(ddm(e.bis)):"")+'</td><td style="text-align:center">'+esc(typL(e))+'</td><td style="text-align:center">'+esc(tx)+esc(haSfx(e))+unsH(e)+(e.schwerpunkt?' <span class="note">'+esc(e.schwerpunkt)+"</span>":"")+(e.detail&&e.typ!=="Ferien"?'<div class="note" style="font-weight:400">Detail: '+esc(e.detail)+"</div>":"")+(e.ctask&&e.typ!=="Ferien"?'<div class="note" style="font-weight:400;color:var(--ac)">Co-Trainer: '+esc(e.ctask)+"</div>":"")+(e.typ!=="Ferien"?dienstSub(e,e.datum).map((s)=>'<div class="note" style="font-weight:400">'+esc(s)+"</div>").join(""):"")+'</td><td style="text-align:center">'+esc(zeitG(e))+'</td><td style="text-align:center">'+esc(e.ort||"")+"</td><td>"+(e.virt?"Eltern":e.eltern===false?"intern":"Eltern")+"</td><td>"+actions+"</td></tr>"}).join(""):'<tr><td class="empty" style="text-align:center">Keine Termine in '+mname(mMonth)+'. Oben „Termin“ oder „Serie“ wählen.</td></tr>';
+    return'<tr class="'+(wk?"mwe":"")+'" style="'+(wk?"font-weight:600":"")+'"><td style="text-align:center">'+(e.kobs?"":'<input type="checkbox" data-sel="'+e.id+'" aria-label="Auswählen"'+(mSel.has(e.id)?" checked":"")+' style="margin-right:6px">')+esc(WK[wday(e.datum)]+" "+ddm(e.datum))+(e.bis&&e.bis>e.datum?" – "+esc(ddm(e.bis)):"")+'</td><td style="text-align:center">'+esc(typL(e))+'</td><td style="text-align:center">'+esc(tx)+esc(haSfx(e))+unsH(e)+(e.schwerpunkt?' <span class="note">'+esc(e.schwerpunkt)+"</span>":"")+(e.detail&&e.typ!=="Ferien"?'<div class="note" style="font-weight:400">Detail: '+esc(e.detail)+"</div>":"")+(e.ctask&&e.typ!=="Ferien"?'<div class="note" style="font-weight:400;color:var(--ac)">Co-Trainer: '+esc(e.ctask)+"</div>":"")+(e.typ!=="Ferien"?dienstSub(e,e.datum).map((s)=>'<div class="note" style="font-weight:400">'+esc(s)+"</div>").join(""):"")+'</td><td style="text-align:center">'+esc(zeitG(e))+'</td><td style="text-align:center">'+esc(e.ort||"")+"</td><td>"+(e.virt?"Eltern":e.eltern===false?"intern":"Eltern")+"</td><td>"+actions+"</td></tr>"}).join(""):'<tr><td class="empty" style="text-align:center">Keine Termine in '+mname(mMonth)+'. Oben „Termin“ oder „Serie“ wählen.</td></tr>';
   const wk=$("#mw").value||monday(today());$("#mw").value=wk;$("#mwk").textContent=kwOf(wk)+". KW · "+dlong(monday(wk))+" – "+dlong(addD(monday(wk),6));
 }
 $("#mm").onchange=(e)=>{mMonth=e.target.value;mArm=null;renderTermine()};
@@ -2671,8 +2673,11 @@ $("#mnext").onclick=()=>{const M=seasonMonths(),k=M.indexOf(mMonth);if(k<11){mMo
 $("#mw").onchange=renderTermine;
 const fld=(id,label,inner,st)=>'<label class="note"'+(st?' style="'+st+'"':"")+">"+label+"<br>"+inner+"</label>";
 /* Spätere Termine, die mit diesem zusammengehören: gleiche Serie, sonst gleiche Art mit derselben bisherigen Uhrzeit */
-const serieMatches=(e)=>{if(!e||e.virt||isGameTyp(e.typ))return[];const td=today();
-  return(D.events||[]).filter((x)=>x.id!==e.id&&x.datum>e.datum&&x.datum>=td&&x.typ===e.typ&&(e.serie?x.serie===e.serie:(!x.serie&&(e.beginn||e.ende)&&x.beginn===e.beginn&&x.ende===e.ende)))};
+const WKP=["Sonntage","Montage","Dienstage","Mittwoche","Donnerstage","Freitage","Samstage"];
+const serieMatches=(e,wd)=>{if(!e||e.virt||isGameTyp(e.typ))return[];const td=today();
+  return(D.events||[]).filter((x)=>x.id!==e.id&&x.datum>e.datum&&x.datum>=td&&x.typ===e.typ&&(e.serie?x.serie===e.serie:(!x.serie&&(e.beginn||e.ende)&&x.beginn===e.beginn&&x.ende===e.ende))&&(!wd||wday(x.datum)===wday(e.datum)))};
+const delEvs=(L)=>L.forEach((ev)=>{const fut=ev.datum>today();if(ev.trainId){save("trainings",ev.trainId,null)}else if(ev.spielId){const g=D.spiele.find((x)=>x.id===ev.spielId);if(g&&fut&&g.tore==null)save("games",g.id,null)}if(!ev.virt)save("events",ev.id,null)});
+const serSel=(old)=>{const v=$("#ed_ser")?$("#ed_ser").value:"";return v==="alle"?serieMatches(old):v==="wd"?serieMatches(old,true):[]};
 function openEv(id){
   const e=id&&id!=="new"?evAll().find((x)=>x.id===id):null,d=e||{datum:today().slice(0,7)===mMonth?today():mMonth+"-01",typ:"Training",eltern:true};
   const gg=d.spielId?D.spiele.find((x)=>x.id===d.spielId):null,gf=gg?gg.form:(arten().find((a)=>a.name===d.typ)||{}).form||"",gd=gg?gg.dauer:(arten().find((a)=>a.name===d.typ)||{}).dauer||"";
@@ -2687,7 +2692,7 @@ function openEv(id){
    +fld("","Zeit als Text (überschreibt, z. B. „Offen“)",inp("ed_zt",d.zeit,190))+fld("","Ort",inp("ed_ort",d.ort,190))
    +'<span id="ed_spw" style="display:'+(NFB.includes(d.typ)?"none":"contents")+'">'+fld("","Schwerpunkt (nur Trainer)",inp("ed_sp",d.schwerpunkt,240))+fld("","Detail zum Schwerpunkt",inp("ed_de",d.detail,240))+"</span>"
    +'<label class="note" style="display:flex;gap:8px;align-items:flex-end;padding-bottom:6px"><input type="checkbox" id="ed_el"'+(d.eltern===false?"":" checked")+"> im Elternexport zeigen</label>"+'<label class="note" style="display:flex;gap:8px;align-items:flex-end;padding-bottom:6px"><input type="checkbox" id="ed_un"'+(d.unsicher?" checked":"")+"> Verlegung wahrscheinlich (Tag oder Zeit)</label>"+fld("","Hinweis dazu (optional)",inp("ed_ug",d.unsGrund,230))+"</div>"
-   +(()=>{const sm=e&&!e.virt?serieMatches((D.events||[]).find((x)=>x.id===e.id)):[];return sm.length?'<label class="note" style="display:flex;gap:8px;align-items:flex-start;margin:0 0 10px"><input type="checkbox" id="ed_ser" style="margin-top:3px"><span>Auch die '+sm.length+" späteren "+(e.serie?"Termine dieser Serie":"Termine mit der bisherigen Uhrzeit")+" ändern (Treffen, Beginn, Ende, Ort, Titel). Einzeln angepasste Termine bleiben unverändert.</span></label>":""})()
+   +(()=>{const ev0=e&&!e.virt?(D.events||[]).find((x)=>x.id===e.id):null,sm=ev0?serieMatches(ev0):[],sw=ev0?serieMatches(ev0,true):[];return(sm.length?'<label class="note" style="display:block;margin:0 0 10px">Wofür soll das gelten?<br><select id="ed_ser"><option value="">Nur dieser Termin</option><option value="alle">Dieser und alle '+sm.length+" späteren "+(ev0.serie?"der Serie":"mit der bisherigen Uhrzeit")+"</option>"+(sw.length&&sw.length<sm.length?'<option value="wd">Dieser und nur die '+sw.length+" späteren "+WKP[wday(ev0.datum)]+"</option>":"")+'</select><br><span class="note">Gilt fürs Speichern (Treffen, Beginn, Ende, Ort, Titel) und fürs Löschen. Einzeln angepasste Termine bleiben beim Ändern unverändert.</span></label>':"")+(e?'<div class="bar" style="margin:0 0 10px"><button class="btn" id="edx" style="color:var(--r)">Löschen</button></div>':"")})()
    +'<div class="bar" style="margin:0"><span class="note" id="edm"></span><span style="flex:1"></span><button class="btn" id="edc">Abbrechen</button><button class="btn" id="eds" style="background:var(--ac);color:#fff;border-color:var(--ac)">Speichern</button></div></div>';
   $("#med").scrollIntoView({behavior:"smooth",block:"nearest"});
 }
@@ -2711,15 +2716,19 @@ function syncEv(o,old){
   }else{delete o.spielId;delete o.trainId}
 }
 $("#mnew").onclick=()=>{$("#mse").hidden=true;openEv("new")};
+$("#med").addEventListener("change",(e)=>{if(e.target.id==="ed_ser"){const b=$("#edx");if(b){b.dataset.arm="";b.textContent="Löschen"}}});
 $("#med").addEventListener("click",(e)=>{
   if(e.target.id==="edc"){$("#med").hidden=true;$("#med").innerHTML="";return}
+  if(e.target.id==="edx"){const id0=$("#med").dataset.id,ev=(D.events||[]).find((x)=>x.id===id0)||evAll().find((x)=>x.id===$("#med").dataset.virt);if(!ev)return;const L=[ev,...(ev.virt?[]:serSel(ev))];
+    if(e.target.dataset.arm!==String(L.length)){e.target.dataset.arm=String(L.length);e.target.textContent=L.length>1?"Wirklich "+L.length+" Termine löschen?":"Wirklich löschen?";return}
+    delEvs(L);$("#med").hidden=true;$("#med").innerHTML="";setSt(L.length+(L.length>1?" Termine":" Termin")+" gelöscht","ok");renderTermine();return}
   if(e.target.id!=="eds")return;
   const g=(i)=>$("#"+i).value.trim(),dat=g("ed_dat");if(!dat){$("#edm").textContent="Bitte ein Datum wählen.";return}
   const vv=$("#med").dataset.virt?evAll().find((x)=>x.id===$("#med").dataset.virt):null;
   const id=$("#med").dataset.id||"e"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),old=(D.events||[]).find((x)=>x.id===id)||(vv?{spielId:vv.spielId,trainId:vv.trainId}:{});
   const o={...old,id,datum:dat,bis:g("ed_bis")&&g("ed_bis")>dat?g("ed_bis"):null,typ:evTypRes($("#ed_typ").value)||(old&&old.typ)||evTypes()[0],gegner:g("ed_geg"),ha:$("#ed_ha").value,titel:g("ed_tit"),treffen:g("ed_tr"),beginn:g("ed_be"),ende:g("ed_en"),zeit:g("ed_zt"),ort:g("ed_ort"),schwerpunkt:g("ed_sp"),detail:g("ed_de"),unsicher:$("#ed_un").checked||undefined,unsGrund:$("#ed_un").checked?g("ed_ug"):undefined,eltern:$("#ed_el").checked};
   if($("#ed_fo")){o.form=$("#ed_fo").value;o.dauer=Math.round(+$("#ed_da").value)||0}if($("#ed_tw")&&!$("#ed_tw").closest("#ed_gm").hidden)o.twd=Math.max(0,Math.round(+$("#ed_tw").value)||0);if($("#ed_fz")){const fzv=Math.round(+$("#ed_fz").value);if(fzv>0)o.fzm=fzv;else delete o.fzm}
-  let serN=0;if($("#ed_ser")&&$("#ed_ser").checked&&old&&old.id){const F=["treffen","beginn","ende","ort","titel"];serieMatches(old).forEach((x)=>{const y={...x};let ch=false;F.forEach((f)=>{if((o[f]||"")!==(old[f]||"")&&(x[f]||"")===(old[f]||"")){y[f]=o[f];ch=true}});if(ch){syncEv(y,x);delete y.form;delete y.dauer;delete y.twd;save("events",x.id,y);serN++}})}
+  let serN=0;if($("#ed_ser")&&$("#ed_ser").value&&old&&old.id){const F=["treffen","beginn","ende","ort","titel"];serSel(old).forEach((x)=>{const y={...x};let ch=false;F.forEach((f)=>{if((o[f]||"")!==(old[f]||"")&&(x[f]||"")===(old[f]||"")){y[f]=o[f];ch=true}});if(ch){syncEv(y,x);delete y.form;delete y.dauer;delete y.twd;save("events",x.id,y);serN++}})}
   syncEv(o,old);delete o.form;delete o.dauer;delete o.twd;save("events",id,o);if(serN)setSt(serN+" weitere Termine angepasst","ok");mMonth=dat.slice(0,7);$("#med").hidden=true;$("#med").innerHTML="";renderTermine();
 });
 $("#mser").onclick=()=>{$("#med").hidden=true;const s=$("#mse");s.hidden=!s.hidden};
@@ -2741,8 +2750,12 @@ $("#mse").addEventListener("click",(e)=>{
     const id="e"+d.replace(/-/g,"")+Math.random().toString(36).slice(2,6);const o={id,datum:d,bis:null,typ,gegner:"",ha:"",titel:$("#se_tit").value.trim(),treffen:"",beginn:$("#se_be").value,ende:$("#se_en").value,zeit:"",ort:$("#se_ort").value.trim(),schwerpunkt:"",detail:"",eltern:true,serie:sid};syncEv(o,{});save("events",id,o);n++}
   $("#sem").textContent=n+" Termine erzeugt (bestehende Termine derselben Art am selben Tag bleiben unverändert).";
 });
+document.addEventListener("click",(e)=>{if(e.target.closest("#msd,#msn")){const bt=e.target.closest("#msd,#msn");if(bt.id==="msn"){mSel.clear();renderTermine();return}
+    const L=[...mSel].map((i)=>evAll().find((x)=>x.id===i)).filter(Boolean);if(bt.dataset.arm!=="1"){bt.dataset.arm="1";bt.textContent="Wirklich "+L.length+" löschen?";return}
+    delEvs(L.map((x)=>(D.events||[]).find((y)=>y.id===x.id)||x));mSel.clear();setSt(L.length+" Termine gelöscht","ok");renderTermine();return}});
 $("#mt").addEventListener("click",(e)=>{
   const ee=e.target.closest("[data-ee]"),ed=e.target.closest("[data-ed]"),eg=e.target.closest("[data-eg]"),vg=e.target.closest("[data-vg]"),vt=e.target.closest("[data-vt]");
+  const sc=e.target.closest("[data-sel]");if(sc){sc.checked?mSel.add(sc.dataset.sel):mSel.delete(sc.dataset.sel);renderTermine();return}
   if(ee){mArm=null;openEv(ee.dataset.ee);return}
   if(vt){go("t");return}
   if(vg){go("g");openGame(vg.dataset.vg);return}
