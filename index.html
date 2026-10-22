@@ -1117,14 +1117,15 @@ xTheme(false);
 
 /* Vereinslogo: weißen Rand außen entfernen und rund ausschneiden (nur wenn das Logo rund ist) */
 let _lgSrc="",_lgOut="";
-function lgPrep(){const s=D.config&&D.config.logo;if(!s||s===_lgSrc)return;_lgSrc=s;_lgOut="";const im=new Image();
+function lgTrim(s){return new Promise((res)=>{const im=new Image();im.onerror=()=>res("");
   im.onload=()=>{try{const w=im.naturalWidth,h=im.naturalHeight,c=document.createElement("canvas");c.width=w;c.height=h;const g=c.getContext("2d");g.drawImage(im,0,0);const d=g.getImageData(0,0,w,h).data,bg=(i)=>d[i+3]<20||(d[i]>235&&d[i+1]>235&&d[i+2]>235);
     let x0=w,x1=-1,y0=h,y1=-1;for(let y=0;y<h;y++)for(let x=0;x<w;x++){if(!bg((y*w+x)*4)){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}}
-    if(x1<0)return;const bw=x1-x0+1,bh=y1-y0+1,S=Math.max(bw,bh),cx=x0+bw/2,cy=y0+bh/2,o=document.createElement("canvas");o.width=o.height=S;const q=o.getContext("2d");
+    if(x1<0){res("");return}const bw=x1-x0+1,bh=y1-y0+1,S=Math.max(bw,bh),cx=x0+bw/2,cy=y0+bh/2,o=document.createElement("canvas");o.width=o.height=S;const q=o.getContext("2d");
     const corner=[[x0,y0],[x1,y0],[x0,y1],[x1,y1]].every((p)=>bg((p[1]*w+p[0])*4)),round=corner&&Math.abs(bw-bh)<=S*.06;
     if(round){q.beginPath();q.arc(S/2,S/2,S/2,0,Math.PI*2);q.closePath();q.clip()}
-    q.drawImage(im,cx-S/2,cy-S/2,S,S,0,0,S,S);_lgOut=o.toDataURL("image/png");try{renderLogo()}catch(e){}}catch(e){}};
-  im.src=s}
+    q.drawImage(im,cx-S/2,cy-S/2,S,S,0,0,S,S);res(o.toDataURL("image/png"))}catch(e){res("")}};
+  im.src=s})}
+function lgPrep(){const s=D.config&&D.config.logo;if(!s||s===_lgSrc)return;_lgSrc=s;_lgOut="";lgTrim(s).then((u)=>{if(!u||s!==_lgSrc)return;_lgOut=u;try{renderLogo()}catch(e){}})}
 function lgR(){const s=D.config&&D.config.logo;if(!s)return "";if(s!==_lgSrc)lgPrep();return s===_lgSrc&&_lgOut?_lgOut:s}
 const XF="system-ui,-apple-system,Segoe UI,Helvetica,Arial,sans-serif";
 const xctx=document.createElement("canvas").getContext("2d");
@@ -2358,11 +2359,13 @@ function vPlan(root,T){
 }
 function planOnly(d){
   useBg();dzApply(d,SNAP.dz);const v=shell(),cur=document.documentElement.getAttribute("data-theme")||"";
-  v.innerHTML='<div class="vh">'+(d.l?'<img alt="" src="'+esc(d.l)+'">':"")+'<div><b style="font-size:22px;line-height:1.2">Terminplan '+esc(d.m||"U13")+'</b><div class="note" style="font-size:14px">TuS Haltern am See · Saison '+esc(d.s||"")+'</div></div><span style="flex:1"></span><select id="vth" aria-label="Darstellung"><option value="">Darstellung: Auto</option><option value="light">Hell</option><option value="dark">Dunkel</option></select></div>'+hnHtml(hnItems(d.hn,"alle"))+'<div id="vplan"></div><div class="vf">Stand: '+esc(dt(d.u))+'</div>';
-  bgPick();const s=document.getElementById("vth");s.value=cur;s.onchange=()=>{applyTheme(s.value);try{s.value?localStorage.setItem("u13theme",s.value):localStorage.removeItem("u13theme")}catch(e){}};
+  v.innerHTML='<div class="vh">'+(d.l?'<img alt="" data-lg src="'+esc(d.l)+'">':"")+'<div><b style="font-size:22px;line-height:1.2">Terminplan '+esc(d.m||"U13")+'</b><div class="note" style="font-size:14px">TuS Haltern am See · Saison '+esc(d.s||"")+'</div></div><span style="flex:1"></span><select id="vth" aria-label="Darstellung"><option value="">Darstellung: Auto</option><option value="light">Hell</option><option value="dark">Dunkel</option></select></div>'+hnHtml(hnItems(d.hn,"alle"))+'<div id="vplan"></div><div class="vf">Stand: '+esc(dt(d.u))+'</div>';
+  bgPick();vLogo(v,d.l);const s=document.getElementById("vth");s.value=cur;s.onchange=()=>{applyTheme(s.value);try{s.value?localStorage.setItem("u13theme",s.value):localStorage.removeItem("u13theme")}catch(e){}};
   vPlan(document.getElementById("vplan"),{...d.t,s:d.s,lg:d.l,hn:d.hn});
   document.title="TuS Haltern U13 · Terminplan";
 }
+/* Kopf im Link: Vereinslogo ohne weißen Rand (wird im Browser zugeschnitten, falls noch nicht geschehen) */
+const vLogo=(v,l)=>{const im=l&&v.querySelector(".vh img[data-lg]");if(im)lgTrim(l).then((u)=>{if(u&&im.isConnected)im.src=u})};
 const dzApply=(d,s)=>{let n=0;const f=()=>{if(window.__dz){__dz.set(d.dz||s||"kobalt",true);__dz.view(d.da,d.dg);return}if(++n<40)setTimeout(f,100)};f()};
 async function showExt(k,blob,key){
   let d;try{d=await unseal(key,blob)}catch(e){showAccess("Dieser Link ist nicht (mehr) gültig. Bitte den Trainer fragen.");return}
@@ -2401,8 +2404,8 @@ async function showViewer(pid,key){
   const VD=window.__vid,hasU=!!(VD&&(d.t||(d.vc&&d.vc.length)||(d.vg&&d.vg.length)||d.fk));
   const tabsHtml=()=>{const w=VD&&hasU?VD.viewerTabs(d,pid):{};return(hasU?'<button data-v="u">Übersicht</button>':"")+(d.h?'<button data-v="p">Profil</button>':"")+(d.t?'<button data-v="t">Terminplan</button>':"")+(d.li?'<button data-v="l">Liga</button>':"")+(w.v?'<button data-v="v">Videos</button>':"")+(w.f?'<button data-v="f">Feedback</button>':"")};
   const multi=hasU||d.t||d.li;
-  v.innerHTML='<div class="vh">'+(d.l?'<img alt="" src="'+esc(d.l)+'">':"")+'<div><b style="font-size:22px;line-height:1.2">'+(d.n?"Hey "+esc(d.n)+"!":"Hey!")+'</b><div class="note" style="font-size:14px">Deine '+esc(d.m||"U13")+'-Zentrale · Saison '+esc(d.s||"")+'</div></div><span style="flex:1"></span><select id="vth" aria-label="Darstellung"><option value="">Darstellung: Auto</option><option value="light">Hell</option><option value="dark">Dunkel</option></select></div>'+hnHtml(hnItems(d.hn,"alle"))+(multi?'<div class="seg" id="vtab" style="margin-bottom:14px">'+tabsHtml()+'</div>':"")+(hasU?'<div id="vueb"></div>':"")+'<div id="vprof"'+(hasU?" hidden":"")+'>'+(d.h||(multi?"":'<div class="card"><div class="note">Ein Spielerprofil ist für diesen Link nicht freigegeben.</div></div>'))+'</div>'+(d.t?'<div id="vplan" hidden></div>':"")+(d.li?'<div id="vliga" hidden></div>':"")+(hasU?'<div id="vvid" hidden></div><div id="vfb" hidden></div>':"")+'<div class="vf">Stand: '+esc(dt(d.u))+' · Persönlicher Link, bitte nicht weitergeben.<span id="vwer"></span></div>';
-  bgPick();const s=document.getElementById("vth");s.value=cur;s.onchange=()=>{applyTheme(s.value);try{s.value?localStorage.setItem("u13theme",s.value):localStorage.removeItem("u13theme")}catch(e){}};
+  v.innerHTML='<div class="vh">'+(d.f?'<img alt="" class="vfoto" style="border-radius:50%;object-fit:cover" src="'+esc(d.f)+'">':d.l?'<img alt="" data-lg src="'+esc(d.l)+'">':"")+'<div><b style="font-size:22px;line-height:1.2">'+(d.n?"Hey "+esc(d.n)+"!":"Hey!")+'</b><div class="note" style="font-size:14px">Deine '+esc(d.m||"U13")+'-Zentrale · Saison '+esc(d.s||"")+'</div></div><span style="flex:1"></span><select id="vth" aria-label="Darstellung"><option value="">Darstellung: Auto</option><option value="light">Hell</option><option value="dark">Dunkel</option></select></div>'+hnHtml(hnItems(d.hn,"alle"))+(multi?'<div class="seg" id="vtab" style="margin-bottom:14px">'+tabsHtml()+'</div>':"")+(hasU?'<div id="vueb"></div>':"")+'<div id="vprof"'+(hasU?" hidden":"")+'>'+(d.h||(multi?"":'<div class="card"><div class="note">Ein Spielerprofil ist für diesen Link nicht freigegeben.</div></div>'))+'</div>'+(d.t?'<div id="vplan" hidden></div>':"")+(d.li?'<div id="vliga" hidden></div>':"")+(hasU?'<div id="vvid" hidden></div><div id="vfb" hidden></div>':"")+'<div class="vf">Stand: '+esc(dt(d.u))+' · Persönlicher Link, bitte nicht weitergeben.<span id="vwer"></span></div>';
+  bgPick();if(!d.f)vLogo(v,d.l);const s=document.getElementById("vth");s.value=cur;s.onchange=()=>{applyTheme(s.value);try{s.value?localStorage.setItem("u13theme",s.value):localStorage.removeItem("u13theme")}catch(e){}};
   if(multi){const tb=document.getElementById("vtab");let ready=false,curV="";
     const show=(v)=>{curV=v;tb.querySelectorAll("button").forEach((x)=>x.classList.toggle("on",x.dataset.v===v));const pe=document.getElementById("vplan"),le=document.getElementById("vliga");document.getElementById("vprof").hidden=v!=="p";if(pe)pe.hidden=v!=="t";if(le){le.hidden=v!=="l";if(v==="l"&&!le.innerHTML&&window.__FD)le.innerHTML=window.__FD.view(d.li)}if(v==="t"&&!ready&&pe){ready=true;vPlan(pe,{...d.t,s:d.s,lg:d.l,hn:d.hn})}
       [["u","vueb"],["v","vvid"],["f","vfb"]].forEach(([k,id])=>{const el=document.getElementById(id);if(el)el.hidden=v!==k});if(hasU&&"uvf".includes(v))VD.shown(v)};
@@ -2624,7 +2627,7 @@ const daOf=(dz)=>window.__dz?__dz.accOf(dz):"",dgOf=(dz)=>dz==="glas"&&window.__
 const dzSig=()=>JSON.stringify(Object.keys(L).sort().filter((k)=>L[k].aktiv&&L[k].key).map((k)=>[k,dzOf(k),daOf(dzOf(k)),dgOf(dzOf(k))]));
 async function buildSnap(){
   const LI=ligaSnap(),TP=planSnap(),HN=(D.config&&D.config.hinweise)||[],out={v:1,u:new Date().toISOString(),p:{},k:{}},logo=lgR(),sa=(D.config&&D.config.saison)||"";
-  for(const p of active()){const l=L[p.id];if(!l||!l.aktiv||!l.key)continue;out.p[p.id]=await seal(l.key,{...(window.__vid?window.__vid.pkg(p.id):{}),h:profExt()?profileHtml(p.id):"",l:logo,s:sa,m:mann(),u:out.u,t:TP,n:p.vorname,hn:HN,li:LI,dz:dzOf(p.id),da:daOf(dzOf(p.id)),dg:dgOf(dzOf(p.id))});out.k[p.id]=await sha8(l.key)}
+  for(const p of active()){const l=L[p.id];if(!l||!l.aktiv||!l.key)continue;out.p[p.id]=await seal(l.key,{...(window.__vid?window.__vid.pkg(p.id):{}),h:profExt()?profileHtml(p.id):"",l:logo,s:sa,m:mann(),u:out.u,t:TP,n:p.vorname,f:p.foto||"",hn:HN,li:LI,dz:dzOf(p.id),da:daOf(dzOf(p.id)),dg:dgOf(dzOf(p.id))});out.k[p.id]=await sha8(l.key)}
   out.bg=await bgSnap();out.dzs=dzSig();out.x={};out.xk={};
   for(const k of ["full","anon","plan","demo"]){const l=L["x"+k];if(!l||!l.aktiv||!l.key)continue;out.x[k]=await seal(l.key,k==="plan"?{k,u:out.u,t:TP,l:logo,s:sa,m:mann(),hn:HN,dz:dzOf("x"+k),da:daOf(dzOf("x"+k)),dg:dgOf(dzOf("x"+k))}:{k,u:out.u,db:extData(k),dz:dzOf("x"+k),da:daOf(dzOf("x"+k)),dg:dgOf(dzOf("x"+k))});out.xk[k]=await sha8(l.key)}
   {const f=await fingerprintParts();out.fp=f.a+f.s;out.fa=f.a;out.fs=f.s}return out;
