@@ -264,6 +264,8 @@ nav button .em{display:inline-flex;justify-content:center;align-items:center}
 @media(max-width:600px){html body .top{gap:8px;margin-bottom:8px}html body .top .logo{width:46px;height:46px;font-size:8px;border-radius:10px}html body .top b{font-size:18px!important}html body .top #tzl{font-size:12px!important}}
 /* Tablet/Computer: Menüpunkte, die nicht in die Zeile passen, liegen hinter „Mehr ▾“ */
 @media(min-width:761px){nav button.mobx{display:none!important}nav button.tabmore{flex:none;margin-left:auto;font-weight:600}.mobsheet{position:fixed;z-index:400;background:var(--card);border:1px solid var(--ln);border-radius:14px;padding:6px;display:grid;gap:2px;min-width:230px;max-height:75vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.35);backdrop-filter:blur(30px) saturate(1.8);-webkit-backdrop-filter:blur(30px) saturate(1.8)}html[data-design="glas"] .mobsheet{background:rgba(255,255,255,.9)}@media(prefers-color-scheme:dark){html[data-design="glas"]:not([data-theme="light"]) .mobsheet{background:rgba(28,29,34,.94)}}html[data-design="glas"][data-theme="dark"] .mobsheet{background:rgba(28,29,34,.94)}.mobsheet[hidden]{display:none}.mobsheet button{display:flex;align-items:center;gap:12px;min-height:44px;border:0;background:none;color:var(--tx);font:inherit;font-size:15px;border-radius:9px;padding:8px 14px;cursor:pointer;text-align:left}.mobsheet button:hover{background:var(--acs)}.mobsheet button svg{width:19px;height:19px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}}
+/* Datum/Uhrzeit als Textfeld am Computer (datum.js) */
+input.dsf-d{width:9.5em}input.dsf-t{width:5.5em}input.dsbad{border-color:var(--r,#c62828)!important;outline-color:var(--r,#c62828)}
 #lkco{display:none!important}</style>
 <div class="app">
 <nav><h1>U13 · <span id="sais">2026/27</span></h1><small>Teamzentrale</small>
@@ -274,7 +276,7 @@ nav button .em{display:inline-flex;justify-content:center;align-items:center}
 <div class="kpis" id="hn" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))"></div>
 <hr class="hl"><h3>Termine &amp; Hinweise</h3><div class="gr" id="hg" style="margin-top:0"></div><hr class="hl"><h3>Kennzahlen</h3><div class="kpis" id="hk"></div><hr class="hl"><div class="card" style="margin-top:14px"><h3>Export für Eltern und Trainer</h3><div class="bar"><label class="note">Fassung <select id="hv"><option value="Eltern">Eltern / Spieler (ohne Geburtstage, Schwerpunkte, interne Termine)</option><option value="Trainer">Trainer (alles)</option></select></label><label class="note">Modus <select class="xthp"><option value="light">Hell</option><option value="dark">Dunkel</option></select></label></div>
 <div class="bar"><span class="note" style="min-width:110px">Monatsplan (A4)</span><select id="hmm" aria-label="Monat"></select><div class="seg" id="hxmo"><button data-f="png">PNG</button><button data-f="jpg">JPG</button><button data-f="pdf">PDF</button></div></div>
-<div class="bar"><span class="note" style="min-width:110px">Wochenplan (A4)</span><input type="date" id="hmw" aria-label="Woche (beliebiger Tag)"><span class="note" id="hmk"></span><div class="seg" id="hxwo"><button data-f="png">PNG</button><button data-f="jpg">JPG</button><button data-f="pdf">PDF</button></div></div></div>
+<div class="bar"><span class="note" style="min-width:110px">Wochenplan (A4)</span><button class="btn" id="hmwp" aria-label="Vorherige Woche">◀</button><select id="hmw" aria-label="Kalenderwoche"></select><button class="btn" id="hmwn" aria-label="Nächste Woche">▶</button><div class="seg" id="hxwo"><button data-f="png">PNG</button><button data-f="jpg">JPG</button><button data-f="pdf">PDF</button></div></div></div>
 </section>
 <section id="liga" hidden></section>
 <section id="v" hidden></section>
@@ -285,7 +287,7 @@ nav button .em{display:inline-flex;justify-content:center;align-items:center}
 <div id="pn_td" hidden><h3 style="margin-top:14px">To-Do / Hinweis</h3><div class="bar" style="margin:0;align-items:flex-start"><select id="tdt" aria-label="Art"><option value="todo">To-Do</option><option value="hinweis">Hinweis</option></select><label class="note">Zuständig<br><select id="tdw" aria-label="Zuständig"><option value="">– niemand –</option></select></label><textarea id="tdx" rows="3" placeholder="Text … (Zeilenumbruch mit Enter)" style="flex:1;min-width:220px;min-height:60px" autocomplete="off"></textarea><label class="note">Deadline (optional)<br><input type="date" id="tdd"></label><button class="btn" id="tda" style="background:var(--ac);color:#fff;border-color:var(--ac)">＋ Hinzufügen</button></div><p class="note" style="margin:8px 0 0">Erscheinen auf der Startseite, nur für Trainer sichtbar. Die Deadline färbt sich gelb (≤ 7 Tage), orange (≤ 2 Tage) und rot (überfällig). Hinweise für Eltern: Termin mit Art „Hinweis“.</p></div></div>
 <div class="card" style="margin-bottom:14px"><h3>Export für Eltern und Trainer</h3><div class="bar"><label class="note">Fassung <select id="mv"><option value="Eltern">Eltern (ohne Geburtstage, Schwerpunkte, interne Termine)</option><option value="Trainer">Trainer (alles)</option></select></label><label class="note">Modus <select class="xthp"><option value="light">Hell</option><option value="dark">Dunkel</option></select></label></div>
 <div class="bar"><span class="note" style="min-width:150px">Monatsplan (A4 hoch): <b id="xmlab"></b></span><div class="seg" id="xmo"><button data-f="png">PNG</button><button data-f="jpg">JPG</button><button data-f="pdf">PDF</button></div></div>
-<div class="bar"><span class="note" style="min-width:150px">Wochenplan:</span><input type="date" id="mw" aria-label="Woche (beliebiger Tag)"><span class="note" id="mwk"></span><div class="seg" id="xwo"><button data-f="png">PNG</button><button data-f="jpg">JPG</button><button data-f="pdf">PDF</button></div></div></div>
+<div class="bar"><span class="note" style="min-width:150px">Wochenplan:</span><button class="btn" id="mwp" aria-label="Vorherige Woche">◀</button><select id="mw" aria-label="Kalenderwoche"></select><button class="btn" id="mwn" aria-label="Nächste Woche">▶</button><div class="seg" id="xwo"><button data-f="png">PNG</button><button data-f="jpg">JPG</button><button data-f="pdf">PDF</button></div></div></div>
 <div class="bar"><button class="btn" id="mprev" aria-label="Vorheriger Monat">◀</button><select id="mm" aria-label="Monat"></select><button class="btn" id="mnext" aria-label="Nächster Monat">▶</button></div>
 <div class="leg" id="ml"></div><div class="card tw" style="padding:0"><table id="mt"></table></div>
 <div class="card" style="margin-top:14px"><h3>To-Dos &amp; Hinweise</h3><div id="tdl"></div></div>
@@ -543,6 +545,49 @@ nav button .em{display:inline-flex;justify-content:center;align-items:center}
   }
   setInterval(fold,800);
 })();
+</script><script>/* Datum und Uhrzeit am Computer tippen wie im Clip-Formular (Videos):
+   Auf Geräten mit Maus werden alle Felder type=date/time zu Textfeldern TT.MM.JJJJ / HH:MM,
+   nach zwei Ziffern springt es automatisch weiter ("1800" wird "18:00").
+   Für den übrigen Code bleibt .value wie bei den Browser-Feldern (JJJJ-MM-TT bzw. HH:MM),
+   input/change kommen erst, wenn ein vollständiger, gültiger Wert dasteht.
+   Auf Handy und Tablet bleibt der Kalender des Geräts. */
+(function(){
+if(!window.matchMedia||!matchMedia("(hover:hover) and (pointer:fine)").matches)return;
+const NV=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,"value");
+const P2=(n)=>String(n).padStart(2,"0"),FULL={d:10,t:5},SEP=/[.\/,\- :]/;
+function autoFmt(v,sep,max,firstMax,del){
+  const g=[""];for(const ch of String(v)){if(/\d/.test(ch)){let cur=g[g.length-1];if(g.length<max.length&&cur.length>=2){g.push("");cur=""}
+      if(cur.length>=max[g.length-1])continue;g[g.length-1]+=ch;
+      if(g.length<max.length&&g[g.length-1].length===1&&+ch>firstMax[g.length-1]){g[g.length-1]="0"+ch}}
+    else if(SEP.test(ch)&&g.length<max.length&&g[g.length-1].length>0){g[g.length-1]=g[g.length-1].padStart(2,"0");g.push("")}}
+  let out=g.join(sep);if(!del&&g.length<max.length&&g[g.length-1].length===2)out+=sep;return out}
+const fmt=(k,iso)=>!iso?"":k==="d"?iso.slice(8,10)+"."+iso.slice(5,7)+"."+iso.slice(0,4):iso.slice(0,5);
+const norm=(k,v)=>{v=v==null?"":String(v);if(k==="d")return/^\d{4}-\d{2}-\d{2}$/.test(v)?v:"";const m=/^(\d{1,2}):(\d{2})/.exec(v);return m&&+m[1]<24&&+m[2]<60?P2(+m[1])+":"+m[2]:""};
+/* "" = leer, null = ungültig; ohne Jahr: dieses Jahr; zweistelliges Jahr: 19xx, wenn es sonst mehr als 10 Jahre in der Zukunft läge */
+function parse(k,t){t=String(t||"").trim().replace(/:$/,"");if(!t)return"";
+  if(k==="t"){const m=t.match(/^(\d{1,2})(?::(\d{1,2}))?$/);if(!m||+m[1]>23||+(m[2]||0)>59)return null;return P2(+m[1])+":"+P2(+(m[2]||0))}
+  const m=t.match(/^(\d{1,2})\.(\d{1,2})\.?(\d{2}|\d{4})?$/);if(!m)return null;
+  const now=new Date().getFullYear();let y=m[3]?+m[3]:now;if(m[3]&&m[3].length===2)y+=y+2000>now+10?1900:2000;
+  const d=+m[1],mo=+m[2],dt=new Date(y,mo-1,d);if(dt.getMonth()!==mo-1||dt.getDate()!==d)return null;return y+"-"+P2(mo)+"-"+P2(d)}
+function upgrade(el){if(el._ds)return;const k=el.type==="date"?"d":el.type==="time"?"t":"";if(!k)return;
+  el._dv=norm(k,NV.get.call(el));el._ds=k;el.type="text";el.inputMode="numeric";el.autocomplete="off";el.maxLength=FULL[k];
+  if(!el.placeholder)el.placeholder=k==="d"?"TT.MM.JJJJ":"HH:MM";el.classList.add("dsf",k==="d"?"dsf-d":"dsf-t");
+  Object.defineProperty(el,"value",{configurable:true,get(){return el._dv},set(v){el._dv=norm(k,v);el.classList.remove("dsbad");NV.set.call(el,fmt(k,el._dv))}});
+  NV.set.call(el,fmt(k,el._dv))}
+const scan=(r)=>{if(r.matches&&r.matches("input[type=date],input[type=time]"))upgrade(r);if(r.querySelectorAll)r.querySelectorAll("input[type=date],input[type=time]").forEach(upgrade)};
+function fire(el){for(const t of["input","change"]){const ev=new Event(t,{bubbles:true});ev._ds=1;el.dispatchEvent(ev)}}
+/* Text fertig: übernehmen und melden; ungültig: alten Wert wieder anzeigen */
+function commit(el){const k=el._ds,p=parse(k,NV.get.call(el));el.classList.remove("dsbad");
+  if(p===null){NV.set.call(el,fmt(k,el._dv));return}if(p!==el._dv){el._dv=p;NV.set.call(el,fmt(k,p));fire(el)}else NV.set.call(el,fmt(k,p))}
+window.addEventListener("input",(e)=>{const el=e.target;if(!el||!el._ds||e._ds)return;e.stopImmediatePropagation();
+  const k=el._ds,raw=NV.get.call(el),n=autoFmt(raw,k==="d"?".":":",k==="d"?[2,2,4]:[2,2],k==="d"?[3,1,9]:[2,5],/^delete/.test(e.inputType||""));if(n!==raw)NV.set.call(el,n);
+  const p=parse(k,n),full=n.length===FULL[k];el.classList.toggle("dsbad",full&&p===null);if(full&&p&&p!==el._dv){el._dv=p;fire(el)}},true);
+window.addEventListener("change",(e)=>{const el=e.target;if(el&&el._ds&&!e._ds)e.stopImmediatePropagation()},true);
+window.addEventListener("focusout",(e)=>{const el=e.target;if(el&&el._ds)commit(el)},true);
+window.addEventListener("keydown",(e)=>{const el=e.target;if(el&&el._ds&&e.key==="Enter")commit(el)},true);
+const go=()=>{scan(document.body);new MutationObserver((ms)=>{for(const m of ms)m.addedNodes.forEach((n)=>{if(n.nodeType===1)scan(n)})}).observe(document.body,{childList:true,subtree:true})};
+document.body?go():document.addEventListener("DOMContentLoaded",go);
+})();
 </script>
 <script>
 const $=(q)=>document.querySelector(q),POS=["TW","IV","AV","FL","ZM","ST"],pc=(x)=>x==null?"–":(x*100).toFixed(1).replace(".",",")+" %",mn=(x)=>String(Math.round(x));
@@ -575,16 +620,18 @@ const qTxt=()=>"Offline – "+OQ.size+(OQ.size===1?" Änderung wartet":" Änderu
 function qApply(coll,id,data,quiet){const k=COLKEY[coll];if(!k||!D[k])return;const i=D[k].findIndex((x)=>x.id===id);if(data){const o={id,...data};if(i>=0)D[k][i]=o;else D[k].push(o)}else if(i>=0)D[k].splice(i,1);if(!quiet){try{renderAll()}catch(e){}}}
 const qReapply=(k)=>OQ.forEach((it)=>{if(COLKEY[it.coll]===k)qApply(it.coll,it.id,it.data,true)});
 function save(coll,id,data){ // data=null löscht
-  if(!db)return;const key=coll+"/"+id,it={coll,id,data:data?JSON.parse(JSON.stringify(data)):null,ts:Date.now()};
+  if(!db)return;const key=coll+"/"+id,it={coll,id,data:data?JSON.parse(JSON.stringify(data)):null,ts:Date.now()};if(ccAuto)it.auto=true;
   OQ.set(key,it);qStore();ccMine(coll,id,it.data);
   if(navigator.onLine===false){qApply(coll,id,it.data);setSt(qTxt(),"busy");return Promise.resolve()}
   setSt("Speichert …","busy");return qPush(it);
 }
 /* ---------- Hinweis bei gleichzeitiger Bearbeitung: ein anderes Gerät ändert ein Dokument, an dem man gerade arbeitet ---------- */
-const CW={mine:{},seen:{},touch:{},items:[]};
+const CW={mine:{},seen:{},seenN:{},touch:{},items:[]};
+/* Automatische Änderungen (Spiel-Nummern, Kader vorbelegen, FUSSBALL.DE-Abgleich) zählen nicht als „ich arbeite gerade daran“ */
+let ccAuto=0;function ccQuiet(fn){ccAuto++;try{return fn()}finally{ccAuto--}}window.ccQuiet=ccQuiet;
 const ccStr=(o)=>JSON.stringify(o,(k,v)=>v&&typeof v==="object"&&!Array.isArray(v)?Object.keys(v).sort().reduce((a,b)=>(a[b]=v[b],a),{}):v);
 const ccH=(s)=>{let h=5381;for(let i=0;i<s.length;i++)h=((h*33)^s.charCodeAt(i))>>>0;return h+"."+s.length};
-function ccMine(coll,id,data){const k=coll+"/"+id;if(!data){CW.mine[k]=[];CW.touch[k]=Date.now();return}(CW.mine[k]=CW.mine[k]||[]).push(ccH(ccStr(data)));if(CW.mine[k].length>8)CW.mine[k].shift();CW.touch[k]=Date.now()}
+function ccMine(coll,id,data){const k=coll+"/"+id;if(!data){CW.mine[k]=[];if(!ccAuto)CW.touch[k]=Date.now();return}(CW.mine[k]=CW.mine[k]||[]).push(ccH(ccStr(data)));if(CW.mine[k].length>8)CW.mine[k].shift();if(!ccAuto)CW.touch[k]=Date.now()}
 const ccDate=(s)=>s?String(s).slice(8,10)+"."+String(s).slice(5,7)+".":"";
 function ccLabel(coll,id,d){d=d||{};const g=(i)=>(D.spiele||[]).find((x)=>x.id===i)||{};
   if(coll==="games")return"Spiel "+(d.nr!=null?d.nr:"")+(d.gegner?" gegen "+d.gegner:"");
@@ -601,9 +648,9 @@ function ccRender(){const b=document.getElementById("ccw");if(!b)return;if(!CW.i
   b.innerHTML="<b>⚠ Gleichzeitige Änderung</b><ul>"+CW.items.slice(0,5).map((x)=>"<li>"+esc(x)+"</li>").join("")+(CW.items.length>5?"<li>… und "+(CW.items.length-5)+" weitere</li>":"")+'</ul><p class="note" style="margin:0 0 6px">Ein anderes Gerät (zum Beispiel das des Co-Trainers) hat dies geändert, während du daran gearbeitet hast. Es gilt immer die zuletzt gespeicherte Fassung. Bitte kurz prüfen, ob alles stimmt.</p><div class="bar"><button class="btn" data-ccok="1">Verstanden</button></div>';b.hidden=false}
 function ccNote(coll,id,d){if(window.__RO||window.__VIEWER||window.__DEMO)return;const t=ccLabel(coll,id,d);if(!CW.items.includes(t))CW.items.push(t);ccRender()}
 window.__ccNote=ccNote;
-function ccSnap(coll,docs){docs.forEach((d)=>{const k=coll+"/"+d.id,x=d.data(),h=ccH(ccStr(x)),prev=CW.seen[k];CW.seen[k]=h;
-  if(prev===undefined||prev===h||(CW.mine[k]||[]).includes(h))return;
-  const open=(coll==="games"&&typeof gOpen!=="undefined"&&gOpen===d.id)||(coll==="notes"&&typeof nEdit!=="undefined"&&nEdit===d.id),rec=Date.now()-(CW.touch[k]||0)<6e5||OQ.has(k);
+function ccSnap(coll,docs){docs.forEach((d)=>{const k=coll+"/"+d.id,x=d.data(),h=ccH(ccStr(x)),prev=CW.seen[k],hn=coll==="games"?ccH(ccStr({...x,nr:0})):h,prevN=CW.seenN[k];CW.seen[k]=h;CW.seenN[k]=hn;
+  if(prev===undefined||prev===h||(CW.mine[k]||[]).includes(h)||prevN===hn)return;
+  const q=OQ.get(k),open=(coll==="games"&&typeof gOpen!=="undefined"&&gOpen===d.id)||(coll==="notes"&&typeof nEdit!=="undefined"&&nEdit===d.id),rec=Date.now()-(CW.touch[k]||0)<6e5||!!(q&&!q.auto);
   if(open||rec)ccNote(coll,d.id,x)})}
 document.addEventListener("click",(e)=>{if(e.target.closest&&e.target.closest("[data-ccok]")){CW.items=[];ccRender()}});
 function qPush(it){const key=it.coll+"/"+it.id;it.busy=true;
@@ -696,6 +743,10 @@ $("#so").onchange=$("#od").onchange=renderSaison;
 const ORDER=["","x","K","e","v","t","u"],SL={x:"teilgenommen",K:"Kreisauswahl (zählt als teilgenommen)",e:"entschuldigt",v:"verletzt",t:"terminlich verhindert",u:"unentschuldigt"};
 $("#l1").innerHTML=Object.keys(SL).map((c)=>'<i><span class="s '+c+'" style="cursor:default">'+(c==="K"?"k":c)+"</span>"+SL[c]+"</i>").join("")+'<i><span class="s o" style="cursor:default">·</span>kein Eintrag</i>';
 const seasonMonths=()=>{const y=+String(D.config&&D.config.saison||"2026/27").slice(0,4);return Array.from({length:12},(_,k)=>{const d=new Date(y,6+k,1);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")})};
+/* Termine und Spiele nur innerhalb der eingestellten Saison (Juli bis Juni) */
+const inSaison=(d)=>!!d&&seasonMonths().includes(String(d).slice(0,7));
+const saisonMsg=()=>{const M=seasonMonths();return"Das Datum liegt außerhalb der Saison ("+mname(M[0])+" bis "+mname(M[11])+"). Bitte ein Datum in der Saison wählen."};
+const saisonMM=()=>{const M=seasonMonths();return' min="'+M[0]+'-01" max="'+M[11]+'-30"'};
 const mname=(m)=>new Date(+m.slice(0,4),+m.slice(5)-1,1).toLocaleDateString("de-DE",{month:"long",year:"numeric"});
 const active=()=>D.spieler.filter((p)=>p.name&&p.aktiv!==false);
 let cm=null,armed=null;
@@ -789,13 +840,13 @@ const artDauer=(a)=>+a.dauer>0?+a.dauer:/twin/i.test((a.form||"")+" "+(a.name||"
 const HAL={H:"Heim",A:"Auswärts",N:"Neutral"};
 const ergTag=(g)=>{const e=U13.ergebnis(g);return e?'<span class="s '+({S:"x",U:"e",N:"u"})[e.art]+'" style="cursor:default;width:auto;padding:0 8px">'+e.text+"</span>":(g.wertung?'<span class="note" title="Gewertet, aber ohne Ergebnis">offen</span>':'<span class="note">nicht gewertet</span>')};
 const dfmt=(iso)=>iso?iso.slice(8)+"."+iso.slice(5,7)+".":"";
-let gArmed=false,gOpen=null,gRenumSig="";
+let gArmed=false,gOpen=null,gRenumSig="",gEvArm=null;
 const gSort=(a,b)=>String(a.datum||"9999").localeCompare(String(b.datum||"9999"))||(a.nr-b.nr);
 function gNewId(){return "g"+(Math.max(0,...D.spiele.map((g)=>+String(g.id).replace(/\D/g,"")||0))+1)}
 /* Spiel-Nummern laufen nach Datum (nicht nach Anlegereihenfolge); bei Änderung werden sie einmal neu vergeben */
 function gRenumber(){if(!D.ready||document.body.classList.contains("ro")||window.__PUB||window.__DEMO)return;
   const s=D.spiele.slice().sort(gSort),sig=s.map((g)=>g.id+":"+g.nr).join();if(sig===gRenumSig)return;
-  s.forEach((g,i)=>{if(g.nr!==i+1){const n={...g,nr:i+1};g.nr=i+1;save("games",g.id,n)}});
+  ccQuiet(()=>s.forEach((g,i)=>{if(g.nr!==i+1){const n={...g,nr:i+1};g.nr=i+1;save("games",g.id,n)}}));
   gRenumSig=D.spiele.slice().sort(gSort).map((g)=>g.id+":"+g.nr).join()}
 /* Spiel-Termine ohne Spiel-Eintrag (zum Beispiel ein im Terminplan angelegtes Testspiel) */
 function gPending(){const have=new Set(D.spiele.map((g)=>g.id));
@@ -809,7 +860,7 @@ function renderGames(){
   if(!G.length&&!PE.length){$("#gl").innerHTML='<tr><td class="empty" style="text-align:center">Noch keine Spiele. Oben „Neues Spiel“ wählen.</td></tr>';return}
   const td0=today(),AL=G.map((g)=>({g})).concat(PE.map((ev)=>({ev,g:{datum:ev.datum,nr:0}}))).sort((a,b)=>gSort(a.g,b.g)),pa=AL.filter((x)=>(x.g.datum||"")<td0),fu=AL.filter((x)=>(x.g.datum||"")>=td0),foc=AL.length>4?pa.slice(-1).concat(fu.slice(0,2)):[];
   const L=foc.length?foc.map((x)=>({...x,f:1})).concat([{sep:1}],AL):AL;
-  $("#gl").innerHTML='<tr><th>#</th><th style="text-align:left">Gegner</th><th>Datum</th><th>Spielart</th><th>H/A</th><th>Ergebnis</th><th>Form</th><th>Dauer</th><th>Gewichtung</th><th>Im Kader</th><th>Minuten gesamt</th></tr>'+L.map((x)=>{if(x.sep)return'<tr><td colspan="11" style="padding:0;height:0;border-top:3px solid var(--mu)"></td></tr>';if(x.ev){const e=x.ev;return'<tr data-ev="'+esc(e.id)+'" style="opacity:.85"><td'+(x.f?' style="color:var(--ac);font-weight:700"':"")+'>–</td><td>'+esc(e.gegner||"Gegner offen")+'</td><td>'+dfmt(e.datum)+'</td><td>'+esc(e.typ||"–")+'</td><td>'+(e.ha||"–")+'</td><td colspan="6" class="note" style="text-align:left">aus dem Terminplan · noch nicht erfasst · anklicken zum Anlegen</td></tr>'}const g=x.g,v=Object.values(g.spieler||{}),k=v.filter((x)=>x.status==="k");return'<tr data-g="'+g.id+'"><td'+(x.f?' style="color:var(--ac);font-weight:700"':"")+'>'+g.nr+"</td><td>"+esc(g.gegner)+vidIcon(g)+"</td><td>"+dfmt(g.datum)+"</td><td>"+esc(g.art||"–")+"</td><td>"+(g.ha||"–")+"</td><td>"+ergTag(g)+"</td><td>"+(g.tw?"Twin + ":"")+esc(g.form)+"</td><td>"+(g.tw?g.tw.d+" + ":"")+g.dauer+" Min.</td><td><span class=\""+(g.gewichtet?"tagj":"tagn")+'">'+(g.gewichtet?"Ja":"Nein")+"</span></td><td>"+k.length+"</td><td>"+mn(k.reduce((a,x)=>a+(x.minuten||0),0))+"</td></tr>"}).join("");
+  $("#gl").innerHTML='<tr><th>#</th><th style="text-align:left">Gegner</th><th>Datum</th><th>Spielart</th><th>H/A</th><th>Ergebnis</th><th>Form</th><th>Dauer</th><th>Gewichtung</th><th>Im Kader</th><th>Minuten gesamt</th></tr>'+L.map((x)=>{if(x.sep)return'<tr><td colspan="11" style="padding:0;height:0;border-top:3px solid var(--mu)"></td></tr>';if(x.ev){const e=x.ev;return'<tr data-ev="'+esc(e.id)+'" style="opacity:.85"><td'+(x.f?' style="color:var(--ac);font-weight:700"':"")+'>–</td><td>'+esc(e.gegner||"Gegner offen")+'</td><td>'+dfmt(e.datum)+'</td><td>'+esc(e.typ||"–")+'</td><td>'+(e.ha||"–")+'</td><td colspan="6" class="note" style="text-align:left">aus dem Terminplan · noch nicht erfasst · anklicken zum Anlegen'+(document.body.classList.contains("ro")?"":' <button class="rm'+(gEvArm===e.id?" arm":"")+'" data-evx="'+esc(e.id)+'" style="margin-left:8px">'+(gEvArm===e.id?"Wirklich löschen?":"Termin löschen")+"</button>")+'</td></tr>'}const g=x.g,v=Object.values(g.spieler||{}),k=v.filter((x)=>x.status==="k");return'<tr data-g="'+g.id+'"><td'+(x.f?' style="color:var(--ac);font-weight:700"':"")+'>'+g.nr+"</td><td>"+esc(g.gegner)+vidIcon(g)+"</td><td>"+dfmt(g.datum)+"</td><td>"+esc(g.art||"–")+"</td><td>"+(g.ha||"–")+"</td><td>"+ergTag(g)+"</td><td>"+(g.tw?"Twin + ":"")+esc(g.form)+"</td><td>"+(g.tw?g.tw.d+" + ":"")+g.dauer+" Min.</td><td><span class=\""+(g.gewichtet?"tagj":"tagn")+'">'+(g.gewichtet?"Ja":"Nein")+"</span></td><td>"+k.length+"</td><td>"+mn(k.reduce((a,x)=>a+(x.minuten||0),0))+"</td></tr>"}).join("");
 }
 const GORD=["","k","t","v","n"];let gmOpen=false;
 function renderGM(){
@@ -841,7 +892,7 @@ $("#gmt").addEventListener("click",(e)=>{
 let gFilled=false;
 function gFill(){
   if(gFilled||!D.ready||!db)return;const P=active();if(!P.length)return;gFilled=true;const t=today();
-  D.spiele.filter((g)=>g.datum&&g.datum>=t&&!Object.keys(g.spieler||{}).length).forEach((g)=>{const sp={};P.forEach((p)=>sp[p.id]={status:"k",minuten:0});save("games",g.id,{...g,spieler:sp})});
+  D.spiele.filter((g)=>g.datum&&g.datum>=t&&!Object.keys(g.spieler||{}).length).forEach((g)=>{const sp={};P.forEach((p)=>sp[p.id]={status:"k",minuten:0});ccQuiet(()=>save("games",g.id,{...g,spieler:sp}))});
 }
 function openGame(id){
   const P=active(),old=id?D.spiele.find((g)=>g.id===id):null,nr=old?old.nr:Math.max(0,...D.spiele.map((g)=>g.nr))+1,gid=old?old.id:gNewId(),last=D.spiele.slice().sort((a,b)=>b.nr-a.nr)[0];
@@ -849,7 +900,7 @@ function openGame(id){
   gOpen=g.id;gArmed=false;
   $("#gd").hidden=false;
   $("#gd").innerHTML='<div class="card" style="margin-top:14px"><div class="bar"><b style="font-size:16px">'+(old?"Spiel "+g.nr+" · "+esc(g.gegner):"Neues Spiel (Nr. "+nr+")")+'</b><span style="flex:1"></span>'+(old?'<button class="btn" id="glv" title="Aufstellung, Ansprache, Skizzen, Live-Spielzeit und Notizblatt für diesen Spieltag">🏟 Spieltag</button><button class="btn" id="glvl" title="Direkt zur Live-Spielzeit-Erfassung">⏱ Live-Spielzeit</button><span class="note">A4-Export</span><div class="seg" id="xg1"><button data-f="png">PNG</button><button data-f="jpg">JPG</button><button data-f="pdf">PDF</button></div><button class="btn" id="gdel">Spiel löschen</button>':"")+'<button class="btn" id="gcl">Schließen</button><button class="btn" id="gsv" style="background:var(--ac);color:#fff;border-color:var(--ac)">Speichern</button></div>'
-   +'<div class="grid"><label class="note">Datum<br><input type="date" id="gdt" value="'+esc(g.datum)+'"></label><label class="note">Gegner<br><input id="gop" value="'+esc(g.gegner)+'" style="width:190px" autocomplete="off"></label><label class="note">Treffen<br><input type="time" id="gtr" value="'+esc(((D.events||[]).find((x)=>x.spielId===g.id)||{}).treffen||"")+'"></label><label class="note">Beginn / Anstoß<br><input type="time" id="gbe" value="'+esc(((D.events||[]).find((x)=>x.spielId===g.id)||{}).beginn||"")+'"></label><label class="note">Ende<br><input type="time" id="gen" value="'+esc(((D.events||[]).find((x)=>x.spielId===g.id)||{}).ende||"")+'"></label><label class="note">Ort / Adresse<br><input id="gort" value="'+esc(((D.events||[]).find((x)=>x.spielId===g.id)||{}).ort||"")+'" style="width:210px" placeholder="z. B. Sportplatz, Straße, Ort" autocomplete="off"></label><label class="note">Spielart<br><select id="gar"><option value="">–</option>'+arten().map((x)=>'<option'+(x.name===g.art?" selected":"")+">"+esc(x.name)+"</option>").join("")+'</select></label><label class="note">Heim/Auswärts<br><select id="gha"><option value="">–</option>'+Object.keys(HAL).map((k)=>'<option value="'+k+'"'+(k===g.ha?" selected":"")+">"+HAL[k]+"</option>").join("")+'</select></label><label class="note">Wertung (Ergebnis zählt)<br><select id="gwt"><option'+(g.wertung?" selected":"")+">Ja</option><option"+(g.wertung?"":" selected")+'>Nein</option></select></label><label class="note">Tore<br><input type="number" id="gto" min="0" step="1" value="'+(g.tore==null?"":g.tore)+'" style="width:70px"></label><label class="note">Gegentore<br><input type="number" id="ggt" min="0" step="1" value="'+(g.gt==null?"":g.gt)+'" style="width:70px"></label><label class="note">Spielform<br><select id="gfm">'+forms().map((x)=>'<option value="'+esc(x.kuerzel)+'"'+(x.kuerzel===g.form?" selected":"")+">"+esc(x.kuerzel)+"</option>").join("")+'</select></label><label class="note">Dauer (Min.)<br><input type="number" id="gdu" min="1" step="1" value="'+g.dauer+'" style="width:90px"></label><label class="note">Spielzeit gewichten<br><select id="gw"><option'+(g.gewichtet?" selected":"")+">Ja</option><option"+(g.gewichtet?"":" selected")+'>Nein</option></select></label><label class="note">Spielerzahl<br><input type="number" id="gsz" min="1" step="1" value="'+(g.spielerzahl||"")+'" style="width:80px"></label><label class="note" style="flex:1;min-width:280px">Link zur Aufnahme (Video)<br><span style="display:flex;gap:6px"><input type="url" id="gvid" value="'+esc(g.video||"")+'" placeholder="https://…" style="flex:1" autocomplete="off"><a class="btn" id="gvo" target="_blank" rel="noopener noreferrer" href="'+(vidOk(g.video)?esc(g.video):"#")+'"'+(vidOk(g.video)?"":" hidden")+' style="text-decoration:none">▶ Öffnen</a></span></label></div>'
+   +'<div class="grid"><label class="note">Datum<br><input type="date" id="gdt"'+saisonMM()+' value="'+esc(g.datum)+'"></label><label class="note">Gegner<br><input id="gop" value="'+esc(g.gegner)+'" style="width:190px" autocomplete="off"></label><label class="note">Treffen<br><input type="time" id="gtr" value="'+esc(((D.events||[]).find((x)=>x.spielId===g.id)||{}).treffen||"")+'"></label><label class="note">Beginn / Anstoß<br><input type="time" id="gbe" value="'+esc(((D.events||[]).find((x)=>x.spielId===g.id)||{}).beginn||"")+'"></label><label class="note">Ende<br><input type="time" id="gen" value="'+esc(((D.events||[]).find((x)=>x.spielId===g.id)||{}).ende||"")+'"></label><label class="note">Ort / Adresse<br><input id="gort" value="'+esc(((D.events||[]).find((x)=>x.spielId===g.id)||{}).ort||"")+'" style="width:210px" placeholder="z. B. Sportplatz, Straße, Ort" autocomplete="off"></label><label class="note">Spielart<br><select id="gar"><option value="">–</option>'+arten().map((x)=>'<option'+(x.name===g.art?" selected":"")+">"+esc(x.name)+"</option>").join("")+'</select></label><label class="note">Heim/Auswärts<br><select id="gha"><option value="">–</option>'+Object.keys(HAL).map((k)=>'<option value="'+k+'"'+(k===g.ha?" selected":"")+">"+HAL[k]+"</option>").join("")+'</select></label><label class="note">Wertung (Ergebnis zählt)<br><select id="gwt"><option'+(g.wertung?" selected":"")+">Ja</option><option"+(g.wertung?"":" selected")+'>Nein</option></select></label><label class="note">Tore<br><input type="number" id="gto" min="0" step="1" value="'+(g.tore==null?"":g.tore)+'" style="width:70px"></label><label class="note">Gegentore<br><input type="number" id="ggt" min="0" step="1" value="'+(g.gt==null?"":g.gt)+'" style="width:70px"></label><label class="note">Spielform<br><select id="gfm">'+forms().map((x)=>'<option value="'+esc(x.kuerzel)+'"'+(x.kuerzel===g.form?" selected":"")+">"+esc(x.kuerzel)+"</option>").join("")+'</select></label><label class="note">Dauer (Min.)<br><input type="number" id="gdu" min="1" step="1" value="'+g.dauer+'" style="width:90px"></label><label class="note">Spielzeit gewichten<br><select id="gw"><option'+(g.gewichtet?" selected":"")+">Ja</option><option"+(g.gewichtet?"":" selected")+'>Nein</option></select></label><label class="note">Spielerzahl<br><input type="number" id="gsz" min="1" step="1" value="'+(g.spielerzahl||"")+'" style="width:80px"></label><label class="note" style="flex:1;min-width:280px">Link zur Aufnahme (Video)<br><span style="display:flex;gap:6px"><input type="url" id="gvid" value="'+esc(g.video||"")+'" placeholder="https://…" style="flex:1" autocomplete="off"><a class="btn" id="gvo" target="_blank" rel="noopener noreferrer" href="'+(vidOk(g.video)?esc(g.video):"#")+'"'+(vidOk(g.video)?"":" hidden")+' style="text-decoration:none">▶ Öffnen</a></span></label></div>'
    +'<div class="bar" id="geqb"'+(isEq(g.form)?"":" hidden")+'><button class="btn" id="geq">⚖ Spielzeit gleich verteilen</button><span class="note">TwinGame (zwei Felder): beide Torhüter spielen voll, fehlt einer, teilen die Feldspieler seine Zeit. Mehr Spieler als Plätze: alle teilen sich die Zeit gleich. Halle: ein Torhüter-Platz. Bis dahin bleibt die Spielzeit leer.</span></div>'
 +'<div class="bar" id="gtwb"><label class="note" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="gtwc"'+(g.tw?" checked":"")+'> <b>Twin Games vor dem Spiel</b> (derselbe Kader)</label><label class="note gtwf"'+(g.tw?"":" hidden")+'>Dauer (Min.) <input type="number" id="gtwd" min="1" step="1" value="'+(g.tw?g.tw.d:30)+'" style="width:70px"></label><label class="note gtwf"'+(g.tw?"":" hidden")+'>Spieler auf dem Platz <input type="number" id="gtws" min="1" step="1" value="'+(g.tw?g.tw.sz:12)+'" style="width:70px"></label><button class="btn gtwf" id="gtwv"'+(g.tw?"":" hidden")+'>⚖ Twin-Minuten verteilen</button><span class="note gtwf"'+(g.tw?"":" hidden")+'>Torhüter spielen voll (zwei Plätze), Feldspieler teilen den Rest gleich. Twin-Minuten zählen nicht in die gewichtete Spielzeit; Einzelne kannst du ändern.</span></div>'
    +'<div class="tw"><table id="gpl" class="'+(g.tw?"":"notw")+'"><tr><th>#</th><th style="text-align:left">Spieler</th><th>Status</th><th>Minuten</th><th title="Nur wenn der Spieler wegen Verletzung oder fehlender Fitness nicht die volle Zeit spielen konnte: so viele Minuten hätte er maximal spielen können. Leer = volle Spieldauer.">Fit für (Min.)</th><th>Anteil</th><th class="gtwc" title="Minuten in der Twin-Games-Phase vor dem Spiel (zählt nicht in die gewichtete Spielzeit)">Twin (Min.)</th></tr>'+P.map((p,i)=>{const e=g.spieler[p.id]||{status:old?"":"k",minuten:0},st=e.status;return'<tr data-p="'+p.id+'"><td>'+esc(p.nr||"")+"</td><td>"+esc(nm(p))+'</td><td><select class="gs">'+[["","–"],["k","k"],["t","a"],["v","v"],["n","n"]].map((o)=>'<option value="'+o[0]+'"'+(o[0]===st?" selected":"")+">"+o[1]+"</option>").join("")+'</select></td><td><input class="gm" type="number" min="0" step="0.5" value="'+(st==="k"&&e.minuten?e.minuten:"")+'"'+(st==="k"?"":" disabled")+'></td><td><input class="gf" type="number" min="0" step="0.5" placeholder="volle Zeit" value="'+(st==="k"&&e.fit!=null&&e.fit!==""?e.fit:"")+'"'+(st==="k"?"":" disabled")+'></td><td class="ga"></td><td class="gtwc"><input class="gtw" type="number" min="0" step="0.5" value="'+(st==="k"&&e.tw?e.tw:"")+'"'+(st==="k"?"":" disabled")+'></td></tr>'}).join("")+'<tr><td></td><td><b>Summe</b></td><td></td><td id="gsum"></td><td></td><td></td><td class="gtwc" id="gtwsum"></td></tr></table></div>'
@@ -887,7 +938,7 @@ function gRead(){
   const num=(q)=>$(q).value===""?null:Math.max(0,Math.round(+$(q).value));return{id:gOpen,nr,datum:$("#gdt").value,gegner:$("#gop").value.trim(),art:$("#gar").value,ha:$("#gha").value,wertung:$("#gwt").value==="Ja",tore:num("#gto"),gt:num("#ggt"),form:$("#gfm").value,dauer:+$("#gdu").value||0,gewichtet:$("#gw").value==="Ja",spielerzahl:+$("#gsz").value||null,video:vidOk($("#gvid").value.trim())?$("#gvid").value.trim():"",spieler:sp,...(twOn?{tw:{d:+$("#gtwd").value,sz:Math.max(1,Math.round(+$("#gtws").value||12))}}:{}),...(old&&old.live?{live:old.live}:{})};
 }
 $("#ng").onclick=()=>openGame(null);
-$("#gl").addEventListener("click",(e)=>{if(e.target.closest("[data-vid]"))return;const pv=e.target.closest("tr[data-ev]");if(pv){const ev=(D.events||[]).find((x)=>x.id===pv.dataset.ev);if(ev&&!document.body.classList.contains("ro")){const o={...ev};syncEv(o,ev);save("events",o.id,o);if(o.spielId)openGame(o.spielId)}return}const r=e.target.closest("tr[data-g]");if(r)openGame(r.dataset.g)});
+$("#gl").addEventListener("click",(e)=>{if(e.target.closest("[data-vid]"))return;const ex=e.target.closest("[data-evx]");if(ex){const id=ex.dataset.evx;if(gEvArm===id){gEvArm=null;save("events",id,null)}else gEvArm=id;renderGames();return}gEvArm=null;const pv=e.target.closest("tr[data-ev]");if(pv){const ev=(D.events||[]).find((x)=>x.id===pv.dataset.ev);if(ev&&!document.body.classList.contains("ro")){const o={...ev};syncEv(o,ev);save("events",o.id,o);if(o.spielId)openGame(o.spielId)}return}const r=e.target.closest("tr[data-g]");if(r)openGame(r.dataset.g)});
 $("#gd").addEventListener("input",(e)=>{if(e.target.id==="gvid"){const u=e.target.value.trim(),a=$("#gvo");a.hidden=!vidOk(u);a.href=vidOk(u)?u:"#"}});
 $("#gd").addEventListener("input",(e)=>{gCalc();const t=e.target;if(t.classList&&t.classList.contains("gtw")){t.dataset.man="1";gTwSum()}else if(t.id==="gtwd"||t.id==="gtws")gTwin(false)});
 $("#gd").addEventListener("change",(e)=>{
@@ -904,6 +955,7 @@ $("#gd").addEventListener("click",(e)=>{
   else if(id==="gsv"){
     const g=gRead(),msg=$("#gmsg");
     if(!g.datum){msg.textContent="Bitte ein Datum angeben.";msg.className="note warn";return}
+    if(!inSaison(g.datum)){msg.textContent=saisonMsg();msg.className="note warn";return}
     if(!(g.dauer>0)){msg.textContent="Bitte die Spieldauer angeben.";msg.className="note warn";return}
     const bad2=Object.entries(g.spieler).filter(([k,v])=>v.fit!=null&&(v.fit>g.dauer||v.fit<v.minuten));if(bad2.length){msg.textContent="Bei "+bad2.length+" Spieler(n) passt „Fit für“ nicht: nicht größer als die Spieldauer und nicht kleiner als die gespielten Minuten.";msg.className="note warn";return}
     const bad=Object.entries(g.spieler).filter(([k,v])=>v.minuten>g.dauer);
@@ -911,7 +963,7 @@ $("#gd").addEventListener("click",(e)=>{
     const badT=g.tw?Object.values(g.spieler).filter((v)=>v.tw>g.tw.d):[];if(badT.length){msg.textContent="Bei "+badT.length+" Spieler(n) sind die Twin-Minuten größer als die Twin-Dauer. Bitte korrigieren.";msg.className="note warn";return}
     save("games",g.id,g);{const ev=(D.events||[]).find((x)=>x.spielId===g.id),V=(i)=>($(i)?$(i).value.trim():""),nv={ort:V("#gort"),treffen:V("#gtr"),beginn:V("#gbe"),ende:V("#gen")};if(ev){if(Object.keys(nv).some((k)=>(ev[k]||"")!==nv[k]))save("events",ev.id,{...ev,...nv})}else if(Object.values(nv).some((v)=>v)){const eid="e"+Date.now().toString(36)+Math.random().toString(36).slice(2,5);save("events",eid,{id:eid,datum:g.datum,typ:g.art,gegner:g.gegner,ha:g.ha||"",spielId:g.id,eltern:true,schwerpunkt:"",detail:"",...nv})}}$("#gd").hidden=true;gOpen=null;
   }
-  else if(id==="gdel"){if(gArmed){save("games",gOpen,null);$("#gd").hidden=true;gOpen=null}else{gArmed=true;e.target.textContent="Wirklich löschen?";e.target.style.color="var(--r)"}}
+  else if(id==="gdel"){if(gArmed){(D.events||[]).filter((x)=>x.spielId===gOpen).forEach((x)=>save("events",x.id,null));save("games",gOpen,null);$("#gd").hidden=true;gOpen=null}else{gArmed=true;e.target.textContent="Wirklich löschen?";e.target.style.color="var(--r)"}}
 });
 /* ---------- Spielerprofil ---------- */
 let PID=null,PM="d";
@@ -2037,6 +2089,13 @@ function fbHtml(){
       +(ro?"":'<div class="bar" style="margin:8px 0 0">'+(x.antwort||!x.r||!window.__WEB?"":'<textarea class="vd-ta" data-fbt rows="2" maxlength="2000" placeholder="Antwort als '+esc(myName())+'" style="flex:1;min-width:200px"></textarea><button class="btn" data-fbr style="background:var(--ac);color:#fff;border-color:var(--ac)">Antworten</button>')
         +(x.gelesen?"":'<button class="btn" data-fbg>Als gelesen markieren</button>')+'<button class="btn'+(V.armed==="f"+x.id?" arm":"")+'" data-fbd>'+(V.armed==="f"+x.id?"Wirklich löschen?":"Löschen")+"</button></div>")+"</div>"}).join("")}
 const msg=(t,bad)=>{const m=document.getElementById(fsec()&&!fsec().hidden?"fbm":"vdm");if(m){m.textContent=t||"";m.className="note"+(bad?" warn":"")}};
+/* Benachrichtigungen vormerken (verschickt ein Zeitplan bei GitHub, Texte ohne Namen, siehe push/LIESMICH.md). Nur Web-Version. */
+const pushQ=(id,o)=>{if(window.__WEB&&db)db.doc("pushq/"+id).set({t:Date.now(),...o}).catch(()=>{})};
+const pushQdel=(id)=>{if(window.__WEB&&db)db.doc("pushq/"+id).delete().catch(()=>{})};
+/* Erinnerung an die Frist: einen Tag vorher, bei knapper Zeit 3 Stunden vorher */
+function fristQ(c){const f=fristTs(c.frist);let t=f-864e5;if(t<Date.now()+36e5)t=f-108e5;
+  if(!c.frist||isNaN(f)||t<Date.now()){pushQdel("f_"+c.id);return}
+  pushQ("f_"+c.id,{art:"frist",an:c.an,t,tx:"Bitte kommentiere den Clip bis "+dShort(c.frist)+", "+dTime(c.frist)+". Falls du das schon gemacht hast: Danke!"})}
 let pubT=null;const pubSoon=()=>{clearTimeout(pubT);pubT=setTimeout(()=>{if(window.__WEB&&window.__lkPublish&&window.__ROLE==="voll")window.__lkPublish(true)},1500)};
 async function saveClip(){
   const u=$("#vdu").value.trim(),t=$("#vdt").value.trim(),a=$("#vda").value.trim(),alle=$("#vdan .on").dataset.an==="alle",sel=[...document.querySelectorAll("#vdps input:checked")].map((i)=>i.value);
@@ -2049,18 +2108,19 @@ async function saveClip(){
   if(b===null){msg("Das Datum bei „Für Spieler sichtbar bis“ stimmt nicht (z. B. 26.10.2026).",true);return}
   const old=V.edit&&V.edit!=="neu"?V.clips.find((x)=>x.id===V.edit):null;
   const c={id:old?old.id:nid("cl"),titel:t,url:u,aufgabe:a,an:alle?"alle":sel,frist:fd?fd+"T"+(ft||"18:00"):"",bis:b||"",at:old&&old.at||new Date().toISOString(),s:old&&old.s||hex(32),ck:old&&old.ck||b64u(crypto.getRandomValues(new Uint8Array(16)))};
-  try{if(!old)await db.doc("clipauth/"+c.s).set({c:c.id});await save("clips",c.id,c);V.edit=null;V.sel=c.id;draw();msg(old?"Gespeichert.":"Clip gespeichert. Er erscheint in den Spielerlinks der Empfänger.");pubSoon()}catch(e){msg("Das konnte nicht gespeichert werden.",true)}
+  try{if(!old)await db.doc("clipauth/"+c.s).set({c:c.id});await save("clips",c.id,c);V.edit=null;V.sel=c.id;draw();msg(old?"Gespeichert.":"Clip gespeichert. Er erscheint in den Spielerlinks der Empfänger.");pubSoon();
+    if(!old)pushQ(nid("q"),{art:"clip",an:c.an});if(!old||old.frist!==c.frist||JSON.stringify(old.an)!==JSON.stringify(c.an))fristQ(c)}catch(e){msg("Das konnte nicht gespeichert werden.",true)}
 }
 async function delClip(id){const c=V.clips.find((x)=>x.id===id);if(!c)return;
   try{if(window.__WEB&&c.s){try{const s=await db.collection("kom").doc(c.s).collection("m").get();for(const d of s.docs)await db.collection("kom").doc(c.s).collection("m").doc(d.id).delete()}catch(e){}await db.doc("clipauth/"+c.s).delete().catch(()=>{})}
-    await save("clips",id,null);V.sel=null;draw();msg("Clip gelöscht.");pubSoon()}catch(e){msg("Das konnte nicht gelöscht werden.",true)}}
+    await save("clips",id,null);pushQdel("f_"+id);V.sel=null;draw();msg("Clip gelöscht.");pubSoon()}catch(e){msg("Das konnte nicht gelöscht werden.",true)}}
 async function postKom(){
   const c=V.clips.find((x)=>x.id===V.sel),ta=$("#vdrt");if(!c||!ta)return;const t=ta.value.trim();if(!t)return;
-  const id=nid("k"),o={p:"T",n:myName(),t,r:V.repTo||"",tr:true};
-  try{const b=await window.__lk.seal(c.ck,o);await db.collection("kom").doc(c.s).collection("m").doc(id).set({b,at:new Date().toISOString()});ta.value="";V.repTo=null;draw()}catch(e){msg("Das konnte nicht gesendet werden.",true)}}
+  const id=nid("k"),o={p:"T",n:myName(),t,r:V.repTo||"",tr:true},an=V.repTo&&(V.kom[c.id]||[]).find((k)=>k.id===V.repTo&&!k.tr&&k.p);
+  try{const b=await window.__lk.seal(c.ck,o);await db.collection("kom").doc(c.s).collection("m").doc(id).set({b,at:new Date().toISOString()});if(an)pushQ(nid("q"),{art:"kom",an:[an.p]});ta.value="";V.repTo=null;draw()}catch(e){msg("Das konnte nicht gesendet werden.",true)}}
 async function fbReply(x,t){
   const id=nid("a"),now=new Date().toISOString(),von=myName();
-  try{await db.collection("fbaus").doc(x.r).collection("m").doc(id).set({id,at:now,text:t,von,t:"trainer",re:x.id});await db.doc("fbin/"+x.id).update({antwort:t,antwortVon:von,antwortAm:now,gelesen:true});msg("Antwort gesendet. Sie erscheint im Link unter „Feedback“.")}catch(e){msg("Das konnte nicht gesendet werden.",true)}}
+  try{await db.collection("fbaus").doc(x.r).collection("m").doc(id).set({id,at:now,text:t,von,t:"trainer",re:x.id});await db.doc("fbin/"+x.id).update({antwort:t,antwortVon:von,antwortAm:now,gelesen:true});pushQ(nid("q"),{art:"antwort",r:x.r});msg("Antwort gesendet. Sie erscheint im Link unter „Feedback“.")}catch(e){msg("Das konnte nicht gesendet werden.",true)}}
 document.addEventListener("click",async(e)=>{
   const el=sec(),fe=fsec();if(!e.target.closest||!((el&&el.contains(e.target))||(fe&&fe.contains(e.target))))return;const q=(s)=>e.target.closest(s);
   let b;
@@ -2162,6 +2222,7 @@ const fbDev=(pid)=>{let r=ls.get("u13fbdev."+pid,"");if(!/^[0-9a-f]{64}$/.test(r
 /* Einstieg aus links.js: Reiter Übersicht/Videos/Feedback füllen */
 V.viewer=(d,pid,api)=>{
   addCss();VW.d=d;VW.pid=pid;VW.api=api;
+  window.__pushCtx=()=>{const r=role(pid);return d.fk&&net()?{k:d.fk,pid,ro:r?r.r:"",r:fbDev(pid)}:null};
   const paint=(w)=>{const el=document.getElementById(w==="u"?"vueb":w==="v"?"vvid":"vfb");if(!el)return;
     if(w==="u")el.innerHTML=(V.viewerTabs(d,pid).needRole?whoHtml(d):"")+uebHtml(d,pid);
     if(w==="v")el.innerHTML=vidHtml(d,pid);
@@ -2197,7 +2258,7 @@ document.addEventListener("click",async(e)=>{
   if((b=q("[data-fa]"))){VW.art=b.dataset.fa;document.querySelectorAll("#vfart button").forEach((x)=>{x.classList.toggle("on",x===b);x.setAttribute("aria-pressed",x===b)});return}
   if((b=q("#vfs"))){const t=document.getElementById("vft").value.trim(),m=document.getElementById("vfm"),r=role(pid);if(!t){m.textContent="Bitte zuerst etwas schreiben.";return}if(!n||!d.fk||!r)return;
     b.disabled=true;const id=nid("f"),at=new Date().toISOString(),art=VW.art||"Idee",von=r.r==="e"?(r.n||""):d.n||"",dev=fbDev(pid);
-    try{await n.create("fbin",id,{id,at,k:d.fk,art,text:t,von,rolle:r.r,pid,r:dev});await n.create("fbaus/"+dev+"/m",id,{id,at,k:d.fk,art,text:t,von,t:"ich"});
+    try{await n.create("fbin",id,{id,at,k:d.fk,art,text:t,von,rolle:r.r,pid,r:dev});await n.create("fbaus/"+dev+"/m",id,{id,at,k:d.fk,art,text:t,von,t:"ich"});n.create("pushq",nid("q"),{art:"fb",k:d.fk,t:Date.now()}).catch(()=>{});
       VW.fb=await n.list("fbaus/"+dev+"/m");VW.art="Idee";VW.paint("f");const m2=document.getElementById("vfm");if(m2)m2.textContent="Danke! Deine Nachricht ist beim Trainer angekommen."}
     catch(x){b.disabled=false;m.className="note warn";m.textContent="Das hat nicht geklappt. Bitte später noch einmal versuchen."}return}
 });
@@ -2955,7 +3016,7 @@ function wnGet(){try{return localStorage.getItem("u13wnmin")||""}catch(e){return
 function wnSet(v){try{v?localStorage.setItem("u13wnmin",v):localStorage.removeItem("u13wnmin")}catch(e){}}
 function renderStart(){
   const hm=$("#hmm");if(hm&&!busy("#h")){const c=hm.value||curMonth();hm.innerHTML=monthOpts(c)}
-  const hw=$("#hmw");if(hw){const w=hw.value||monday(today());hw.value=w;$("#hmk").textContent=kwOf(w)+". KW"}
+  wkFill("#hmw");
   if(!D.ready){$("#hsub").textContent="Daten werden geladen …";return}
   const t=today(),all=evAllM(),up=all.filter((e)=>(e.bis||e.datum)>=t&&e.typ!=="Hinweis"&&e.typ!=="Ferien").slice(0,8),hin=all.filter((e)=>(e.typ==="Hinweis"||e.typ==="Ferien")&&(e.bis||e.datum)>=t).slice(0,5),bd=bdays(t,addD(t,366)).slice(0,5);
   $("#hsub").textContent=dlong(t)+" · "+WT[wday(t)]+" · "+kwOf(t)+". Kalenderwoche";
@@ -3032,10 +3093,15 @@ $("#m").addEventListener("change",(e)=>{const c=e.target.dataset&&e.target.datas
 const pnl=(k)=>{["med","mse","pn_d","pn_td"].forEach((i)=>{if(i!==k)$("#"+i).hidden=true});if(k)$("#"+k).hidden=!$("#"+k).hidden};
 $("#mdn").onclick=()=>pnl("pn_d");$("#mtd").onclick=()=>{pnl("pn_td");if(!$("#pn_td").hidden)$("#tdx").focus()};
 $("#mnew").addEventListener("click",()=>{$("#pn_d").hidden=true;$("#pn_td").hidden=true});$("#mser").addEventListener("click",()=>{$("#pn_d").hidden=true;$("#pn_td").hidden=true});
-$("#hmw").onchange=renderStart;
+/* Wochenplan-Export: Kalenderwoche wählen statt Datum (diese, nächste, Liste, ◀ ▶) */
+function wkOpts(sel){const t=monday(today()),W=[];for(let i=-8;i<=52;i++)W.push(addD(t,7*i));if(!W.includes(sel))W.push(sel);W.sort();
+  return W.map((m)=>{const i=Math.round((parseD(m)-parseD(t))/6048e5);return'<option value="'+m+'"'+(m===sel?" selected":"")+">"+kwOf(m)+". KW · "+ddm(m)+" – "+ddm(addD(m,6))+addD(m,6).slice(0,4)+(i===0?" (diese Woche)":i===1?" (nächste Woche)":"")+"</option>"}).join("")}
+function wkFill(id,w){const s=$(id);if(!s)return;w=monday(w||s.value||today());if(document.activeElement===s&&s.value===w)return;s.innerHTML=wkOpts(w);s.value=w}
+[["#hmw","#hmwp","#hmwn"],["#mw","#mwp","#mwn"]].forEach(([id,p,n])=>{$(id).onchange=()=>wkFill(id);$(p).onclick=()=>wkFill(id,addD(monday($(id).value||today()),-7));$(n).onclick=()=>wkFill(id,addD(monday($(id).value||today()),7))});
 
 /* ---------- Termine ---------- */
 function renderTermine(){
+  wkFill("#mw");
   if(busy("#m"))return;
   mMonth=mMonth||curMonth();$("#mm").innerHTML=monthOpts(mMonth);
   if(!D.ready){$("#mt").innerHTML='<tr><td class="empty" style="text-align:center">Daten werden geladen …</td></tr>';return}
@@ -3044,15 +3110,14 @@ function renderTermine(){
   $("#ml").innerHTML='<i>Eltern = erscheint im Elternexport</i><i>intern = nur in der Trainerfassung</i>';
   {let b=$("#msb");if(!b){b=document.createElement("div");b.id="msb";b.className="bar";b.style.margin="0 0 8px";$("#mt").closest(".card").parentNode.insertBefore(b,$("#mt").closest(".card"))}
    const n=[...mSel].filter((i)=>all.some((e)=>e.id===i)).length;b.hidden=!n;b.innerHTML=n?'<span class="note">'+n+' ausgewählt</span><button class="btn" id="msd" style="color:var(--r)">Ausgewählte löschen</button><button class="btn" id="msn">Auswahl aufheben</button>':""}
-  $("#mt").innerHTML=all.length?'<tr><th>Datum</th><th>Art</th><th>Gegner / Aktion</th><th>Treffen / Anstoß</th><th>Ort</th><th>Elternexport</th><th></th></tr>'+all.map((e)=>{
+  const aus=evAllM().filter((e)=>!e.kobs&&!inSaison(e.datum)&&!inSaison(e.bis));
+  $("#mt").innerHTML=(aus.length||all.length)?'<tr><th>Datum</th><th>Art</th><th>Gegner / Aktion</th><th>Treffen / Anstoß</th><th>Ort</th><th>Elternexport</th><th></th></tr>'+(()=>{const row=(e)=>{
     const wk=[0,6].includes(wday(e.datum)),tx=isGameTyp(e.typ)?matchup(e):(e.titel||""),act=(e)=>e.kobs?'<button class="rm ic" data-kgo="1" title="Im Kader öffnen" aria-label="Im Kader öffnen">'+IC.go+'</button>':((e.virt?'<button class="rm ic" data-ee="'+e.id+'" title="Bearbeiten" aria-label="Bearbeiten">'+IC.ed+'</button>'+(e.trainId?'<button class="rm ic" data-vt="1" title="In Training öffnen" aria-label="In Training öffnen">'+IC.go+'</button>':'<button class="rm ic" data-vg="'+e.spielId+'" title="Im Bereich Spiele öffnen" aria-label="Im Bereich Spiele öffnen">'+IC.go+'</button>'):'<button class="rm ic" data-ee="'+e.id+'" title="Bearbeiten" aria-label="Bearbeiten">'+IC.ed+'</button>'+(e.linked?(e.spielId?'<button class="rm ic" data-vg="'+e.spielId+'" title="Im Bereich Spiele öffnen" aria-label="Im Bereich Spiele öffnen">'+IC.go+'</button>':'<button class="rm ic" data-vt="1" title="In Training öffnen" aria-label="In Training öffnen">'+IC.go+'</button>'):""))+'<button class="rm ic'+(mArm===e.id?" arm":"")+'" data-ed="'+e.id+'" title="Löschen" aria-label="Löschen">'+(mArm===e.id?(trAtt(e)?"Mit Anwesenheit löschen?":"Wirklich löschen?"):IC.del)+"</button>"),actions=(isGameTyp(e.typ)&&e.spielId&&!window.__RO?'<button class="rm ic" data-si="'+e.spielId+'" title="Spielinfo für WhatsApp" aria-label="Spielinfo für WhatsApp">📲</button>':"")+(e.typ==="Training"?'<button class="rm ic" data-wa="'+e.datum+'" title="Bild für WhatsApp" aria-label="Bild für WhatsApp">📲</button>':"")+act(e)+(e._m||[]).map(act).join("");
-    return'<tr class="'+(wk?"mwe":"")+'" style="'+(wk?"font-weight:600":"")+'"><td style="text-align:center">'+(e.kobs?"":'<input type="checkbox" data-sel="'+e.id+'" aria-label="Auswählen"'+(mSel.has(e.id)?" checked":"")+' style="margin-right:6px">')+esc(WK[wday(e.datum)]+" "+ddm(e.datum))+(e.bis&&e.bis>e.datum?" – "+esc(ddm(e.bis)):"")+'</td><td style="text-align:center">'+esc(typL(e))+'</td><td style="text-align:center">'+esc(tx)+esc(haSfx(e))+unsH(e)+(e.schwerpunkt?' <span class="note">'+esc(e.schwerpunkt)+"</span>":"")+(e.detail&&e.typ!=="Ferien"?'<div class="note" style="font-weight:400">Detail: '+esc(e.detail)+"</div>":"")+(e.ctask&&e.typ!=="Ferien"?'<div class="note" style="font-weight:400;color:var(--ac)">Co-Trainer: '+esc(e.ctask)+"</div>":"")+(e.typ!=="Ferien"?dienstSub(e,e.datum).map((s)=>'<div class="note" style="font-weight:400">'+esc(s)+"</div>").join(""):"")+'</td><td style="text-align:center">'+esc(zeitG(e))+'</td><td style="text-align:center">'+esc(e.ort||"")+"</td><td>"+(e.virt?"Eltern":e.eltern===false?"intern":"Eltern")+"</td><td>"+actions+"</td></tr>"}).join(""):'<tr><td class="empty" style="text-align:center">Keine Termine in '+mname(mMonth)+'. Oben „Termin“ oder „Serie“ wählen.</td></tr>';
-  const wk=$("#mw").value||monday(today());$("#mw").value=wk;$("#mwk").textContent=kwOf(wk)+". KW · "+dlong(monday(wk))+" – "+dlong(addD(monday(wk),6));
+    return'<tr class="'+(wk?"mwe":"")+'" style="'+(wk?"font-weight:600":"")+'"><td style="text-align:center">'+(e.kobs?"":'<input type="checkbox" data-sel="'+e.id+'" aria-label="Auswählen"'+(mSel.has(e.id)?" checked":"")+' style="margin-right:6px">')+esc(WK[wday(e.datum)]+" "+ddm(e.datum))+(e.bis&&e.bis>e.datum?" – "+esc(ddm(e.bis)):"")+'</td><td style="text-align:center">'+esc(typL(e))+'</td><td style="text-align:center">'+esc(tx)+esc(haSfx(e))+unsH(e)+(e.schwerpunkt?' <span class="note">'+esc(e.schwerpunkt)+"</span>":"")+(e.detail&&e.typ!=="Ferien"?'<div class="note" style="font-weight:400">Detail: '+esc(e.detail)+"</div>":"")+(e.ctask&&e.typ!=="Ferien"?'<div class="note" style="font-weight:400;color:var(--ac)">Co-Trainer: '+esc(e.ctask)+"</div>":"")+(e.typ!=="Ferien"?dienstSub(e,e.datum).map((s)=>'<div class="note" style="font-weight:400">'+esc(s)+"</div>").join(""):"")+'</td><td style="text-align:center">'+esc(zeitG(e))+'</td><td style="text-align:center">'+esc(e.ort||"")+"</td><td>"+(e.virt?"Eltern":e.eltern===false?"intern":"Eltern")+"</td><td>"+actions+"</td></tr>"};return(aus.length?'<tr><td colspan="7" style="text-align:left;color:var(--o);font-weight:600">⚠ '+(aus.length===1?"Ein Termin liegt":aus.length+" Termine liegen")+" außerhalb der Saison. Bitte löschen oder das Datum ändern.</td></tr>"+aus.map(row).join("")+(all.length?'<tr><td colspan="7" style="padding:0;height:0;border-top:3px solid var(--mu)"></td></tr>':""):"")+all.map(row).join("")})():'<tr><td class="empty" style="text-align:center">Keine Termine in '+mname(mMonth)+'. Oben „Termin“ oder „Serie“ wählen.</td></tr>';
 }
 $("#mm").onchange=(e)=>{mMonth=e.target.value;mArm=null;renderTermine()};
 $("#mprev").onclick=()=>{const M=seasonMonths(),k=M.indexOf(mMonth);if(k>0){mMonth=M[k-1];renderTermine()}};
 $("#mnext").onclick=()=>{const M=seasonMonths(),k=M.indexOf(mMonth);if(k<11){mMonth=M[k+1];renderTermine()}};
-$("#mw").onchange=renderTermine;
 const fld=(id,label,inner,st)=>'<label class="note"'+(st?' style="'+st+'"':"")+">"+label+"<br>"+inner+"</label>";
 /* Spätere Termine, die mit diesem zusammengehören: gleiche Serie, sonst gleiche Art mit derselben bisherigen Uhrzeit */
 const WKP=["Sonntage","Montage","Dienstage","Mittwoche","Donnerstage","Freitage","Samstage"];
@@ -3066,7 +3131,7 @@ function openEv(id){
   $("#med").hidden=false;$("#med").dataset.id=e&&!e.virt?e.id:"";$("#med").dataset.virt=e&&e.virt?e.id:"";
   const inp=(i,v,w,t)=>'<input id="'+i+'" '+(t?'type="'+t+'" ':"")+'value="'+esc(v||"")+'" style="width:'+w+'px" autocomplete="off">';
   $("#med").innerHTML='<div class="card" style="margin-bottom:14px"><b style="font-size:16px">'+(e?"Termin bearbeiten":"Neuer Termin")+(e&&(e.linked||e.virt)?' <span class="note">· verknüpft mit '+(isGameTyp(e.typ)?"Spiele":"Training")+" – Änderungen gelten dort ebenfalls</span>":"")+'</b><div class="grid" style="display:flex;flex-wrap:wrap;gap:12px;margin:12px 0">'
-   +fld("","Datum",inp("ed_dat",d.datum,150,"date"))+fld("","bis (optional)",inp("ed_bis",d.bis,150,"date"))
+   +fld("","Datum",inp("ed_dat",d.datum,150,"date").replace("<input ","<input"+saisonMM()+" "))+fld("","bis (optional)",inp("ed_bis",d.bis,150,"date").replace("<input ","<input"+saisonMM()+" "))
    +fld("","Art",'<input id="ed_typ" list="ed_typl" value="'+esc(d.typ)+'" placeholder="tippen oder wählen" autocomplete="off" style="width:170px"><datalist id="ed_typl">'+evTypes().map((t)=>'<option value="'+esc(t)+'">').join("")+"</datalist>")
    +'<span id="ed_gm" style="display:contents"'+(isGameTyp(d.typ)?"":" hidden")+">"+fld("","Spielform",'<select id="ed_fo"><option value="">–</option>'+forms().map((f)=>'<option value="'+esc(f.kuerzel)+'"'+(f.kuerzel===gf?" selected":"")+">"+esc(f.kuerzel)+"</option>").join("")+"</select>")+fld("","Spielzeit (Min.)",'<input id="ed_da" type="number" min="1" step="1" value="'+esc(gd||"")+'" style="width:90px" placeholder="–">')+fld("","Twin Games davor (Min.)",'<input id="ed_tw" type="number" min="0" step="1" value="'+esc(gg&&gg.tw?gg.tw.d:"")+'" style="width:90px" placeholder="keine">')+fld("","Spieler auf dem Platz (Twin)",'<input id="ed_tws" type="number" min="2" max="30" step="1" value="'+esc(gg&&gg.tw?gg.tw.sz:"")+'" style="width:90px" placeholder="12">')+fld("","Fahrzeit (Min., leer = automatisch)",'<input id="ed_fz" type="number" min="1" step="1" value="'+esc(d.fzm||"")+'" style="width:90px" placeholder="auto">'+((typeof gcOrt==="function"&&!gcOrt(d)&&d.ha==="A")?'<br><span style="color:var(--o)">Adresse fehlt – Fahrzeit geschätzt (20 Min.)</span>':""))+"</span>"
    +fld("","Gegner",inp("ed_geg",d.gegner,170))+fld("","Heim/Auswärts",'<select id="ed_ha"><option value="">–</option><option value="H"'+(d.ha==="H"?" selected":"")+'>Heim</option><option value="A"'+(d.ha==="A"?" selected":"")+'>Auswärts</option><option value="N"'+(d.ha==="N"?" selected":"")+">Neutral</option></select>")
@@ -3106,6 +3171,7 @@ $("#med").addEventListener("click",(e)=>{
     delEvs(L);$("#med").hidden=true;$("#med").innerHTML="";setSt(L.length+(L.length>1?" Termine":" Termin")+" gelöscht","ok");renderTermine();return}
   if(e.target.id!=="eds")return;
   const g=(i)=>$("#"+i).value.trim(),dat=g("ed_dat");if(!dat){$("#edm").textContent="Bitte ein Datum wählen.";return}
+  if(!inSaison(dat)||(g("ed_bis")>dat&&!inSaison(g("ed_bis")))){$("#edm").textContent=saisonMsg();return}
   const vv=$("#med").dataset.virt?evAll().find((x)=>x.id===$("#med").dataset.virt):null;
   const id=$("#med").dataset.id||"e"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),old=(D.events||[]).find((x)=>x.id===id)||(vv?{spielId:vv.spielId,trainId:vv.trainId}:{});
   const o={...old,id,datum:dat,bis:g("ed_bis")&&g("ed_bis")>dat?g("ed_bis"):null,typ:evTypRes($("#ed_typ").value)||(old&&old.typ)||evTypes()[0],gegner:g("ed_geg"),ha:$("#ed_ha").value,titel:g("ed_tit"),treffen:g("ed_tr"),beginn:g("ed_be"),ende:g("ed_en"),zeit:g("ed_zt"),ort:g("ed_ort"),schwerpunkt:g("ed_sp"),detail:g("ed_de"),unsicher:$("#ed_un").checked||undefined,unsGrund:$("#ed_un").checked?g("ed_ug"):undefined,eltern:$("#ed_el").checked};
@@ -3117,7 +3183,7 @@ $("#mser").onclick=()=>{$("#med").hidden=true;const s=$("#mse");s.hidden=!s.hidd
 $("#mse").innerHTML='<div class="card" style="margin-bottom:14px"><b style="font-size:16px">Serientermine (z. B. Training)</b><div class="grid" style="display:flex;flex-wrap:wrap;gap:12px;margin:12px 0">'
   +fld("","Art",'<select id="se_typ">'+["Training","Teamevent","Sonstiges"].map((t)=>"<option>"+t+"</option>").join("")+"</select>")
   +fld("","Wochentage",'<div class="chips" id="se_wd">'+[1,2,3,4,5,6,0].map((n)=>'<button type="button" data-wd="'+n+'" class="'+([1,3,5].includes(n)?"on":"")+'">'+WK[n]+"</button>").join("")+"</div>")
-  +fld("","von",'<input type="date" id="se_von">')+fld("","bis",'<input type="date" id="se_bis">')+fld("","Beginn",'<input type="time" id="se_be" value="17:00">')+fld("","Ende",'<input type="time" id="se_en" value="18:30">')
+  +fld("","von",'<input type="date" id="se_von"'+saisonMM()+'>')+fld("","bis",'<input type="date" id="se_bis"'+saisonMM()+'>')+fld("","Beginn",'<input type="time" id="se_be" value="17:00">')+fld("","Ende",'<input type="time" id="se_en" value="18:30">')
   +fld("","Ort",'<input id="se_ort" style="width:170px">')+fld("","Titel (optional)",'<input id="se_tit" style="width:170px">')+"</div>"
   +'<div class="bar" style="margin:0"><span class="note" id="sem"></span><span style="flex:1"></span><button class="btn" id="sec">Schließen</button><button class="btn" id="ses" style="background:var(--ac);color:#fff;border-color:var(--ac)">Termine erzeugen</button></div></div>';
 $("#mse").addEventListener("click",(e)=>{
@@ -3126,6 +3192,7 @@ $("#mse").addEventListener("click",(e)=>{
   if(e.target.id!=="ses")return;
   const von=$("#se_von").value,bis=$("#se_bis").value,wds=[...document.querySelectorAll("#se_wd .on")].map((b)=>+b.dataset.wd),typ=$("#se_typ").value;
   if(!von||!bis||bis<von){$("#sem").textContent="Bitte einen gültigen Zeitraum wählen.";return}
+  if(!inSaison(von)||!inSaison(bis)){$("#sem").textContent=saisonMsg();return}
   if(!wds.length){$("#sem").textContent="Bitte mindestens einen Wochentag wählen.";return}
   const sid="s"+Date.now().toString(36);let n=0;for(let d=von,k=0;d<=bis&&k<400;d=addD(d,1),k++){
     if(!wds.includes(wday(d))||(D.events||[]).some((x)=>x.datum===d&&x.typ===typ))continue;
@@ -3634,7 +3701,7 @@ document.addEventListener("input",(e)=>{const t=e.target;if(!L||!t.closest||!t.c
   if(t.dataset.w){const [id,i]=t.dataset.w.split(".");L.p[id].w[+i]=t.value;upd(id);mkP(id);persist();const n=q("#lvon");if(n)n.innerHTML=onTxt()}});
 document.addEventListener("change",(e)=>{const t=e.target;if(!L||!t.dataset||!t.closest("#lv"))return;if(t.id==="lvn"){L.n=+t.value;mkD();persist();render();return}if(t.dataset.gr){L.p[t.dataset.gr].a=t.value;mkP(t.dataset.gr);persist()}});
 /* Reparatur: falsch gespeicherter Status „a“ (abwesend) heißt intern „t“ */
-const fx=new Set();window.__fixA=function(){(D.spiele||[]).forEach((g)=>{const sp=g.spieler||{};if(!Object.values(sp).some((s)=>s&&s.status==="a")||fx.has(g.id))return;fx.add(g.id);const n={};Object.keys(sp).forEach((k)=>{n[k]=sp[k]&&sp[k].status==="a"?{...sp[k],status:"t"}:sp[k]});save("games",g.id,{...g,spieler:n})})};
+const fx=new Set();window.__fixA=function(){(D.spiele||[]).forEach((g)=>{const sp=g.spieler||{};if(!Object.values(sp).some((s)=>s&&s.status==="a")||fx.has(g.id))return;fx.add(g.id);const n={};Object.keys(sp).forEach((k)=>{n[k]=sp[k]&&sp[k].status==="a"?{...sp[k],status:"t"}:sp[k]});(window.ccQuiet||((f)=>f()))(()=>save("games",g.id,{...g,spieler:n}))})};
 const css=document.createElement("style");
 css.textContent='#lv{position:fixed;inset:0;z-index:200;background:var(--bg);overflow:auto;-webkit-overflow-scrolling:touch}#lv[hidden]{display:none}#lv .lvb{max-width:1000px;margin:0 auto;padding:12px 14px calc(90px + env(safe-area-inset-bottom))}'
 +'#lv .lvbar{display:flex;align-items:center;gap:10px;position:sticky;top:0;background:var(--bg);padding:6px 0 10px;z-index:3;flex-wrap:wrap}#lv .lvtop{display:flex;gap:18px;align-items:center;flex-wrap:wrap}'
@@ -6210,7 +6277,7 @@ function diffs(){
 FD.diffs=diffs;
 
 function runAuto(auto){if(!canWrite()||!auto.length)return;const now=Date.now();
-  auto.forEach((a)=>{if(FD.done[a.key]&&now-FD.done[a.key]<120000)return;FD.done[a.key]=now;try{apply(a.g,a.f,a.o)}catch(e){}})}
+  auto.forEach((a)=>{if(FD.done[a.key]&&now-FD.done[a.key]<120000)return;FD.done[a.key]=now;try{(window.ccQuiet||((f)=>f()))(()=>apply(a.g,a.f,a.o))}catch(e){}})}
 function panelHtml(){
   if(!FD.aktiv())return"";const d=FD.cur(),can=canWrite();
   if(!FD.cfg().team)return can?'<div class="card fdp"><div class="fdh"><span class="fdbadge">FUSSBALL.DE</span><span class="note" style="flex:1">Spielplan, Ergebnisse und Tabelle automatisch übernehmen.</span><button class="btn" data-fda="cfg">Verknüpfen …</button></div></div>':"";
