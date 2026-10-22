@@ -5,7 +5,7 @@
 "use strict";
 if(window.__WEBINIT)return;window.__WEBINIT=true;
 const CFG=window.U13_FIREBASE||{};
-const SDK=(CFG.sdkBase||"https://www.gstatic.com/firebasejs/10.14.1/");
+const SDK=(CFG.sdkBase||"https://www.gstatic.com/firebasejs/10.14.1/");   /* Version auch in sw.js anpassen (Offline-Start) */
 const XIDS=["full","anon","plan","demo"];
 window.__WEB=true;
 window.__WEB_BASE=location.origin+location.pathname.replace(/index\.html$/,"");
@@ -177,6 +177,7 @@ async function afterLogin(){
   }
   window.__ROLE=owner?"voll":role;window.__ACCT=(((auth.currentUser&&auth.currentUser.email)||"")+"").toLowerCase().replace(/[^a-z0-9@._-]/g,"_")||"main";
   if(!owner)document.body.classList.add("co");
+  instCard();
   if(window.__ROLE==="scout")document.body.classList.add("scoutonly");
   if(window.__ROLE==="lesen"||window.__ROLE==="scout"){const t=document.querySelector(".top .note");if(t){const sp=document.createElement("span");sp.style.marginLeft="8px";sp.textContent=window.__ROLE==="lesen"?"· Nur Ansicht":"· Scouting-Zugang";t.appendChild(sp)}}
   if(window.__ROLE==="scout"){window.__scoutLink=()=>"(nur für Trainer sichtbar)";return}
@@ -192,6 +193,21 @@ async function afterLogin(){
     const k=rndKey();try{await fs.doc("config/scout").set({k});scoutKey=k;const i=document.getElementById("sclink");if(i)i.value=window.__scoutLink();b.dataset.arm="";b.textContent="Neu erzeugen";document.dispatchEvent(new Event("u13scoutkey"))}catch(e){b.textContent="Hat nicht geklappt"}});
   if(owner)cards();
 }
+/* Hinweis „Als App installieren“ unter Einstellungen → Hinweise & Links (für alle Angemeldeten, auch eingeschränkte Ansicht) */
+function instCard(){
+  const put=()=>{
+    const pp=document.getElementById("etp-l");if(!pp){setTimeout(put,500);return}
+    if(!document.getElementById("u13inst")){
+      const c=document.createElement("div");c.className="card";c.id="u13inst";c.style.display="block";
+      const done=window.matchMedia&&matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+      c.innerHTML='<h3>Als App installieren</h3>'+(done?'<p class="note" style="margin-top:0">Die App ist auf diesem Gerät schon installiert.</p>':'<p class="note" style="margin-top:0">Dann liegt die Teamzentrale wie eine normale App auf dem Startbildschirm, öffnet in einem eigenen Fenster und startet auch ohne Netz. Daten und Updates bleiben dieselben wie im Browser.</p><button class="btn" id="u13instb" style="display:none;margin:4px 0 8px">App jetzt installieren</button><ul style="margin:6px 0 6px 20px;padding:0"><li><b>iPhone/iPad:</b> in Safari unten auf <b>Teilen</b> (Quadrat mit Pfeil) → <b>Zum Home-Bildschirm</b>.</li><li><b>Android:</b> in Chrome oben rechts auf <b>⋮</b> → <b>App installieren</b> (oder „Zum Startbildschirm hinzufügen“).</li><li><b>Mac/PC:</b> in Chrome oder Edge rechts in der Adresszeile auf das Symbol <b>Installieren</b>. In Safari auf dem Mac: <b>Ablage</b> → <b>Zum Dock hinzufügen</b>.</li></ul><p class="note">Ohne Netz kannst du ansehen und ändern. Die Änderungen werden geschickt, sobald wieder Netz da ist. Anmelden und Spielerlinks brauchen Netz. Auf einem gemeinsam genutzten Gerät wird nichts gespeichert, dort geht es nur mit Netz.</p>');
+      const b=c.querySelector("#u13instb"),show=()=>{if(b&&instEv)b.style.display=""};show();window.addEventListener("u13inst",show);
+      if(b)b.onclick=async()=>{const ev=instEv;if(!ev)return;instEv=null;b.style.display="none";try{await ev.prompt()}catch(e){}};
+      pp.appendChild(c);
+    }
+  };put();
+}
+let instEv=null;   /* Installations-Angebot des Browsers (Chrome/Edge/Android), siehe unten */
 function cards(){
   const put=()=>{
     const m=document.getElementById("etp-m"),sv=document.getElementById("etp-s");if(!m||!sv){setTimeout(put,500);return}
@@ -268,5 +284,7 @@ window.claude={use:async function(name){
 }};
 
 /* ---------- Offline-Start (Service Worker) und Installation ---------- */
+window.addEventListener("beforeinstallprompt",(e)=>{e.preventDefault();instEv=e;window.dispatchEvent(new Event("u13inst"))});
+window.addEventListener("appinstalled",()=>{instEv=null;const b=document.getElementById("u13instb");if(b)b.style.display="none"});
 if("serviceWorker" in navigator&&/^https:|^http:\/\/localhost/.test(location.protocol+"//"+location.hostname)){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})})}
 })();
