@@ -40,8 +40,9 @@ export async function run({ fetch, webpush, env, now = Date.now(), log = console
   /* falls der Schlüssel auf die eigene Seite beschränkt ist: Herkunft wie die App (GitHub Pages) angeben */
   const [own, repo] = String(env.GITHUB_REPOSITORY || "").split("/"), ref = own && repo ? { Referer: "https://" + own.toLowerCase() + ".github.io/" + repo + "/" } : {};
   const login = await fetch("https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" + api,
-    { method: "POST", headers: { "Content-Type": "application/json", ...ref }, body: JSON.stringify({ email: HELFER, password: env.HELFER_PASSWORT, returnSecureToken: true }) });
-  if (!login.ok) throw new Error("Anmeldung des Versand-Helfers fehlgeschlagen (" + login.status + "). Konto und Passwort prüfen.");
+    { method: "POST", headers: { "Content-Type": "application/json", ...ref }, body: JSON.stringify({ email: HELFER, password: String(env.HELFER_PASSWORT).trim(), returnSecureToken: true }) });
+  if (!login.ok) { let c = ""; try { c = ((await login.json()).error || {}).message || ""; } catch (e) { }
+    throw new Error("Anmeldung des Versand-Helfers fehlgeschlagen (" + login.status + (c ? ", " + c : "") + "). Konto und Passwort prüfen."); }
   const H = { Authorization: "Bearer " + (await login.json()).idToken, "Content-Type": "application/json", ...ref };
   const call = async (url, o = {}) => { const r = await fetch(url, { headers: H, ...o }); if (!r.ok && r.status !== 404) throw new Error("Datenbank " + r.status); return r; };
 
