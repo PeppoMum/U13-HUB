@@ -70,6 +70,18 @@ window.__kurzNet={
     r=await fetch(FSB()+"pub/"+encodeURIComponent(aid)+"?updateMask.fieldPaths=s&updateMask.fieldPaths=w&updateMask.fieldPaths=v&currentDocument.exists=true&"+K(),{method:"PATCH",headers:hd,body:JSON.stringify({fields:{s:{stringValue:o.s},w:{stringValue:o.w},v:{integerValue:String(o.v|0)}}})});
     fetch(FSB()+"aliasin/"+encodeURIComponent(aid)+"?"+K(),{method:"DELETE"}).catch(()=>{});
     if(!r.ok)fail(r)}};}
+/* Videos und Feedback im Spielerlink: Kommentare (geheimer Pfad, verschlüsselt) und Nachrichten an den Trainer, ohne Anmeldung */
+{const hd={"Content-Type":"application/json"},K=()=>"key="+encodeURIComponent(CFG.apiKey),P=(p)=>p.split("/").map(encodeURIComponent).join("/"),fail=(r)=>{throw{code:r.status===403?"permission-denied":"http-"+r.status}};
+const fromFs=(v)=>v.stringValue!=null?v.stringValue:v.integerValue!=null?+v.integerValue:v.doubleValue!=null?v.doubleValue:v.booleanValue!=null?v.booleanValue:v.timestampValue!=null?v.timestampValue:null;
+window.__vidNet={
+  async list(path){const out=[];let tok="";
+    do{const r=await fetch(FSB()+P(path)+"?pageSize=300&"+K()+(tok?"&pageToken="+encodeURIComponent(tok):""));if(r.status===404)return out;if(!r.ok)fail(r);const j=await r.json();
+      (j.documents||[]).forEach((x)=>{const o={id:x.name.split("/").pop()},F=x.fields||{};Object.keys(F).forEach((k)=>{o[k]=fromFs(F[k])});if(F.at&&F.at.timestampValue!=null){o.server=true;o.at=new Date(F.at.timestampValue).toISOString()}out.push(o)});tok=j.nextPageToken||""}while(tok&&out.length<3000);
+    return out},
+  async create(coll,id,obj,ts){const f={};Object.keys(obj).forEach((k)=>{f[k]=toFs(obj[k])});if(ts)f.at={timestampValue:new Date().toISOString()};
+    const r=await fetch(FSB()+P(coll)+"?documentId="+encodeURIComponent(id)+"&"+K(),{method:"POST",headers:hd,body:JSON.stringify({fields:f})});if(!r.ok)fail(r)},
+  async update(path,obj){const ks=Object.keys(obj),f={};ks.forEach((k)=>{f[k]=toFs(obj[k])});
+    const r=await fetch(FSB()+P(path)+"?"+ks.map((k)=>"updateMask.fieldPaths="+encodeURIComponent(k)).join("&")+"&currentDocument.exists=true&"+K(),{method:"PATCH",headers:hd,body:JSON.stringify({fields:f})});if(!r.ok)fail(r)}};}
 window.__webSnap=async function(pid){
   if(!cfgOk())throw new Error("config");
   const x=XIDS.indexOf(pid)>=0,b=await restBlob((x?"x_":"p_")+pid),bg=await restDoc("bg"),s={p:{},x:{}};

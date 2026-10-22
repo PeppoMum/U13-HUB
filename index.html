@@ -265,7 +265,7 @@ nav button .em{display:inline-flex;justify-content:center;align-items:center}
 #lkco{display:none!important}</style>
 <div class="app">
 <nav><h1>U13 · <span id="sais">2026/27</span></h1><small>Teamzentrale</small>
-<button data-s="h" class="on">🏠 Start</button><button data-s="a">👥 Beteiligung</button><button data-s="q">🏆 Bilanz</button><button data-s="p">👤 Profil</button><button data-s="n">📝 Notizen</button><button data-s="t">🏃 Training</button><button data-s="g">⚽ Spiele</button><button data-s="liga" hidden>🏅 Liga</button><button data-s="m">📅 Termine</button><button data-s="w">🎯 Schwerpunkte</button><button data-s="s">🗂 Stammdaten</button><button data-s="k">🧩 Kader</button><button data-s="e">⚙️ Einstellungen</button></nav>
+<button data-s="h" class="on">🏠 Start</button><button data-s="a">👥 Beteiligung</button><button data-s="q">🏆 Bilanz</button><button data-s="p">👤 Profil</button><button data-s="n">📝 Notizen</button><button data-s="t">🏃 Training</button><button data-s="g">⚽ Spiele</button><button data-s="v">🎬 Videos</button><button data-s="liga" hidden>🏅 Liga</button><button data-s="m">📅 Termine</button><button data-s="w">🎯 Schwerpunkte</button><button data-s="s">🗂 Stammdaten</button><button data-s="k">🧩 Kader</button><button data-s="e">⚙️ Einstellungen</button></nav>
 <main>
 <div class="top"><button class="logo" id="logo" type="button" title="Vereinslogo einfügen" aria-label="Vereinslogo einfügen">Logo<br>einfügen</button><button class="rm" id="logox" hidden title="Logo entfernen">✕</button><div><b style="font-size:22px;line-height:1.2"><span id="mann2">U13</span> · <span id="sais2"></span></b><div class="note" style="font-size:14px">Teamzentrale</div></div><span style="flex:1"></span><select id="th" aria-label="Darstellung" title="Darstellung"><option value="">Darstellung: Auto</option><option value="light">Hell</option><option value="dark">Dunkel</option></select><span class="pill" id="st">Verbinde …</span></div><div id="lkw" class="lkw" role="alert" hidden></div><div id="ccw" class="lkw lkw-y" role="alert" hidden></div><div id="bkw" class="lkw lkw-y" role="status" hidden></div><input type="file" id="fi" accept="image/*" hidden>
 <section id="h"><h2>Übersicht</h2><p class="sub" id="hsub"></p><div id="vnh" style="margin:0 0 8px"></div><div id="bwt"></div><div id="htd" style="margin:0 0 14px"></div>
@@ -275,6 +275,7 @@ nav button .em{display:inline-flex;justify-content:center;align-items:center}
 <div class="bar"><span class="note" style="min-width:110px">Wochenplan (A4)</span><input type="date" id="hmw" aria-label="Woche (beliebiger Tag)"><span class="note" id="hmk"></span><div class="seg" id="hxwo"><button data-f="png">PNG</button><button data-f="jpg">JPG</button><button data-f="pdf">PDF</button></div></div></div>
 </section>
 <section id="liga" hidden></section>
+<section id="v" hidden></section>
 <section id="m" hidden><h2>Termine</h2><p class="sub" id="msub"></p>
 <div class="card" style="margin-bottom:14px"><h3>Neu anlegen</h3><div class="bar" style="margin:0"><button class="btn" id="mnew" style="background:var(--ac);color:#fff;border-color:var(--ac)">＋ Termin</button><button class="btn" id="mser">🔁 Serie</button><button class="btn" id="mdn">＋ Dienst</button><button class="btn" id="mtd">＋ To-Do / Hinweis</button></div>
 <div id="med" hidden></div><div id="mse" hidden></div><div id="pn_d" hidden><h3 style="margin-top:14px">Dienst</h3><p class="note" style="margin-top:0">Material-, Leibchen-, Obst-&Gemüse-Dienst usw. – erscheinen im Wochenplan. Trikotnummern in den Stammdaten (Spalte „Nr.“).</p><div id="df"></div></div>
@@ -542,7 +543,7 @@ nav button .em{display:inline-flex;justify-content:center;align-items:center}
 </script>
 <script>
 const $=(q)=>document.querySelector(q),POS=["TW","IV","AV","FL","ZM","ST"],pc=(x)=>x==null?"–":(x*100).toFixed(1).replace(".",",")+" %",mn=(x)=>String(Math.round(x));
-const SECS=["h","a","p","t","g","liga","q","n","m","w","s","k","e"];
+const SECS=["h","a","p","t","g","v","liga","q","n","m","w","s","k","e"];
 const D={spieler:[],spiele:[],trainings:[],notizen:[],events:[],dienste:[],todos:[],tipps:[],config:null,ready:false};let db=null;
 const nm=(p)=>window.__ANON?p.vorname+" "+p.name:p.vorname+" "+(p.name||"")[0]+".";
 function applyTheme(v){if(v)document.documentElement.setAttribute("data-theme",v);else document.documentElement.removeAttribute("data-theme")}
@@ -1843,6 +1844,327 @@ function xStatsPage(){
 xbtn("#xq",(f)=>xRunPages(()=>[xStatsPage()],f,"Bilanz_"+today(),true));
 renderQ();
 </script>
+<script>/* Videos und Feedback.
+   Trainer: Reiter „Videos“ mit Clips (Link, Titel, Aufgabe, Empfänger, Frist, sichtbar bis), Kommentaren und dem Feedback-Eingang.
+   Spielerlink: Reiter „Übersicht“, „Videos“ (Clips und ganze Spiele) und „Feedback“, dazu einmalig „Wer bist du?“.
+   Datenschutz: Clips stehen nur in den verschlüsselten Links der Empfänger. Kommentare liegen unter einem geheimen Pfad (kom/<s>/m),
+   den nur die Empfänger kennen, und sind zusätzlich mit dem Clip-Schlüssel verschlüsselt. Feedback geht nur an den Trainer (fbin);
+   Antworten liegen unter einem geheimen Pfad je Gerät (fbaus/<r>/m). Funktioniert mit Datenbank nur in der Web-Version. */
+(function(){
+"use strict";
+const ARTEN=["Idee","Anliegen","Frage","Feedback","Sonstiges"];
+const EDIT_MIN=30;
+const hex=(n)=>[...crypto.getRandomValues(new Uint8Array(n))].map((x)=>x.toString(16).padStart(2,"0")).join("");
+const b64u=(u)=>btoa(String.fromCharCode.apply(null,u)).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const nid=(p)=>p+Date.now().toString(36)+hex(4);
+const P2=(n)=>String(n).padStart(2,"0");
+const isoDay=(d)=>d.getFullYear()+"-"+P2(d.getMonth()+1)+"-"+P2(d.getDate());
+const today=()=>isoDay(new Date());
+const urlOk=(u)=>/^https?:\/\/[^\s]+$/i.test(String(u||"").trim());
+const toIso=(v)=>v&&typeof v.toDate==="function"?v.toDate().toISOString():typeof v==="string"?v:v&&v.seconds!=null?new Date(v.seconds*1000).toISOString():"";
+const WT=["So","Mo","Di","Mi","Do","Fr","Sa"];
+const dShort=(s)=>{if(!s)return"";const d=new Date(s.length<=10?s+"T12:00":s);return isNaN(d)?"":WT[d.getDay()]+", "+d.getDate()+"."+(d.getMonth()+1)+"."};
+const dTime=(s)=>{const d=new Date(s);return isNaN(d)?"":P2(d.getHours())+":"+P2(d.getMinutes())+" Uhr"};
+const fristTxt=(f)=>{if(!f)return"";const d=new Date(f),t=new Date(),m=new Date(t);m.setDate(t.getDate()+1);
+  const day=isoDay(d)===isoDay(t)?"heute":isoDay(d)===isoDay(m)?"morgen":dShort(f);return day+(f.length>10?", "+dTime(f):"")};
+const fristTs=(f)=>f?Date.parse(f.length<=10?f+"T23:59":f):NaN;
+/* Hinweis ab dem Kalendertag vor der Frist */
+const fristBald=(f)=>{const t=fristTs(f);if(isNaN(t))return false;const d=new Date(t);d.setDate(d.getDate()-1);return today()>=isoDay(d)};
+const ago=(iso)=>{const t=Date.parse(iso);if(isNaN(t))return"";const m=Math.round((Date.now()-t)/6e4);if(m<1)return"gerade eben";if(m<60)return"vor "+m+" Min.";const d=new Date(t);if(isoDay(d)===today())return"heute, "+dTime(iso);const y=new Date();y.setDate(y.getDate()-1);if(isoDay(d)===isoDay(y))return"gestern, "+dTime(iso);return dShort(iso)+" "+dTime(iso)};
+const ls={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const css='<style id="vidcss">.vd-card{background:var(--card);border:1px solid var(--ln);border-radius:14px;margin:0 0 10px;overflow:hidden}'
++'.vd-hd{display:flex;gap:10px;align-items:center;width:100%;padding:12px 14px;border:0;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer;min-height:56px}'
++'.vd-hd .vd-t{font-size:16px;font-weight:650}.vd-sub{font-size:13px;color:var(--mu)}.vd-chev{flex:none;transition:transform .15s}.vd-open .vd-chev{transform:rotate(180deg)}'
++'.vd-bd{padding:0 14px 14px;display:flex;flex-direction:column;gap:10px}.vd-tags{display:flex;gap:6px;flex-wrap:wrap}'
++'.vd-tag{font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--grs);color:var(--tx)}.vd-tag.neu{background:var(--gs);color:var(--g)}.vd-tag.bald{background:var(--os);color:var(--o)}'
++'.vd-veo{display:flex;align-items:center;justify-content:center;gap:10px;min-height:52px;border-radius:12px;background:var(--ac);color:#fff!important;text-decoration:none;font-weight:600;padding:10px}'
++'.vd-auf{background:var(--grs);border-radius:10px;padding:10px 12px}.vd-auf b{font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--g)}'
++'.vd-k{display:flex;gap:9px}.vd-av{width:30px;height:30px;border-radius:99px;flex:none;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:var(--grs);color:var(--tx)}'
++'.vd-bub{flex:1;min-width:0;border-radius:12px;padding:7px 11px;background:var(--grs);border:1px solid transparent;overflow-wrap:anywhere;white-space:pre-wrap}.vd-k.tr .vd-av{background:var(--g);color:#fff}.vd-k.tr .vd-bub{background:var(--gs);border-color:color-mix(in srgb,var(--g) 45%,transparent)}'
++'.vd-trb{font-size:10px;font-weight:700;color:var(--g);background:var(--card);border:1px solid color-mix(in srgb,var(--g) 45%,transparent);padding:0 6px;border-radius:99px;margin-left:5px;vertical-align:1px}'
++'.vd-rep{margin-left:39px}.vd-act{display:flex;gap:14px;padding:0 0 0 4px}.vd-act button{border:0;background:none;padding:6px 0;font:inherit;font-size:13px;font-weight:600;color:var(--mu);cursor:pointer;min-height:32px}'
++'.vd-ta{width:100%;box-sizing:border-box;font:inherit;font-size:15px;padding:9px 11px;border:1px solid var(--ln);border-radius:10px;background:var(--card);color:var(--tx);resize:vertical}'
++'.vd-go{min-height:44px;border:0;border-radius:10px;background:var(--ac);color:#fff;font:inherit;font-weight:600;padding:0 16px;cursor:pointer}.vd-go:disabled{opacity:.55}'
++'.vd-hint{display:flex;gap:10px;align-items:flex-start;background:var(--os);border:1px solid color-mix(in srgb,var(--o) 35%,transparent);border-radius:12px;padding:10px 12px;margin:0 0 10px}'
++'.vd-hint button{flex:none;border:0;background:none;color:var(--o);font:inherit;font-size:13px;font-weight:600;cursor:pointer;min-height:32px}'
++'.vd-chips{display:flex;gap:6px;flex-wrap:wrap}.vd-chips button{border:1px solid var(--ln);background:var(--card);color:var(--tx);font:inherit;font-size:14px;padding:7px 13px;border-radius:99px;cursor:pointer;min-height:38px}.vd-chips button.on{border-color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac);font-weight:600}'
++'.vd-row{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--ln)}.vd-row:last-child{border-bottom:0}'
++'#vtab{max-width:100%;flex-wrap:wrap}#vtab button{white-space:nowrap}'
++'@media(max-width:600px){#vtab{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;border-radius:14px}#vtab button{border-radius:9px!important;border:1px solid var(--ln)!important;padding:8px 4px;min-height:40px}#vtab button.on{border-color:var(--ac)!important}}'
++'.vd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:4px}.vd-grid label{display:flex;gap:6px;align-items:center;font-size:14px;padding:5px 7px;border-radius:8px}'
++'.vd-wrap{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}.vd-wrap>.vd-l{flex:1 1 320px;min-width:0}.vd-wrap>.vd-r{flex:999 1 420px;min-width:0}'
++'.vd-miss{display:flex;gap:6px;flex-wrap:wrap}.vd-miss span{font-size:12.5px;padding:3px 9px;border-radius:99px;background:var(--gs);color:var(--g)}.vd-miss span.no{background:var(--os);color:var(--o)}'
++'</style>';
+const addCss=()=>{if(!document.getElementById("vidcss"))document.head.insertAdjacentHTML("beforeend",css)};
+const SVG={play:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M10 8l6 4-6 4z" fill="currentColor"></path></svg>',
+  chev:'<svg class="vd-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>',
+  clock:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="flex:none;color:var(--o)"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>',
+  lock:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="flex:none"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>'};
+const veoBtn=(u,t)=>urlOk(u)?'<a class="vd-veo" href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">'+SVG.play+esc(t||"Bei Veo ansehen")+"</a>":"";
+
+/* Kommentare einer Liste als Baum (Hauptkommentare mit Antworten darunter), älteste zuerst */
+function tree(list){const top=list.filter((k)=>!k.r||!list.some((x)=>x.id===k.r)).sort((a,b)=>a.at<b.at?-1:1);
+  return top.map((k)=>({...k,rep:list.filter((x)=>x.r===k.id).sort((a,b)=>a.at<b.at?-1:1)}))}
+const initials=(n,tr)=>tr?String(n||"T").trim().charAt(0).toUpperCase():String(n||"?").trim().charAt(0).toUpperCase();
+function kHtml(k,o){/* o: {me, canEdit(k), reply:true} */
+  const tr=!!k.tr,mine=o.me&&!tr&&k.p===o.me,edit=mine&&o.canEdit&&o.canEdit(k);
+  return'<div class="vd-k'+(tr?" tr":"")+(o.rep?" vd-rep":"")+'" data-kid="'+esc(k.id)+'"><div class="vd-av" aria-hidden="true">'+esc(initials(k.n,tr))+'</div><div style="flex:1;min-width:0"><div class="vd-bub"><div style="font-size:13px;font-weight:650;white-space:normal">'+esc(k.n||"")+(mine?" (du)":"")+(tr?'<span class="vd-trb">Trainer</span>':"")+' <span style="font-weight:400;color:var(--mu)">· '+esc(ago(k.at))+(k.ed?" · geändert":"")+'</span></div><div data-ktx>'+esc(k.t||"")+"</div></div>"
+    +(o.rep?"":'<div class="vd-act">'+(o.reply?'<button type="button" data-krep="'+esc(k.id)+'">Antworten</button>':"")+(edit?'<button type="button" data-ked="'+esc(k.id)+'" style="color:var(--ac)">Bearbeiten · noch '+Math.max(1,Math.ceil((Date.parse(k.at)+EDIT_MIN*6e4-Date.now())/6e4))+" Min.</button>":"")+(o.del?'<button type="button" data-kdel="'+esc(k.id)+'">Löschen</button>':"")+"</div>")
+    +(o.rep&&edit?'<div class="vd-act"><button type="button" data-ked="'+esc(k.id)+'" style="color:var(--ac)">Bearbeiten</button></div>':"")
+    +(o.rep&&o.del?'<div class="vd-act"><button type="button" data-kdel="'+esc(k.id)+'">Löschen</button></div>':"")+"</div></div>"}
+function treeHtml(list,o){return tree(list).map((k)=>kHtml(k,o)+k.rep.map((r)=>kHtml(r,{...o,rep:true})).join("")).join("")}
+const canEdit=(k)=>!!k.server&&Date.now()<Date.parse(k.at)+EDIT_MIN*6e4;
+
+/* =====================================================================
+   Trainer
+   ===================================================================== */
+const V={clips:[],fb:[],kom:{},unsub:{},sel:null,edit:null,tab:"c",armed:null,started:false,fbKey:"",repTo:null};
+window.__vid=V;
+const recips=(c)=>c.an==="alle"||!Array.isArray(c.an)?active():active().filter((p)=>c.an.includes(p.id));
+const pname=(id)=>{const p=D.spieler.find((x)=>x.id===id);return p?p.vorname+" "+p.name:""};
+const sichtbar=(c)=>!c.bis||c.bis>=today();
+const myName=()=>{const v=ls.get("u13vname","");if(v)return v;const st=((D.config&&D.config.staff)||[]),o=st.find((x)=>x.owner)||st[0];if(window.__webOwner&&o&&o.name)return String(o.name).split(" ")[0];
+  const em=(window.__ACCT||"").split("@")[0];return em&&em!=="main"?em.charAt(0).toUpperCase()+em.slice(1).split(/[._-]/)[0]:"Trainer"};
+const canW=()=>!!db&&window.__ROLE!=="lesen"&&window.__ROLE!=="scout"&&!window.__RO;
+/* Für die Spielerlinks (links.js): Clips je Spieler, ganze Spiele mit Video, Feedback-Schlüssel */
+V.clipsFor=(pid)=>V.clips.filter((c)=>sichtbar(c)&&c.s&&c.ck&&(c.an==="alle"||(Array.isArray(c.an)&&c.an.includes(pid))))
+  .map((c)=>({id:c.id,ti:c.titel||"",u:c.url||"",a:c.aufgabe||"",f:c.frist||"",at:c.at||"",s:c.s,ck:c.ck,n:c.an==="alle"?0:c.an.length}));
+V.games=()=>D.spiele.filter((g)=>urlOk(g.video)).map((g)=>({d:g.datum||"",g:g.gegner||"",ha:g.ha||"",a:g.art||"",e:g.tore!=null&&g.gt!=null?g.tore+":"+g.gt:"",v:g.video})).sort((a,b)=>a.d<b.d?1:-1);
+V.sig=()=>JSON.stringify([V.clips.filter(sichtbar).map((c)=>[c.id,c.titel,c.url,c.aufgabe,c.an,c.frist,c.bis,c.s]),V.games(),V.fbKey]);
+V.pkg=(pid)=>({vc:V.clipsFor(pid),vg:V.games(),fk:V.fbKey});
+
+function startTrainer(){
+  if(V.started||!db||window.__VIEWER||window.__SCOUT||window.__ROLE==="scout")return;V.started=true;addCss();
+  db.collection("clips").onSnapshot((s)=>{V.clips=s.docs.map((d)=>({id:d.id,...d.data()})).sort((a,b)=>(a.at||"")<(b.at||"")?1:-1);watchKom();render();typeof renderLinks==="function"&&renderLinks()},()=>{});
+  db.collection("fbin").onSnapshot((s)=>{V.fb=s.docs.map((d)=>({id:d.id,...d.data()})).sort((a,b)=>(a.at||"")<(b.at||"")?1:-1);badge();render()},()=>{});
+  (async()=>{try{const r=await db.doc("config/feedback").get();let k=r&&r.exists!==false&&r.data&&r.data()&&r.data().k;if(!k&&canW()&&window.__ROLE==="voll"){k=b64u(crypto.getRandomValues(new Uint8Array(18)));await db.doc("config/feedback").set({k})}V.fbKey=k||"";typeof renderLinks==="function"&&renderLinks()}catch(e){}})();
+}
+V.start=startTrainer;
+/* Kommentare aller sichtbaren Clips mitlesen (für „x von y haben kommentiert“ und die Ansicht) */
+function watchKom(){
+  const want=new Set(V.clips.filter((c)=>c.s&&c.ck).map((c)=>c.id));
+  Object.keys(V.unsub).forEach((id)=>{if(!want.has(id)){try{V.unsub[id]()}catch(e){}delete V.unsub[id];delete V.kom[id]}});
+  V.clips.forEach((c)=>{if(!want.has(c.id)||V.unsub[c.id])return;
+    try{V.unsub[c.id]=db.collection("kom").doc(c.s).collection("m").onSnapshot(async(s)=>{const out=[];for(const d of s.docs){const x=d.data()||{};try{const o=await window.__lk.unseal(c.ck,x.b);out.push({id:d.id,at:toIso(x.at),...o})}catch(e){}}V.kom[c.id]=out;render()},()=>{})}catch(e){}});
+}
+function badge(){const b=document.querySelector('nav button[data-s="v"]');if(!b)return;const n=V.fb.filter((x)=>!x.gelesen).length;b.innerHTML="🎬 Videos"+(n?' <span class="pill" style="background:var(--o);color:#fff;padding:0 7px;margin-left:2px">'+n+"</span>":"")}
+const sec=()=>document.getElementById("v");
+function render(){const el=sec();if(!el||el.hidden&&el.dataset.done)return;el.dataset.done="1";draw()}
+V.render=()=>{const el=sec();if(el)draw()};
+function draw(){
+  const el=sec();if(!el)return;addCss();
+  const ae=document.activeElement;if(ae&&el.contains(ae)&&ae.matches("input,textarea,select"))return;
+  const nf=V.fb.filter((x)=>!x.gelesen).length;
+  el.innerHTML='<h2>Videos</h2><p class="sub">Clips mit Aufgabe für die Spielerlinks · Kommentare der Spieler · Feedback von Spielern und Eltern</p>'
+    +'<div class="seg" id="vdseg" style="margin:0 0 14px"><button data-vt="c" class="'+(V.tab==="c"?"on":"")+'">Clips</button><button data-vt="f" class="'+(V.tab==="f"?"on":"")+'">Feedback'+(nf?" ("+nf+" neu)":"")+"</button></div>"
+    +(V.tab==="c"?clipsHtml():fbHtml())+'<div class="note" id="vdm" style="min-height:18px"></div>';
+}
+function formHtml(){
+  const c=V.edit&&V.edit!=="neu"?V.clips.find((x)=>x.id===V.edit)||{}:{},alle=!c.an||c.an==="alle",sel=Array.isArray(c.an)?c.an:[];
+  const fd=c.frist?c.frist.slice(0,10):"",ft=c.frist&&c.frist.length>10?c.frist.slice(11,16):"18:00";
+  return'<div class="card" id="vdform"><h3 style="margin-top:0">'+(c.id?"Clip bearbeiten":"Neuer Clip")+'</h3>'
+    +'<label class="note" style="display:block;margin:0 0 8px">Link zum Clip (z. B. Veo-Teilen-Link)<br><input id="vdu" type="url" inputmode="url" placeholder="https://…" value="'+esc(c.url||"")+'" style="width:100%"></label>'
+    +'<label class="note" style="display:block;margin:0 0 8px">Titel<br><input id="vdt" maxlength="120" value="'+esc(c.titel||"")+'" style="width:100%"></label>'
+    +'<label class="note" style="display:block;margin:0 0 8px">Aufgabe (freiwillig)<br><textarea id="vda" rows="3" maxlength="1500" style="width:100%;box-sizing:border-box">'+esc(c.aufgabe||"")+"</textarea></label>"
+    +'<div class="note" style="margin:0 0 4px">Wer bekommt den Clip?</div><div class="seg" id="vdan" style="margin:0 0 6px"><button type="button" data-an="alle" class="'+(alle?"on":"")+'">Ganze Mannschaft</button><button type="button" data-an="ein" class="'+(alle?"":"on")+'">Einzelne Spieler</button></div>'
+    +'<div class="vd-grid" id="vdps"'+(alle?" hidden":"")+">"+active().map((p)=>'<label><input type="checkbox" value="'+esc(p.id)+'"'+(sel.includes(p.id)?" checked":"")+">"+esc(p.vorname+" "+p.name)+"</label>").join("")+"</div>"
+    +'<div class="note" style="margin:8px 0 4px">Kommentieren bis (freiwillig)</div><div class="bar" style="margin:0 0 4px"><input id="vdfd" type="date" value="'+esc(fd)+'" aria-label="Datum der Frist"><input id="vdft" type="time" value="'+esc(ft)+'" aria-label="Uhrzeit der Frist"></div><div class="note" style="margin:0 0 8px">Einen Tag vorher bekommen Spieler ohne Kommentar einen Hinweis. Kommentieren geht auch danach.</div>'
+    +'<label class="note" style="display:block;margin:0 0 8px">Für Spieler sichtbar bis (freiwillig)<br><input id="vdb" type="date" value="'+esc(c.bis||"")+'"></label><div class="note" style="margin:-4px 0 10px">Danach verschwindet der Clip bei den Spielern. Du siehst ihn weiter unter „Abgelaufen“.</div>'
+    +'<div class="bar"><button class="btn" id="vdsave" style="background:var(--ac);color:#fff;border-color:var(--ac)">Speichern</button><button class="btn" id="vdcancel">Abbrechen</button></div></div>'}
+function clipRow(c){
+  const R=recips(c),K=V.kom[c.id]||[],done=new Set(K.filter((k)=>!k.tr&&!k.r).map((k)=>k.p)),n=R.filter((p)=>done.has(p.id)).length;
+  return'<button type="button" class="card" data-vc="'+esc(c.id)+'" style="display:block;width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer;margin:0 0 8px;'+(V.sel===c.id?"border-color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac)":"")+'"><b style="font-size:15px">'+esc(c.titel||"(ohne Titel)")+'</b><div class="note">'+(c.an==="alle"?"Ganze Mannschaft":"An "+R.length+" Spieler")+(c.frist?" · bis "+esc(fristTxt(c.frist)):"")+(c.bis?" · sichtbar bis "+esc(dShort(c.bis)):"")+'</div><div class="note" style="color:var(--g);font-weight:600">'+n+" von "+R.length+" haben kommentiert</div></button>"}
+function clipsHtml(){
+  const ro=!canW(),akt=V.clips.filter(sichtbar),alt=V.clips.filter((c)=>!sichtbar(c));
+  if(V.sel&&!V.clips.some((c)=>c.id===V.sel))V.sel=null;
+  const left=(ro?"":(V.edit?formHtml():'<div class="bar" style="margin:0 0 12px"><button class="btn" id="vdnew" style="background:var(--ac);color:#fff;border-color:var(--ac)">＋ Neuer Clip</button></div>'))
+    +(akt.length?akt.map(clipRow).join(""):'<div class="card"><div class="note">Noch keine Clips. Füge einen Veo-Link hinzu, damit die Spieler ihn in ihrem Link sehen.</div></div>')
+    +(alt.length?'<details style="margin:10px 0 0"><summary class="note" style="cursor:pointer">Abgelaufen ('+alt.length+")</summary>"+alt.map(clipRow).join("")+"</details>":"")
+    +(window.__WEB?"":'<p class="note">Kommentare und Feedback funktionieren nur in der Web-Version der App.</p>');
+  return'<div class="vd-wrap"><div class="vd-l">'+left+'</div><div class="vd-r">'+detailHtml()+"</div></div>"}
+function detailHtml(){
+  const c=V.clips.find((x)=>x.id===V.sel);if(!c)return'<div class="card"><div class="note">Wähle links einen Clip, um die Kommentare zu sehen und zu antworten.</div></div>';
+  const R=recips(c),K=V.kom[c.id]||[],done=new Set(K.filter((k)=>!k.tr&&!k.r).map((k)=>k.p)),ro=!canW(),armed=V.armed==="d"+c.id;
+  return'<div class="card" id="vddet"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start"><div style="flex:1;min-width:200px"><h3 style="margin:0;font-size:18px;text-transform:none;letter-spacing:0">'+esc(c.titel||"(ohne Titel)")+'</h3><div class="note">'+(c.an==="alle"?"Ganze Mannschaft":"An "+esc(R.map((p)=>p.vorname).join(", ")))+(c.frist?" · kommentieren bis "+esc(fristTxt(c.frist)):"")+"</div></div>"
+    +'<div class="bar" style="margin:0">'+(urlOk(c.url)?'<a class="btn" href="'+esc(c.url)+'" target="_blank" rel="noopener noreferrer">Ansehen</a>':"")+(ro?"":'<button class="btn" data-vce="'+esc(c.id)+'">Bearbeiten</button><button class="btn'+(armed?" arm":"")+'" data-vcd="'+esc(c.id)+'">'+(armed?"Wirklich löschen?":"Löschen")+"</button>")+"</div></div>"
+    +(c.aufgabe?'<div class="vd-auf" style="margin:10px 0"><b>Aufgabe</b><div style="white-space:pre-wrap">'+esc(c.aufgabe)+"</div></div>":"")
+    +'<div class="vd-miss" style="margin:8px 0 12px">'+R.map((p)=>'<span class="'+(done.has(p.id)?"":"no")+'">'+esc(p.vorname)+(done.has(p.id)?" ✓":" fehlt noch")+"</span>").join("")+"</div>"
+    +'<div style="display:flex;flex-direction:column;gap:8px" id="vdk">'+(K.length?treeHtml(K,{reply:!ro,del:!ro}):'<div class="note">Noch keine Kommentare.</div>')+"</div>"
+    +(ro||!window.__WEB?"":'<div style="margin-top:12px" id="vdrw">'+(V.repTo?'<div class="note">Antwort auf den Kommentar von <b>'+esc((K.find((k)=>k.id===V.repTo)||{}).n||"")+'</b> · <button type="button" class="btn" data-vrx style="font-size:12px;padding:2px 8px">nicht antworten</button></div>':"")
+    +'<label class="note" for="vdrt">Antwort als '+esc(myName())+' <button type="button" class="btn" data-vname style="font-size:12px;padding:2px 8px">Name ändern</button></label><div class="bar" style="align-items:flex-end;margin:4px 0 0"><textarea id="vdrt" class="vd-ta" rows="2" maxlength="2000" style="flex:1;min-width:200px"></textarea><button class="btn" id="vdrs" style="background:var(--ac);color:#fff;border-color:var(--ac)">'+(V.repTo?"Antworten":"Schreiben")+"</button></div></div>")+"</div>"}
+function fbHtml(){
+  const ro=!canW();
+  if(!V.fb.length)return'<div class="card"><div class="note">Noch kein Feedback. Spieler und Eltern können dir im Spielerlink unter „Feedback“ schreiben (Idee, Anliegen, Frage, Feedback, Sonstiges). Nur das Trainerteam liest das.</div></div>';
+  return V.fb.map((x)=>{const who=x.rolle==="e"?(x.von||"Elternteil")+" (Elternteil von "+(pname(x.pid)||"?")+")":(pname(x.pid)||x.von||"Spieler");
+    return'<div class="card" data-fid="'+esc(x.id)+'" style="'+(x.gelesen?"":"border-color:var(--o)")+'"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="pill">'+esc(x.art||"Sonstiges")+'</span><b style="flex:1;min-width:150px">'+esc(who)+'</b><span class="note">'+esc(ago(x.at))+"</span></div>"
+      +'<div style="white-space:pre-wrap;overflow-wrap:anywhere;margin:8px 0">'+esc(x.text||"")+"</div>"
+      +(x.antwort?'<div class="vd-k tr"><div class="vd-av">'+esc(initials(x.antwortVon,true))+'</div><div class="vd-bub"><div style="font-size:13px;font-weight:650">'+esc(x.antwortVon||"")+'<span class="vd-trb">Trainer</span></div>'+esc(x.antwort)+"</div></div>":"")
+      +(ro?"":'<div class="bar" style="margin:8px 0 0">'+(x.antwort||!x.r||!window.__WEB?"":'<textarea class="vd-ta" data-fbt rows="2" maxlength="2000" placeholder="Antwort als '+esc(myName())+'" style="flex:1;min-width:200px"></textarea><button class="btn" data-fbr style="background:var(--ac);color:#fff;border-color:var(--ac)">Antworten</button>')
+        +(x.gelesen?"":'<button class="btn" data-fbg>Als gelesen markieren</button>')+'<button class="btn'+(V.armed==="f"+x.id?" arm":"")+'" data-fbd>'+(V.armed==="f"+x.id?"Wirklich löschen?":"Löschen")+"</button></div>")+"</div>"}).join("")}
+const msg=(t,bad)=>{const m=document.getElementById("vdm");if(m){m.textContent=t||"";m.className="note"+(bad?" warn":"")}};
+let pubT=null;const pubSoon=()=>{clearTimeout(pubT);pubT=setTimeout(()=>{if(window.__WEB&&window.__lkPublish&&window.__ROLE==="voll")window.__lkPublish(true)},1500)};
+async function saveClip(){
+  const u=$("#vdu").value.trim(),t=$("#vdt").value.trim(),a=$("#vda").value.trim(),alle=$("#vdan .on").dataset.an==="alle",sel=[...document.querySelectorAll("#vdps input:checked")].map((i)=>i.value);
+  if(!urlOk(u)){msg("Bitte einen gültigen Link eintragen (beginnt mit https://).",true);return}
+  if(!t){msg("Bitte einen Titel eintragen.",true);return}
+  if(!alle&&!sel.length){msg("Bitte mindestens einen Spieler auswählen.",true);return}
+  const fd=$("#vdfd").value,ft=$("#vdft").value||"18:00",b=$("#vdb").value;
+  const old=V.edit&&V.edit!=="neu"?V.clips.find((x)=>x.id===V.edit):null;
+  const c={id:old?old.id:nid("cl"),titel:t,url:u,aufgabe:a,an:alle?"alle":sel,frist:fd?fd+"T"+ft:"",bis:b||"",at:old&&old.at||new Date().toISOString(),s:old&&old.s||hex(32),ck:old&&old.ck||b64u(crypto.getRandomValues(new Uint8Array(16)))};
+  try{if(!old)await db.doc("clipauth/"+c.s).set({c:c.id});await save("clips",c.id,c);V.edit=null;V.sel=c.id;draw();msg(old?"Gespeichert.":"Clip gespeichert. Er erscheint in den Spielerlinks der Empfänger.");pubSoon()}catch(e){msg("Das konnte nicht gespeichert werden.",true)}
+}
+async function delClip(id){const c=V.clips.find((x)=>x.id===id);if(!c)return;
+  try{if(window.__WEB&&c.s){try{const s=await db.collection("kom").doc(c.s).collection("m").get();for(const d of s.docs)await db.collection("kom").doc(c.s).collection("m").doc(d.id).delete()}catch(e){}await db.doc("clipauth/"+c.s).delete().catch(()=>{})}
+    await save("clips",id,null);V.sel=null;draw();msg("Clip gelöscht.");pubSoon()}catch(e){msg("Das konnte nicht gelöscht werden.",true)}}
+async function postKom(){
+  const c=V.clips.find((x)=>x.id===V.sel),ta=$("#vdrt");if(!c||!ta)return;const t=ta.value.trim();if(!t)return;
+  const id=nid("k"),o={p:"T",n:myName(),t,r:V.repTo||"",tr:true};
+  try{const b=await window.__lk.seal(c.ck,o);await db.collection("kom").doc(c.s).collection("m").doc(id).set({b,at:new Date().toISOString()});ta.value="";V.repTo=null;draw()}catch(e){msg("Das konnte nicht gesendet werden.",true)}}
+async function fbReply(x,t){
+  const id=nid("a"),now=new Date().toISOString(),von=myName();
+  try{await db.collection("fbaus").doc(x.r).collection("m").doc(id).set({id,at:now,text:t,von,t:"trainer",re:x.id});await db.doc("fbin/"+x.id).update({antwort:t,antwortVon:von,antwortAm:now,gelesen:true});msg("Antwort gesendet. Sie erscheint im Link unter „Feedback“.")}catch(e){msg("Das konnte nicht gesendet werden.",true)}}
+document.addEventListener("click",async(e)=>{
+  const el=sec();if(!el||!e.target.closest||!el.contains(e.target))return;const q=(s)=>e.target.closest(s);
+  let b;
+  if((b=q("[data-vt]"))){V.tab=b.dataset.vt;draw();return}
+  if(q("#vdnew")){V.edit="neu";draw();const u=$("#vdu");u&&u.focus();return}
+  if(q("#vdcancel")){V.edit=null;draw();return}
+  if(q("#vdsave")){saveClip();return}
+  if((b=q("#vdan button"))){document.querySelectorAll("#vdan button").forEach((x)=>x.classList.toggle("on",x===b));$("#vdps").hidden=b.dataset.an==="alle";return}
+  if((b=q("[data-vc]"))){V.sel=b.dataset.vc;V.repTo=null;V.armed=null;draw();const d=$("#vddet");if(d&&window.innerWidth<900)d.scrollIntoView({behavior:"smooth",block:"start"});return}
+  if((b=q("[data-vce]"))){V.edit=b.dataset.vce;draw();const f=$("#vdform");f&&f.scrollIntoView({block:"start"});return}
+  if((b=q("[data-vcd]"))){const k="d"+b.dataset.vcd;if(V.armed!==k){V.armed=k;draw();return}V.armed=null;delClip(b.dataset.vcd);return}
+  if((b=q("[data-krep]"))){V.repTo=b.dataset.krep;draw();const t=$("#vdrt");t&&t.focus();return}
+  if(q("[data-vrx]")){V.repTo=null;draw();return}
+  if((b=q("[data-kdel]"))){const c=V.clips.find((x)=>x.id===V.sel);const k="k"+b.dataset.kdel;if(V.armed!==k){V.armed=k;b.textContent="Wirklich löschen?";return}V.armed=null;try{await db.collection("kom").doc(c.s).collection("m").doc(b.dataset.kdel).delete();(V.kom[c.id]||[]).filter((x)=>x.r===b.dataset.kdel).forEach((x)=>db.collection("kom").doc(c.s).collection("m").doc(x.id).delete().catch(()=>{}))}catch(x){msg("Das konnte nicht gelöscht werden.",true)}return}
+  if(q("[data-vname]")){const n=prompt("Dein Name bei Antworten:",myName());if(n&&n.trim()){ls.set("u13vname",n.trim().slice(0,40));draw()}return}
+  if(q("#vdrs")){postKom();return}
+  const card=q("[data-fid]");if(card){const x=V.fb.find((f)=>f.id===card.dataset.fid);if(!x)return;
+    if(q("[data-fbg]")){db.doc("fbin/"+x.id).update({gelesen:true}).catch(()=>{});return}
+    if(q("[data-fbr]")){const t=card.querySelector("[data-fbt]").value.trim();if(t)fbReply(x,t);return}
+    if(q("[data-fbd]")){const k="f"+x.id;if(V.armed!==k){V.armed=k;draw();return}V.armed=null;save("fbin",x.id,null);return}}
+});
+document.addEventListener("keydown",(e)=>{if(e.key==="Enter"&&(e.metaKey||e.ctrlKey)&&e.target&&e.target.id==="vdrt")postKom()});
+/* Sichtbarkeit: Reiter nur für Trainer; zeichnen, wenn er geöffnet wird */
+document.addEventListener("click",(e)=>{const b=e.target.closest&&e.target.closest('nav button[data-s="v"]');if(b)setTimeout(()=>{draw();badge()},0)});
+const boot=()=>{if(window.__VIEWER||window.__SCOUT)return;if(typeof db!=="undefined"&&db&&window.__dbUp)startTrainer();else setTimeout(boot,400)};
+setTimeout(boot,300);
+
+/* =====================================================================
+   Spielerlink
+   ===================================================================== */
+const VW={};
+const net=()=>window.__vidNet||null;
+const role=(pid)=>ls.get("u13wer."+pid,null);
+V.viewerTabs=(d,pid)=>{const r=role(pid),hasV=(d.vc&&d.vc.length)||(d.vg&&d.vg.length),hasF=!!(d.fk&&net());
+  return{u:true,v:!!hasV&&(!r||r.r==="s")&&!!r,f:hasF&&!!r,needRole:!!(hasV||hasF)&&!r}};
+/* Kommentare eines Clips laden (entschlüsselt) */
+async function loadKom(c){const n=net();if(!n)return null;try{const L=await n.list("kom/"+c.s+"/m"),out=[];for(const x of L){try{const o=await window.__lk.unseal(c.ck,x.b);out.push({id:x.id,at:x.at,server:x.server,...o})}catch(e){}}return out}catch(e){return null}}
+const mineTop=(K,pid)=>(K||[]).some((k)=>!k.tr&&k.p===pid&&!k.r);
+const seenGet=(pid)=>new Set(ls.get("u13vseen."+pid,[]));
+const seenAdd=(pid,id)=>{const s=seenGet(pid);s.add(id);ls.set("u13vseen."+pid,[...s].slice(-300))};
+const hintOff=(pid,id)=>ls.get("u13vhx."+pid,[]).includes(id);
+const hintsFor=(d,pid)=>(d.vc||[]).filter((c)=>c.f&&!hintOff(pid,c.id)&&fristBald(c.f)&&VW.kom&&VW.kom[c.id]&&!mineTop(VW.kom[c.id],pid));
+function hintHtml(d,pid){return hintsFor(d,pid).map((c)=>'<div class="vd-hint" data-hint="'+esc(c.id)+'">'+SVG.clock+'<div style="flex:1;font-size:14px;line-height:1.4"><b>'+(Date.now()>fristTs(c.f)?"Frist vorbei":"Bis "+esc(fristTxt(c.f)))+":</b> Bitte kommentiere den Clip „"+esc(c.ti)+'“.</div><button type="button" data-hx="'+esc(c.id)+'">Ausblenden</button></div>').join("")}
+/* Wer bist du? (einmal je Gerät und Link) */
+function whoHtml(d){return'<div class="card" id="vwho" style="margin:0 0 14px;border-color:var(--ac)"><h3 style="margin-top:0;text-transform:none;letter-spacing:0;font-size:18px">Wer bist du?</h3><p class="note" style="margin-top:0">Das fragen wir einmal auf diesem Gerät. Du kannst es später unten auf der Seite ändern.</p>'
+  +'<div class="bar" style="margin:0 0 8px"><button class="btn" data-who="s" style="min-height:44px;font-weight:600">Ich bin '+esc(d.n||"der Spieler")+'</button><button class="btn" data-who="e" style="min-height:44px">Ich bin Elternteil von '+esc(d.n||"…")+"</button></div>"
+  +'<div id="vwhoe" hidden><label class="note" for="vwhon">Wie heißt du?</label><div class="bar" style="margin:4px 0 0"><input id="vwhon" maxlength="60" autocomplete="name" placeholder="Vor- und Nachname" style="flex:1;min-width:180px"><button class="btn" data-whook style="background:var(--ac);color:#fff;border-color:var(--ac)">Weiter</button></div><div class="note warn" id="vwhom"></div></div>'
+  +'<p class="note" style="margin-bottom:0">Clips und die Kommentare der Spieler sind nur für die Mannschaft gedacht. Liebe Eltern, bitte respektiert das.</p></div>'}
+/* Übersicht */
+function uebHtml(d,pid){
+  const r=role(pid),T=d.t||{days:{}},t0=today(),days=Object.keys(T.days||{}).filter((x)=>x>=t0).sort(),nx=[];
+  for(const x of days){(T.days[x]||[]).forEach((o)=>{if(o.ty!=="Ferien"&&nx.length<4)nx.push({d:x,...o})});if(nx.length>=4)break}
+  const clips=(d.vc||[]),open=r&&r.r==="s"?clips.filter((c)=>c.a&&VW.kom&&VW.kom[c.id]&&!mineTop(VW.kom[c.id],pid)):[],neu=r&&r.r==="s"?clips.filter((c)=>!seenGet(pid).has(c.id)):[];
+  const rep=newReplies(d,pid);
+  return(r&&r.r==="s"?hintHtml(d,pid):"")
+    +'<div class="card" style="margin:0 0 12px"><h3 style="margin-top:0">Als Nächstes</h3>'+(nx.length?nx.map((o)=>'<div class="vd-row"><div style="min-width:86px;font-weight:600">'+esc(dShort(o.d))+'</div><div style="flex:1;min-width:0"><span class="pill">'+esc(o.tl||o.ty)+"</span> "+esc(o.tx||"")+(o.u?'<div class="note" style="color:var(--o)">⚠ '+esc(o.u)+"</div>":"")+'</div><div style="font-weight:600;white-space:nowrap">'+esc(o.z||"")+"</div></div>").join(""):'<div class="note">Keine Termine in nächster Zeit.</div>')+(d.t?'<div class="bar" style="margin:8px 0 0"><button class="btn" data-vgo="t">Zum Terminplan</button></div>':"")+"</div>"
+    +(r&&r.r==="s"&&clips.length?'<div class="card" style="margin:0 0 12px"><h3 style="margin-top:0">Videos</h3>'+(open.length?open.map((c)=>'<div class="vd-row"><div style="flex:1;min-width:0"><b>'+esc(c.ti)+'</b><div class="note">Aufgabe offen'+(c.f?" · bis "+esc(fristTxt(c.f)):"")+"</div></div></div>").join(""):'<div class="note">'+(VW.kom?"Keine offenen Aufgaben. Stark!":"Wird geladen …")+"</div>")+(neu.length?'<div class="note" style="margin-top:6px">'+neu.length+(neu.length===1?" neuer Clip":" neue Clips")+"</div>":"")+'<div class="bar" style="margin:8px 0 0"><button class="btn" data-vgo="v">Zu den Videos</button></div></div>':"")
+    +(rep.length?'<div class="card" style="margin:0 0 12px"><h3 style="margin-top:0">Neue Antworten vom Trainer</h3>'+rep.map((x)=>'<div class="vd-row"><div style="flex:1;min-width:0"><b>'+esc(x.wo)+'</b><div class="note">'+esc(x.n)+": "+esc(String(x.t).slice(0,120))+"</div></div><button class=\"btn\" data-vgo=\""+x.go+"\">Ansehen</button></div>").join("")+"</div>":"")}
+function newReplies(d,pid){const r=role(pid),seen=new Set(ls.get("u13vrs."+pid,[])),out=[];
+  if(r&&r.r==="s"&&VW.kom)(d.vc||[]).forEach((c)=>{const K=VW.kom[c.id]||[],mine=new Set(K.filter((k)=>!k.tr&&k.p===pid).map((k)=>k.id));K.filter((k)=>k.tr&&mine.has(k.r)&&!seen.has(k.id)).forEach((k)=>out.push({id:k.id,wo:"Clip „"+c.ti+"“",n:k.n,t:k.t,go:"v"}))});
+  (VW.fb||[]).filter((x)=>x.t==="trainer"&&!seen.has(x.id)).forEach((x)=>out.push({id:x.id,wo:"Feedback",n:x.von,t:x.text,go:"f"}));return out}
+const markReplies=(pid,ids)=>{if(!ids.length)return;const s=new Set(ls.get("u13vrs."+pid,[]));ids.forEach((i)=>s.add(i));ls.set("u13vrs."+pid,[...s].slice(-500))};
+/* Videos */
+function vidHtml(d,pid){
+  const sub=VW.sub||"c",clips=(d.vc||[]).slice().sort((a,b)=>a.at<b.at?1:-1),games=d.vg||[];
+  return hintHtml(d,pid)+'<div class="seg" id="vvseg" style="margin:0 0 12px"><button data-vv="c" class="'+(sub==="c"?"on":"")+'">Clips</button><button data-vv="g" class="'+(sub==="g"?"on":"")+'">Ganze Spiele</button></div>'
+    +(sub==="c"?(clips.length?'<div class="note" style="margin:0 0 8px">Neueste Clips oben</div>'+clips.map((c)=>clipHtml(c,pid)).join(""):'<div class="card"><div class="note">Noch keine Clips.</div></div>')
+      :(games.length?'<div class="note" style="margin:0 0 8px">Alle Spiele mit Video, neueste oben</div><div class="card">'+games.map((g)=>'<div class="vd-row"><div style="flex:1;min-width:0"><b>'+esc(g.g?"gegen "+g.g:"Spiel")+(g.ha?" ("+esc(g.ha)+")":"")+'</b><div class="note">'+esc(dShort(g.d))+(g.a?" · "+esc(g.a):"")+(g.e?" · "+esc(g.e):"")+'</div></div><a class="btn" href="'+esc(g.v)+'" target="_blank" rel="noopener noreferrer" style="font-weight:600">Bei Veo</a></div>').join("")+"</div>":'<div class="card"><div class="note">Noch keine Spiel-Videos.</div></div>'))}
+function clipHtml(c,pid){
+  const open=VW.open===c.id,K=VW.kom?VW.kom[c.id]:null,done=K&&mineTop(K,pid),neu=!seenGet(pid).has(c.id),late=c.f&&!done&&fristBald(c.f);
+  const tags=(neu?'<span class="vd-tag neu">Neu</span>':"")+(c.f?'<span class="vd-tag'+(late?" bald":"")+'">'+(done?"erledigt":"bis "+esc(fristTxt(c.f)))+"</span>":"");
+  let body="";
+  if(open){
+    const others=K?K.filter((k)=>!(k.p===pid&&!k.tr)&&!k.r).length:0;
+    body='<div class="vd-bd">'+veoBtn(c.u,"Clip bei Veo ansehen")
+      +(c.a?'<div class="vd-auf"><b>Deine Aufgabe</b><div style="font-size:15px;margin-top:3px;white-space:pre-wrap">'+esc(c.a)+"</div>"+(c.f?'<div class="note" style="margin-top:6px">Kommentieren bis '+esc(fristTxt(c.f))+"</div>":"")+"</div>":"")
+      +(!net()?'<div class="note">Kommentieren ist in dieser Ansicht nicht möglich.</div>':K==null?'<div class="note">Kommentare werden geladen …</div>':!done
+        ?'<label class="note" for="vkt" style="font-weight:600;color:var(--tx)">Deine Meinung</label><textarea id="vkt" class="vd-ta" rows="3" maxlength="2000" placeholder="Was siehst du in der Szene?"></textarea><button class="vd-go" data-ksend="'+esc(c.id)+'">Abschicken</button><div class="note">Du kannst deinen Kommentar '+EDIT_MIN+" Minuten lang ändern.</div>"+(others?'<div class="vd-hint" style="background:var(--grs);border-color:var(--ln);margin:0">'+SVG.lock+'<div style="font-size:13px">'+others+(others===1?" Kommentar":" Kommentare")+" der anderen siehst du, sobald du deine eigene Meinung geschrieben hast.</div></div>":"")
+        :'<button class="btn" data-kshow="'+esc(c.id)+'" style="min-height:44px;font-weight:600">'+(VW.kOpen===c.id?"Kommentare ausblenden":"Kommentare anzeigen ("+K.length+")")+"</button>"+(VW.kOpen===c.id?'<div style="display:flex;flex-direction:column;gap:8px">'+treeHtml(K,{me:pid,canEdit,reply:true})+"</div>"+(VW.rep&&VW.rep.c===c.id?'<div id="vkrw"><div class="note">Antwort an <b>'+esc((K.find((k)=>k.id===VW.rep.k)||{}).n||"")+'</b></div><textarea id="vkr" class="vd-ta" rows="2" maxlength="2000"></textarea><div class="bar" style="margin:6px 0 0"><button class="vd-go" data-krsend="'+esc(c.id)+'">Antworten</button><button class="btn" data-krx>Abbrechen</button></div></div>':""):""))
+      +'<div class="note">'+(c.n?"Sehen nur die "+(c.n===1?"Empfänger":c.n+" Spieler")+", die den Clip bekommen haben, und die Trainer.":"Sieht die ganze Mannschaft.")+"</div></div>"}
+  return'<div class="vd-card'+(open?" vd-open":"")+'" data-cl="'+esc(c.id)+'"><button type="button" class="vd-hd" data-clt="'+esc(c.id)+'" aria-expanded="'+open+'"><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">'+(tags?'<div class="vd-tags">'+tags+"</div>":"")+'<div class="vd-t">'+esc(c.ti||"Clip")+'</div><div class="vd-sub">'+(c.n?"Nur für "+(c.n===1?"dich":c.n+" Spieler"):"Für alle")+" · "+esc(dShort(c.at))+"</div></div>"+SVG.chev+"</button>"+body+"</div>"}
+/* Feedback */
+function fbHtmlV(d,pid){
+  const r=role(pid),art=VW.art||"Idee",L=(VW.fb||[]).filter((x)=>x.t==="ich").sort((a,b)=>a.at<b.at?1:-1),ans=(VW.fb||[]).filter((x)=>x.t==="trainer");
+  return'<div class="vd-hint" style="background:var(--gs);border-color:color-mix(in srgb,var(--g) 35%,transparent)">'+SVG.lock+'<div style="font-size:14px"><b>Nur der Trainer liest das.</b> Andere Spieler und Eltern sehen deine Nachricht nicht.</div></div>'
+    +'<div class="card" style="margin:0 0 12px"><div class="note" style="margin:0 0 6px;font-weight:600;color:var(--tx)">Worum geht es?</div><div class="vd-chips" id="vfart" role="group" aria-label="Art">'+ARTEN.map((a)=>'<button type="button" data-fa="'+a+'" class="'+(a===art?"on":"")+'" aria-pressed="'+(a===art)+'">'+a+"</button>").join("")+"</div>"
+    +'<label class="note" for="vft" style="display:block;margin:10px 0 4px;font-weight:600;color:var(--tx)">Deine Nachricht</label><textarea id="vft" class="vd-ta" rows="5" maxlength="3500" placeholder="Schreib hier, was dir wichtig ist."></textarea>'
+    +'<div class="note" style="margin:6px 0">Absender: <b>'+esc(r&&r.r==="e"?(r.n||"Elternteil")+" (Elternteil von "+(d.n||"")+")":d.n||"")+'</b></div><button class="vd-go" id="vfs">Abschicken</button><div class="note" id="vfm"></div></div>'
+    +(L.length?'<h3 style="margin:16px 0 8px">Deine Nachrichten</h3>'+L.map((x)=>{const a=ans.filter((y)=>y.re===x.id).sort((p,q)=>p.at<q.at?-1:1);
+      return'<div class="card" style="margin:0 0 8px"><div style="display:flex;justify-content:space-between;gap:8px" class="note"><span>'+esc(x.art)+" · "+esc(ago(x.at))+'</span><b style="color:'+(a.length?"var(--g)":"var(--mu)")+'">'+(a.length?"Beantwortet":"Gesendet")+'</b></div><div style="white-space:pre-wrap;overflow-wrap:anywhere;margin:6px 0">'+esc(x.text)+"</div>"
+        +a.map((y)=>kHtml({id:y.id,tr:true,n:y.von,t:y.text,at:y.at},{})).join("")+"</div>"}).join(""):"")}
+/* Laden der Kommentare und Antworten */
+async function loadAll(d,pid){const n=net();if(!n)return;
+  const r=role(pid);
+  if(r&&r.r==="s"){const K={};await Promise.all((d.vc||[]).map(async(c)=>{const x=await loadKom(c);if(x)K[c.id]=x}));VW.kom=K}
+  if(d.fk&&r){try{VW.fb=await n.list("fbaus/"+fbDev(pid)+"/m")}catch(e){}}
+}
+const fbDev=(pid)=>{let r=ls.get("u13fbdev."+pid,"");if(!/^[0-9a-f]{64}$/.test(r)){r=hex(32);ls.set("u13fbdev."+pid,r)}return r};
+/* Einstieg aus links.js: Reiter Übersicht/Videos/Feedback füllen */
+V.viewer=(d,pid,api)=>{
+  addCss();VW.d=d;VW.pid=pid;VW.api=api;
+  const paint=(w)=>{const el=document.getElementById(w==="u"?"vueb":w==="v"?"vvid":"vfb");if(!el)return;
+    if(w==="u")el.innerHTML=(V.viewerTabs(d,pid).needRole?whoHtml(d):"")+uebHtml(d,pid);
+    if(w==="v")el.innerHTML=vidHtml(d,pid);
+    if(w==="f")el.innerHTML=fbHtmlV(d,pid)};
+  VW.paint=paint;VW.repaint=()=>["u","v","f"].forEach((w)=>{const el=document.getElementById(w==="u"?"vueb":w==="v"?"vvid":"vfb");if(el&&!el.hidden){const a=document.activeElement;if(a&&el.contains(a)&&a.matches("textarea,input")&&a.value)return;paint(w)}});
+  ["u","v","f"].forEach(paint);
+  loadAll(d,pid).then(()=>{VW.repaint();api.refresh&&api.refresh()});
+};
+V.shown=(w)=>{const d=VW.d,pid=VW.pid;if(!d)return;
+  if(w==="f"){markReplies(pid,(VW.fb||[]).filter((x)=>x.t==="trainer").map((x)=>x.id))}
+  VW.paint(w)};
+const vroot=()=>document.getElementById("vw2");
+document.addEventListener("click",async(e)=>{
+  const root=vroot();if(!root||!VW.d||!e.target.closest||!root.contains(e.target))return;
+  const d=VW.d,pid=VW.pid,q=(s)=>e.target.closest(s),n=net();let b;
+  if((b=q("[data-who]"))){if(b.dataset.who==="s"){ls.set("u13wer."+pid,{r:"s"});VW.api.refresh();loadAll(d,pid).then(()=>{VW.repaint();VW.api.refresh()});return}document.getElementById("vwhoe").hidden=false;const i=document.getElementById("vwhon");i&&i.focus();return}
+  if(q("[data-whook]")){const nm=document.getElementById("vwhon").value.trim();if(nm.length<2){document.getElementById("vwhom").textContent="Bitte deinen Namen eintragen.";return}ls.set("u13wer."+pid,{r:"e",n:nm.slice(0,60)});VW.api.refresh();loadAll(d,pid).then(()=>{VW.repaint();VW.api.refresh()});return}
+  if(q("[data-wchg]")){try{localStorage.removeItem("u13wer."+pid)}catch(x){}VW.api.refresh();VW.api.go("u");return}
+  if((b=q("[data-vgo]"))){VW.api.go(b.dataset.vgo);return}
+  if((b=q("[data-hx]"))){const L=ls.get("u13vhx."+pid,[]);L.push(b.dataset.hx);ls.set("u13vhx."+pid,L);VW.repaint();return}
+  if((b=q("[data-vv]"))){VW.sub=b.dataset.vv;VW.paint("v");return}
+  if((b=q("[data-clt]"))){const id=b.dataset.clt;VW.open=VW.open===id?null:id;VW.kOpen=null;VW.rep=null;if(VW.open){seenAdd(pid,id);const c=(d.vc||[]).find((x)=>x.id===id);if(c&&n&&!(VW.kom&&VW.kom[id])){VW.paint("v");const K=await loadKom(c);if(K){VW.kom=VW.kom||{};VW.kom[id]=K}}}VW.paint("v");return}
+  if((b=q("[data-kshow]"))){const id=b.dataset.kshow;VW.kOpen=VW.kOpen===id?null:id;VW.rep=null;if(VW.kOpen){const c=(d.vc||[]).find((x)=>x.id===id),K=await loadKom(c);if(K)VW.kom[id]=K;markReplies(pid,(VW.kom[id]||[]).filter((k)=>k.tr).map((k)=>k.id))}VW.paint("v");return}
+  if((b=q("[data-krep]"))){VW.rep={c:VW.open,k:b.dataset.krep};VW.paint("v");const t=document.getElementById("vkr");t&&t.focus();return}
+  if(q("[data-krx]")){VW.rep=null;VW.paint("v");return}
+  if((b=q("[data-ksend]"))||(b=q("[data-krsend]"))){const rep=!!b.dataset.krsend,id=b.dataset.ksend||b.dataset.krsend,c=(d.vc||[]).find((x)=>x.id===id),ta=document.getElementById(rep?"vkr":"vkt"),t=ta&&ta.value.trim();if(!c||!t||!n)return;
+    b.disabled=true;try{const o={p:pid,n:d.n||"",t,r:rep?VW.rep.k:""},kid=nid("k");await n.create("kom/"+c.s+"/m",kid,{b:await window.__lk.seal(c.ck,o)},true);const K=await loadKom(c);if(K)VW.kom[id]=K;VW.rep=null;if(!rep)VW.kOpen=id;VW.paint("v");VW.api.refresh()}catch(x){b.disabled=false;window.__toast&&window.__toast("Das hat nicht geklappt. Bitte später noch einmal versuchen.",true)}return}
+  if((b=q("[data-ked]"))){const kid=b.dataset.ked,wrap=b.closest("[data-kid]"),c=(d.vc||[]).find((x)=>x.id===VW.open),k=(VW.kom[VW.open]||[]).find((x)=>x.id===kid);if(!wrap||!k)return;
+    const tx=wrap.querySelector("[data-ktx]");tx.innerHTML='<textarea class="vd-ta" rows="3" maxlength="2000" data-kedt></textarea><div class="bar" style="margin:6px 0 0"><button class="vd-go" data-kedok="'+esc(kid)+'">Speichern</button><button class="btn" data-krx>Abbrechen</button></div>';tx.querySelector("textarea").value=k.t;b.remove();return}
+  if((b=q("[data-kedok]"))){const kid=b.dataset.kedok,c=(d.vc||[]).find((x)=>x.id===VW.open),k=(VW.kom[VW.open]||[]).find((x)=>x.id===kid),ta=b.closest("[data-kid]").querySelector("[data-kedt]"),t=ta.value.trim();if(!c||!k||!t)return;
+    if(!canEdit(k)){window.__toast&&window.__toast("Die 30 Minuten zum Ändern sind vorbei.",true);VW.paint("v");return}
+    b.disabled=true;try{await n.update("kom/"+c.s+"/m/"+kid,{b:await window.__lk.seal(c.ck,{p:pid,n:d.n||"",t,r:k.r||"",ed:true})});const K=await loadKom(c);if(K)VW.kom[c.id]=K;VW.paint("v")}catch(x){b.disabled=false;window.__toast&&window.__toast("Ändern hat nicht geklappt (nur 30 Minuten lang möglich).",true)}return}
+  if((b=q("[data-fa]"))){VW.art=b.dataset.fa;document.querySelectorAll("#vfart button").forEach((x)=>{x.classList.toggle("on",x===b);x.setAttribute("aria-pressed",x===b)});return}
+  if((b=q("#vfs"))){const t=document.getElementById("vft").value.trim(),m=document.getElementById("vfm"),r=role(pid);if(!t){m.textContent="Bitte zuerst etwas schreiben.";return}if(!n||!d.fk||!r)return;
+    b.disabled=true;const id=nid("f"),at=new Date().toISOString(),art=VW.art||"Idee",von=r.r==="e"?(r.n||""):d.n||"",dev=fbDev(pid);
+    try{await n.create("fbin",id,{id,at,k:d.fk,art,text:t,von,rolle:r.r,pid,r:dev});await n.create("fbaus/"+dev+"/m",id,{id,at,k:d.fk,art,text:t,von,t:"ich"});
+      VW.fb=await n.list("fbaus/"+dev+"/m");VW.art="Idee";VW.paint("f");const m2=document.getElementById("vfm");if(m2)m2.textContent="Danke! Deine Nachricht ist beim Trainer angekommen."}
+    catch(x){b.disabled=false;m.className="note warn";m.textContent="Das hat nicht geklappt. Bitte später noch einmal versuchen."}return}
+});
+})();
+</script>
 <script>/* Kurze Rückmeldung nach einer Aktion (6 bis 8 Sekunden, antippen schließt) */
 window.__toast=(t,bad)=>{let el=document.getElementById("u13toast");if(!el){el=document.createElement("div");el.id="u13toast";el.setAttribute("role","status");el.setAttribute("aria-live","polite");el.style.cssText="position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:200;max-width:min(92vw,520px);padding:11px 16px;border-radius:12px;font-size:14px;line-height:1.35;box-shadow:0 6px 24px rgba(0,0,0,.35);cursor:pointer";el.onclick=()=>{el.hidden=true};document.body.appendChild(el)}
   el.textContent=t;el.style.background=bad?"var(--r)":"var(--ac)";el.style.color="#fff";el.hidden=false;clearTimeout(window.__toastT);window.__toastT=setTimeout(()=>{el.hidden=true},String(t).length>60?8000:6000)};
@@ -1946,7 +2268,7 @@ async function showExt(k,blob,key){
   document.title="TuS Haltern U13 · "+(window.__DEMO?"Demo":"Teamzentrale");
   const st=document.getElementById("st");if(st){st.textContent=(window.__DEMO?"Demo · Zufallsdaten · ":"Nur Ansicht · ")+"Stand "+dt(d.u);st.className="pill"}
   const hide=(q)=>document.querySelectorAll(q).forEach((x)=>{x.style.display="none"});
-  if(!window.__DEMO)hide('nav button[data-s="e"],nav button[data-s="k"]');if(window.__ANON)hide('nav button[data-s="s"]');
+  hide('nav button[data-s="v"]');if(!window.__DEMO)hide('nav button[data-s="e"],nav button[data-s="k"]');if(window.__ANON)hide('nav button[data-s="s"]');
   const XI=["xa","xsp","xp","xpa","xnw","xq","xtm","xts","xga","xsw","xsk","xnt","xnz"];
   const OKS=(window.__DEMO?XI.map((i)=>"#"+i).join(",")+",.xth,#kps,[data-bkf],[data-bkq],[data-obf],":"")+"#xpv,#mm,#ms,#ps,#so,#od,#qf,#fz,#fk,#fv,#fa,#wm,#wkd,#hmm,#th,#vbg",OKB=(window.__DEMO?XI.map((i)=>"#"+i+",#"+i+" button").join(",")+",[data-kt],[data-vsel],[data-bkm],[data-bkv],[data-bkt],":"")+"#sseg button,#pmode button,#bprev,#bnext,#mprev,#mnext,#wprev,#wnext,#pprev,#pnext,#vw button,nav button,#hn button";
   const cut=(q,f)=>{const e=document.querySelector(q);if(e){const c=f?f(e):e;if(c)c.style.display="none"}};
@@ -1972,10 +2294,19 @@ async function showViewer(pid,key){
   if(!blob){showAccess("Dieser Link ist nicht (mehr) aktiv. Bitte den Trainer fragen.");return}
   let d;try{d=await unseal(key,blob)}catch(e){showAccess("Dieser Link ist nicht (mehr) gültig. Bitte den Trainer fragen.");return}
   useBg();dzApply(d);const v=shell(),cur=document.documentElement.getAttribute("data-theme")||"";
-  v.innerHTML='<div class="vh">'+(d.l?'<img alt="" src="'+esc(d.l)+'">':"")+'<div><b style="font-size:22px;line-height:1.2">'+(d.n?"Hey "+esc(d.n)+"!":"Hey!")+'</b><div class="note" style="font-size:14px">Deine '+esc(d.m||"U13")+'-Zentrale · Saison '+esc(d.s||"")+'</div></div><span style="flex:1"></span><select id="vth" aria-label="Darstellung"><option value="">Darstellung: Auto</option><option value="light">Hell</option><option value="dark">Dunkel</option></select></div>'+hnHtml(hnItems(d.hn,"alle"))+((d.t||d.li)?'<div class="seg" id="vtab" style="margin-bottom:14px">'+(d.h?'<button data-v="p" class="on">Profil</button>':"")+(d.t?'<button data-v="t">Terminplan</button>':"")+(d.li?'<button data-v="l">Liga</button>':"")+'</div>':"")+'<div id="vprof">'+(d.h||(d.t||d.li?"":'<div class="card"><div class="note">Ein Spielerprofil ist für diesen Link nicht freigegeben.</div></div>'))+'</div>'+(d.t?'<div id="vplan" hidden></div>':"")+(d.li?'<div id="vliga" hidden></div>':"")+'<div class="vf">Stand: '+esc(dt(d.u))+' · Persönlicher Link, bitte nicht weitergeben.</div>';
+  const VD=window.__vid,hasU=!!(VD&&(d.t||(d.vc&&d.vc.length)||(d.vg&&d.vg.length)||d.fk));
+  const tabsHtml=()=>{const w=VD&&hasU?VD.viewerTabs(d,pid):{};return(hasU?'<button data-v="u">Übersicht</button>':"")+(d.h?'<button data-v="p">Profil</button>':"")+(d.t?'<button data-v="t">Terminplan</button>':"")+(d.li?'<button data-v="l">Liga</button>':"")+(w.v?'<button data-v="v">Videos</button>':"")+(w.f?'<button data-v="f">Feedback</button>':"")};
+  const multi=hasU||d.t||d.li;
+  v.innerHTML='<div class="vh">'+(d.l?'<img alt="" src="'+esc(d.l)+'">':"")+'<div><b style="font-size:22px;line-height:1.2">'+(d.n?"Hey "+esc(d.n)+"!":"Hey!")+'</b><div class="note" style="font-size:14px">Deine '+esc(d.m||"U13")+'-Zentrale · Saison '+esc(d.s||"")+'</div></div><span style="flex:1"></span><select id="vth" aria-label="Darstellung"><option value="">Darstellung: Auto</option><option value="light">Hell</option><option value="dark">Dunkel</option></select></div>'+hnHtml(hnItems(d.hn,"alle"))+(multi?'<div class="seg" id="vtab" style="margin-bottom:14px">'+tabsHtml()+'</div>':"")+(hasU?'<div id="vueb"></div>':"")+'<div id="vprof"'+(hasU?" hidden":"")+'>'+(d.h||(multi?"":'<div class="card"><div class="note">Ein Spielerprofil ist für diesen Link nicht freigegeben.</div></div>'))+'</div>'+(d.t?'<div id="vplan" hidden></div>':"")+(d.li?'<div id="vliga" hidden></div>':"")+(hasU?'<div id="vvid" hidden></div><div id="vfb" hidden></div>':"")+'<div class="vf">Stand: '+esc(dt(d.u))+' · Persönlicher Link, bitte nicht weitergeben.<span id="vwer"></span></div>';
   bgPick();const s=document.getElementById("vth");s.value=cur;s.onchange=()=>{applyTheme(s.value);try{s.value?localStorage.setItem("u13theme",s.value):localStorage.removeItem("u13theme")}catch(e){}};
-  if(d.t||d.li){const tb=document.getElementById("vtab");let ready=false;tb.onclick=(e)=>{const b=e.target.closest("button");if(!b)return;tb.querySelectorAll("button").forEach((x)=>x.classList.toggle("on",x===b));const v=b.dataset.v,pe=document.getElementById("vplan"),le=document.getElementById("vliga");document.getElementById("vprof").hidden=v!=="p";if(pe)pe.hidden=v!=="t";if(le){le.hidden=v!=="l";if(v==="l"&&!le.innerHTML&&window.__FD)le.innerHTML=window.__FD.view(d.li)}if(v==="t"&&!ready&&pe){ready=true;vPlan(pe,{...d.t,s:d.s,lg:d.l,hn:d.hn})}}}
-  if(!d.h&&(d.t||d.li)){const f=document.querySelector("#vtab button");if(f)f.click()}
+  if(multi){const tb=document.getElementById("vtab");let ready=false,curV="";
+    const show=(v)=>{curV=v;tb.querySelectorAll("button").forEach((x)=>x.classList.toggle("on",x.dataset.v===v));const pe=document.getElementById("vplan"),le=document.getElementById("vliga");document.getElementById("vprof").hidden=v!=="p";if(pe)pe.hidden=v!=="t";if(le){le.hidden=v!=="l";if(v==="l"&&!le.innerHTML&&window.__FD)le.innerHTML=window.__FD.view(d.li)}if(v==="t"&&!ready&&pe){ready=true;vPlan(pe,{...d.t,s:d.s,lg:d.l,hn:d.hn})}
+      [["u","vueb"],["v","vvid"],["f","vfb"]].forEach(([k,id])=>{const el=document.getElementById(id);if(el)el.hidden=v!==k});if(hasU&&"uvf".includes(v))VD.shown(v)};
+    tb.onclick=(e)=>{const b=e.target.closest("button");if(!b)return;show(b.dataset.v);try{window.scrollTo(0,0)}catch(x){}};
+    const wer=()=>{const el=document.getElementById("vwer"),r=(()=>{try{return JSON.parse(localStorage.getItem("u13wer."+pid)||"null")}catch(e){return null}})();if(el)el.innerHTML=r&&hasU?' · Du bist hier als '+esc(r.r==="e"?(r.n||"Elternteil")+" (Elternteil)":d.n||"Spieler")+' · <button type="button" data-wchg style="border:0;background:none;padding:0;font:inherit;color:var(--ac);text-decoration:underline;cursor:pointer">Ändern</button>':""};
+    const refresh=()=>{tb.innerHTML=tabsHtml();if(!tb.querySelector('[data-v="'+curV+'"]'))curV=tb.querySelector("button").dataset.v;show(curV);wer()};
+    if(hasU)VD.viewer(d,pid,{refresh,go:(v)=>{if(tb.querySelector('[data-v="'+v+'"]'))show(v)}});
+    show(tb.querySelector("button").dataset.v);wer()}
   document.getElementById("vprof").addEventListener("click",(e)=>{const b=e.target.closest("#pmode button");if(!b)return;const w=b.closest("[data-m]");w.dataset.m=b.dataset.pm;w.querySelectorAll("#pmode button").forEach((x)=>x.classList.toggle("on",x===b))});
   document.title="TuS Haltern U13 · Teamzentrale";
 }
@@ -2069,7 +2400,7 @@ const fingerprintParts=async()=>{
   const notes=D.notizen.filter((n)=>n.art!=="beobachtung"&&(full||n.sichtbar)).sort((a,b)=>a.id<b.id?-1:1);
   const evs=full?D.events:evAll().map((e)=>{const q={};Object.keys(e).sort().forEach((k)=>{if(k==="id"||k==="virt"||k==="trainId"||k==="schwerpunkt"||k==="ctask"||(k==="detail"&&e.typ==="Training"))return;const v=e[k];if(v===""||v==null||(k==="eltern"&&v!==false))return;q[k]=v});return q}).sort((a,b)=>JSON.stringify(a)<JSON.stringify(b)?-1:1);
   const gs=D.spiele.filter(U13.erreicht).map((g)=>{const q={...g};delete q.live;return q}),ts=D.trainings.filter(U13.erreicht);
-  const a=(await sha(JSON.stringify([D.spieler,evs,D.dienste,notes,full?D.todos:null,cfg]))).slice(0,16),s=(await sha(JSON.stringify((window.__FD&&window.__FD.sig())?[gs,ts,window.__FD.sig()]:[gs,ts]))).slice(0,16);
+  const a=(await sha(JSON.stringify([D.spieler,evs,D.dienste,notes,full?D.todos:null,cfg,window.__vid?window.__vid.sig():null]))).slice(0,16),s=(await sha(JSON.stringify((window.__FD&&window.__FD.sig())?[gs,ts,window.__FD.sig()]:[gs,ts]))).slice(0,16);
   return{a,s}};
 const fingerprint=async()=>{const f=await fingerprintParts();return f.a+f.s};
 const profExt=()=>!(D.config&&D.config.profilExt===false);
@@ -2182,7 +2513,7 @@ const daOf=(dz)=>window.__dz?__dz.accOf(dz):"",dgOf=(dz)=>dz==="glas"&&window.__
 const dzSig=()=>JSON.stringify(Object.keys(L).sort().filter((k)=>L[k].aktiv&&L[k].key).map((k)=>[k,dzOf(k),daOf(dzOf(k)),dgOf(dzOf(k))]));
 async function buildSnap(){
   const FDS=window.__FD?window.__FD.snap():null,TP=planSnap(),HN=(D.config&&D.config.hinweise)||[],out={v:1,u:new Date().toISOString(),p:{},k:{}},logo=lgR(),sa=(D.config&&D.config.saison)||"";
-  for(const p of active()){const l=L[p.id];if(!l||!l.aktiv||!l.key)continue;out.p[p.id]=await seal(l.key,{h:profExt()?profileHtml(p.id):"",l:logo,s:sa,m:mann(),u:out.u,t:TP,n:p.vorname,hn:HN,li:FDS,dz:dzOf(p.id),da:daOf(dzOf(p.id)),dg:dgOf(dzOf(p.id))});out.k[p.id]=await sha8(l.key)}
+  for(const p of active()){const l=L[p.id];if(!l||!l.aktiv||!l.key)continue;out.p[p.id]=await seal(l.key,{...(window.__vid?window.__vid.pkg(p.id):{}),h:profExt()?profileHtml(p.id):"",l:logo,s:sa,m:mann(),u:out.u,t:TP,n:p.vorname,hn:HN,li:FDS,dz:dzOf(p.id),da:daOf(dzOf(p.id)),dg:dgOf(dzOf(p.id))});out.k[p.id]=await sha8(l.key)}
   out.bg=await bgSnap();out.dzs=dzSig();out.x={};out.xk={};
   for(const k of ["full","anon","plan","demo"]){const l=L["x"+k];if(!l||!l.aktiv||!l.key)continue;out.x[k]=await seal(l.key,k==="plan"?{k,u:out.u,t:TP,l:logo,s:sa,m:mann(),hn:HN,dz:dzOf("x"+k),da:daOf(dzOf("x"+k)),dg:dgOf(dzOf("x"+k))}:{k,u:out.u,db:extData(k),dz:dzOf("x"+k),da:daOf(dzOf("x"+k)),dg:dgOf(dzOf("x"+k))});out.xk[k]=await sha8(l.key)}
   {const f=await fingerprintParts();out.fp=f.a+f.s;out.fa=f.a;out.fs=f.s}return out;
