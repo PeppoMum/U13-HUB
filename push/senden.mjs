@@ -15,11 +15,13 @@ const TX = {
   kom: { t: "Antwort vom Trainer", b: "Der Trainer hat auf deinen Kommentar zum Clip geantwortet.", u: "./?link" },
   antwort: { t: "Antwort vom Trainer", b: "Der Trainer hat auf deine Nachricht geantwortet.", u: "./?link" },
   fb: { t: "Neues Feedback", b: "Ein Spieler oder Elternteil hat dir geschrieben.", u: "./" },
+  hinweis: { t: "Neuer Hinweis vom Trainer", b: "Schau in die App.", u: "./?link" },
 };
 
 /* Wer bekommt den Eintrag? s = Anmeldung eines Geräts (ro: s Spieler, e Elternteil, t Trainer, leer = noch nicht gewählt) */
 export function passt(q, s) {
   if (q.art === "fb") return s.ro === "t";
+  if (q.art === "hinweis") return s.ro !== "t";
   if (q.art === "antwort") return !!q.r && s.r === q.r && s.ro !== "t";
   if (q.art === "clip" || q.art === "frist" || q.art === "kom") return s.ro !== "t" && s.ro !== "e" && !!s.pid && (q.an === "alle" || (Array.isArray(q.an) && q.an.includes(s.pid)));
   return false;

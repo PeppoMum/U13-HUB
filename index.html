@@ -1624,6 +1624,10 @@ $("#brc").onclick=async()=>{
 /* ---------- Hinweise für Spielerlinks ---------- */
 var HNF={blau:["hb","Blau"],gelb:["hy","Gelb"],rot:["hr","Rot"],gruen:["hg","Grün"]};var hnEdit=null,hnArm=null;
 function hnList(){return((D.config&&D.config.hinweise)||[]).filter(Boolean)}
+/* Web-Version: neuer Hinweis → Benachrichtigung an Spieler/Eltern (ab dem „von“-Tag um 8 Uhr), gelöscht → fällt weg; Links gleich aktualisieren */
+function hnPush(id,o){const Q=window.__pushQ;if(!window.__WEB)return;
+  if(Q){if(o===null)Q.del("h_"+id);else if(o){const v=o.von?Date.parse(o.von+"T08:00"):0;Q.add("h_"+id,{art:"hinweis",t:Math.max(Date.now(),v||0)})}}
+  if(window.__lkPublish&&window.__ROLE==="voll")setTimeout(()=>window.__lkPublish(true),1500)}
 function hnD(s){return s?s.slice(8)+"."+s.slice(5,7)+"."+s.slice(0,4):""}
 function renderHints(){
   const r=$("#hnl");if(!r)return;const L=hnList();
@@ -1640,7 +1644,7 @@ $("#lkh").addEventListener("change",(e)=>{if(e.target.id==="hnw")hnShow()});
 $("#lkh").addEventListener("click",(e)=>{
   const m=$("#hnm"),de=e.target.closest("[data-hne]"),dd=e.target.closest("[data-hnd]");
   if(de){const n=hnList().find((x)=>x.id===de.dataset.hne);if(!n)return;hnEdit=n.id;$("#hnt").value=n.text;$("#hnf").value=n.farbe||"blau";$("#hnw").value=n.wo==="plan"?"plan":"alle";$("#hnv").value=n.von||"";$("#hnb").value=n.bis||"";hnMo=(n.pm||[]).slice();$("#hnkw").value=n.pw||"";$("#hna").textContent="💾 Änderung speichern";$("#hnc").hidden=false;hnShow();$("#hnt").scrollIntoView({behavior:"smooth",block:"center"});return}
-  if(dd){const id=dd.dataset.hnd;if(hnArm===id){hnArm=null;cfgSave({hinweise:hnList().filter((x)=>x.id!==id)});m.innerHTML='Entfernt. Eltern sehen die Änderung bei der nächsten Aktualisierung (alle 6 Stunden). <span class="ownonly"><button class="btn" data-lkgo="u" type="button">Jetzt Links aktualisieren</button></span><span class="coonly">Bitte den Besitzer, die Links zu aktualisieren.</span>'}else{hnArm=id;renderHints()}return}
+  if(dd){const id=dd.dataset.hnd;if(hnArm===id){hnArm=null;cfgSave({hinweise:hnList().filter((x)=>x.id!==id)});hnPush(id,null);m.innerHTML='Entfernt. Eltern sehen die Änderung bei der nächsten Aktualisierung (alle 6 Stunden). <span class="ownonly"><button class="btn" data-lkgo="u" type="button">Jetzt Links aktualisieren</button></span><span class="coonly">Bitte den Besitzer, die Links zu aktualisieren.</span>'}else{hnArm=id;renderHints()}return}
   const hm=e.target.closest("[data-hm]");if(hm){const v=hm.dataset.hm,i=hnMo.indexOf(v);i<0?hnMo.push(v):hnMo.splice(i,1);hm.classList.toggle("on");return}
   if(e.target.id==="hnc"){hnReset();m.textContent="";return}
   if(e.target.id==="hna"){
@@ -1648,7 +1652,7 @@ $("#lkh").addEventListener("click",(e)=>{
     const v=$("#hnv").value,b=$("#hnb").value;if(v&&b&&b<v){m.textContent="„Sichtbar bis“ liegt vor „Sichtbar ab“.";m.className="note warn";return}
     const kw=$("#hnkw").value.trim();if($("#hnw").value==="plan"&&kw&&!/^\d{1,2}(\s*[-–]\s*\d{1,2})?(\s*[,;]\s*\d{1,2}(\s*[-–]\s*\d{1,2})?)*$/.test(kw)){m.textContent="Kalenderwochen bitte so eingeben: 41 oder 43–45, 48";m.className="note warn";return}
     const id=hnEdit||"h"+Date.now().toString(36),o={id,text,farbe:$("#hnf").value,wo:$("#hnw").value,von:v||null,bis:b||null,pm:$("#hnw").value==="plan"?hnMo.slice():[],pw:$("#hnw").value==="plan"&&kw?kw:null},L=hnList();
-    cfgSave({hinweise:hnEdit?L.map((x)=>x.id===id?o:x):L.concat([o])});hnReset();m.className="note";m.innerHTML='Gespeichert. Eltern sehen die Änderung bei der nächsten Aktualisierung (alle 6 Stunden). <span class="ownonly"><button class="btn" data-lkgo="u" type="button">Jetzt Links aktualisieren</button></span><span class="coonly">Bitte den Besitzer, die Links zu aktualisieren.</span>';return}
+    cfgSave({hinweise:hnEdit?L.map((x)=>x.id===id?o:x):L.concat([o])});hnPush(id,hnEdit?false:o);hnReset();m.className="note";m.innerHTML='Gespeichert. Eltern sehen die Änderung bei der nächsten Aktualisierung (alle 6 Stunden). <span class="ownonly"><button class="btn" data-lkgo="u" type="button">Jetzt Links aktualisieren</button></span><span class="coonly">Bitte den Besitzer, die Links zu aktualisieren.</span>';return}
   if(hnArm){hnArm=null;renderHints()}
 });
 renderHints();
@@ -2092,6 +2096,7 @@ const msg=(t,bad)=>{const m=document.getElementById(fsec()&&!fsec().hidden?"fbm"
 /* Benachrichtigungen vormerken (verschickt ein Zeitplan bei GitHub, Texte ohne Namen, siehe push/LIESMICH.md). Nur Web-Version. */
 const pushQ=(id,o)=>{if(window.__WEB&&db)db.doc("pushq/"+id).set({t:Date.now(),...o}).catch(()=>{})};
 const pushQdel=(id)=>{if(window.__WEB&&db)db.doc("pushq/"+id).delete().catch(()=>{})};
+window.__pushQ={add:pushQ,del:pushQdel};
 /* Erinnerung an die Frist: einen Tag vorher, bei knapper Zeit 3 Stunden vorher */
 function fristQ(c){const f=fristTs(c.frist);let t=f-864e5;if(t<Date.now()+36e5)t=f-108e5;
   if(!c.frist||isNaN(f)||t<Date.now()){pushQdel("f_"+c.id);return}
