@@ -9,20 +9,20 @@ const SDK=(CFG.sdkBase||"https://www.gstatic.com/firebasejs/10.14.1/");   /* Ver
 const XIDS=["full","anon","plan","demo"];
 window.__WEB=true;
 window.__WEB_BASE=location.origin+location.pathname.replace(/index\.html$/,"");
+const IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+/* Start der installierten Link-App („./?link“ ohne Link): den auf diesem Gerät gespeicherten Link wieder einsetzen */
+if(/[?&]link\b/.test(location.search)&&!location.hash){try{const s=localStorage.getItem("u13link");if(s&&/^#/.test(s))history.replaceState(null,"",location.pathname+location.search+s)}catch(e){}}
 const H=location.hash;
 const isScout=/^#scout\.[A-Za-z0-9_-]{16,}$/.test(H);
 window.__SCOUTKEY=isScout?H.slice(7):"";
 const isKurz=/^#k\/[A-Za-z0-9_-]{4,40}$/.test(H);
 const isViewerHash=(/^#[A-Za-z0-9]+\.[A-Za-z0-9_-]{16,}$/.test(H)&&!/^#co[A-Za-z0-9]+\./.test(H)&&!isScout)||isKurz;
-/* Spieler-, Eltern- und externe Links als eigene App: Die installierte App startet immer mit genau diesem Link (eigene Startadresse statt Trainer-Anmeldung).
-   Rechte ändern sich nicht: Die App zeigt dasselbe wie der Link im Browser. */
-if(isViewerHash){try{
-  const B=window.__WEB_BASE,l=document.querySelector('link[rel="manifest"]'),u=B+H;
-  const m={id:u,name:"TuS Haltern U13",short_name:"U13",start_url:u,scope:B,display:"standalone",background_color:"#000000",theme_color:"#000000",lang:"de",
-    icons:[{src:B+"icon-192.png",sizes:"192x192",type:"image/png",purpose:"any"},{src:B+"icon-512.png",sizes:"512x512",type:"image/png",purpose:"any"},{src:B+"icon-512.png",sizes:"512x512",type:"image/png",purpose:"maskable"}]};
-  window.__appManifest=m;
-  if(l)l.href=URL.createObjectURL(new Blob([JSON.stringify(m)],{type:"application/manifest+json"}));
-}catch(e){}}
+/* Spieler-, Eltern- und externe Links als eigene App. Rechte ändern sich nicht: Die App zeigt dasselbe wie der Link im Browser.
+   Android/Computer: eigene App-Datei (manifest-link) mit Startadresse „./?link“; beim Start wird der zuletzt geöffnete Link auf diesem Gerät wieder eingesetzt (siehe oben).
+   iPhone/iPad: ohne App-Datei, dann speichert das iPhone genau die geöffnete Adresse samt Link. */
+if(isViewerHash)try{localStorage.setItem("u13link",H)}catch(e){}
+{const mf=isViewerHash?(IOS?"":"manifest-link.webmanifest"):"manifest.webmanifest";   /* App-Datei steht deshalb nicht fest in index.html */
+  if(mf){const l=document.createElement("link");l.rel="manifest";l.href=mf;document.head.appendChild(l)}}
 const cfgOk=()=>!!(CFG.apiKey&&CFG.projectId&&CFG.authDomain&&!/DEIN|EINTRAGEN|XXXX/i.test(CFG.apiKey+CFG.projectId));
 const E=(s)=>String(s==null?"":s).replace(/[&<>"]/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const clean=(o)=>o==null?o:JSON.parse(JSON.stringify(o));
