@@ -5186,11 +5186,11 @@ const oX=XS;XS=function(W,H,nobg){const s=oX(W,H,nobg),d0=s.done;
     sh.onclick=(e)=>{const x=e.target.closest("[data-mb]");if(!x)return;sh.hidden=true;const b=nav.querySelector('button[data-s="'+x.dataset.mb+'"]');if(b)b.click()};
   }
     const tick=()=>{try{const nav=document.querySelector("body > .app > nav")||document.querySelector("nav");
-    const sb=ph()+"|"+W.innerWidth+"|"+(document.documentElement.dataset.design||"")+"|"+(nav?[...nav.querySelectorAll("button[data-s]:not(.mobx)")].map((b)=>b.dataset.s+(b.classList.contains("on")?"*":"")).join(","):"")+"|"+(nav?nav.querySelectorAll("button.mobx").length:0)+"|"+(document.body.className||"");
+    const sb=ph()+"|"+W.innerWidth+"|"+(document.documentElement.dataset.design||"")+"|"+(nav?[...nav.querySelectorAll("button[data-s]:not(.mobx)")].map((b)=>b.dataset.s+(b.classList.contains("on")?"*":"")+(b.hidden?"-":"")).join(","):"")+"|"+(nav?nav.querySelectorAll("button.mobx").length+(nav.scrollWidth>nav.clientWidth+1?"!":""):0)+"|"+(document.body.className||"");
     if(sb!==sigB){bottom();sigB=sb}}catch(e){}};
   W.addEventListener("resize",()=>{sigB="";tick()});
   document.addEventListener("click",(e)=>{if(!e.target.closest(".mobsheet,#mobmore"))document.querySelectorAll(".mobsheet").forEach((x)=>x.hidden=true)});
-  setInterval(tick,600);setTimeout(tick,300);
+  setInterval(tick,600);setTimeout(tick,300);try{document.fonts.ready.then(()=>{sigB="";tick()})}catch(e){}
 })();
 </script><script>/* ---------- Kalender-Abgleich: Termine -> eigener Google-Kalender (erscheint in Apple Kalender) ---------- */
 const GC_TZ="Europe/Berlin",GC_API="https://www.googleapis.com/calendar/v3",GC_SCOPE="https://www.googleapis.com/auth/calendar.app.created";
