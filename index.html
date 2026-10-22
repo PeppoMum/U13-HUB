@@ -1952,7 +1952,14 @@ V.clipsFor=(pid)=>V.clips.filter((c)=>sichtbar(c)&&c.s&&c.ck&&(c.an==="alle"||(A
   .map((c)=>({id:c.id,ti:c.titel||"",u:c.url||"",a:c.aufgabe||"",f:c.frist||"",at:c.at||"",s:c.s,ck:c.ck,n:c.an==="alle"?0:c.an.length}));
 V.games=()=>D.spiele.filter((g)=>urlOk(g.video)).map((g)=>({d:g.datum||"",g:g.gegner||"",ha:g.ha||"",a:g.art||"",e:g.tore!=null&&g.gt!=null?g.tore+":"+g.gt:"",v:g.video})).sort((a,b)=>a.d<b.d?1:-1);
 V.sig=()=>JSON.stringify([V.clips.filter(sichtbar).map((c)=>[c.id,c.titel,c.url,c.aufgabe,c.an,c.frist,c.bis,c.s]),V.games(),V.fbKey]);
-V.pkg=(pid)=>({vc:V.clipsFor(pid),vg:V.games(),fk:V.fbKey});
+/* Dienste für die Übersicht im Spielerlink: Materialdienst für alle, Leibchen und Obst & Gemüse nur im Link des eingeteilten Spielers.
+   Welche gerade gelten, entscheidet der Spielerlink beim Anzeigen nach dem heutigen Datum (dsNow). */
+const DS_EIG=["Leibchen","Obst & Gemüse"];
+V.dienste=(pid)=>{const t=today(),nm=(x)=>{try{return typeof dienstText==="function"?dienstText(x):""}catch(e){return""}};
+  const L=(D.dienste||[]).filter((x)=>x&&x.datum&&(x.bis||x.datum)>=t&&(x.art==="Materialdienst"||(DS_EIG.includes(x.art)&&(x.spieler||[]).includes(pid))))
+    .map((x)=>({a:x.art,d:x.datum,b:x.bis||null,l:x.label||"",x:x.art==="Materialdienst"?nm(x):"",sp:x.spielText||""}));
+  return L.length?L:null};
+V.pkg=(pid)=>({vc:V.clipsFor(pid),vg:V.games(),fk:V.fbKey,ds:V.dienste(pid)});
 
 function startTrainer(){
   if(V.started||!db||window.__VIEWER||window.__SCOUT||window.__ROLE==="scout")return;V.started=true;addCss();
@@ -2128,6 +2135,11 @@ async function loadKom(c){const n=net();if(!n)return null;try{const L=await n.li
 const mineTop=(K,pid)=>(K||[]).some((k)=>!k.tr&&k.p===pid&&!k.r);
 const seenGet=(pid)=>new Set(ls.get("u13vseen."+pid,[]));
 const seenAdd=(pid,id)=>{const s=seenGet(pid);s.add(id);ls.set("u13vseen."+pid,[...s].slice(-300))};
+/* Zahl hinter „Videos“: noch nicht geöffnete Clips, die eine laufende Frist haben oder in den letzten 5 Tagen kamen */
+const unseen=(d,pid)=>{const s=seenGet(pid),now=Date.now(),t5=now-5*864e5;
+  return(d.vc||[]).filter((c)=>!s.has(c.id)&&((c.f&&fristTs(c.f)>=now)||Date.parse(c.at||"")>=t5)).length};
+V.vidLabel=(d,pid)=>{const n=unseen(d,pid);return"Videos"+(n?" ("+n+")":"")};
+const vidTab=()=>{const b=document.querySelector('#vtab [data-v="v"]');if(b&&VW.d)b.textContent=V.vidLabel(VW.d,VW.pid)};
 const hintOff=(pid,id)=>ls.get("u13vhx."+pid,[]).includes(id);
 const hintsFor=(d,pid)=>(d.vc||[]).filter((c)=>c.f&&!hintOff(pid,c.id)&&fristBald(c.f)&&VW.kom&&VW.kom[c.id]&&!mineTop(VW.kom[c.id],pid));
 function hintHtml(d,pid){return hintsFor(d,pid).map((c)=>'<div class="vd-hint" data-hint="'+esc(c.id)+'">'+SVG.clock+'<div style="flex:1;font-size:14px;line-height:1.4"><b>'+(Date.now()>fristTs(c.f)?"Frist vorbei":"Bis "+esc(fristTxt(c.f)))+":</b> Bitte kommentiere den Clip „"+esc(c.ti)+'“.</div><button type="button" data-hx="'+esc(c.id)+'">Ausblenden</button></div>').join("")}
@@ -2136,13 +2148,24 @@ function whoHtml(d){return'<div class="card" id="vwho" style="margin:0 0 14px;bo
   +'<div class="bar" style="margin:0 0 8px"><button class="btn" data-who="s" style="min-height:44px;font-weight:600">Ich bin '+esc(d.n||"der Spieler")+'</button><button class="btn" data-who="e" style="min-height:44px">Ich bin Elternteil von '+esc(d.n||"…")+"</button></div>"
   +'<div id="vwhoe" hidden><label class="note" for="vwhon">Wie heißt du?</label><div class="bar" style="margin:4px 0 0"><input id="vwhon" maxlength="60" autocomplete="name" placeholder="Vor- und Nachname" style="flex:1;min-width:180px"><button class="btn" data-whook style="background:var(--ac);color:#fff;border-color:var(--ac)">Weiter</button></div><div class="note warn" id="vwhom"></div></div>'
   +'<p class="note" style="margin-bottom:0">Clips und die Kommentare der Spieler sind nur für die Mannschaft gedacht. Liebe Eltern, bitte respektiert das.</p></div>'}
+/* Dienste in der Übersicht: Materialdienst der aktuellen Woche (Mo–So), Leibchen heute und die nächsten 6 Tage,
+   Obst & Gemüse ab heute bis Sonntag. Leibchen und Obst & Gemüse stehen ohnehin nur im Link des eingeteilten Spielers. */
+const addDay=(s,n)=>{const x=new Date(s+"T12:00");x.setDate(x.getDate()+n);return isoDay(x)};
+const dsDate=(s)=>{const x=new Date(s+"T12:00");return WT[x.getDay()]+", "+x.getDate()+"."+(x.getMonth()+1)+"."};
+function dsNow(d){const t=today(),k=(new Date(t+"T12:00").getDay()+6)%7,mon=addDay(t,-k),sun=addDay(mon,6),w7=addDay(t,6);
+  return(d.ds||[]).filter((x)=>x.a==="Materialdienst"?x.d<=sun&&(x.b||x.d)>=mon:x.a==="Leibchen"?x.d>=t&&x.d<=w7:x.a==="Obst & Gemüse"?x.d>=t&&x.d<=sun:false)
+    .sort((a,b)=>(a.a==="Materialdienst"?0:1)-(b.a==="Materialdienst"?0:1)||a.d.localeCompare(b.d))}
+function dsHtml(d,pid){const L=dsNow(d);if(!L.length)return"";const r=role(pid),wer=r&&r.r==="e"?esc(d.n||"Dein Kind")+" ist":"Du bist";
+  return'<div class="card" style="margin:0 0 12px"><h3 style="margin-top:0">Dienste</h3>'+L.map((x)=>{const eig=x.a!=="Materialdienst",wann=x.b?dsDate(x.d)+" – "+dsDate(x.b):dsDate(x.d);
+    return'<div class="vd-row"><div style="flex:1;min-width:0"><b>'+esc(x.a==="Leibchen"?"Leibchendienst":x.a==="Obst & Gemüse"?"Obst & Gemüse":"Materialdienst")+"</b>"+(x.l?" · "+esc(x.l):"")
+      +'<div class="note">'+(eig?'<b style="color:var(--ac)">'+wer+" dran</b> · ":"")+esc(wann)+(x.sp?" · "+esc(x.sp):"")+"</div>"+(x.x?'<div style="margin-top:2px">'+esc(x.x)+"</div>":"")+"</div></div>"}).join("")+"</div>"}
 /* Übersicht */
 function uebHtml(d,pid){
   const r=role(pid),T=d.t||{days:{}},t0=today(),days=Object.keys(T.days||{}).filter((x)=>x>=t0).sort(),nx=[];
   for(const x of days){(T.days[x]||[]).forEach((o)=>{if(o.ty!=="Ferien"&&nx.length<4)nx.push({d:x,...o})});if(nx.length>=4)break}
   const clips=(d.vc||[]),open=r&&r.r==="s"?clips.filter((c)=>c.a&&VW.kom&&VW.kom[c.id]&&!mineTop(VW.kom[c.id],pid)):[],neu=r&&r.r==="s"?clips.filter((c)=>!seenGet(pid).has(c.id)):[];
   const rep=newReplies(d,pid);
-  return(r&&r.r==="s"?hintHtml(d,pid):"")
+  return(r&&r.r==="s"?hintHtml(d,pid):"")+dsHtml(d,pid)
     +'<div class="card" style="margin:0 0 12px"><h3 style="margin-top:0">Als Nächstes</h3>'+(nx.length?nx.map((o)=>'<div class="vd-row"><div style="min-width:86px;font-weight:600">'+esc(dShort(o.d))+'</div><div style="flex:1;min-width:0"><span class="pill">'+esc(o.tl||o.ty)+"</span> "+esc(o.tx||"")+(o.u?'<div class="note" style="color:var(--o)">⚠ '+esc(o.u)+"</div>":"")+'</div><div style="font-weight:600;white-space:nowrap">'+esc(o.z||"")+"</div></div>").join(""):'<div class="note">Keine Termine in nächster Zeit.</div>')+(d.t?'<div class="bar" style="margin:8px 0 0"><button class="btn" data-vgo="t">Zum Terminplan</button></div>':"")+"</div>"
     +(r&&r.r==="s"&&clips.length?'<div class="card" style="margin:0 0 12px"><h3 style="margin-top:0">Videos</h3>'+(open.length?open.map((c)=>'<div class="vd-row"><div style="flex:1;min-width:0"><b>'+esc(c.ti)+'</b><div class="note">Aufgabe offen'+(c.f?" · bis "+esc(fristTxt(c.f)):"")+"</div></div></div>").join(""):'<div class="note">'+(VW.kom?"Keine offenen Aufgaben. Stark!":"Wird geladen …")+"</div>")+(neu.length?'<div class="note" style="margin-top:6px">'+neu.length+(neu.length===1?" neuer Clip":" neue Clips")+"</div>":"")+'<div class="bar" style="margin:8px 0 0"><button class="btn" data-vgo="v">Zu den Videos</button></div></div>':"")
     +(rep.length?'<div class="card" style="margin:0 0 12px"><h3 style="margin-top:0">Neue Antworten vom Trainer</h3>'+rep.map((x)=>'<div class="vd-row"><div style="flex:1;min-width:0"><b>'+esc(x.wo)+'</b><div class="note">'+esc(x.n)+": "+esc(String(x.t).slice(0,120))+"</div></div><button class=\"btn\" data-vgo=\""+x.go+"\">Ansehen</button></div>").join("")+"</div>":"")}
@@ -2211,7 +2234,7 @@ document.addEventListener("click",async(e)=>{
   if((b=q("[data-vgo]"))){VW.api.go(b.dataset.vgo);return}
   if((b=q("[data-hx]"))){const L=ls.get("u13vhx."+pid,[]);L.push(b.dataset.hx);ls.set("u13vhx."+pid,L);VW.repaint();return}
   if((b=q("[data-vv]"))){VW.sub=b.dataset.vv;VW.paint("v");return}
-  if((b=q("[data-clt]"))){const id=b.dataset.clt;VW.open=VW.open===id?null:id;VW.kOpen=null;VW.rep=null;if(VW.open){seenAdd(pid,id);const c=(d.vc||[]).find((x)=>x.id===id);if(c&&n&&!(VW.kom&&VW.kom[id])){VW.paint("v");const K=await loadKom(c);if(K){VW.kom=VW.kom||{};VW.kom[id]=K}}}VW.paint("v");return}
+  if((b=q("[data-clt]"))){const id=b.dataset.clt;VW.open=VW.open===id?null:id;VW.kOpen=null;VW.rep=null;if(VW.open){seenAdd(pid,id);vidTab();const c=(d.vc||[]).find((x)=>x.id===id);if(c&&n&&!(VW.kom&&VW.kom[id])){VW.paint("v");const K=await loadKom(c);if(K){VW.kom=VW.kom||{};VW.kom[id]=K}}}VW.paint("v");return}
   if((b=q("[data-kshow]"))){const id=b.dataset.kshow;VW.kOpen=VW.kOpen===id?null:id;VW.rep=null;if(VW.kOpen){const c=(d.vc||[]).find((x)=>x.id===id),K=await loadKom(c);if(K)VW.kom[id]=K;markReplies(pid,(VW.kom[id]||[]).filter((k)=>k.tr).map((k)=>k.id))}VW.paint("v");return}
   if((b=q("[data-krep]"))){VW.rep={c:VW.open,k:b.dataset.krep};VW.paint("v");const t=document.getElementById("vkr");t&&t.focus();return}
   if(q("[data-krx]")){VW.rep=null;VW.paint("v");return}
@@ -2369,8 +2392,8 @@ function viewPlayer(d,pid){
   const demo=d.k==="demosp";if(demo&&window.__vid)window.__vidNet=demoNet(d);
   if(demo&&!document.getElementById("demospcss"))document.head.insertAdjacentHTML("beforeend",'<style id="demospcss">#u13vinst{display:none!important}</style>');   /* kein „Als App speichern“ in der Demo */
   useBg();dzApply(d);const v=shell(),cur=document.documentElement.getAttribute("data-theme")||"";
-  const VD=window.__vid,hasU=!!(VD&&(d.t||(d.vc&&d.vc.length)||(d.vg&&d.vg.length)||d.fk));
-  const tabsHtml=()=>{const w=VD&&hasU?VD.viewerTabs(d,pid):{};return(hasU?'<button data-v="u">Übersicht</button>':"")+(d.h?'<button data-v="p">Profil</button>':"")+(d.t?'<button data-v="t">Terminplan</button>':"")+(d.li?'<button data-v="l">Liga</button>':"")+(w.v?'<button data-v="v">Videos</button>':"")+(w.f?'<button data-v="f">Feedback</button>':"")};
+  const VD=window.__vid,hasU=!!(VD&&(d.t||(d.vc&&d.vc.length)||(d.vg&&d.vg.length)||d.fk||(d.ds&&d.ds.length)));
+  const tabsHtml=()=>{const w=VD&&hasU?VD.viewerTabs(d,pid):{};return(hasU?'<button data-v="u">Übersicht</button>':"")+(d.h?'<button data-v="p">Profil</button>':"")+(d.t?'<button data-v="t">Terminplan</button>':"")+(d.li?'<button data-v="l">Liga</button>':"")+(w.v?'<button data-v="v">'+esc(VD.vidLabel?VD.vidLabel(d,pid):"Videos")+"</button>":"")+(w.f?'<button data-v="f">Feedback</button>':"")};
   const multi=hasU||d.t||d.li;
   v.innerHTML='<div class="vh">'+(d.f?'<img alt="" class="vfoto" style="border-radius:50%;object-fit:cover" src="'+esc(d.f)+'">':d.l?'<img alt="" data-lg src="'+esc(d.l)+'">':"")+'<div><b style="font-size:22px;line-height:1.2">'+(d.n?"Hey "+esc(d.n)+"!":"Hey!")+'</b><div class="note" style="font-size:14px">Deine '+esc(d.m||"U13")+'-Zentrale · Saison '+esc(d.s||"")+'</div></div><span style="flex:1"></span><select id="vth" aria-label="Darstellung"><option value="">Darstellung: Auto</option><option value="light">Hell</option><option value="dark">Dunkel</option></select></div>'+(demo?'<div class="card" id="demohint" style="margin:0 0 14px;border-color:var(--y);background:var(--ys)"><b>Demo-Spielerlink</b><div class="note" style="color:inherit;margin-top:2px">So sieht ein Spielerlink aus. Spieler, Termine, Videos und Feedback sind erfunden und haben nichts mit echten Personen zu tun. Was du hier schreibst, wird nicht gesendet.</div></div>':"")+hnHtml(hnItems(d.hn,"alle"))+(multi?'<div class="seg" id="vtab" style="margin-bottom:14px">'+tabsHtml()+'</div>':"")+(hasU?'<div id="vueb"></div>':"")+'<div id="vprof"'+(hasU?" hidden":"")+'>'+(d.h||(multi?"":'<div class="card"><div class="note">Ein Spielerprofil ist für diesen Link nicht freigegeben.</div></div>'))+'</div>'+(d.t?'<div id="vplan" hidden></div>':"")+(d.li?'<div id="vliga" hidden></div>':"")+(hasU?'<div id="vvid" hidden></div><div id="vfb" hidden></div>':"")+'<div class="vf">Stand: '+esc(dt(d.u))+(demo?" · Demo mit erfundenen Daten":" · Persönlicher Link, bitte nicht weitergeben.")+'<span id="vwer"></span></div>';
   bgPick();if(d.f){const av=v.querySelector("#vprof #av");if(av)av.remove()}else vLogo(v,d.l);const s=document.getElementById("vth");s.value=cur;s.onchange=()=>{applyTheme(s.value);try{s.value?localStorage.setItem("u13theme",s.value):localStorage.removeItem("u13theme")}catch(e){}};
@@ -2497,15 +2520,18 @@ const fingerprintParts=async()=>{
   const notes=D.notizen.filter((n)=>n.art!=="beobachtung"&&n.sichtbar).sort((a,b)=>a.id<b.id?-1:1);
   const evs=evAll().map((e)=>{const q={};Object.keys(e).sort().forEach((k)=>{if(k==="id"||k==="virt"||k==="trainId"||k==="schwerpunkt"||k==="ctask"||(k==="detail"&&e.typ==="Training"))return;const v=e[k];if(v===""||v==null||(k==="eltern"&&v!==false))return;q[k]=v});return q}).sort((a,b)=>JSON.stringify(a)<JSON.stringify(b)?-1:1);
   const gs=D.spiele.filter(U13.erreicht).map((g)=>{const q={...g};delete q.live;return q}),ts=D.trainings.filter(U13.erreicht);
-  const a=(await sha(JSON.stringify([D.spieler,evs,D.dienste,notes,null,cfg,window.__vid?window.__vid.sig():null,ligaSnap()]))).slice(0,16),s=(await sha(JSON.stringify([gs,ts]))).slice(0,16);
+  const a=(await sha(JSON.stringify([D.spieler,evs,D.dienste,notes,null,cfg,window.__vid?window.__vid.sig():null,ligaSnap(false)]))).slice(0,16),s=(await sha(JSON.stringify([gs,ts,(ligaSnap()||{}).t||null]))).slice(0,16);
   return{a,s}};
 /* Reiter „Liga“ im Spielerlink: die selbst unter „Spiele“ eingetragenen Spiele (nicht FUSSBALL.DE).
-   Nur Datum, Anstoß, Gegner, Heim/Auswärts, Ort, Spielart und Ergebnis – keine Aufstellung, Minuten oder Notizen. */
-function ligaSnap(){
+   Nur Datum, Anstoß, Gegner, Heim/Auswärts, Ort, Spielart und Ergebnis – keine Aufstellung, Minuten oder Notizen.
+   Ergebnis wie in „Spiele“: nur bei gewerteten Spielen (nicht gewertet = kein Ergebnis, auch wenn Tore eingetragen sind).
+   Von FUSSBALL.DE kommt nur die Tabelle dazu (falls vorhanden); mitTabelle=false für den Fingerabdruck (Tabelle zählt dort zu S). */
+function ligaSnap(mitTabelle){
   const g=D.spiele.filter((x)=>x.datum).map((x)=>{const e=(D.events||[]).find((v)=>v.spielId===x.id)||{};if(e.eltern===false)return null;
-    const r=x.tore==null||x.gt==null||x.tore===""||x.gt===""?{}:{t:+x.tore,c:+x.gt};
+    const er=U13.ergebnis(x),r=er?{t:er.tore,c:er.gt}:{};
     return{d:x.datum,z:e.beginn||"",ha:x.ha||"",gg:x.gegner||"",ort:e.ort||"",w:x.art||"",...r}}).filter(Boolean).sort((a,b)=>(a.d+a.z).localeCompare(b.d+b.z));
-  return g.length?{o:1,g}:null}
+  const fd=mitTabelle!==false&&window.__FD?window.__FD.snap():null,tb=fd?{t:fd.t,e:fd.e,u:fd.u,lt:fd.lt,ll:fd.ll}:{};
+  return g.length||fd?{o:1,g,...tb}:null}
 const fingerprint=async()=>{const f=await fingerprintParts();return f.a+f.s};
 const profExt=()=>!(D.config&&D.config.profilExt===false);
 function profileHtml(pid){
@@ -2615,7 +2641,7 @@ function demoPlayer(){
   if(!p)return{n:"Max",h:"",vc:[],vg:[],dk:{},df:[]};
   const K=["spieler","spiele","trainings","notizen","events","dienste","todos","config"],keep={},kob=window.__kobsEv;let r={h:"",t:null,li:null};
   K.forEach((k)=>{keep[k]=D[k]});
-  try{window.__kobsEv=null;K.forEach((k)=>{D[k]=o[k]});r={h:profileHtml(p.id),t:planSnap(),li:ligaSnap()}}
+  try{window.__kobsEv=null;K.forEach((k)=>{D[k]=o[k]});r={h:profileHtml(p.id),t:planSnap(),li:ligaSnap(),ds:window.__vid?window.__vid.dienste(p.id):null}}
   catch(e){try{console.warn("Demo-Spielerlink:",e&&e.message)}catch(_){}}
   finally{K.forEach((k)=>{D[k]=keep[k]});window.__kobsEv=kob;try{renderProfile()}catch(e){}}
   const me=(x)=>x===p.id?"demosp":x,mine=V.clips.filter((c)=>c.an==="alle"||c.an.includes(p.id));
@@ -2641,8 +2667,8 @@ const useBg=()=>{const b=SNAP.bg;if(!b||!window.applyBg)return;let v="";try{v=lo
 const bgPick=()=>{const b=SNAP.bg,t=document.getElementById("vth")||document.getElementById("th");if(!b||!b.i||!t||document.getElementById("vbg"))return;let v="";try{v=localStorage.getItem("u13vbg")||""}catch(e){}
   const e=document.createElement("select");e.id="vbg";e.setAttribute("aria-label","Hintergrund");e.innerHTML='<option value="">Hintergrund: Standard</option><option value="bild">Hintergrund: Bild</option>';e.value=v;
   e.onchange=()=>{try{e.value?localStorage.setItem("u13vbg",e.value):localStorage.removeItem("u13vbg")}catch(x){}useBg()};t.insertAdjacentElement("afterend",e)};
-/* LKV: Aufbau der Links. Erhöhen, wenn neuer Inhalt in die Links kommt – dann werden alle sofort neu veröffentlicht (2 = Spielerfoto im Kopf) */
-const LKV=2;
+/* LKV: Aufbau der Links. Erhöhen, wenn neuer Inhalt in die Links kommt – dann werden alle sofort neu veröffentlicht (2 = Spielerfoto im Kopf, 3 = Dienste in der Übersicht, 4 = Liga: Tabelle von FUSSBALL.DE, kein Ergebnis bei nicht gewerteten Spielen) */
+const LKV=4;
 const dzSig=()=>JSON.stringify(Object.keys(L).sort().filter((k)=>L[k].aktiv&&L[k].key).map((k)=>[k]))+"|"+LKV;
 async function buildSnap(){
   const LI=ligaSnap(),TP=planSnap(),HN=(D.config&&D.config.hinweise)||[],out={v:1,u:new Date().toISOString(),p:{},k:{}},logo=lgR(),sa=(D.config&&D.config.saison)||"";
@@ -6118,10 +6144,12 @@ function ownRow(f){
   return'<div class="fdg"><div class="fdd"><b>'+E(dl(f.d))+'</b><span>'+E(f.z?f.z+" Uhr":"")+'</span></div><div class="fdm">'+(HAT[f.ha]?'<span class="fdha" title="'+HAT[f.ha]+'">'+E(f.ha)+'</span>':"")+'<b>'+(f.gg?E(f.gg):"Gegner noch offen")+'</b>'+(f.ort?'<span class="note">'+E(f.ort)+'</span>':"")+(f.w?'<span class="note">'+E(f.w)+'</span>':"")+'</div><div class="fdres">'+res+'</div></div>'}
 function ownView(li){const T=todayIso(),g=(li.g||[]).slice().sort((a,b)=>(a.d+(a.z||"")).localeCompare(b.d+(b.z||""))),has=(x)=>x.t!=null&&x.c!=null;
   const ko=g.filter((x)=>x.d>=T&&!has(x)),ge=g.filter((x)=>!(x.d>=T&&!has(x))).reverse();
-  return'<div class="card" style="margin-bottom:12px"><h3 style="margin-top:0">Kommende Spiele</h3>'+(ko.length?ko.map(ownRow).join(""):'<div class="note">Zurzeit sind keine weiteren Spiele eingetragen.</div>')+'</div>'
+  const lk=[li.lt?'<a href="'+E(li.lt)+'" target="_blank" rel="noopener noreferrer">Mannschaft bei FUSSBALL.DE</a>':"",li.ll?'<a href="'+E(li.ll)+'" target="_blank" rel="noopener noreferrer">Liga bei FUSSBALL.DE</a>':""].filter(Boolean).join(" · ");
+  return(li.t&&li.t.length?'<div class="card" style="margin-bottom:12px"><h3 style="margin-top:0">Tabelle</h3>'+tabHtml(li.t,li.e)+'<p class="note" style="margin-bottom:0">Quelle: FUSSBALL.DE'+(li.u?" · Stand "+E(standTxt(li.u)):"")+(lk?" · "+lk:"")+'</p></div>':"")
+  +'<div class="card" style="margin-bottom:12px"><h3 style="margin-top:0">Kommende Spiele</h3>'+(ko.length?ko.map(ownRow).join(""):'<div class="note">Zurzeit sind keine weiteren Spiele eingetragen.</div>')+'</div>'
   +(ge.length?'<div class="card" style="margin-bottom:12px"><h3 style="margin-top:0">Ergebnisse</h3>'+ge.map(ownRow).join("")+'</div>':"")
-  +'<p class="note">Eingetragen vom Trainerteam.</p>'}
-/* li = {u: Stand, e: eigener Name, t: Tabelle, g: Spiele, lt/ll: Links} von FUSSBALL.DE oder {o: 1, g: eigene Spiele}; Zeitpunkt „heute“ kommt vom Gerät */
+  +'<p class="note">Spiele und Ergebnisse: eingetragen vom Trainerteam.</p>'}
+/* li = {u: Stand, e: eigener Name, t: Tabelle, g: Spiele, lt/ll: Links} von FUSSBALL.DE oder {o: 1, g: eigene Spiele, dazu ggf. t/e/u/lt/ll: nur die Tabelle von FUSSBALL.DE}; Zeitpunkt „heute“ kommt vom Gerät */
 FD.view=(li,o)=>{o=o||{};if(!li)return"";if(li.o)return ownView(li);const T=todayIso(),g=(li.g||[]).slice().sort((a,b)=>(a.d+a.z).localeCompare(b.d+b.z)),ko=g.filter((x)=>x.d>=T),ge=g.filter((x)=>x.d<T).reverse();
   const lk=[li.lt?'<a href="'+E(li.lt)+'" target="_blank" rel="noopener noreferrer">Mannschaft bei FUSSBALL.DE</a>':"",li.ll?'<a href="'+E(li.ll)+'" target="_blank" rel="noopener noreferrer">Liga bei FUSSBALL.DE</a>':""].filter(Boolean).join(" · ");
   return'<div class="card" style="margin-bottom:12px"><h3 style="margin-top:0">Tabelle</h3>'+tabHtml(li.t,li.e)+'</div>'
