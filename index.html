@@ -322,7 +322,7 @@ input.dsf-d{width:9.5em}input.dsf-t{width:5.5em}input.dsbad{border-color:var(--r
 <div class="tw"><table id="lkt"></table></div>
 </div>
 <div class="card" id="lkco" style="margin-top:12px"><h3>Trainer-Links (Co-Trainer)</h3><p class="note" style="margin-top:0">Für Trainer und Verantwortliche aus den Stammdaten (außer dem Besitzer). Sie sehen und bearbeiten alles, aber nicht die Einstellungen. <b>Wichtig:</b> Bearbeiten geht nur mit Claude-Konto, und die Person muss unter „Teilen“ der Seite als Mitwirkende eingeladen sein; der Link allein reicht nicht. Ein ausgeschalteter Link sperrt den Zugang über die App sofort (ohne „Aktualisieren“).</p><div class="tw"><table id="lkct"></table></div></div>
-<div class="card" id="lkx" style="margin-top:12px"><h3>Externe Links (nur ansehen)</h3><p class="note" style="margin-top:0">Für Personen außerhalb des Teams. „Vollansicht“ und „Struktur“ zeigen die komplette App (ohne Änderungen). <b>„Nur Terminpläne“</b> zeigt ausschließlich Monats- und Wochenplan und lässt sich ohne Anmeldung öffnen (der A4-Download steht nur den Trainern zur Verfügung) – Spielerprofile, Notizen und To-Dos sind darin nicht enthalten. <b>„Demo“</b> zeigt die ganze App samt A4-Export-Knöpfen mit komplett zufällig erzeugten Daten (Lorem ipsum) – ohne Anmeldung, nichts davon ist echt. Ein-/Ausschalten gilt nach wenigen Sekunden, neue Daten werden etwa alle 6 Stunden übernommen.</p><div class="tw"><table id="lkxt"></table></div></div>
+<div class="card" id="lkx" style="margin-top:12px"><h3>Teamlink &amp; Demos</h3><p class="note" style="margin-top:0">Zum Weitergeben an alle, auch außerhalb des Teams. Die Links öffnen ohne Konto und ohne Passwort, man kann nur ansehen. <b>Teamlink</b>: nur der Terminplan der Mannschaft. <b>Demo Trainer</b> und <b>Demo Spielerlink</b>: zeigen, wie die App aussieht – mit erfundenen Daten, nichts davon ist echt. Ein- und Ausschalten gilt nach wenigen Sekunden.</p><div class="tw"><table id="lkxt"></table></div></div>
 
 </div>
 <div class="etp" id="etp-s" hidden>
@@ -2331,29 +2331,30 @@ const dzApply=(d,s)=>{let n=0;const f=()=>{if(window.__dz){__dz.set();return}if(
 async function showExt(k,blob,key){
   let d;try{d=await unseal(key,blob)}catch(e){showAccess("Dieser Link ist nicht (mehr) gültig. Bitte den Trainer fragen.");return}
   if(d.k==="plan"){planOnly(d);return}
-  useBg();dzApply(d);bgPick();Object.assign(D,d.db,{ready:true});window.__RO=true;window.__ANON=d.k==="anon";window.__DEMO=d.k==="demo";
-  document.body.classList.add("ro");if(window.__ANON)document.body.classList.add("anon");
+  if(d.k==="demosp"){viewPlayer(d,k);return}
+  useBg();dzApply(d);bgPick();Object.assign(D,d.db,{ready:true});window.__RO=true;window.__DEMO=d.k==="demo";
+  document.body.classList.add("ro");
   document.title="TuS Haltern U13 · "+(window.__DEMO?"Demo":"Teamzentrale");
   const st=document.getElementById("st");if(st){st.textContent=(window.__DEMO?"Demo · Zufallsdaten · ":"Nur Ansicht · ")+"Stand "+dt(d.u);st.className="pill"}
   const hide=(q)=>document.querySelectorAll(q).forEach((x)=>{x.style.display="none"});
-  hide('nav button[data-s="v"],nav button[data-s="fb"]');if(!window.__DEMO)hide('nav button[data-s="e"],nav button[data-s="k"]');if(window.__ANON)hide('nav button[data-s="s"]');
+  if(!window.__DEMO)hide('nav button[data-s="v"],nav button[data-s="fb"],nav button[data-s="e"],nav button[data-s="k"]');
   const XI=["xa","xsp","xp","xpa","xnw","xq","xtm","xts","xga","xsw","xsk","xnt","xnz"];
-  const OKS=(window.__DEMO?XI.map((i)=>"#"+i).join(",")+",.xth,#kps,[data-bkf],[data-bkq],[data-obf],":"")+"#xpv,#mm,#ms,#ps,#so,#od,#qf,#fz,#fk,#fv,#fa,#wm,#wkd,#hmm,#th,#vbg",OKB=(window.__DEMO?XI.map((i)=>"#"+i+",#"+i+" button").join(",")+",[data-kt],[data-vsel],[data-bkm],[data-bkv],[data-bkt],":"")+"#sseg button,#pmode button,#bprev,#bnext,#mprev,#mnext,#wprev,#wnext,#pprev,#pnext,#vw button,nav button,#hn button";
+  const OKS=(window.__DEMO?XI.map((i)=>"#"+i).join(",")+",.xth,#kps,[data-bkf],[data-bkq],[data-obf],":"")+"#xpv,#mm,#ms,#ps,#so,#od,#qf,#fz,#fk,#fv,#fa,#wm,#wkd,#hmm,#th,#vbg",OKB=(window.__DEMO?XI.map((i)=>"#"+i+",#"+i+" button").join(",")+",[data-kt],[data-vsel],[data-bkm],[data-bkv],[data-bkt],#vdseg button,[data-vc],":"")+"#sseg button,#pmode button,#bprev,#bnext,#mprev,#mnext,#wprev,#wnext,#pprev,#pnext,#vw button,nav button,#hn button";
   const cut=(q,f)=>{const e=document.querySelector(q);if(e){const c=f?f(e):e;if(c)c.style.display="none"}};
   const pass=()=>{
     document.querySelectorAll("main input,main textarea,main select").forEach((x)=>{if(!x.matches(OKS)&&!x.disabled)x.disabled=true});
     document.querySelectorAll("main button").forEach((x)=>{if(!x.matches(OKB)&&!x.matches(".s,.chips button"))x.style.display="none"});
     ["#hv","#mv","#nft","#mnew","#ntx"].forEach((q)=>cut(q,(e)=>e.closest(".card")));
-    if(!window.__DEMO)hide('#hn [data-go="e"],#hn [data-go="k"]');if(window.__ANON)hide('#hn [data-go="s"]');
+    if(!window.__DEMO)hide('#hn [data-go="e"],#hn [data-go="k"]');
     hide("#t>.sub,#g>.sub");document.querySelectorAll("#hg h3").forEach((h)=>{if(!window.__DEMO&&/Zu erledigen/.test(h.textContent))h.closest(".card").style.display="none"});
     cut("#ng",(e)=>e.closest(".bar"));cut("#nd",(e)=>e.closest("label"));cut("#logo");cut("#logox");
     if(!window.__DEMO)XI.forEach((id)=>{const e=document.getElementById(id);if(!e)return;e.style.display="none";let p=e.previousElementSibling;while(p&&(p.matches("span.note")||p.matches("label.note"))&&!p.querySelector("#so,#od,#fz")){p.style.display="none";p=p.previousElementSibling}});
   };
   let tm=null;new MutationObserver(()=>{clearTimeout(tm);tm=setTimeout(pass,30)}).observe(document.querySelector("main"),{childList:true,subtree:true});
   if(window.__DEMO&&d.db.kader&&window.__kader){const KK=window.__kader,kd=d.db.kader;if(window.initKader)window.initKader({collection:()=>({onSnapshot:()=>{}})});KK.KD.plans=kd.plans||[];KK.KD.pers=kd.pers||[];KK.KD.obs=kd.obs||[];KK.KD.vereine=kd.vereine||[];KK.KD.inbox=kd.inbox||[];if(kd.plans&&kd.plans[0])KK.ks.pid=kd.plans[0].id;window.__kgplans=true}
+  if(window.__DEMO&&d.db.vid&&window.__vid){const V=window.__vid,x=d.db.vid;V.clips=x.clips||[];V.fb=(x.fb||[]).slice().sort((a,b)=>a.at<b.at?1:-1);V.kom=x.kom||{};V.fbKey="demo"}
   renderAll();if(window.__DEMO)demoSettings();pass();
-  if(window.__DEMO){const h=document.getElementById("hsub");if(h&&!document.getElementById("demohint"))h.insertAdjacentHTML("afterend",'<div class="card" id="demohint" style="margin:0 0 14px;border-color:var(--y);background:var(--ys)"><b>Demo-Ansicht mit Zufallsdaten</b><div class="note" style="color:inherit;margin-top:2px">Alle Namen, Beteiligungen, Spielergebnisse, Notizen und Entwicklungsziele sind zufällig erzeugt (Lorem ipsum) und haben nichts mit echten Personen zu tun. Auch die Kaderplanung und die Einstellungen enthalten nur erfundene Daten und Platzhalter-Links. Die App ist hier nur lesbar. Die A4-Exporte (Knöpfe „PNG/JPG/PDF“) sind sichtbar, der Download funktioniert aber nur für angemeldete Trainer.</div></div>')}
-  if(window.__ANON){const h=document.getElementById("hsub");if(h&&!document.getElementById("anonhint"))h.insertAdjacentHTML("afterend",'<div class="card" id="anonhint" style="margin:0 0 14px;border-color:var(--y);background:var(--ys)"><b>Anonymisierte Ansicht</b><div class="note" style="color:inherit;margin-top:2px">Sensible Daten wurden entfernt: Spielernamen (ersetzt durch „Spieler 1…n“), Fotos, Geburtsdaten, Kontakte, Notizen, Entwicklungsziele, To-Dos und interne Termine.</div></div>')}
+  if(window.__DEMO){const h=document.getElementById("hsub");if(h&&!document.getElementById("demohint"))h.insertAdjacentHTML("afterend",'<div class="card" id="demohint" style="margin:0 0 14px;border-color:var(--y);background:var(--ys)"><b>Demo-Ansicht mit Zufallsdaten</b><div class="note" style="color:inherit;margin-top:2px">Alle Namen, Beteiligungen, Spielergebnisse, Notizen, Entwicklungsziele, Videos und Feedback sind zufällig erzeugt und haben nichts mit echten Personen zu tun. Auch die Kaderplanung und die Einstellungen enthalten nur erfundene Daten und Platzhalter-Links. Die App ist hier nur lesbar. Die A4-Exporte (Knöpfe „PNG/JPG/PDF“) sind sichtbar, der Download funktioniert aber nur für angemeldete Trainer.</div></div>')}
 }
 async function showViewer(pid,key){
   if(window.__webSnap){try{SNAP=await window.__webSnap(pid)}catch(e){showAccess("Die Verbindung zum Server hat nicht geklappt. Bitte später noch einmal versuchen.");return}}
@@ -2361,11 +2362,17 @@ async function showViewer(pid,key){
   const blob=SNAP.p&&SNAP.p[pid];
   if(!blob){showAccess("Dieser Link ist nicht (mehr) aktiv. Bitte den Trainer fragen.");return}
   let d;try{d=await unseal(key,blob)}catch(e){showAccess("Dieser Link ist nicht (mehr) gültig. Bitte den Trainer fragen.");return}
+  viewPlayer(d,pid);
+}
+/* Spielerlink anzeigen. Demo-Spielerlink (d.k="demosp"): erfundener Spieler, Kommentare und Feedback bleiben nur in diesem Fenster. */
+function viewPlayer(d,pid){
+  const demo=d.k==="demosp";if(demo&&window.__vid)window.__vidNet=demoNet(d);
+  if(demo&&!document.getElementById("demospcss"))document.head.insertAdjacentHTML("beforeend",'<style id="demospcss">#u13vinst{display:none!important}</style>');   /* kein „Als App speichern“ in der Demo */
   useBg();dzApply(d);const v=shell(),cur=document.documentElement.getAttribute("data-theme")||"";
   const VD=window.__vid,hasU=!!(VD&&(d.t||(d.vc&&d.vc.length)||(d.vg&&d.vg.length)||d.fk));
   const tabsHtml=()=>{const w=VD&&hasU?VD.viewerTabs(d,pid):{};return(hasU?'<button data-v="u">Übersicht</button>':"")+(d.h?'<button data-v="p">Profil</button>':"")+(d.t?'<button data-v="t">Terminplan</button>':"")+(d.li?'<button data-v="l">Liga</button>':"")+(w.v?'<button data-v="v">Videos</button>':"")+(w.f?'<button data-v="f">Feedback</button>':"")};
   const multi=hasU||d.t||d.li;
-  v.innerHTML='<div class="vh">'+(d.f?'<img alt="" class="vfoto" style="border-radius:50%;object-fit:cover" src="'+esc(d.f)+'">':d.l?'<img alt="" data-lg src="'+esc(d.l)+'">':"")+'<div><b style="font-size:22px;line-height:1.2">'+(d.n?"Hey "+esc(d.n)+"!":"Hey!")+'</b><div class="note" style="font-size:14px">Deine '+esc(d.m||"U13")+'-Zentrale · Saison '+esc(d.s||"")+'</div></div><span style="flex:1"></span><select id="vth" aria-label="Darstellung"><option value="">Darstellung: Auto</option><option value="light">Hell</option><option value="dark">Dunkel</option></select></div>'+hnHtml(hnItems(d.hn,"alle"))+(multi?'<div class="seg" id="vtab" style="margin-bottom:14px">'+tabsHtml()+'</div>':"")+(hasU?'<div id="vueb"></div>':"")+'<div id="vprof"'+(hasU?" hidden":"")+'>'+(d.h||(multi?"":'<div class="card"><div class="note">Ein Spielerprofil ist für diesen Link nicht freigegeben.</div></div>'))+'</div>'+(d.t?'<div id="vplan" hidden></div>':"")+(d.li?'<div id="vliga" hidden></div>':"")+(hasU?'<div id="vvid" hidden></div><div id="vfb" hidden></div>':"")+'<div class="vf">Stand: '+esc(dt(d.u))+' · Persönlicher Link, bitte nicht weitergeben.<span id="vwer"></span></div>';
+  v.innerHTML='<div class="vh">'+(d.f?'<img alt="" class="vfoto" style="border-radius:50%;object-fit:cover" src="'+esc(d.f)+'">':d.l?'<img alt="" data-lg src="'+esc(d.l)+'">':"")+'<div><b style="font-size:22px;line-height:1.2">'+(d.n?"Hey "+esc(d.n)+"!":"Hey!")+'</b><div class="note" style="font-size:14px">Deine '+esc(d.m||"U13")+'-Zentrale · Saison '+esc(d.s||"")+'</div></div><span style="flex:1"></span><select id="vth" aria-label="Darstellung"><option value="">Darstellung: Auto</option><option value="light">Hell</option><option value="dark">Dunkel</option></select></div>'+(demo?'<div class="card" id="demohint" style="margin:0 0 14px;border-color:var(--y);background:var(--ys)"><b>Demo-Spielerlink</b><div class="note" style="color:inherit;margin-top:2px">So sieht ein Spielerlink aus. Spieler, Termine, Videos und Feedback sind erfunden und haben nichts mit echten Personen zu tun. Was du hier schreibst, wird nicht gesendet.</div></div>':"")+hnHtml(hnItems(d.hn,"alle"))+(multi?'<div class="seg" id="vtab" style="margin-bottom:14px">'+tabsHtml()+'</div>':"")+(hasU?'<div id="vueb"></div>':"")+'<div id="vprof"'+(hasU?" hidden":"")+'>'+(d.h||(multi?"":'<div class="card"><div class="note">Ein Spielerprofil ist für diesen Link nicht freigegeben.</div></div>'))+'</div>'+(d.t?'<div id="vplan" hidden></div>':"")+(d.li?'<div id="vliga" hidden></div>':"")+(hasU?'<div id="vvid" hidden></div><div id="vfb" hidden></div>':"")+'<div class="vf">Stand: '+esc(dt(d.u))+(demo?" · Demo mit erfundenen Daten":" · Persönlicher Link, bitte nicht weitergeben.")+'<span id="vwer"></span></div>';
   bgPick();if(d.f){const av=v.querySelector("#vprof #av");if(av)av.remove()}else vLogo(v,d.l);const s=document.getElementById("vth");s.value=cur;s.onchange=()=>{applyTheme(s.value);try{s.value?localStorage.setItem("u13theme",s.value):localStorage.removeItem("u13theme")}catch(e){}};
   if(multi){const tb=document.getElementById("vtab");let ready=false,curV="";
     const show=(v)=>{curV=v;tb.querySelectorAll("button").forEach((x)=>x.classList.toggle("on",x.dataset.v===v));const pe=document.getElementById("vplan"),le=document.getElementById("vliga");document.getElementById("vprof").hidden=v!=="p";if(pe)pe.hidden=v!=="t";if(le){le.hidden=v!=="l";if(v==="l"&&!le.innerHTML&&window.__FD)le.innerHTML=window.__FD.view(d.li)}if(v==="t"&&!ready&&pe){ready=true;vPlan(pe,{...d.t,s:d.s,lg:d.l,hn:d.hn})}
@@ -2374,9 +2381,21 @@ async function showViewer(pid,key){
     const wer=()=>{const el=document.getElementById("vwer"),r=(()=>{try{return JSON.parse(localStorage.getItem("u13wer."+pid)||"null")}catch(e){return null}})();if(el)el.innerHTML=r&&hasU?' · Du bist hier als '+esc(r.r==="e"?(r.n||"Elternteil")+" (Elternteil)":d.n||"Spieler")+' · <button type="button" data-wchg style="border:0;background:none;padding:0;font:inherit;color:var(--ac);text-decoration:underline;cursor:pointer">Ändern</button>':""};
     const refresh=()=>{tb.innerHTML=tabsHtml();if(!tb.querySelector('[data-v="'+curV+'"]'))curV=tb.querySelector("button").dataset.v;show(curV);wer()};
     if(hasU)VD.viewer(d,pid,{refresh,go:(v)=>{if(tb.querySelector('[data-v="'+v+'"]'))show(v)}});
+    if(demo)window.__pushCtx=()=>null;
     show(tb.querySelector("button").dataset.v);wer()}
   document.getElementById("vprof").addEventListener("click",(e)=>{const b=e.target.closest("#pmode button");if(!b)return;const w=b.closest("[data-m]");w.dataset.m=b.dataset.pm;w.querySelectorAll("#pmode button").forEach((x)=>x.classList.toggle("on",x===b))});
-  document.title="TuS Haltern U13 · Teamzentrale";
+  document.title="TuS Haltern U13 · "+(demo?"Demo":"Teamzentrale");
+}
+/* Netz-Ersatz für den Demo-Spielerlink: liefert die Beispiel-Kommentare und -Nachrichten, Neues bleibt nur im Speicher dieses Fensters */
+function demoNet(d){
+  const S={},ck={};
+  (d.vc||[]).forEach((c)=>{ck[c.s]=c.ck;S["kom/"+c.s+"/m"]=((d.dk||{})[c.id]||[]).map((k)=>({id:k.id,at:k.at,server:true,o:k}))});
+  const fb=(d.df||[]).map((x)=>({...x}));
+  return{
+    async list(path){if(/^fbaus\//.test(path))return fb.map((x)=>({...x}));const s=path.split("/")[1],L=S[path]||[];
+      return Promise.all(L.map(async(x)=>x.b?{...x}:{id:x.id,at:x.at,server:true,b:await seal(ck[s],{p:x.o.p,n:x.o.n,t:x.o.t,r:x.o.r||"",...(x.o.tr?{tr:true}:{})})}))},
+    async create(coll,id,obj){if(/^kom\//.test(coll))(S[coll]=S[coll]||[]).push({id,at:new Date().toISOString(),server:true,b:obj.b});else if(/^fbaus\//.test(coll))fb.push({...obj})},
+    async update(path,obj){const p=path.split("/"),L=S[p.slice(0,3).join("/")]||[],x=L.find((y)=>y.id===p[3]);if(x){x.b=obj.b;delete x.o}}};
 }
 window.showAccess=showAccess;
 
@@ -2458,17 +2477,27 @@ function kzFoot(alias,aid,doc,p){
 const L={};window.__links=L;let started=false,tok=0,armed=null;
 const base=()=>window.__WEB_BASE||BASE_DEFAULT;window.__lkbase=base;const kzBase=()=>window.__WEB_BASE0||base();   /* Kurzlinks hängen immer direkt an der Grundadresse (ohne ?t=…) */
 const linkOf=(pid,key)=>base()+"#"+pid+"."+key;
+/* Links zum Weitergeben ohne Konto: Teamlink (nur Terminplan), Demo Trainer (ganze App), Demo Spielerlink. Kurzlinks dazu dürfen ohne Passwort sein. */
+const XK=["plan","demo","demosp"],XOPEN=XK.map((k)=>"x"+k);
+/* Handy (bis 600 px): jede Zeile der Link-Tabellen als Karte – oben Name, Haken und Stand, darunter alles in voller Breite, kein Seitwärts-Wischen */
+if(!document.getElementById("lkcss")){const st=document.createElement("style");st.id="lkcss";const T3="#lkt,#lkct,#lkxt",E=(s)=>T3.split(",").map((t)=>t+" "+s).join(",");
+  st.textContent="@media(max-width:600px){"+T3+"{display:block;width:100%;min-width:0!important}"+E("tbody")+"{display:block}"+E("tr:has(>th)")+"{display:none}"
+    +E("tr")+"{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px 10px;align-items:center;padding:10px 12px;margin:0 0 8px;border:1px solid var(--ln);border-radius:12px;background:var(--card)}"
+    +E("td")+"{display:block;grid-column:1/-1;padding:0!important;border:0!important;text-align:left!important;white-space:normal!important;min-width:0;width:auto!important;max-width:none!important}"
+    +E("td:nth-child(1)")+"{grid-column:1;grid-row:1}"+E("td:nth-child(2)")+"{grid-column:2;grid-row:1}"+E("td:has(>.pill)")+"{grid-column:3;grid-row:1}"+E("td:empty")+"{display:none}"+E("td:nth-child(1):has(>.note)")+"{display:contents}"+E("td:nth-child(1)>b")+"{grid-column:1;grid-row:1}"+E("td:nth-child(1)>.note")+"{grid-column:1/-1;grid-row:2}"
+    +E("td .note")+"{max-width:none!important}"+E("input:not([type=checkbox])")+"{width:100%!important;min-width:0!important;box-sizing:border-box}"+E("input[type=checkbox]")+"{width:22px;height:22px;margin:0}"
+    +E("td:has(>.btn)")+"{display:flex;flex-wrap:wrap;gap:6px}"+E(".btn")+"{min-height:40px}"+E("select")+"{width:100%;max-width:100%}"+E("[data-kid] [data-kzadd]")+"{margin-top:6px}"
+    +".tw:has(>#lkt),.tw:has(>#lkct),.tw:has(>#lkxt){overflow-x:visible}}";document.head.appendChild(st)}
 const FP_INT=["trainerToDos","trainerToDosM","kaderAus","linkBasis","sicherung","bw"];
 /* Zwei Stände: A = was Eltern sofort im Plan bzw. im Profil lesen (Termine, Dienste, Hinweise, Kontakte, sichtbare Notizen, Spielerdaten),
    S = Auswertung (eingetragene Anwesenheit, Kader und Minuten bereits erreichter Termine). Änderungen an S sind weniger dringend. */
 const fingerprintParts=async()=>{
-  const full=!!(L.xfull&&L.xfull.aktiv&&L.xfull.key);
-  const cfg=D.config?Object.fromEntries(Object.entries(D.config).filter(([k])=>full||!FP_INT.includes(k))):null;
+  const cfg=D.config?Object.fromEntries(Object.entries(D.config).filter(([k])=>!FP_INT.includes(k))):null;
   if(cfg)delete cfg.linkBasis;
-  const notes=D.notizen.filter((n)=>n.art!=="beobachtung"&&(full||n.sichtbar)).sort((a,b)=>a.id<b.id?-1:1);
-  const evs=full?D.events:evAll().map((e)=>{const q={};Object.keys(e).sort().forEach((k)=>{if(k==="id"||k==="virt"||k==="trainId"||k==="schwerpunkt"||k==="ctask"||(k==="detail"&&e.typ==="Training"))return;const v=e[k];if(v===""||v==null||(k==="eltern"&&v!==false))return;q[k]=v});return q}).sort((a,b)=>JSON.stringify(a)<JSON.stringify(b)?-1:1);
+  const notes=D.notizen.filter((n)=>n.art!=="beobachtung"&&n.sichtbar).sort((a,b)=>a.id<b.id?-1:1);
+  const evs=evAll().map((e)=>{const q={};Object.keys(e).sort().forEach((k)=>{if(k==="id"||k==="virt"||k==="trainId"||k==="schwerpunkt"||k==="ctask"||(k==="detail"&&e.typ==="Training"))return;const v=e[k];if(v===""||v==null||(k==="eltern"&&v!==false))return;q[k]=v});return q}).sort((a,b)=>JSON.stringify(a)<JSON.stringify(b)?-1:1);
   const gs=D.spiele.filter(U13.erreicht).map((g)=>{const q={...g};delete q.live;return q}),ts=D.trainings.filter(U13.erreicht);
-  const a=(await sha(JSON.stringify([D.spieler,evs,D.dienste,notes,full?D.todos:null,cfg,window.__vid?window.__vid.sig():null,ligaSnap()]))).slice(0,16),s=(await sha(JSON.stringify([gs,ts]))).slice(0,16);
+  const a=(await sha(JSON.stringify([D.spieler,evs,D.dienste,notes,null,cfg,window.__vid?window.__vid.sig():null,ligaSnap()]))).slice(0,16),s=(await sha(JSON.stringify([gs,ts]))).slice(0,16);
   return{a,s}};
 /* Reiter „Liga“ im Spielerlink: die selbst unter „Spiele“ eingetragenen Spiele (nicht FUSSBALL.DE).
    Nur Datum, Anstoß, Gegner, Heim/Auswärts, Ort, Spielart und Ergebnis – keine Aufstellung, Minuten oder Notizen. */
@@ -2500,7 +2529,7 @@ function demoSettings(){
   const lkct=document.getElementById("lkct");
   if(lkct)lkct.innerHTML='<tr><th style="text-align:left">Trainer</th><th>Aktiv</th><th style="text-align:left">Link</th><th style="text-align:left">Stand</th></tr>'+((D0.config&&D0.config.staff)||[]).filter((s)=>!s.owner).map((s,i)=>'<tr><td style="text-align:left">'+esc(s.name)+'</td><td><input type="checkbox" checked disabled></td><td style="text-align:left">'+inp("trainer"+(i+1))+'</td><td style="text-align:left"><span class="pill">Demo</span></td></tr>').join("");
   const lkxt=document.getElementById("lkxt");
-  if(lkxt)lkxt.innerHTML='<tr><th style="text-align:left">Link</th><th>Aktiv</th><th style="text-align:left">Adresse</th><th style="text-align:left">Stand</th></tr>'+[["Vollansicht","voll"],["Struktur (anonym)","anon"],["Teamlink","plan"],["Demo","demo"]].map((r)=>'<tr><td style="text-align:left"><b>'+r[0]+'</b></td><td><input type="checkbox" '+(r[1]==="voll"?"":"checked ")+'disabled></td><td style="text-align:left">'+inp(r[1])+'</td><td style="text-align:left"><span class="pill">Demo</span></td></tr>').join("");
+  if(lkxt)lkxt.innerHTML='<tr><th style="text-align:left">Link</th><th>Aktiv</th><th style="text-align:left">Adresse</th><th style="text-align:left">Stand</th></tr>'+[["Teamlink","plan"],["Demo Trainer","demo"],["Demo Spielerlink","demosp"]].map((r)=>'<tr><td style="text-align:left"><b>'+r[0]+'</b></td><td><input type="checkbox" checked disabled></td><td style="text-align:left">'+inp(r[1])+'</td><td style="text-align:left"><span class="pill">Demo</span></td></tr>').join("");
   const lkm=document.getElementById("lkm");if(lkm)lkm.textContent="Demo: Alle Links hier sind Platzhalter und funktionieren nicht.";
 }
 /* Demo-Kaderplanung: komplett erfundene Daten, nichts aus dem echten Kader */
@@ -2544,7 +2573,7 @@ function demoData(o){
     const d=+g.dauer||60,sp={};ids.forEach((id)=>{const r=R();if(r<.68){const f=pick([1,1,1,.83,.67,.5,.5]);sp[id]={status:"k",minuten:Math.round(d*f*2)/2}}else{sp[id]={status:r<.84?"t":r<.92?"v":"n",minuten:0}}});
     const ks=ids.filter((id)=>sp[id].status==="k");shuf(ids.filter((id)=>sp[id].status!=="k")).slice(0,Math.max(0,11-ks.length)).forEach((id)=>{sp[id]={status:"k",minuten:Math.round(d*pick([1,.83,.67,.5])*2)/2}});
     q.spieler=sp;q.wertung=true;
-    if(g.datum<td){const a=pick([0,1,1,2,2,3,4,5]),b=pick([0,0,1,1,2,3,4]);q.tore=a;q.gt=b}else{q.tore=null;q.gt=null}return q});
+    if(g.datum<td){const a=pick([0,1,1,2,2,3,4,5]),b=pick([0,0,1,1,2,3,4]);q.tore=a;q.gt=b;if(R()<.6)q.video=DEMO_URL}else{q.tore=null;q.gt=null}return q});
   o.events=o.events.map((e)=>{const q=keepPrim(e);["id","typ","datum","bis","ha","form","spielId","trainId","ref","zeit","beginn","ende","treffen"].forEach((k)=>{if(typeof e[k]==="string")q[k]=e[k]});
     if(e.gegner)q.gegner=pick(CL);if(e.titel)q.titel=cap(words(ri(2,3)));if(e.schwerpunkt)q.schwerpunkt=cap(words(ri(2,4)));if(e.ort)q.ort="Sportplatz Musterstadt";return q});
   o.dienste=o.dienste.map((d)=>{const q=keepPrim(d);["id","art","datum","bis","ref","label"].forEach((k)=>{if(typeof d[k]==="string")q[k]=d[k]});q.spieler=Array.isArray(d.spieler)?d.spieler.filter((x)=>ids.includes(x)):[];if(d.spielText)q.spielText="Heimspiel";return q});
@@ -2558,16 +2587,47 @@ function demoData(o){
   c.kontakte=[{titel:"Trainerteam",zeilen:"Max Mustermann · 0123 456789\nErika Beispiel · 0123 456780"},{titel:"Rückfragen",zeilen:"Lorem ipsum dolor sit amet, consetetur sadipscing elitr."}];
   c.trainerToDos=[{name:"Max Mustermann",text:sent(6)},{name:"Erika Beispiel",text:""}];
   o.kader=demoKader({R,ri,pick,shuf,sent,text,FN,LN,CL,o,td});
+  o.vid=demoVid(o.spieler.filter((p)=>p.aktiv!==false),staff);
   return o;
+}
+/* Demo-Videos und -Feedback: drei Clips (einer mit Frist morgen, einer nur für drei Spieler), Kommentare, Antworten der Trainer, Nachrichten */
+const DEMO_URL="https://example.com/";
+function demoVid(act,staff){
+  const who=(i)=>{const p=act[i%Math.max(1,act.length)];return p?{p:p.id,n:p.vorname}:{p:"x"+i,n:"Spieler"}},ago=(h)=>new Date(Date.now()-h*36e5).toISOString();
+  const day=(n)=>{const x=new Date();x.setDate(x.getDate()+n);return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0")};
+  const tr1=staff[0].name,tr2=staff[1].name;
+  const clips=[{id:"dc1",titel:"Pressing nach Ballverlust",aufgabe:"Wohin hättest du nach dem Ballverlust laufen müssen?",an:"alle",frist:day(1)+"T18:00",at:ago(20)},
+    {id:"dc2",titel:"Torchance nach Flanke",aufgabe:"",an:act.slice(0,3).map((p)=>p.id),frist:"",at:ago(70)},
+    {id:"dc3",titel:"Spielaufbau über außen",aufgabe:"Was macht der Außenverteidiger in der Szene gut?",an:"alle",frist:"",at:ago(150)}]
+    .map((c,i)=>({...c,url:DEMO_URL,bis:"",s:"demo"+(i+1),ck:newKey()}));
+  const kom={dc1:[{id:"dk1",...who(1),t:"Ich hätte sofort nach innen laufen müssen.",at:ago(6)},{id:"dk2",...who(2),t:"Zu spät umgeschaltet. Beim nächsten Mal schneller zurück.",at:ago(4)},{id:"dk3",p:"T",n:tr1,tr:true,r:"dk1",t:"Genau richtig erkannt!",at:ago(3)}],
+    dc2:[{id:"dk4",...who(0),t:"Der Laufweg an den zweiten Pfosten war gut.",at:ago(60)},{id:"dk5",p:"T",n:tr2,tr:true,r:"dk4",t:"Stark gemacht, weiter so!",at:ago(58)}],
+    dc3:[{id:"dk6",...who(3),t:"Er schaut vor der Ballannahme über die Schulter.",at:ago(100)},{id:"dk7",...who(0),t:"Er spielt den Ball schnell und flach weiter.",at:ago(96)}]};
+  const fb=[{id:"df1",at:ago(30),art:"Frage",text:"Wann beginnt das Hallentraining?",von:who(0).n,rolle:"s",pid:who(0).p,gelesen:true,antwort:"Ab November immer donnerstags. Bis dann!",antwortVon:tr1,antwortAm:ago(27)},
+    {id:"df2",at:ago(5),art:"Idee",text:"Können wir im Training mal ein kleines Turnier spielen?",von:who(1).n,rolle:"s",pid:who(1).p,gelesen:false},
+    {id:"df3",at:ago(28),art:"Anliegen",text:"Wir sind in den Herbstferien eine Woche verreist.",von:"Beispiel-Elternteil",rolle:"e",pid:who(2).p,gelesen:false}];
+  return{clips,kom,fb};
+}
+/* Demo-Spielerlink: ein erfundener Spieler aus den Zufallsdaten (der erste aktive Feldspieler).
+   Profil, Terminplan und Liga werden kurz mit den Zufallsdaten statt der echten Daten berechnet. Keine Beobachtungen, Trainingsbewertung, Kader- oder Scouting-Daten. */
+function demoPlayer(){
+  const o=extData("demo"),act=o.spieler.filter((p)=>p.aktiv!==false),p=act[0],V=o.vid;
+  if(!p)return{n:"Max",h:"",vc:[],vg:[],dk:{},df:[]};
+  const K=["spieler","spiele","trainings","notizen","events","dienste","todos","config"],keep={},kob=window.__kobsEv;let r={h:"",t:null,li:null};
+  K.forEach((k)=>{keep[k]=D[k]});
+  try{window.__kobsEv=null;K.forEach((k)=>{D[k]=o[k]});r={h:profileHtml(p.id),t:planSnap(),li:ligaSnap()}}
+  catch(e){try{console.warn("Demo-Spielerlink:",e&&e.message)}catch(_){}}
+  finally{K.forEach((k)=>{D[k]=keep[k]});window.__kobsEv=kob;try{renderProfile()}catch(e){}}
+  const me=(x)=>x===p.id?"demosp":x,mine=V.clips.filter((c)=>c.an==="alle"||c.an.includes(p.id));
+  const vc=mine.map((c)=>({id:c.id,ti:c.titel,u:c.url,a:c.aufgabe,f:c.frist,at:c.at,s:c.s,ck:c.ck,n:c.an==="alle"?0:c.an.length}));
+  const dk={};mine.forEach((c)=>{dk[c.id]=(V.kom[c.id]||[]).map((k)=>({...k,p:me(k.p)}))});
+  const df=[];V.fb.filter((x)=>x.pid===p.id).forEach((x)=>{df.push({id:x.id,at:x.at,art:x.art,text:x.text,von:x.von,t:"ich"});if(x.antwort)df.push({id:x.id+"a",at:x.antwortAm||x.at,text:x.antwort,von:x.antwortVon,t:"trainer",re:x.id})});
+  const vg=o.spiele.filter((g)=>g.video).map((g)=>({d:g.datum||"",g:g.gegner||"",ha:g.ha||"",a:g.art||"",e:g.tore!=null&&g.gt!=null?g.tore+":"+g.gt:"",v:g.video})).sort((a,b)=>a.d<b.d?1:-1);
+  return{...r,n:p.vorname,f:"",vc,vg,fk:"demo",dk,df,hn:[{text:"Beispiel-Hinweis: Zum Heimspiel bitte 30 Minuten vor Anstoß da sein.",farbe:"blau",wo:"alle"}]};
 }
 function extData(k){
   const cl=(x)=>JSON.parse(JSON.stringify(x===undefined?null:x)),o={spieler:cl(D.spieler),spiele:cl(D.spiele),trainings:cl(D.trainings),notizen:cl(D.notizen.filter((n)=>n.art!=="beobachtung")),events:cl(D.events),dienste:cl(D.dienste),todos:cl(D.todos),config:cl(D.config)||{}};
   delete o.config.linkBasis;
-  if(k==="anon"){
-    o.spieler=o.spieler.map((p,i)=>{const q={...p,vorname:"Spieler",name:String(i+1)};delete q.foto;q.geburtsdatum=null;return q});
-    o.notizen=[];o.todos=[];o.events=o.events.filter((e)=>e.eltern!==false);o.config.kontakte=[];o.config.staff=[];
-    o.spiele.forEach((g)=>{delete g.video});
-  }
   if(k==="demo")return demoData(o);
   return o;
 }
@@ -2588,7 +2648,7 @@ async function buildSnap(){
   const LI=ligaSnap(),TP=planSnap(),HN=(D.config&&D.config.hinweise)||[],out={v:1,u:new Date().toISOString(),p:{},k:{}},logo=lgR(),sa=(D.config&&D.config.saison)||"";
   for(const p of active()){const l=L[p.id];if(!l||!l.aktiv||!l.key)continue;out.p[p.id]=await seal(l.key,{...(window.__vid?window.__vid.pkg(p.id):{}),h:profExt()?profileHtml(p.id):"",l:logo,s:sa,m:mann(),u:out.u,t:TP,n:p.vorname,f:p.foto||"",hn:HN,li:LI,dz:"kobalt"});out.k[p.id]=await sha8(l.key)}
   out.bg=await bgSnap();out.dzs=dzSig();out.x={};out.xk={};
-  for(const k of ["full","anon","plan","demo"]){const l=L["x"+k];if(!l||!l.aktiv||!l.key)continue;out.x[k]=await seal(l.key,k==="plan"?{k,u:out.u,t:TP,l:logo,s:sa,m:mann(),hn:HN,dz:"kobalt"}:{k,u:out.u,db:extData(k),dz:"kobalt"});out.xk[k]=await sha8(l.key)}
+  for(const k of XK){const l=L["x"+k];if(!l||!l.aktiv||!l.key)continue;out.x[k]=await seal(l.key,k==="demosp"?{...demoPlayer(),k,u:out.u,l:logo,s:sa,m:mann(),dz:"kobalt"}:k==="plan"?{k,u:out.u,t:TP,l:logo,s:sa,m:mann(),hn:HN,dz:"kobalt"}:{k,u:out.u,db:extData(k),dz:"kobalt"});out.xk[k]=await sha8(l.key)}
   {const f=await fingerprintParts();out.fp=f.a+f.s;out.fa=f.a;out.fs=f.s}return out;
 }
 function composeHtml(snap){
@@ -2605,11 +2665,11 @@ const saveLink=(pid,o)=>{
   const d={id:pid,key:o.key,aktiv:!!o.aktiv};["alias","pw","t","open","dz"].forEach((k)=>{const v=k in o?o[k]:c[k];if(v)d[k]=v});
   return save("links",pid,d)};
 /* ---------- Kurzlinks (Trainer) ---------- */
-const kzVid=(pid)=>["xfull","xanon","xplan","xdemo"].includes(pid)?pid.slice(1):pid,kzA={};
+const kzVid=(pid)=>XOPEN.includes(pid)?pid.slice(1):pid,kzA={};
 async function kzPre(){await Promise.all(Object.keys(L).filter((k)=>L[k].alias&&!kzA[L[k].alias]).map(async(k)=>{kzA[L[k].alias]=await kzId(L[k].alias)}))}
 async function kzSet(pid,alias,key,aktiv,open,pw0){
   const Tr=window.__kurzTr,aid=await kzId(alias),t=newKey();
-  if(open&&pid==="xplan"){await Tr.put(aid,{s:"",w:"",v:2,i:kzVid(pid),k:key},t);await save("links",pid,{id:pid,key,aktiv:!!aktiv,alias,open:true,t});return}
+  if(open&&XOPEN.includes(pid)){await Tr.put(aid,{s:"",w:"",v:2,i:kzVid(pid),k:key},t);await save("links",pid,{id:pid,key,aktiv:!!aktiv,alias,open:true,t});return}
   const pw=pw0||kzPw(),n=await kzWrap(pw,{i:kzVid(pid),k:key,t});
   await Tr.put(aid,{s:n.s,w:n.w,v:0},t);
   await save("links",pid,{id:pid,key,aktiv:!!aktiv,alias,pw,t});
@@ -2732,9 +2792,9 @@ document.addEventListener("u13scoutkey",()=>{setTimeout(()=>{window.__scKz.sync(
 function kzCell(pid){
   if(!window.__kurzTr||window.__ROLE==="lesen")return"";
   const l=L[pid]||{};if(!l.key)return"";
-  if(!l.alias)return'<div data-kid="'+pid+'" style="margin-top:6px;white-space:normal"><input data-kzin placeholder="Kurzlink-Name, z. B. max-muster" maxlength="40" autocapitalize="off" style="width:62%;min-width:170px"> <button class="btn" data-kzadd>Kurzlink anlegen</button>'+(pid==="xplan"?'<label class="note" style="display:flex;gap:6px;align-items:center;margin-top:4px"><input type="checkbox" data-kzpwc> mit Passwort schützen (sonst öffnet jeder, der den Kurzlink kennt, die Terminpläne)</label>':"")+"</div>";
+  if(!l.alias)return'<div data-kid="'+pid+'" style="margin-top:6px;white-space:normal"><input data-kzin placeholder="Kurzlink-Name, z. B. max-muster" maxlength="40" autocapitalize="off" style="width:62%;min-width:170px"> <button class="btn" data-kzadd>Kurzlink anlegen</button>'+(XOPEN.includes(pid)?'<label class="note" style="display:flex;gap:6px;align-items:center;margin-top:4px"><input type="checkbox" data-kzpwc> mit Passwort schützen (sonst öffnet jeder, der den Kurzlink kennt, '+(pid==="xplan"?"die Terminpläne":"die Demo")+")</label>":"")+"</div>";
   const aid=kzA[l.alias],doc=aid&&SNAP.a?SNAP.a[aid]:null,own=!!(doc&&doc.v===1),key="kz"+pid;
-  return'<div data-kid="'+pid+'" style="margin-top:6px;white-space:normal"><div class="note">Kurzlink: <b>'+esc(kzBase()+l.alias)+"</b></div><div class=\"note\">"+(l.open?"Ohne Passwort – jeder mit dem Kurzlink kann die Terminpläne sehen":own?"Passwort: <b>eigenes Passwort gewählt</b> (nicht einsehbar)":doc?"Passwort: <b style=\"font-family:ui-monospace,Menlo,monospace;font-size:14px;user-select:all\">"+esc(l.pw||"")+"</b>":"Kurzlink wird eingerichtet …")+'</div><div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn" data-kzcl>Kurzlink kopieren</button>'+(pid==="xplan"&&/terminplaene\d*$/.test(l.alias)?'<button class="btn'+(armed==="km"+pid?" arm":"")+'" data-kzmig title="Der alte Kurzlink funktioniert danach nicht mehr">'+(armed==="km"+pid?"Wirklich? Der alte Link gilt dann nicht mehr":"Auf "+esc(kzPrefix())+"team umstellen")+"</button>":"")+(own||l.open?"":'<button class="btn" data-kzcpw>Passwort kopieren</button>')+(l.open||pid==="xplan"||!kzStd.pw||l.pw===kzStd.pw&&!own?"":'')+(l.open?'<button class="btn" data-kzon>Passwort aktivieren</button>':'<button class="btn'+(armed===key?" arm":"")+'" data-kzrs title="Es wird ein neues, nur für diesen Link geltendes Passwort erzeugt; das bisherige gilt nicht mehr">'+(armed===key?"Wirklich zurücksetzen?":"Passwort zurücksetzen")+"</button>"+(pid==="xplan"?'<button class="btn" data-kzoff>Passwort entfernen</button>':""))+'<button class="btn'+(armed==="kr"+pid?" arm":"")+'" data-kzrm>'+(armed==="kr"+pid?"Wirklich entfernen?":"Kurzlink entfernen")+"</button></div></div>"}
+  return'<div data-kid="'+pid+'" style="margin-top:6px;white-space:normal"><div class="note">Kurzlink: <b>'+esc(kzBase()+l.alias)+"</b></div><div class=\"note\">"+(l.open?"Ohne Passwort – jeder mit dem Kurzlink kann "+(pid==="xplan"?"die Terminpläne":"die Demo")+" sehen":own?"Passwort: <b>eigenes Passwort gewählt</b> (nicht einsehbar)":doc?"Passwort: <b style=\"font-family:ui-monospace,Menlo,monospace;font-size:14px;user-select:all\">"+esc(l.pw||"")+"</b>":"Kurzlink wird eingerichtet …")+'</div><div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn" data-kzcl>Kurzlink kopieren</button>'+(pid==="xplan"&&/terminplaene\d*$/.test(l.alias)?'<button class="btn'+(armed==="km"+pid?" arm":"")+'" data-kzmig title="Der alte Kurzlink funktioniert danach nicht mehr">'+(armed==="km"+pid?"Wirklich? Der alte Link gilt dann nicht mehr":"Auf "+esc(kzPrefix())+"team umstellen")+"</button>":"")+(own||l.open?"":'<button class="btn" data-kzcpw>Passwort kopieren</button>')+(l.open||pid==="xplan"||!kzStd.pw||l.pw===kzStd.pw&&!own?"":'')+(l.open?'<button class="btn" data-kzon>Passwort aktivieren</button>':'<button class="btn'+(armed===key?" arm":"")+'" data-kzrs title="Es wird ein neues, nur für diesen Link geltendes Passwort erzeugt; das bisherige gilt nicht mehr">'+(armed===key?"Wirklich zurücksetzen?":"Passwort zurücksetzen")+"</button>"+(XOPEN.includes(pid)?'<button class="btn" data-kzoff>Passwort entfernen</button>':""))+'<button class="btn'+(armed==="kr"+pid?" arm":"")+'" data-kzrm>'+(armed==="kr"+pid?"Wirklich entfernen?":"Kurzlink entfernen")+"</button></div></div>"}
 async function kzCopy(txt,what){const m=T("lkm");try{await navigator.clipboard.writeText(txt);m.textContent=what+" kopiert."}catch(e){m.textContent=what+": "+txt}m.className="note"}
 
 function renderCo(){
@@ -2756,12 +2816,12 @@ async function lkHealth(){
     if(!pub||pub!==want||!(SNAP.p||{})[p.id]){nOn.push(nm(p));continue}
     if(!(await test(l.key,SNAP.p[p.id])))E.push("Link von "+nm(p)+" lässt sich nicht öffnen (Inhalt beschädigt).")}
   if(nOn.length)E.push((nOn.length===1?"Der Link von ":nOn.length+" Spielerlinks (")+nOn.slice(0,4).join(", ")+(nOn.length>4?" u. a.":"")+(nOn.length===1?" ist aktiv, aber noch nicht online":") sind aktiv, aber noch nicht online")+" – sie zeigen „Link ungültig“.");
-  for(const k of ["full","anon","plan","demo"]){const l=L["x"+k]||{};if(!l.aktiv||!l.key)continue;
-    const nmx={full:"Vollansicht",anon:"Anonyme Ansicht",plan:"Teamlink",demo:"Demo"}[k],want=await sha8(l.key),pub=(SNAP.xk||{})[k];
+  for(const k of XK){const l=L["x"+k]||{};if(!l.aktiv||!l.key)continue;
+    const nmx={plan:"Teamlink",demo:"Demo Trainer",demosp:"Demo Spielerlink"}[k],want=await sha8(l.key),pub=(SNAP.xk||{})[k];
     if(!pub||pub!==want||!(SNAP.x||{})[k]){xMiss++;E.push("Link „"+nmx+"“ ist aktiv, aber noch nicht online.");continue}
     if(!(await test(l.key,SNAP.x[k])))E.push("Link „"+nmx+"“ lässt sich nicht öffnen (Inhalt beschädigt).")}
   if(my!==lkTok)return;
-  const off=pubIds.filter((id)=>{const l=L[id]||{};return P.some((p)=>p.id===id)&&!(l.aktiv&&l.key)}).length+pubIds.filter((id)=>!P.some((p)=>p.id===id)).length;
+  const off=pubIds.filter((id)=>{const l=L[id]||{};return P.some((p)=>p.id===id)&&!(l.aktiv&&l.key)}).length+pubIds.filter((id)=>!P.some((p)=>p.id===id)).length+xGone();
   if(off&&!window.__WEB)W.push(off+" Link(s) sind noch online, obwohl sie abgeschaltet oder der Spieler nicht mehr aktiv ist – beim nächsten Aktualisieren werden sie entfernt.");
   const fpp=await fingerprintParts();if(my!==lkTok)return;
   if(window.__WEB){/* Web-Version: automatisch veröffentlichen (Link-Änderungen sofort, neue Daten alle 6 Stunden) */
@@ -2785,6 +2845,8 @@ async function lkHealth(){
 document.addEventListener("click",(e)=>{const b=e.target.closest&&e.target.closest("[data-lkgo]");if(!b)return;
   if(b.dataset.lkgo==="e"){const n=document.querySelector('nav button[data-s="e"]');if(n)n.click();if(window.__etab)window.__etab("l");const c=document.getElementById("lkt");if(c)setTimeout(()=>c.scrollIntoView({behavior:"smooth",block:"center"}),60)}
   else{const u=document.getElementById("lku");if(u&&!u.disabled)u.click()}});
+/* Noch online, aber abgeschaltet oder nicht mehr angeboten (frühere „Vollansicht“ und „Struktur (anonym)“): fällt beim nächsten Aktualisieren weg */
+const xGone=()=>Object.keys(SNAP.xk||{}).filter((k)=>{const l=L["x"+k]||{};return!XK.includes(k)||!(l.aktiv&&l.key)}).length;
 window.lkHealth=lkHealth;setTimeout(lkHealth,5000);setInterval(lkHealth,60000);
 async function renderLinks(){if(window.__DEMO)return;
   renderCo();lkHealth();
@@ -2794,13 +2856,13 @@ async function renderLinks(){if(window.__DEMO)return;
   const my=++tok,P=active(),cur=await Promise.all(P.map(async(p)=>{const l=L[p.id]||{};return{p,l,want:l.aktiv&&l.key?await sha8(l.key):null,pub:(SNAP.k||{})[p.id]||null}}));
   const fp=await fingerprint();if(my!==tok)return;
   const pubIds=Object.keys(SNAP.k||{}),orphan=pubIds.filter((id)=>!P.some((p)=>p.id===id)).length;
-  const xr=await Promise.all(["full","anon","plan","demo"].map(async(k)=>{const l=L["x"+k]||{};return{k,l,want:l.aktiv&&l.key?await sha8(l.key):null,pub:(SNAP.xk||{})[k]||null}}));if(my!==tok)return;
+  const xr=await Promise.all(XK.map(async(k)=>{const l=L["x"+k]||{};return{k,l,want:l.aktiv&&l.key?await sha8(l.key):null,pub:(SNAP.xk||{})[k]||null}}));if(my!==tok)return;
   await kzPre();if(my!==tok)return;
   renderStd();kzAutoKick();
-  const pend=cur.filter((r)=>r.want!==r.pub).length+xr.filter((r)=>r.want!==r.pub).length+orphan,stale=!!SNAP.fp&&SNAP.fp!==fp||(!SNAP.fp&&pubIds.length>0),on=cur.filter((r)=>r.want&&r.want===r.pub).length;
+  const pend=cur.filter((r)=>r.want!==r.pub).length+xr.filter((r)=>r.want!==r.pub).length+orphan+Object.keys(SNAP.xk||{}).filter((k)=>!XK.includes(k)).length,stale=!!SNAP.fp&&SNAP.fp!==fp||(!SNAP.fp&&pubIds.length>0),on=cur.filter((r)=>r.want&&r.want===r.pub).length;
   $("#lks").innerHTML=(SNAP.u?"Letzter Stand online: <b>"+esc(dt(SNAP.u))+"</b> · ":"Noch nichts veröffentlicht · ")+"<b>"+on+"</b> Link(s) online"+(pend||stale?' · <span class="warn">⚠ '+(pend?"Link-Änderungen":"")+(pend&&stale?" und ":"")+(stale?"neuere Daten":"")+(window.__WEB?" noch nicht online – wird automatisch übernommen.":" noch nicht online – bitte „Alle Links aktualisieren“ klicken.")+"</span>":' · <span class="up">alles aktuell</span>');
   const xe=$("#lkxt");
-  if(xe){const XN={full:["Vollansicht","Alles sichtbar, nur lesend (inkl. Namen, Fotos, Notizen, To-Dos, Kontakte)"],plan:["Teamlink","Terminplan (Monat und Woche) der Mannschaft zum Ansehen, ohne Anmeldung – keine Spielerprofile, Notizen oder To-Dos"],demo:["Demo (Zufallsdaten)","Ganze App mit komplett zufällig erzeugten Daten (Namen, Beteiligung, Ergebnisse, Lorem-ipsum-Notizen) – ohne Konto, nur lesend, nichts davon echt"],anon:["Struktur (anonym)","Spieler 1…n mit Rückennummer, ohne Fotos, Geburtstage, Kontakte, Notizen, To-Dos und interne Termine"]};
+  if(xe){const XN={plan:["Teamlink","Der Terminplan der Mannschaft (Monat und Woche). Keine Spielerprofile, Notizen oder To-Dos."],demo:["Demo Trainer","Die ganze Trainer-App mit erfundenen Daten. Nichts davon ist echt."],demosp:["Demo Spielerlink","So sieht ein Spielerlink aus – mit einem erfundenen Spieler. Nichts davon ist echt."]};
     if(!(document.activeElement&&document.activeElement.matches&&document.activeElement.matches("[data-xln],[data-kzin]")))xe.innerHTML='<tr><th style="text-align:left">Link</th><th>Aktiv</th><th style="text-align:left">Adresse</th><th></th><th style="text-align:left">Stand</th></tr>'+xr.map((r)=>{const st=r.want&&r.want===r.pub?'<span class="pill ok">online</span>':r.want?'<span class="pill busy">geht beim Aktualisieren online</span>':r.pub?'<span class="pill busy">wird beim Aktualisieren abgeschaltet</span>':'<span class="pill">aus</span>';
       return'<tr data-x="'+r.k+'"><td style="text-align:left"><b>'+XN[r.k][0]+'</b><div class="note" style="white-space:normal;max-width:260px">'+XN[r.k][1]+'</div></td><td><input type="checkbox" data-xak '+(r.l.aktiv?"checked":"")+'></td><td style="text-align:left">'+(r.l.key?'<input readonly data-xln value="'+esc(linkOf(r.k,r.l.key))+'" style="width:100%;min-width:230px">'+kzCell("x"+r.k):'<span class="note">noch kein Link</span>')+'</td><td style="white-space:nowrap">'+(r.l.key?'<button class="btn" data-xcp>Kopieren</button> <button class="btn'+(armed==="x"+r.k?" arm":"")+'" data-xnw title="Der bisherige Link wird ungültig">'+(armed==="x"+r.k?"Wirklich neu?":"Neu erzeugen")+"</button>":"")+'</td><td style="text-align:left">'+st+"</td></tr>"}).join("");
   }
@@ -2867,7 +2929,7 @@ document.addEventListener("click",async(e)=>{
   const w=e.target.closest&&e.target.closest("[data-kid]");if(!w||!window.__kurzTr)return;
   const pid=w.dataset.kid,l=L[pid]||{},m=T("lkm");
   if(e.target.closest("[data-kzon]")||e.target.closest("[data-kzoff]")){const off=!!e.target.closest("[data-kzoff]");try{await kzSet(pid,l.alias,l.key,l.aktiv,off);m.className="note";m.textContent=off?"Passwort entfernt. Der Kurzlink öffnet jetzt ohne Passwort.":"Passwort aktiviert."}catch(x){m.className="note warn";m.textContent="Das hat nicht geklappt."}return}
-  if(e.target.closest("[data-kzadd]")){const i=w.querySelector("[data-kzin]"),c=w.querySelector("[data-kzpwc]"),r=await kzCreate(pid,i.value,pid==="xplan"&&!(c&&c.checked));m.className=r?"note warn":"note";m.textContent=r||"Kurzlink angelegt.";return}
+  if(e.target.closest("[data-kzadd]")){const i=w.querySelector("[data-kzin]"),c=w.querySelector("[data-kzpwc]"),r=await kzCreate(pid,i.value,XOPEN.includes(pid)&&!(c&&c.checked));m.className=r?"note warn":"note";m.textContent=r||"Kurzlink angelegt.";return}
   if(e.target.closest("[data-kzmig]")){const k="km"+pid;if(armed!==k){armed=k;renderLinks();return}armed=null;
     try{const old=l.alias,na=await kzFreeAlias(kzPrefix()+"team");await kzSet(pid,na,l.key,l.aktiv,!!l.open,l.open?undefined:l.pw);await window.__kurzTr.del(await kzId(old));m.className="note";m.textContent="Umgestellt: "+kzBase()+na+". Der alte Kurzlink gilt nicht mehr."}catch(x){m.className="note warn";m.textContent="Das hat nicht geklappt."}return}
   if(e.target.closest("[data-kzcl]")){kzCopy(kzBase()+l.alias,"Kurzlink");return}

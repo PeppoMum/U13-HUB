@@ -6,7 +6,7 @@
 if(window.__WEBINIT)return;window.__WEBINIT=true;
 const CFG=window.U13_FIREBASE||{};
 const SDK=(CFG.sdkBase||"https://www.gstatic.com/firebasejs/10.14.1/");   /* Version auch in sw.js anpassen (Offline-Start) */
-const XIDS=["full","anon","plan","demo"];
+const XIDS=["plan","demo","demosp"];
 window.__WEB=true;
 window.__WEB_BASE=location.origin+location.pathname.replace(/index\.html$/,"");
 const IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
