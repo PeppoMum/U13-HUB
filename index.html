@@ -2438,8 +2438,15 @@ const fingerprintParts=async()=>{
   const notes=D.notizen.filter((n)=>n.art!=="beobachtung"&&(full||n.sichtbar)).sort((a,b)=>a.id<b.id?-1:1);
   const evs=full?D.events:evAll().map((e)=>{const q={};Object.keys(e).sort().forEach((k)=>{if(k==="id"||k==="virt"||k==="trainId"||k==="schwerpunkt"||k==="ctask"||(k==="detail"&&e.typ==="Training"))return;const v=e[k];if(v===""||v==null||(k==="eltern"&&v!==false))return;q[k]=v});return q}).sort((a,b)=>JSON.stringify(a)<JSON.stringify(b)?-1:1);
   const gs=D.spiele.filter(U13.erreicht).map((g)=>{const q={...g};delete q.live;return q}),ts=D.trainings.filter(U13.erreicht);
-  const a=(await sha(JSON.stringify([D.spieler,evs,D.dienste,notes,full?D.todos:null,cfg,window.__vid?window.__vid.sig():null]))).slice(0,16),s=(await sha(JSON.stringify((window.__FD&&window.__FD.sig())?[gs,ts,window.__FD.sig()]:[gs,ts]))).slice(0,16);
+  const a=(await sha(JSON.stringify([D.spieler,evs,D.dienste,notes,full?D.todos:null,cfg,window.__vid?window.__vid.sig():null,ligaSnap()]))).slice(0,16),s=(await sha(JSON.stringify([gs,ts]))).slice(0,16);
   return{a,s}};
+/* Reiter „Liga“ im Spielerlink: die selbst unter „Spiele“ eingetragenen Spiele (nicht FUSSBALL.DE).
+   Nur Datum, Anstoß, Gegner, Heim/Auswärts, Ort, Spielart und Ergebnis – keine Aufstellung, Minuten oder Notizen. */
+function ligaSnap(){
+  const g=D.spiele.filter((x)=>x.datum).map((x)=>{const e=(D.events||[]).find((v)=>v.spielId===x.id)||{};if(e.eltern===false)return null;
+    const r=x.tore==null||x.gt==null||x.tore===""||x.gt===""?{}:{t:+x.tore,c:+x.gt};
+    return{d:x.datum,z:e.beginn||"",ha:x.ha||"",gg:x.gegner||"",ort:e.ort||"",w:x.art||"",...r}}).filter(Boolean).sort((a,b)=>(a.d+a.z).localeCompare(b.d+b.z));
+  return g.length?{o:1,g}:null}
 const fingerprint=async()=>{const f=await fingerprintParts();return f.a+f.s};
 const profExt=()=>!(D.config&&D.config.profilExt===false);
 function profileHtml(pid){
@@ -2550,8 +2557,8 @@ const dzOf=(id)=>{const v=(L[id]||{}).dz;return v==="glas"||v==="ruhig"||v==="ko
 const daOf=(dz)=>window.__dz?__dz.accOf(dz):"",dgOf=(dz)=>dz==="glas"&&window.__dz?__dz.glOf():"std";
 const dzSig=()=>JSON.stringify(Object.keys(L).sort().filter((k)=>L[k].aktiv&&L[k].key).map((k)=>[k,dzOf(k),daOf(dzOf(k)),dgOf(dzOf(k))]));
 async function buildSnap(){
-  const FDS=window.__FD?window.__FD.snap():null,TP=planSnap(),HN=(D.config&&D.config.hinweise)||[],out={v:1,u:new Date().toISOString(),p:{},k:{}},logo=lgR(),sa=(D.config&&D.config.saison)||"";
-  for(const p of active()){const l=L[p.id];if(!l||!l.aktiv||!l.key)continue;out.p[p.id]=await seal(l.key,{...(window.__vid?window.__vid.pkg(p.id):{}),h:profExt()?profileHtml(p.id):"",l:logo,s:sa,m:mann(),u:out.u,t:TP,n:p.vorname,hn:HN,li:FDS,dz:dzOf(p.id),da:daOf(dzOf(p.id)),dg:dgOf(dzOf(p.id))});out.k[p.id]=await sha8(l.key)}
+  const LI=ligaSnap(),TP=planSnap(),HN=(D.config&&D.config.hinweise)||[],out={v:1,u:new Date().toISOString(),p:{},k:{}},logo=lgR(),sa=(D.config&&D.config.saison)||"";
+  for(const p of active()){const l=L[p.id];if(!l||!l.aktiv||!l.key)continue;out.p[p.id]=await seal(l.key,{...(window.__vid?window.__vid.pkg(p.id):{}),h:profExt()?profileHtml(p.id):"",l:logo,s:sa,m:mann(),u:out.u,t:TP,n:p.vorname,hn:HN,li:LI,dz:dzOf(p.id),da:daOf(dzOf(p.id)),dg:dgOf(dzOf(p.id))});out.k[p.id]=await sha8(l.key)}
   out.bg=await bgSnap();out.dzs=dzSig();out.x={};out.xk={};
   for(const k of ["full","anon","plan","demo"]){const l=L["x"+k];if(!l||!l.aktiv||!l.key)continue;out.x[k]=await seal(l.key,k==="plan"?{k,u:out.u,t:TP,l:logo,s:sa,m:mann(),hn:HN,dz:dzOf("x"+k),da:daOf(dzOf("x"+k)),dg:dgOf(dzOf("x"+k))}:{k,u:out.u,db:extData(k),dz:dzOf("x"+k),da:daOf(dzOf("x"+k)),dg:dgOf(dzOf("x"+k))});out.xk[k]=await sha8(l.key)}
   {const f=await fingerprintParts();out.fp=f.a+f.s;out.fa=f.a;out.fs=f.s}return out;
@@ -5983,7 +5990,7 @@ document.addEventListener("click",(e)=>{const b=e.target.closest&&e.target.close
    Ein Hilfsprogramm („Abholer“, läuft bei GitHub) holt Spielplan, Ergebnisse und Tabelle von FUSSBALL.DE und legt sie in der Sammlung „fussball“ ab
    (ein Dokument je Mannschaft bei FUSSBALL.DE, dazu „_index“ mit dem Stand). Die App liest diese Daten nur (die Regeln verbieten das Schreiben).
    Der Link steht in den Einstellungen: D.config.fd = {team, liga}.
-   Dieses Stück macht: Verknüpfen (Einstellungen), Reiter „Liga“, Abgleich unter „Spiele“, Liga im Spielerlink. */
+   Dieses Stück macht: Verknüpfen (Einstellungen), Reiter „Liga“, Abgleich unter „Spiele“. Der Spielerlink zeigt im Reiter „Liga“ die selbst eingetragenen Spiele (ownView). */
 (function(){
 "use strict";
 const W=window;
@@ -6065,17 +6072,26 @@ function tabHtml(tab,eigen){
 function gameRow(f){
   const m=mine(f),t=theirs(f),res=m==null?"":'<span>'+m+':'+t+'</span><i class="fdr '+(m>t?"S":m<t?"N":"U")+'" title="'+(m>t?"Sieg":m<t?"Niederlage":"Unentschieden")+'">'+(m>t?"S":m<t?"N":"U")+'</i>';
   return'<div class="fdg'+(off(f)?" x":"")+'"><div class="fdd"><b>'+E(dl(f.d))+'</b><span>'+E(f.z?f.z+" Uhr":"")+'</span></div><div class="fdm"><span class="fdha" title="'+(f.h?"Heimspiel":"Auswärtsspiel")+'">'+(f.h?"H":"A")+'</span><b>'+E(opp(f))+'</b>'+(f.ort?'<span class="note">'+E(f.ort)+'</span>':"")+(f.wett?'<span class="note">'+E(f.wett)+'</span>':"")+'</div><div class="fdres">'+(res||(f.st?'<span class="fdxt">'+E(f.st)+'</span>':""))+(res&&f.st?'<span class="fdxt" style="display:block">'+E(f.st)+'</span>':"")+'</div></div>'}
-/* li = {u: Stand, e: eigener Name, t: Tabelle, g: Spiele, lt/ll: Links}; Zeitpunkt „heute“ kommt vom Gerät */
-FD.view=(li,o)=>{o=o||{};if(!li)return"";const T=todayIso(),g=(li.g||[]).slice().sort((a,b)=>(a.d+a.z).localeCompare(b.d+b.z)),ko=g.filter((x)=>x.d>=T),ge=g.filter((x)=>x.d<T).reverse();
+/* Selbst eingetragenes Spiel (Spielerlink): {d, z, ha: H/A/N, gg: Gegner, ort, w: Spielart, t: Tore, c: Gegentore} */
+const HAT={H:"Heimspiel",A:"Auswärtsspiel",N:"Neutraler Platz"};
+function ownRow(f){
+  const r=f.t==null||f.c==null?"":(f.t>f.c?"S":f.t<f.c?"N":"U"),res=r?'<span>'+E(f.t)+':'+E(f.c)+'</span><i class="fdr '+r+'" title="'+({S:"Sieg",U:"Unentschieden",N:"Niederlage"})[r]+'">'+r+'</i>':"";
+  return'<div class="fdg"><div class="fdd"><b>'+E(dl(f.d))+'</b><span>'+E(f.z?f.z+" Uhr":"")+'</span></div><div class="fdm">'+(HAT[f.ha]?'<span class="fdha" title="'+HAT[f.ha]+'">'+E(f.ha)+'</span>':"")+'<b>'+(f.gg?E(f.gg):"Gegner noch offen")+'</b>'+(f.ort?'<span class="note">'+E(f.ort)+'</span>':"")+(f.w?'<span class="note">'+E(f.w)+'</span>':"")+'</div><div class="fdres">'+res+'</div></div>'}
+function ownView(li){const T=todayIso(),g=(li.g||[]).slice().sort((a,b)=>(a.d+(a.z||"")).localeCompare(b.d+(b.z||""))),has=(x)=>x.t!=null&&x.c!=null;
+  const ko=g.filter((x)=>x.d>=T&&!has(x)),ge=g.filter((x)=>!(x.d>=T&&!has(x))).reverse();
+  return'<div class="card" style="margin-bottom:12px"><h3 style="margin-top:0">Kommende Spiele</h3>'+(ko.length?ko.map(ownRow).join(""):'<div class="note">Zurzeit sind keine weiteren Spiele eingetragen.</div>')+'</div>'
+  +(ge.length?'<div class="card" style="margin-bottom:12px"><h3 style="margin-top:0">Ergebnisse</h3>'+ge.map(ownRow).join("")+'</div>':"")
+  +'<p class="note">Eingetragen vom Trainerteam.</p>'}
+/* li = {u: Stand, e: eigener Name, t: Tabelle, g: Spiele, lt/ll: Links} von FUSSBALL.DE oder {o: 1, g: eigene Spiele}; Zeitpunkt „heute“ kommt vom Gerät */
+FD.view=(li,o)=>{o=o||{};if(!li)return"";if(li.o)return ownView(li);const T=todayIso(),g=(li.g||[]).slice().sort((a,b)=>(a.d+a.z).localeCompare(b.d+b.z)),ko=g.filter((x)=>x.d>=T),ge=g.filter((x)=>x.d<T).reverse();
   const lk=[li.lt?'<a href="'+E(li.lt)+'" target="_blank" rel="noopener noreferrer">Mannschaft bei FUSSBALL.DE</a>':"",li.ll?'<a href="'+E(li.ll)+'" target="_blank" rel="noopener noreferrer">Liga bei FUSSBALL.DE</a>':""].filter(Boolean).join(" · ");
   return'<div class="card" style="margin-bottom:12px"><h3 style="margin-top:0">Tabelle</h3>'+tabHtml(li.t,li.e)+'</div>'
   +'<div class="card" style="margin-bottom:12px"><h3 style="margin-top:0">Nächste Spiele</h3>'+(ko.length?ko.map(gameRow).join(""):'<div class="note">Keine weiteren Spiele bei FUSSBALL.DE eingetragen.</div>')+'</div>'
   +(ge.length?'<div class="card" style="margin-bottom:12px"><h3 style="margin-top:0">Ergebnisse</h3>'+ge.map(gameRow).join("")+'</div>':"")
   +'<p class="note">Quelle: FUSSBALL.DE'+(li.u?" · Stand "+E(standTxt(li.u)):"")+(lk?" · "+lk:"")+'</p>'};
-/* Schnappschuss für Spielerlinks (nur Tabelle und Spiele, keine Daten der Mannschaft) */
+/* Schnappschuss für den Reiter „Liga“ der App (nur Tabelle und Spiele, keine Daten der Mannschaft) */
 FD.snap=()=>{const d=FD.cur();if(!d||!(d.tabelle||[]).length)return null;const c=FD.cfg();
   return{u:d.abgeholt||"",e:d.eigen||"",t:d.tabelle,g:(d.spiele||[]).map((f)=>({d:f.d,z:f.z,h:f.h,heim:f.heim,gast:f.gast,ht:f.ht,gt:f.gt,st:f.st,ort:f.ort,wett:f.wett})),lt:/^https:\/\/www\.fussball\.de\//.test(c.team||"")?c.team:"",ll:/^https:\/\/www\.fussball\.de\//.test(c.liga||"")?c.liga:""}};
-FD.sig=()=>{const d=FD.cur();return d&&(d.tabelle||[]).length?(d.hash||"")+"|"+(d.eigen||""):""};
 if(!W.__WEB||W.__VIEWER||W.__SCOUT||W.__CO)return;
 const setHtml=(el,h)=>{if(!el)return false;if(el.__fdh===h)return false;el.__fdh=h;el.innerHTML=h;return true};
 const focusIn=(el)=>{const a=document.activeElement;return !!(el&&a&&el.contains(a)&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))};
