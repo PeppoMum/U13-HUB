@@ -216,15 +216,29 @@ function instCard(){
     }
   };put();
 }
-/* Anleitung „Als App speichern“ unten in der Link-Ansicht (nicht in der installierten App) */
+/* Hinweis „Als App speichern“ in der Link-Ansicht (nicht in der installierten App): zuerst oben mit Anleitung; ausgeblendet wandert er zugeklappt nach unten */
 const STANDALONE=()=>!!(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true;
+const VSTEP={ios:["iPhone/iPad","Unten auf <b>Teilen</b> tippen (Quadrat mit Pfeil nach oben).","Nach unten wischen und <b>Zum Home-Bildschirm</b> wählen.","Oben rechts auf <b>Hinzufügen</b> tippen."],
+  android:["Android","In Chrome oben rechts auf <b>⋮</b> tippen.","<b>App installieren</b> wählen (oder „Zum Startbildschirm hinzufügen“).","Mit <b>Installieren</b> bestätigen."],
+  pc:["Computer","In Chrome oder Edge rechts in der Adresszeile auf das Symbol <b>Installieren</b> klicken.","Mit <b>Installieren</b> bestätigen.","In Safari auf dem Mac stattdessen: <b>Ablage</b> → <b>Zum Dock hinzufügen</b>."]};
 function viewerInstall(){
   if(STANDALONE())return;
-  const mk=()=>{const c=document.createElement("details");c.id="u13vinst";c.className="card";c.style.cssText="margin:14px 0 0";
-    c.innerHTML='<summary style="cursor:pointer;font-weight:600">📲 Als App auf dem Handy speichern</summary><p class="note" style="margin:8px 0 6px">Dann öffnest du diese Seite mit einem Tipp vom Startbildschirm, auch ohne Netz (letzter Stand). Die App zeigt genau das, was du hier siehst.</p><button class="btn" id="u13vinstb" style="display:none;margin:2px 0 8px">App jetzt installieren</button><ul style="margin:4px 0 6px 20px;padding:0"><li><b>iPhone/iPad:</b> diese Seite in <b>Safari</b> öffnen, unten auf <b>Teilen</b> (Quadrat mit Pfeil) → <b>Zum Home-Bildschirm</b>.</li><li><b>Android:</b> in <b>Chrome</b> oben rechts auf <b>⋮</b> → <b>App installieren</b> (oder „Zum Startbildschirm hinzufügen“).</li><li><b>Computer:</b> in Chrome oder Edge rechts in der Adresszeile auf <b>Installieren</b>.</li></ul>'+(isKurz?'<p class="note" style="margin:4px 0 0">Beim ersten Öffnen der App einmal das Passwort eingeben und „Auf diesem Gerät angemeldet bleiben“ anhaken.</p>':'')+'<p class="note" style="margin:4px 0 0">Den Link bitte nicht weitergeben. Er gehört nur dir.</p>';
-    const b=c.querySelector("#u13vinstb"),show=()=>{if(instEv)b.style.display=""};show();window.addEventListener("u13inst",show);
-    b.onclick=async()=>{const ev=instEv;if(!ev)return;instEv=null;b.style.display="none";try{await ev.prompt()}catch(e){}};return c};
-  let c=null;const put=()=>{const v=document.getElementById("vw2");if(!v||document.getElementById("u13vinst"))return;c=c||mk();v.appendChild(c)};
+  const dev=IOS?"ios":/Android/i.test(navigator.userAgent)?"android":"pc",gone=()=>{try{return localStorage.getItem("u13vinstx")==="1"}catch(e){return false}};
+  const ol=(k)=>'<ol style="margin:6px 0 6px 20px;padding:0">'+VSTEP[k].slice(1).map((t)=>"<li>"+t+"</li>").join("")+"</ol>";
+  const body=()=>'<p class="note" style="margin:4px 0 6px">Dann öffnest du diese Seite mit einem Tipp vom Startbildschirm, auch ohne Netz (letzter Stand). Die App zeigt genau das, was du hier siehst.</p><button class="btn" data-vib style="display:none;margin:2px 0 8px">App jetzt installieren</button><b style="font-size:14px">So geht’s ('+VSTEP[dev][0]+'):</b>'+ol(dev)
+    +'<details style="margin:4px 0"><summary class="note" style="cursor:pointer">Anleitung für andere Geräte</summary>'+["ios","android","pc"].filter((k)=>k!==dev).map((k)=>'<b style="font-size:13px">'+VSTEP[k][0]+'</b>'+ol(k)).join("")+"</details>"
+    +(isKurz?'<p class="note" style="margin:4px 0 0">Beim ersten Öffnen der App einmal das Passwort eingeben und „Auf diesem Gerät angemeldet bleiben“ anhaken.</p>':"")+'<p class="note" style="margin:4px 0 0">Den Link bitte nicht weitergeben. Er gehört nur dir.</p>';
+  const wire=(c)=>{const b=c.querySelector("[data-vib]"),show=()=>{if(instEv)b.style.display=""};show();window.addEventListener("u13inst",show);
+    b.onclick=async()=>{const ev=instEv;if(!ev)return;instEv=null;b.style.display="none";try{await ev.prompt()}catch(e){}}};
+  const top=()=>{const c=document.createElement("div");c.id="u13vinst";c.className="card";c.style.cssText="margin:0 0 14px;border-color:var(--ac,#2563eb)";
+    c.innerHTML='<div style="display:flex;gap:8px;align-items:flex-start"><b style="flex:1;font-size:16px">📲 Diese Seite als App speichern</b><button class="btn" data-vix style="font-size:12px;padding:3px 9px">Ausblenden ✕</button></div>'+body();
+    wire(c);c.querySelector("[data-vix]").onclick=()=>{try{localStorage.setItem("u13vinstx","1")}catch(e){}c.remove();put()};return c};
+  const low=()=>{const c=document.createElement("details");c.id="u13vinst";c.className="card";c.style.cssText="margin:14px 0 0";
+    c.innerHTML='<summary style="cursor:pointer;font-weight:600">📲 Als App auf dem Handy speichern</summary>'+body();wire(c);return c};
+  const put=()=>{const v=document.getElementById("vw2");if(!v||document.getElementById("u13vinst"))return;
+    if(gone()){v.appendChild(low());return}
+    const hd=v.querySelector(".vh");if(!hd)return;   /* erst wenn die Ansicht da ist (nicht auf der Passwortseite) */
+    const kf=document.getElementById("kzf"),at=kf&&kf.parentNode===v?kf:hd;at.insertAdjacentElement("afterend",top())};
   new MutationObserver(put).observe(document.documentElement,{childList:true,subtree:true});put();
 }
 if(isViewerHash)document.addEventListener("DOMContentLoaded",viewerInstall);
