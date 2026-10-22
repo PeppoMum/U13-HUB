@@ -2507,7 +2507,8 @@ const fingerprintParts=async()=>{
   const notes=D.notizen.filter((n)=>n.art!=="beobachtung"&&(full||n.sichtbar)).sort((a,b)=>a.id<b.id?-1:1);
   const evs=full?D.events:evAll().map((e)=>{const q={};Object.keys(e).sort().forEach((k)=>{if(k==="id"||k==="virt"||k==="trainId"||k==="schwerpunkt"||k==="ctask"||(k==="detail"&&e.typ==="Training"))return;const v=e[k];if(v===""||v==null||(k==="eltern"&&v!==false))return;q[k]=v});return q}).sort((a,b)=>JSON.stringify(a)<JSON.stringify(b)?-1:1);
   const gs=D.spiele.filter(U13.erreicht).map((g)=>{const q={...g};delete q.live;return q}),ts=D.trainings.filter(U13.erreicht);
-  const a=(await sha(JSON.stringify([D.spieler,evs,D.dienste,notes,full?D.todos:null,cfg,window.__vid?window.__vid.sig():null,ligaSnap()]))).slice(0,16),s=(await sha(JSON.stringify([gs,ts]))).slice(0,16);
+  /* "kopf1": neuer Inhalt im Link (Spielerfoto oben links) – alle Links werden dadurch einmal neu veröffentlicht */
+  const a=(await sha(JSON.stringify([D.spieler,evs,D.dienste,notes,full?D.todos:null,cfg,window.__vid?window.__vid.sig():null,ligaSnap(),"kopf1"]))).slice(0,16),s=(await sha(JSON.stringify([gs,ts]))).slice(0,16);
   return{a,s}};
 /* Reiter „Liga“ im Spielerlink: die selbst unter „Spiele“ eingetragenen Spiele (nicht FUSSBALL.DE).
    Nur Datum, Anstoß, Gegner, Heim/Auswärts, Ort, Spielart und Ergebnis – keine Aufstellung, Minuten oder Notizen. */
