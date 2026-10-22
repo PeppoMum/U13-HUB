@@ -267,7 +267,7 @@ nav button .em{display:inline-flex;justify-content:center;align-items:center}
 #lkco{display:none!important}</style>
 <div class="app">
 <nav><h1>U13 · <span id="sais">2026/27</span></h1><small>Teamzentrale</small>
-<button data-s="h" class="on">🏠 Start</button><button data-s="a">👥 Beteiligung</button><button data-s="q">🏆 Bilanz</button><button data-s="p">👤 Profil</button><button data-s="n">📝 Notizen</button><button data-s="t">🏃 Training</button><button data-s="g">⚽ Spiele</button><button data-s="v">🎬 Videos</button><button data-s="liga" hidden>🏅 Liga</button><button data-s="m">📅 Termine</button><button data-s="w">🎯 Schwerpunkte</button><button data-s="s">🗂 Stammdaten</button><button data-s="k">🧩 Kader</button><button data-s="e">⚙️ Einstellungen</button></nav>
+<button data-s="h" class="on">🏠 Start</button><button data-s="a">👥 Beteiligung</button><button data-s="q">🏆 Bilanz</button><button data-s="p">👤 Profil</button><button data-s="n">📝 Notizen</button><button data-s="t">🏃 Training</button><button data-s="g">⚽ Spiele</button><button data-s="v">🎬 Videos</button><button data-s="fb">💬 Feedback</button><button data-s="liga" hidden>🏅 Liga</button><button data-s="m">📅 Termine</button><button data-s="w">🎯 Schwerpunkte</button><button data-s="s">🗂 Stammdaten</button><button data-s="k">🧩 Kader</button><button data-s="e">⚙️ Einstellungen</button></nav>
 <main>
 <div class="top"><button class="logo" id="logo" type="button" title="Vereinslogo einfügen" aria-label="Vereinslogo einfügen">Logo<br>einfügen</button><button class="rm" id="logox" hidden title="Logo entfernen">✕</button><div><b style="font-size:22px;line-height:1.2"><span id="mann2">U13</span> · <span id="sais2"></span></b><div class="note" style="font-size:14px">Teamzentrale</div></div><span style="flex:1"></span><select id="th" aria-label="Darstellung" title="Darstellung"><option value="">Darstellung: Auto</option><option value="light">Hell</option><option value="dark">Dunkel</option></select><span class="pill" id="st">Verbinde …</span></div><div id="lkw" class="lkw" role="alert" hidden></div><div id="ccw" class="lkw lkw-y" role="alert" hidden></div><div id="bkw" class="lkw lkw-y" role="status" hidden></div><input type="file" id="fi" accept="image/*" hidden>
 <section id="h"><h2>Übersicht</h2><p class="sub" id="hsub"></p><div id="vnh" style="margin:0 0 8px"></div><div id="bwt"></div><div id="htd" style="margin:0 0 14px"></div>
@@ -278,6 +278,7 @@ nav button .em{display:inline-flex;justify-content:center;align-items:center}
 </section>
 <section id="liga" hidden></section>
 <section id="v" hidden></section>
+<section id="fb" hidden></section>
 <section id="m" hidden><h2>Termine</h2><p class="sub" id="msub"></p>
 <div class="card" style="margin-bottom:14px"><h3>Neu anlegen</h3><div class="bar" style="margin:0"><button class="btn" id="mnew" style="background:var(--ac);color:#fff;border-color:var(--ac)">＋ Termin</button><button class="btn" id="mser">🔁 Serie</button><button class="btn" id="mdn">＋ Dienst</button><button class="btn" id="mtd">＋ To-Do / Hinweis</button></div>
 <div id="med" hidden></div><div id="mse" hidden></div><div id="pn_d" hidden><h3 style="margin-top:14px">Dienst</h3><p class="note" style="margin-top:0">Material-, Leibchen-, Obst-&Gemüse-Dienst usw. – erscheinen im Wochenplan. Trikotnummern in den Stammdaten (Spalte „Nr.“).</p><div id="df"></div></div>
@@ -545,7 +546,7 @@ nav button .em{display:inline-flex;justify-content:center;align-items:center}
 </script>
 <script>
 const $=(q)=>document.querySelector(q),POS=["TW","IV","AV","FL","ZM","ST"],pc=(x)=>x==null?"–":(x*100).toFixed(1).replace(".",",")+" %",mn=(x)=>String(Math.round(x));
-const SECS=["h","a","p","t","g","v","liga","q","n","m","w","s","k","e"];
+const SECS=["h","a","p","t","g","v","fb","liga","q","n","m","w","s","k","e"];
 const D={spieler:[],spiele:[],trainings:[],notizen:[],events:[],dienste:[],todos:[],tipps:[],config:null,ready:false};let db=null;
 const nm=(p)=>window.__ANON?p.vorname+" "+p.name:p.vorname+" "+(p.name||"")[0]+".";
 function applyTheme(v){if(v)document.documentElement.setAttribute("data-theme",v);else document.documentElement.removeAttribute("data-theme")}
@@ -1949,18 +1950,50 @@ function watchKom(){
   V.clips.forEach((c)=>{if(!want.has(c.id)||V.unsub[c.id])return;
     try{V.unsub[c.id]=db.collection("kom").doc(c.s).collection("m").onSnapshot(async(s)=>{const out=[];for(const d of s.docs){const x=d.data()||{};try{const o=await window.__lk.unseal(c.ck,x.b);out.push({id:d.id,at:toIso(x.at),...o})}catch(e){}}V.kom[c.id]=out;render()},()=>{})}catch(e){}});
 }
-function badge(){const b=document.querySelector('nav button[data-s="v"]');if(!b)return;const n=V.fb.filter((x)=>!x.gelesen).length;b.innerHTML="🎬 Videos"+(n?' <span class="pill" style="background:var(--o);color:#fff;padding:0 7px;margin-left:2px">'+n+"</span>":"")}
-const sec=()=>document.getElementById("v");
-function render(){const el=sec();if(!el||el.hidden&&el.dataset.done)return;el.dataset.done="1";draw()}
-V.render=()=>{const el=sec();if(el)draw()};
+function badge(){const b=document.querySelector('nav button[data-s="fb"]');if(!b)return;const n=V.fb.filter((x)=>!x.gelesen).length;let p=b.querySelector(".vbadge");
+  if(!n){if(p)p.remove();return}if(!p){p=document.createElement("span");p.className="pill vbadge";p.style.cssText="background:var(--o);color:#fff;padding:0 7px;margin-left:4px";b.appendChild(p)}if(p.textContent!==String(n))p.textContent=n}
+const sec=()=>document.getElementById("v"),fsec=()=>document.getElementById("fb");
+function render(){const el=sec();if(el&&!(el.hidden&&el.dataset.done)){el.dataset.done="1";draw()}const f=fsec();if(f&&!(f.hidden&&f.dataset.done)){f.dataset.done="1";drawFb()}}
+V.render=()=>{if(sec())draw();if(fsec())drawFb()};
 function draw(){
   const el=sec();if(!el)return;addCss();
   const ae=document.activeElement;if(ae&&el.contains(ae)&&ae.matches("input,textarea,select"))return;
-  const nf=V.fb.filter((x)=>!x.gelesen).length;
-  el.innerHTML='<h2>Videos</h2><p class="sub">Clips mit Aufgabe für die Spielerlinks · Kommentare der Spieler · Feedback von Spielern und Eltern</p>'
-    +'<div class="seg" id="vdseg" style="margin:0 0 14px"><button data-vt="c" class="'+(V.tab==="c"?"on":"")+'">Clips</button><button data-vt="f" class="'+(V.tab==="f"?"on":"")+'">Feedback'+(nf?" ("+nf+" neu)":"")+"</button></div>"
-    +(V.tab==="c"?clipsHtml():fbHtml())+'<div class="note" id="vdm" style="min-height:18px"></div>';
+  el.innerHTML='<h2>Videos</h2><p class="sub">Clips mit Aufgabe für die Spielerlinks · Kommentare der Spieler · ganze Spiele mit Video</p>'
+    +'<div class="seg" id="vdseg" style="margin:0 0 14px"><button data-vt="c" class="'+(V.tab==="c"?"on":"")+'">Clips</button><button data-vt="g" class="'+(V.tab==="g"?"on":"")+'">Ganze Spiele</button></div>'
+    +(V.tab==="g"?gamesHtml():clipsHtml())+'<div class="note" id="vdm" style="min-height:18px"></div>';
 }
+/* Feedback: eigenes Menü */
+function drawFb(){
+  const el=fsec();if(!el)return;addCss();
+  const ae=document.activeElement;if(ae&&el.contains(ae)&&ae.matches("input,textarea,select")&&ae.value)return;
+  const nf=V.fb.filter((x)=>!x.gelesen).length;
+  el.innerHTML='<h2>Feedback</h2><p class="sub">Nachrichten von Spielern und Eltern aus den Spielerlinks · nur das Trainerteam liest das'+(nf?" · "+nf+" neu":"")+"</p>"+fbHtml()+'<div class="note" id="fbm" style="min-height:18px"></div>'}
+/* Ganze Spiele (Trainer): alle gespielten Spiele, neueste oben, mit oder ohne Video */
+function gamesHtml(){
+  const G=D.spiele.filter((g)=>U13.erreicht(g)||urlOk(g.video)).slice().sort((a,b)=>(a.datum||"")<(b.datum||"")?1:-1),mit=G.filter((g)=>urlOk(g.video)),ohne=G.filter((g)=>!urlOk(g.video));
+  const row=(g)=>'<div class="vd-row"><div style="flex:1;min-width:0"><b>'+esc(g.gegner?"gegen "+g.gegner:"Spiel")+(g.ha?" ("+esc(g.ha)+")":"")+'</b><div class="note">'+esc(dShort(g.datum))+(g.art?" · "+esc(g.art):"")+(g.tore!=null&&g.gt!=null?" · "+esc(g.tore+":"+g.gt):"")+"</div></div>"
+    +(urlOk(g.video)?'<a class="btn" href="'+esc(g.video)+'" target="_blank" rel="noopener noreferrer" style="font-weight:600">Ansehen</a>':'<span class="note">kein Video</span>')+"</div>";
+  return'<div class="note" style="margin:0 0 8px">Diese Spiele sehen alle Spieler im Link unter „Videos → Ganze Spiele“. Den Video-Link trägst du im Menü „Spiele“ beim Spiel ein („Link zur Aufnahme“).</div>'
+    +'<div class="card">'+(mit.length?mit.map(row).join(""):'<div class="note">Noch kein Spiel mit Video.</div>')+"</div>"
+    +(ohne.length?'<details style="margin:10px 0 0"><summary class="note" style="cursor:pointer">Gespielt, aber ohne Video ('+ohne.length+')</summary><div class="card">'+ohne.map(row).join("")+"</div></details>":"")}
+/* Datum TT.MM.JJJJ und Uhrzeit HH:MM tippen: springt nach zwei Ziffern automatisch weiter */
+const DSEP=/[.\/,\- :]/;
+function autoFmt(v,sep,max,firstMax,del){
+  const g=[""];for(const ch of String(v)){if(/\d/.test(ch)){let cur=g[g.length-1];if(g.length<max.length&&cur.length>=2){g.push("");cur=""}
+      if(cur.length>=max[g.length-1])continue;g[g.length-1]+=ch;
+      if(g.length<max.length&&g[g.length-1].length===1&&+ch>firstMax[g.length-1]){g[g.length-1]="0"+ch}}
+    else if(DSEP.test(ch)&&g.length<max.length&&g[g.length-1].length>0){g[g.length-1]=g[g.length-1].padStart(2,"0");g.push("")}}
+  let out=g.join(sep);if(!del&&g.length<max.length&&g[g.length-1].length===2)out+=sep;return out}
+const fmtD=(iso)=>iso?iso.slice(8,10)+"."+iso.slice(5,7)+"."+iso.slice(0,4):"";
+/* "" = leer, null = ungültig, sonst JJJJ-MM-TT; ohne Jahr: nächstes passendes Datum */
+function parseD(v){v=String(v||"").trim();if(!v)return"";const m=v.match(/^(\d{1,2})\.(\d{1,2})\.?(\d{2}|\d{4})?$/);if(!m)return null;
+  let y=m[3]?+m[3]:new Date().getFullYear();if(y<100)y+=2000;const d=+m[1],mo=+m[2],dt=new Date(y,mo-1,d);if(dt.getMonth()!==mo-1||dt.getDate()!==d)return null;
+  let iso=isoDay(dt);if(!m[3]&&iso<today()){dt.setFullYear(y+1);iso=isoDay(dt)}return iso}
+function parseT(v){v=String(v||"").trim();if(!v)return"";const m=v.match(/^(\d{1,2})(?::(\d{1,2}))?$/);if(!m||+m[1]>23||+(m[2]||0)>59)return null;return P2(+m[1])+":"+P2(+(m[2]||0))}
+document.addEventListener("input",(e)=>{const t=e.target;if(!t||!t.matches)return;const del=/^delete/.test(e.inputType||"");
+  if(t.matches("[data-vdate]")){const n=autoFmt(t.value,".",[2,2,4],[3,1,9],del);if(n!==t.value)t.value=n}
+  else if(t.matches("[data-vtime]")){const n=autoFmt(t.value,":",[2,2],[2,5],del);if(n!==t.value)t.value=n}});
+const dIn=(id,val,lab)=>'<input id="'+id+'" data-vdate inputmode="numeric" autocomplete="off" maxlength="10" placeholder="TT.MM.JJJJ" value="'+esc(fmtD(val))+'" aria-label="'+lab+'" style="width:9.5em">';
 function formHtml(){
   const c=V.edit&&V.edit!=="neu"?V.clips.find((x)=>x.id===V.edit)||{}:{},alle=!c.an||c.an==="alle",sel=Array.isArray(c.an)?c.an:[];
   const fd=c.frist?c.frist.slice(0,10):"",ft=c.frist&&c.frist.length>10?c.frist.slice(11,16):"18:00";
@@ -1970,8 +2003,8 @@ function formHtml(){
     +'<label class="note" style="display:block;margin:0 0 8px">Aufgabe (freiwillig)<br><textarea id="vda" rows="3" maxlength="1500" style="width:100%;box-sizing:border-box">'+esc(c.aufgabe||"")+"</textarea></label>"
     +'<div class="note" style="margin:0 0 4px">Wer bekommt den Clip?</div><div class="seg" id="vdan" style="margin:0 0 6px"><button type="button" data-an="alle" class="'+(alle?"on":"")+'">Ganze Mannschaft</button><button type="button" data-an="ein" class="'+(alle?"":"on")+'">Einzelne Spieler</button></div>'
     +'<div class="vd-grid" id="vdps"'+(alle?" hidden":"")+">"+active().map((p)=>'<label><input type="checkbox" value="'+esc(p.id)+'"'+(sel.includes(p.id)?" checked":"")+">"+esc(p.vorname+" "+p.name)+"</label>").join("")+"</div>"
-    +'<div class="note" style="margin:8px 0 4px">Kommentieren bis (freiwillig)</div><div class="bar" style="margin:0 0 4px"><input id="vdfd" type="date" value="'+esc(fd)+'" aria-label="Datum der Frist"><input id="vdft" type="time" value="'+esc(ft)+'" aria-label="Uhrzeit der Frist"></div><div class="note" style="margin:0 0 8px">Einen Tag vorher bekommen Spieler ohne Kommentar einen Hinweis. Kommentieren geht auch danach.</div>'
-    +'<label class="note" style="display:block;margin:0 0 8px">Für Spieler sichtbar bis (freiwillig)<br><input id="vdb" type="date" value="'+esc(c.bis||"")+'"></label><div class="note" style="margin:-4px 0 10px">Danach verschwindet der Clip bei den Spielern. Du siehst ihn weiter unter „Abgelaufen“.</div>'
+    +'<div class="note" style="margin:8px 0 4px">Kommentieren bis (freiwillig)</div><div class="bar" style="margin:0 0 4px">'+dIn("vdfd",fd,"Datum der Frist")+'<input id="vdft" data-vtime inputmode="numeric" autocomplete="off" maxlength="5" placeholder="HH:MM" value="'+esc(ft)+'" aria-label="Uhrzeit der Frist" style="width:5.5em"><span class="note">Uhr</span></div><div class="note" style="margin:0 0 8px">Einen Tag vorher bekommen Spieler ohne Kommentar einen Hinweis. Kommentieren geht auch danach.</div>'
+    +'<label class="note" style="display:block;margin:0 0 8px">Für Spieler sichtbar bis (freiwillig)<br>'+dIn("vdb",c.bis||"","Für Spieler sichtbar bis")+'</label><div class="note" style="margin:-4px 0 10px">Danach verschwindet der Clip bei den Spielern. Du siehst ihn weiter unter „Abgelaufen“.</div>'
     +'<div class="bar"><button class="btn" id="vdsave" style="background:var(--ac);color:#fff;border-color:var(--ac)">Speichern</button><button class="btn" id="vdcancel">Abbrechen</button></div></div>'}
 function clipRow(c){
   const R=recips(c),K=V.kom[c.id]||[],done=new Set(K.filter((k)=>!k.tr&&!k.r).map((k)=>k.p)),n=R.filter((p)=>done.has(p.id)).length;
@@ -2003,16 +2036,19 @@ function fbHtml(){
       +(x.antwort?'<div class="vd-k tr"><div class="vd-av">'+esc(initials(x.antwortVon,true))+'</div><div class="vd-bub"><div style="font-size:13px;font-weight:650">'+esc(x.antwortVon||"")+'<span class="vd-trb">Trainer</span></div>'+esc(x.antwort)+"</div></div>":"")
       +(ro?"":'<div class="bar" style="margin:8px 0 0">'+(x.antwort||!x.r||!window.__WEB?"":'<textarea class="vd-ta" data-fbt rows="2" maxlength="2000" placeholder="Antwort als '+esc(myName())+'" style="flex:1;min-width:200px"></textarea><button class="btn" data-fbr style="background:var(--ac);color:#fff;border-color:var(--ac)">Antworten</button>')
         +(x.gelesen?"":'<button class="btn" data-fbg>Als gelesen markieren</button>')+'<button class="btn'+(V.armed==="f"+x.id?" arm":"")+'" data-fbd>'+(V.armed==="f"+x.id?"Wirklich löschen?":"Löschen")+"</button></div>")+"</div>"}).join("")}
-const msg=(t,bad)=>{const m=document.getElementById("vdm");if(m){m.textContent=t||"";m.className="note"+(bad?" warn":"")}};
+const msg=(t,bad)=>{const m=document.getElementById(fsec()&&!fsec().hidden?"fbm":"vdm");if(m){m.textContent=t||"";m.className="note"+(bad?" warn":"")}};
 let pubT=null;const pubSoon=()=>{clearTimeout(pubT);pubT=setTimeout(()=>{if(window.__WEB&&window.__lkPublish&&window.__ROLE==="voll")window.__lkPublish(true)},1500)};
 async function saveClip(){
   const u=$("#vdu").value.trim(),t=$("#vdt").value.trim(),a=$("#vda").value.trim(),alle=$("#vdan .on").dataset.an==="alle",sel=[...document.querySelectorAll("#vdps input:checked")].map((i)=>i.value);
   if(!urlOk(u)){msg("Bitte einen gültigen Link eintragen (beginnt mit https://).",true);return}
   if(!t){msg("Bitte einen Titel eintragen.",true);return}
   if(!alle&&!sel.length){msg("Bitte mindestens einen Spieler auswählen.",true);return}
-  const fd=$("#vdfd").value,ft=$("#vdft").value||"18:00",b=$("#vdb").value;
+  const fd=parseD($("#vdfd").value),ft=parseT($("#vdft").value),b=parseD($("#vdb").value);
+  if(fd===null){msg("Das Datum bei „Kommentieren bis“ stimmt nicht (z. B. 26.10.2026).",true);return}
+  if(ft===null){msg("Die Uhrzeit stimmt nicht (z. B. 18:00).",true);return}
+  if(b===null){msg("Das Datum bei „Für Spieler sichtbar bis“ stimmt nicht (z. B. 26.10.2026).",true);return}
   const old=V.edit&&V.edit!=="neu"?V.clips.find((x)=>x.id===V.edit):null;
-  const c={id:old?old.id:nid("cl"),titel:t,url:u,aufgabe:a,an:alle?"alle":sel,frist:fd?fd+"T"+ft:"",bis:b||"",at:old&&old.at||new Date().toISOString(),s:old&&old.s||hex(32),ck:old&&old.ck||b64u(crypto.getRandomValues(new Uint8Array(16)))};
+  const c={id:old?old.id:nid("cl"),titel:t,url:u,aufgabe:a,an:alle?"alle":sel,frist:fd?fd+"T"+(ft||"18:00"):"",bis:b||"",at:old&&old.at||new Date().toISOString(),s:old&&old.s||hex(32),ck:old&&old.ck||b64u(crypto.getRandomValues(new Uint8Array(16)))};
   try{if(!old)await db.doc("clipauth/"+c.s).set({c:c.id});await save("clips",c.id,c);V.edit=null;V.sel=c.id;draw();msg(old?"Gespeichert.":"Clip gespeichert. Er erscheint in den Spielerlinks der Empfänger.");pubSoon()}catch(e){msg("Das konnte nicht gespeichert werden.",true)}
 }
 async function delClip(id){const c=V.clips.find((x)=>x.id===id);if(!c)return;
@@ -2026,7 +2062,7 @@ async function fbReply(x,t){
   const id=nid("a"),now=new Date().toISOString(),von=myName();
   try{await db.collection("fbaus").doc(x.r).collection("m").doc(id).set({id,at:now,text:t,von,t:"trainer",re:x.id});await db.doc("fbin/"+x.id).update({antwort:t,antwortVon:von,antwortAm:now,gelesen:true});msg("Antwort gesendet. Sie erscheint im Link unter „Feedback“.")}catch(e){msg("Das konnte nicht gesendet werden.",true)}}
 document.addEventListener("click",async(e)=>{
-  const el=sec();if(!el||!e.target.closest||!el.contains(e.target))return;const q=(s)=>e.target.closest(s);
+  const el=sec(),fe=fsec();if(!e.target.closest||!((el&&el.contains(e.target))||(fe&&fe.contains(e.target))))return;const q=(s)=>e.target.closest(s);
   let b;
   if((b=q("[data-vt]"))){V.tab=b.dataset.vt;draw();return}
   if(q("#vdnew")){V.edit="neu";draw();const u=$("#vdu");u&&u.focus();return}
@@ -2044,11 +2080,11 @@ document.addEventListener("click",async(e)=>{
   const card=q("[data-fid]");if(card){const x=V.fb.find((f)=>f.id===card.dataset.fid);if(!x)return;
     if(q("[data-fbg]")){db.doc("fbin/"+x.id).update({gelesen:true}).catch(()=>{});return}
     if(q("[data-fbr]")){const t=card.querySelector("[data-fbt]").value.trim();if(t)fbReply(x,t);return}
-    if(q("[data-fbd]")){const k="f"+x.id;if(V.armed!==k){V.armed=k;draw();return}V.armed=null;save("fbin",x.id,null);return}}
+    if(q("[data-fbd]")){const k="f"+x.id;if(V.armed!==k){V.armed=k;drawFb();return}V.armed=null;save("fbin",x.id,null);return}}
 });
 document.addEventListener("keydown",(e)=>{if(e.key==="Enter"&&(e.metaKey||e.ctrlKey)&&e.target&&e.target.id==="vdrt")postKom()});
 /* Sichtbarkeit: Reiter nur für Trainer; zeichnen, wenn er geöffnet wird */
-document.addEventListener("click",(e)=>{const b=e.target.closest&&e.target.closest('nav button[data-s="v"]');if(b)setTimeout(()=>{draw();badge()},0)});
+document.addEventListener("click",(e)=>{const b=e.target.closest&&e.target.closest('nav button[data-s="v"],nav button[data-s="fb"]');if(b)setTimeout(()=>{b.dataset.s==="v"?draw():drawFb();badge()},0)});
 const boot=()=>{if(window.__VIEWER||window.__SCOUT)return;if(typeof db!=="undefined"&&db&&window.__dbUp)startTrainer();else setTimeout(boot,400)};
 setTimeout(boot,300);
 
@@ -2270,7 +2306,7 @@ async function showExt(k,blob,key){
   document.title="TuS Haltern U13 · "+(window.__DEMO?"Demo":"Teamzentrale");
   const st=document.getElementById("st");if(st){st.textContent=(window.__DEMO?"Demo · Zufallsdaten · ":"Nur Ansicht · ")+"Stand "+dt(d.u);st.className="pill"}
   const hide=(q)=>document.querySelectorAll(q).forEach((x)=>{x.style.display="none"});
-  hide('nav button[data-s="v"]');if(!window.__DEMO)hide('nav button[data-s="e"],nav button[data-s="k"]');if(window.__ANON)hide('nav button[data-s="s"]');
+  hide('nav button[data-s="v"],nav button[data-s="fb"]');if(!window.__DEMO)hide('nav button[data-s="e"],nav button[data-s="k"]');if(window.__ANON)hide('nav button[data-s="s"]');
   const XI=["xa","xsp","xp","xpa","xnw","xq","xtm","xts","xga","xsw","xsk","xnt","xnz"];
   const OKS=(window.__DEMO?XI.map((i)=>"#"+i).join(",")+",.xth,#kps,[data-bkf],[data-bkq],[data-obf],":"")+"#xpv,#mm,#ms,#ps,#so,#od,#qf,#fz,#fk,#fv,#fa,#wm,#wkd,#hmm,#th,#vbg",OKB=(window.__DEMO?XI.map((i)=>"#"+i+",#"+i+" button").join(",")+",[data-kt],[data-vsel],[data-bkm],[data-bkv],[data-bkt],":"")+"#sseg button,#pmode button,#bprev,#bnext,#mprev,#mnext,#wprev,#wnext,#pprev,#pnext,#vw button,nav button,#hn button";
   const cut=(q,f)=>{const e=document.querySelector(q);if(e){const c=f?f(e):e;if(c)c.style.display="none"}};
