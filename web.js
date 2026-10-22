@@ -14,6 +14,15 @@ const isScout=/^#scout\.[A-Za-z0-9_-]{16,}$/.test(H);
 window.__SCOUTKEY=isScout?H.slice(7):"";
 const isKurz=/^#k\/[A-Za-z0-9_-]{4,40}$/.test(H);
 const isViewerHash=(/^#[A-Za-z0-9]+\.[A-Za-z0-9_-]{16,}$/.test(H)&&!/^#co[A-Za-z0-9]+\./.test(H)&&!isScout)||isKurz;
+/* Spieler-, Eltern- und externe Links als eigene App: Die installierte App startet immer mit genau diesem Link (eigene Startadresse statt Trainer-Anmeldung).
+   Rechte ändern sich nicht: Die App zeigt dasselbe wie der Link im Browser. */
+if(isViewerHash){try{
+  const B=window.__WEB_BASE,l=document.querySelector('link[rel="manifest"]'),u=B+H;
+  const m={id:u,name:"TuS Haltern U13",short_name:"U13",start_url:u,scope:B,display:"standalone",background_color:"#000000",theme_color:"#000000",lang:"de",
+    icons:[{src:B+"icon-192.png",sizes:"192x192",type:"image/png",purpose:"any"},{src:B+"icon-512.png",sizes:"512x512",type:"image/png",purpose:"any"},{src:B+"icon-512.png",sizes:"512x512",type:"image/png",purpose:"maskable"}]};
+  window.__appManifest=m;
+  if(l)l.href=URL.createObjectURL(new Blob([JSON.stringify(m)],{type:"application/manifest+json"}));
+}catch(e){}}
 const cfgOk=()=>!!(CFG.apiKey&&CFG.projectId&&CFG.authDomain&&!/DEIN|EINTRAGEN|XXXX/i.test(CFG.apiKey+CFG.projectId));
 const E=(s)=>String(s==null?"":s).replace(/[&<>"]/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const clean=(o)=>o==null?o:JSON.parse(JSON.stringify(o));
@@ -199,7 +208,7 @@ function instCard(){
     const pp=document.getElementById("etp-l");if(!pp){setTimeout(put,500);return}
     if(!document.getElementById("u13inst")){
       const c=document.createElement("div");c.className="card";c.id="u13inst";c.style.display="block";
-      const done=window.matchMedia&&matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+      const done=STANDALONE();
       c.innerHTML='<h3>Als App installieren</h3>'+(done?'<p class="note" style="margin-top:0">Die App ist auf diesem Gerät schon installiert.</p>':'<p class="note" style="margin-top:0">Dann liegt die Teamzentrale wie eine normale App auf dem Startbildschirm, öffnet in einem eigenen Fenster und startet auch ohne Netz. Daten und Updates bleiben dieselben wie im Browser.</p><button class="btn" id="u13instb" style="display:none;margin:4px 0 8px">App jetzt installieren</button><ul style="margin:6px 0 6px 20px;padding:0"><li><b>iPhone/iPad:</b> in Safari unten auf <b>Teilen</b> (Quadrat mit Pfeil) → <b>Zum Home-Bildschirm</b>.</li><li><b>Android:</b> in Chrome oben rechts auf <b>⋮</b> → <b>App installieren</b> (oder „Zum Startbildschirm hinzufügen“).</li><li><b>Mac/PC:</b> in Chrome oder Edge rechts in der Adresszeile auf das Symbol <b>Installieren</b>. In Safari auf dem Mac: <b>Ablage</b> → <b>Zum Dock hinzufügen</b>.</li></ul><p class="note">Ohne Netz kannst du ansehen und ändern. Die Änderungen werden geschickt, sobald wieder Netz da ist. Anmelden und Spielerlinks brauchen Netz. Auf einem gemeinsam genutzten Gerät wird nichts gespeichert, dort geht es nur mit Netz.</p>');
       const b=c.querySelector("#u13instb"),show=()=>{if(b&&instEv)b.style.display=""};show();window.addEventListener("u13inst",show);
       if(b)b.onclick=async()=>{const ev=instEv;if(!ev)return;instEv=null;b.style.display="none";try{await ev.prompt()}catch(e){}};
@@ -207,6 +216,18 @@ function instCard(){
     }
   };put();
 }
+/* Anleitung „Als App speichern“ unten in der Link-Ansicht (nicht in der installierten App) */
+const STANDALONE=()=>!!(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true;
+function viewerInstall(){
+  if(STANDALONE())return;
+  const mk=()=>{const c=document.createElement("details");c.id="u13vinst";c.className="card";c.style.cssText="margin:14px 0 0";
+    c.innerHTML='<summary style="cursor:pointer;font-weight:600">📲 Als App auf dem Handy speichern</summary><p class="note" style="margin:8px 0 6px">Dann öffnest du diese Seite mit einem Tipp vom Startbildschirm, auch ohne Netz (letzter Stand). Die App zeigt genau das, was du hier siehst.</p><button class="btn" id="u13vinstb" style="display:none;margin:2px 0 8px">App jetzt installieren</button><ul style="margin:4px 0 6px 20px;padding:0"><li><b>iPhone/iPad:</b> diese Seite in <b>Safari</b> öffnen, unten auf <b>Teilen</b> (Quadrat mit Pfeil) → <b>Zum Home-Bildschirm</b>.</li><li><b>Android:</b> in <b>Chrome</b> oben rechts auf <b>⋮</b> → <b>App installieren</b> (oder „Zum Startbildschirm hinzufügen“).</li><li><b>Computer:</b> in Chrome oder Edge rechts in der Adresszeile auf <b>Installieren</b>.</li></ul>'+(isKurz?'<p class="note" style="margin:4px 0 0">Beim ersten Öffnen der App einmal das Passwort eingeben und „Auf diesem Gerät angemeldet bleiben“ anhaken.</p>':'')+'<p class="note" style="margin:4px 0 0">Den Link bitte nicht weitergeben. Er gehört nur dir.</p>';
+    const b=c.querySelector("#u13vinstb"),show=()=>{if(instEv)b.style.display=""};show();window.addEventListener("u13inst",show);
+    b.onclick=async()=>{const ev=instEv;if(!ev)return;instEv=null;b.style.display="none";try{await ev.prompt()}catch(e){}};return c};
+  let c=null;const put=()=>{const v=document.getElementById("vw2");if(!v||document.getElementById("u13vinst"))return;c=c||mk();v.appendChild(c)};
+  new MutationObserver(put).observe(document.documentElement,{childList:true,subtree:true});put();
+}
+if(isViewerHash)document.addEventListener("DOMContentLoaded",viewerInstall);
 let instEv=null;   /* Installations-Angebot des Browsers (Chrome/Edge/Android), siehe unten */
 function cards(){
   const put=()=>{
