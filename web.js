@@ -107,7 +107,7 @@ async function signOutClean(){try{await auth.signOut()}catch(e){}await wipeLocal
 function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement("script");s.src=src;s.async=false;s.onload=res;s.onerror=()=>rej(new Error("Konnte "+src+" nicht laden"));document.head.appendChild(s)})}
 const CSS='#u13login{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--bg,#f4f5f7);color:var(--tx,#1c1f24);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;overflow:auto}'
 +'#u13login .lc{width:100%;max-width:400px;background:var(--card,#fff);border:1px solid var(--ln,#e5e7eb);border-radius:16px;padding:22px 20px;box-shadow:0 8px 30px rgba(0,0,0,.08)}'
-+'#u13login h1{font-size:20px;margin:0 0 2px}#u13login .sb{color:var(--mu,#6b7280);font-size:13px;margin:0 0 16px}'
++'#u13login h1{font-size:20px;margin:0 0 2px}#u13login .sb{display:block;height:auto;overflow:visible;border-radius:0;color:var(--mu,#6b7280);font-size:13px;margin:0 0 16px}'   /* .sb ist in der App ein Balken (feste Höhe) – hier normaler Text */
 +'#u13login input{width:100%;box-sizing:border-box;margin:0 0 10px;padding:10px 12px;font:inherit;color:var(--tx,#1c1f24);background:var(--card,#fff);border:1px solid var(--ln,#d0d5dd);border-radius:10px}'
 +'#u13login button{width:100%;box-sizing:border-box;padding:10px 12px;margin:0 0 8px;font:inherit;font-weight:600;border-radius:10px;border:1px solid var(--ln,#d0d5dd);background:var(--card,#fff);color:var(--tx,#1c1f24);cursor:pointer}'
 +'#u13login button.pr{background:var(--ac,#2563eb);border-color:var(--ac,#2563eb);color:#fff}#u13login button:disabled{opacity:.55;cursor:default}'
@@ -481,6 +481,8 @@ async function kClaimSp(tok){
 async function kAnfrage(tok){
   let e=null;try{const s=await fs.doc("mteinl/"+tok).get();e=s.exists?s.data():null}catch(x){e=null}
   if(!e||e.aktiv!==true)return"bad";
+  /* Schon freigeschaltet: direkt ins Menü, keine neue Anfrage (ein weiteres Kind geht über „Einstellungen“) */
+  if(((await myLinks())||[]).some((l)=>l.gesperrt!==true))return"drin";
   if(await myAnfrage())return"offen";
   const f=await kForm({btn:"Anfrage senden"});
   try{await fs.doc("kanfr/"+mkeyOf(kEm())).set({email:kEm(),name:f.name.slice(0,60),kind:f.kind.slice(0,60),rolle:f.rolle,at:new Date().toISOString(),s:tok,status:"offen"});return"gesendet"}catch(x){return"fehler"}
@@ -526,6 +528,20 @@ async function kontoStart(){
   window.__showViewer(cur.pid,key);
 }
 window.__kontoStart=()=>{kontoStart().catch((e)=>{overlay('<div class="ms er">Das hat nicht geklappt. Bitte die Seite neu laden.</div>')})};
+/* Karte „App und Benachrichtigungen“ in den Einstellungen: im Browser die Anleitung zum Speichern als App, in der App der Schalter */
+function kNotif(){
+  const h='<div class="card" id="kstp" style="margin:0 0 12px"><h3 style="margin-top:0">App und Benachrichtigungen</h3>',was='<div class="note" style="margin:0 0 8px">Mit Benachrichtigungen bekommst du Bescheid bei einem neuen Clip, einem neuen Hinweis, einer Erinnerung an eine Aufgabe oder einer Antwort vom Trainer, auch wenn die App geschlossen ist. In den Nachrichten stehen keine Namen.</div>';
+  if(STANDALONE()){
+    if(!PUSH_OK())return h+'<div class="note">Die App ist auf diesem Gerät eingerichtet. Benachrichtigungen gehen auf diesem Gerät leider nicht.</div></div>';
+    if(pushPerm()==="denied")return h+'<div class="note" style="margin:0 0 6px">✅ Die App ist auf diesem Gerät eingerichtet.</div><div class="note">🔕 Benachrichtigungen sind auf diesem Gerät blockiert. Du kannst sie in den Einstellungen des Handys erlauben (iPhone: Einstellungen → Mitteilungen → diese App → Mitteilungen erlauben). Danach die App neu öffnen.</div></div>';
+    const on=pushApi.on();
+    return h+'<div class="note" style="margin:0 0 6px">✅ Die App ist auf diesem Gerät eingerichtet.</div>'+was+'<div class="bar" style="align-items:center;margin:0"><span style="flex:1">'+(on?"🔔 Benachrichtigungen sind an.":"🔕 Benachrichtigungen sind aus.")+'</span><button class="btn" data-ks="'+(on?"poff":"pon")+'"'+(on?"":' style="background:var(--ac,#2563eb);color:#fff;border-color:var(--ac,#2563eb);font-weight:600"')+'>'+(on?"Ausschalten":"Einschalten")+'</button></div></div>';
+  }
+  const dev=IOS?"ios":/Android/i.test(navigator.userAgent)?"android":"pc",ol=(k)=>'<ol style="margin:4px 0 6px 20px;padding:0">'+VSTEP[k].slice(1).map((t)=>"<li>"+t+"</li>").join("")+"</ol>";
+  return h+was+'<div style="font-weight:600;margin:6px 0 2px">1. Seite als App speichern</div>'+(instEv?'<button class="btn" data-ks="inst" style="margin:4px 0 6px">App jetzt installieren</button>':"")
+    +ol(dev)+'<details style="margin:0 0 6px"><summary class="note" style="cursor:pointer">Anleitung für andere Geräte</summary>'+["ios","android","pc"].filter((k)=>k!==dev).map((k)=>'<b style="font-size:13px">'+VSTEP[k][0]+'</b>'+ol(k)).join("")+'</details>'
+    +'<div style="font-weight:600;margin:6px 0 2px">2. Benachrichtigungen einschalten</div><div class="note">Die App auf dem Startbildschirm öffnen, einmal mit deinem Konto anmelden und hier unter <b>Einstellungen</b> auf <b>Einschalten</b> tippen. Auf dem iPhone geht das nur in der App, nicht im Browser.</div></div>';
+}
 /* Reiter „Einstellungen“ in der Konto-Ansicht */
 const KS={msg:"",bad:false,arm:"",anf:undefined,r:"",n:null};   /* r, n: gewählte Rolle und eingetippter Name, bis gespeichert */
 function kRender(el){
@@ -543,7 +559,7 @@ function kRender(el){
       :KS.anf===null?'<div class="note">Wird geladen …</div>'
       :'<div class="note" style="margin:2px 0 6px">Der Trainer bekommt eine Anfrage und schaltet das Kind frei.</div><input id="kstk" maxlength="60" placeholder="Vor- und Nachname des Kindes" style="width:100%;box-sizing:border-box"><div class="bar" style="margin:8px 0 0"><button class="btn" data-ks="kid">Anfrage senden</button></div>')
     +'</div></div>'
-    +'<div class="card" style="margin:0 0 12px"><h3 style="margin-top:0">Benachrichtigungen</h3><div class="note">Speichere die Seite als App auf deinem Handy (Anleitung auf der Übersicht). In der App schaltest du die Benachrichtigungen ganz unten auf der Seite ein oder aus.</div></div>'
+    +kNotif()
     +'<div class="card" style="margin:0 0 12px"><h3 style="margin-top:0">Abmelden oder Konto löschen</h3><div class="bar" style="margin:0"><button class="btn" data-ks="out">Abmelden</button><button class="btn" data-ks="del" style="color:var(--r)">'+(KS.arm==="del"?"Wirklich löschen? Dann ist alles weg.":"Konto löschen")+'</button></div></div>'
     +'<div class="note'+(KS.bad?" warn":"")+'" id="kstm" role="status">'+E(KS.msg)+'</div>';
   el.querySelectorAll('[name="krl"]').forEach((r)=>{r.onchange=()=>{if(r.checked)KS.r=r.value;el.querySelector("#kstn").hidden=KS.r==="spieler"}});
@@ -554,6 +570,11 @@ function kRender(el){
       if(r==="eltern"&&!nm2(n)){say("Bitte deinen Vor- und Nachnamen eintragen.",1);return}
       try{await fs.doc("kverkn/"+c.id).update({name:n.slice(0,60),rolle:r});kls.set("u13wer."+c.pid,JSON.stringify(r==="spieler"?{r:"s"}:{r:"e",n}));KS.msg="";location.reload()}catch(x){say("Das hat nicht geklappt. Bitte später noch einmal versuchen.",1)}return}
     if(k==="go"){kls.set("u13kpid",b.dataset.pid);location.reload();return}
+    if(k==="inst"){const e2=instEv;if(!e2)return;instEv=null;try{await e2.prompt()}catch(x){}kRender(el);return}
+    if(k==="pon"||k==="poff"){const pc=window.__pushCtx&&window.__pushCtx();if(!pc)return;b.disabled=true;
+      if(k==="poff"){await pushApi.disable(pc);say("Benachrichtigungen sind aus.");return}
+      let r;try{r=await pushApi.enable(pc)}catch(x){r="fehler"}
+      if(r==="ok")say("Benachrichtigungen sind an.");else say(pushMsg(r),1);return}
     if(k==="kid"){const n=el.querySelector("#kstk").value.trim();if(!nm2(n)){say("Bitte Vor- und Nachnamen des Kindes eintragen.",1);return}
       const a={email:K.email,name:String(c.rolle==="spieler"?c.pn||c.name:c.name).slice(0,60),kind:n.slice(0,60),rolle:"eltern",at:new Date().toISOString(),via:c.pid,status:"offen"};
       try{await fs.doc("kanfr/"+mkeyOf(K.email)).set(a);KS.anf=a;say("Anfrage gesendet. Der Trainer schaltet das Kind frei.")}catch(x){say("Das hat nicht geklappt. Bitte später noch einmal versuchen.",1)}return}
