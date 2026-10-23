@@ -16,11 +16,13 @@ const H=location.hash;
 const isScout=/^#scout\.[A-Za-z0-9_-]{16,}$/.test(H);
 window.__SCOUTKEY=isScout?H.slice(7):"";
 const isKurz=/^#k\/[A-Za-z0-9_-]{4,40}$/.test(H);
-const isViewerHash=(/^#[A-Za-z0-9]+\.[A-Za-z0-9_-]{16,}$/.test(H)&&!/^#co[A-Za-z0-9]+\./.test(H)&&!isScout)||isKurz;
+/* Konto für Spieler und Eltern: #sp/<Schlüssel> (Spielerlink), #mt/<Schlüssel> (Mannschaftslink), #konto (eigene Ansicht nach der Anmeldung) */
+const isKonto=/^#(konto|sp\/[A-Za-z0-9_-]{16,80}|mt\/[A-Za-z0-9_-]{16,80})$/.test(H);
+const isViewerHash=(/^#[A-Za-z0-9]+\.[A-Za-z0-9_-]{16,}$/.test(H)&&!/^#co[A-Za-z0-9]+\./.test(H)&&!isScout)||isKurz||isKonto;
 /* Spieler-, Eltern- und externe Links als eigene App. Rechte ändern sich nicht: Die App zeigt dasselbe wie der Link im Browser.
    Android/Computer: eigene App-Datei (manifest-link) mit Startadresse „./?link“; beim Start wird der zuletzt geöffnete Link auf diesem Gerät wieder eingesetzt (siehe oben).
    iPhone/iPad: ohne App-Datei, dann speichert das iPhone genau die geöffnete Adresse samt Link. */
-if(isViewerHash)try{localStorage.setItem("u13link",H)}catch(e){}
+if(isViewerHash)try{localStorage.setItem("u13link",isKonto?"#konto":H)}catch(e){}
 {const mf=isViewerHash?(IOS?"":"manifest-link.webmanifest"):"manifest.webmanifest";   /* App-Datei steht deshalb nicht fest in index.html */
   if(mf){const l=document.createElement("link");l.rel="manifest";l.href=mf;document.head.appendChild(l)}}
 const cfgOk=()=>!!(CFG.apiKey&&CFG.projectId&&CFG.authDomain&&!/DEIN|EINTRAGEN|XXXX/i.test(CFG.apiKey+CFG.projectId));
@@ -82,6 +84,7 @@ window.__vidNet={
     const r=await fetch(FSB()+P(coll)+"?documentId="+encodeURIComponent(id)+"&"+K(),{method:"POST",headers:hd,body:JSON.stringify({fields:f})});if(!r.ok)fail(r)},
   async update(path,obj){const ks=Object.keys(obj),f={};ks.forEach((k)=>{f[k]=toFs(obj[k])});
     const r=await fetch(FSB()+P(path)+"?"+ks.map((k)=>"updateMask.fieldPaths="+encodeURIComponent(k)).join("&")+"&currentDocument.exists=true&"+K(),{method:"PATCH",headers:hd,body:JSON.stringify({fields:f})});if(!r.ok)fail(r)}};}
+window.__webFile=(fid)=>/^[0-9a-f]{24}$/.test(fid)?restBlob("f_"+fid):Promise.resolve(null);   /* Eigentraining: verschlüsselte Datei */
 window.__webSnap=async function(pid){
   if(!cfgOk())throw new Error("config");
   const x=XIDS.indexOf(pid)>=0,b=await restBlob((x?"x_":"p_")+pid),bg=await restDoc("bg"),s={p:{},x:{}};
@@ -97,7 +100,7 @@ const SHARED=(()=>{try{return localStorage.getItem("u13shared")==="1"}catch(e){r
 async function wipeLocal(){
   try{await fs.terminate()}catch(e){}
   try{await fs.clearPersistence()}catch(e){}
-  try{Object.keys(localStorage).filter((k)=>/^(u13v:|u13rolle$|u13role$|u13kz\.)/.test(k)).forEach((k)=>localStorage.removeItem(k))}catch(e){}
+  try{Object.keys(localStorage).filter((k)=>/^(u13v:|u13rolle$|u13role$|u13kz\.|u13wer\.|u13kpid$|u13ktok$)/.test(k)).forEach((k)=>localStorage.removeItem(k))}catch(e){}
 }
 async function signOutClean(){try{await auth.signOut()}catch(e){}await wipeLocal();location.reload()}
 
@@ -114,16 +117,16 @@ const CSS='#u13login{position:fixed;inset:0;z-index:9999;display:flex;align-item
 +'#u13out{margin-left:10px;font:inherit;font-size:13px;padding:3px 9px;border-radius:8px;border:1px solid var(--ln,#e5e7eb);background:var(--card,#fff);color:var(--tx,#1c1f24);cursor:pointer;vertical-align:middle}';
 const ERR={"auth/invalid-credential":"E-Mail oder Passwort stimmt nicht.","auth/wrong-password":"E-Mail oder Passwort stimmt nicht.","auth/user-not-found":"E-Mail oder Passwort stimmt nicht.","auth/invalid-email":"Diese E-Mail-Adresse ist ungültig.","auth/email-already-in-use":"Zu dieser E-Mail gibt es schon ein Konto. Bitte anmelden.","auth/weak-password":"Das Passwort ist zu schwach (mindestens 10 Zeichen, am besten mehrere Wörter).","auth/too-many-requests":"Zu viele Versuche. Bitte kurz warten und erneut versuchen.","auth/network-request-failed":"Keine Verbindung zum Server.","auth/popup-closed-by-user":"Die Anmeldung wurde abgebrochen.","auth/cancelled-popup-request":"Die Anmeldung wurde abgebrochen.","auth/unauthorized-domain":"Diese Internetadresse ist in Firebase noch nicht freigegeben (Authentication → Einstellungen → Autorisierte Domains).","auth/operation-not-allowed":"Diese Anmeldeart ist in Firebase noch nicht eingeschaltet.","auth/missing-password":"Bitte ein Passwort eingeben.","auth/missing-email":"Bitte eine E-Mail-Adresse eingeben."};
 const errTxt=(e)=>ERR[e&&e.code]||("Das hat nicht geklappt"+(e&&(e.code||e.message)?" ("+(e.code||e.message)+")":"")+".");
-let ov=null;
+let ov=null,OVSUB="Nur für das Trainerteam",LINTRO="";
 function overlay(html){
   if(!document.getElementById("u13css")){const st=document.createElement("style");st.id="u13css";st.textContent=CSS;document.head.appendChild(st)}
   if(!ov){ov=document.createElement("div");ov.id="u13login";(document.body||document.documentElement).appendChild(ov)}
-  ov.innerHTML='<div class="lc"><h1>TuS Haltern · Teamzentrale</h1><p class="sb">Nur für das Trainerteam</p>'+html+"</div>";return ov;
+  ov.innerHTML='<div class="lc"><h1>TuS Haltern · Teamzentrale</h1><p class="sb">'+OVSUB+'</p>'+html+"</div>";return ov;
 }
 const hideOverlay=()=>{if(ov){ov.remove();ov=null}};
 function showSetup(){overlay('<div class="ms er" style="font-size:15px">Die Verbindung zu Firebase ist noch nicht eingerichtet.</div><p class="sb">Bitte die Datei <b>firebase-config.js</b> mit den Werten aus dem Firebase-Projekt ausfüllen (siehe Anleitung) und die Dateien erneut hochladen.</p>')}
 function showDenied(email){
-  const o=overlay('<div class="ms er" style="font-size:15px">Dieses Konto ist nicht freigegeben.</div><p class="sb">Angemeldet als <b>'+E(email)+'</b>. Zugriff haben nur Personen, die der Besitzer unter Einstellungen → Mannschaft → „Zugang zur App“ freigegeben hat.</p><button id="u13so">Abmelden</button>');
+  const o=overlay('<div class="ms er" style="font-size:15px">Dieses Konto ist nicht freigegeben.</div><p class="sb">Angemeldet als <b>'+E(email)+'</b>. Zugriff haben nur Personen, die der Besitzer unter Einstellungen → Mannschaft → „Zugang zur App“ freigegeben hat.</p><p class="sb">Spieler und Eltern: Bitte öffnet den Link, den ihr vom Trainer bekommen habt.</p><button id="u13so">Abmelden</button>');
   o.querySelector("#u13so").onclick=()=>signOutClean();
 }
 function showVerify(user){
@@ -136,7 +139,7 @@ function showVerify(user){
 }
 function showLogin(){
   return new Promise((res)=>{
-    const o=overlay('<button class="pr" id="lg">Mit Google anmelden</button><div class="or">oder mit E-Mail</div><input id="le" type="email" autocomplete="username" placeholder="E-Mail" inputmode="email"><input id="lp" type="password" autocomplete="current-password" placeholder="Passwort"><label class="note" style="display:flex;gap:8px;align-items:flex-start;margin:6px 0 10px;font-size:12.5px"><input type="checkbox" id="lsh" style="width:auto;margin:3px 0 0"><span>Gemeinsames Gerät (Schule, Verein, fremdes Gerät): nichts auf diesem Gerät speichern</span></label><div class="ms" id="lm"></div><button class="pr" id="li">Anmelden</button><button id="lr">Konto anlegen</button><button class="ln" id="lf">Passwort vergessen?</button>'),m=o.querySelector("#lm"),em=o.querySelector("#le"),pw=o.querySelector("#lp");
+    const o=overlay(LINTRO+'<button class="pr" id="lg">Mit Google anmelden</button><div class="or">oder mit E-Mail</div><input id="le" type="email" autocomplete="username" placeholder="E-Mail" inputmode="email"><input id="lp" type="password" autocomplete="current-password" placeholder="Passwort"><label class="note" style="display:flex;gap:8px;align-items:flex-start;margin:6px 0 10px;font-size:12.5px"><input type="checkbox" id="lsh" style="width:auto;margin:3px 0 0"><span>Gemeinsames Gerät (Schule, Verein, fremdes Gerät): nichts auf diesem Gerät speichern</span></label><div class="ms" id="lm"></div><button class="pr" id="li">Anmelden</button><button id="lr">Konto anlegen</button><button class="ln" id="lf">Passwort vergessen?</button>'),m=o.querySelector("#lm"),em=o.querySelector("#le"),pw=o.querySelector("#lp");
     const msg=(t,k)=>{m.className="ms"+(k?" "+k:"");m.textContent=t||""};
     const busy=(b)=>o.querySelectorAll("button").forEach((x)=>{x.disabled=b});
     const run=async(f)=>{busy(true);msg("");try{await f()}catch(e){msg(errTxt(e),"er")}busy(false)};
@@ -175,7 +178,10 @@ async function start(){
     const c=await fs.doc("config/main").get();
     if(!c.exists){await fs.doc("config/main").set({saison:"2026/27"})}
   }catch(e){
-    if(e&&/permission|denied|insufficient/i.test(String(e.code)+" "+String(e.message))){showDenied(u&&u.email);return new Promise(()=>{})}
+    if(e&&/permission|denied|insufficient/i.test(String(e.code)+" "+String(e.message))){
+      /* Kein Trainer: hat die Person ein Konto für Spieler/Eltern (verknüpft oder Anfrage offen), geht es zu ihrer Ansicht */
+      if(await kontoHas()){location.replace(location.pathname+location.search+"#konto");setTimeout(()=>location.reload(),50);return new Promise(()=>{})}
+      showDenied(u&&u.email);return new Promise(()=>{})}
     /* offline: weiter, die Daten kommen aus dem Gerätespeicher */
   }
   hideOverlay();addSignOut();window.__webFs=fs;
@@ -242,7 +248,7 @@ function viewerInstall(){
   const body=()=>(eltern()?'<p style="margin:4px 0 6px;font-size:14.5px">Für Eltern ist das freiwillig. Wer mag, kann die Seite als App speichern und dort die Benachrichtigungen einschalten, zum Beispiel für Antworten vom Trainer und neue Hinweise.</p>'
       :'<p style="margin:4px 0 6px;font-size:14.5px"><b>Für Spieler: Bitte speichere diese Seite als App auf deinem Handy und schalte danach in der App die Benachrichtigungen ein.</b> Nur dann bekommst du Bescheid, wenn es einen neuen Clip, einen neuen Hinweis, eine Erinnerung an eine Aufgabe oder eine Antwort vom Trainer gibt, auch wenn die App geschlossen ist. Danke!</p><p class="note" style="margin:0 0 6px">Eltern brauchen die App nicht unbedingt, können sie aber natürlich auch speichern.</p>')+'<p class="note" style="margin:0 0 6px">Außerdem öffnest du die Seite dann mit einem Tipp vom Startbildschirm, auch ohne Netz (letzter Stand). Die App zeigt genau das, was du hier siehst.</p><button class="btn" data-vib style="display:none;margin:2px 0 8px">App jetzt installieren</button><b style="font-size:14px">So geht’s ('+VSTEP[dev][0]+'):</b>'+ol(dev)
     +'<details style="margin:4px 0"><summary class="note" style="cursor:pointer">Anleitung für andere Geräte</summary>'+["ios","android","pc"].filter((k)=>k!==dev).map((k)=>'<b style="font-size:13px">'+VSTEP[k][0]+'</b>'+ol(k)).join("")+"</details>"
-    +(isKurz?'<p class="note" style="margin:4px 0 0">Beim ersten Öffnen der App einmal das Passwort eingeben und „Auf diesem Gerät angemeldet bleiben“ anhaken.</p>':"")+'<p class="note" style="margin:4px 0 0">Den Link bitte nicht weitergeben. Er gehört nur dir.</p>';
+    +(isKurz?'<p class="note" style="margin:4px 0 0">Beim ersten Öffnen der App einmal das Passwort eingeben und „Auf diesem Gerät angemeldet bleiben“ anhaken.</p>':"")+(isKonto?'<p class="note" style="margin:4px 0 0">In der App meldest du dich einmal mit deinem Konto an.</p>':'<p class="note" style="margin:4px 0 0">Den Link bitte nicht weitergeben. Er gehört nur dir.</p>');
   const wire=(c)=>{const b=c.querySelector("[data-vib]"),show=()=>{if(instEv)b.style.display=""};show();window.addEventListener("u13inst",show);
     b.onclick=async()=>{const ev=instEv;if(!ev)return;instEv=null;b.style.display="none";try{await ev.prompt()}catch(e){}}};
   const top=()=>{const c=document.createElement("div");c.id="u13vinst";c.className="card";c.style.cssText="margin:0 0 14px;border-color:var(--ac,#2563eb)";
@@ -384,11 +390,15 @@ async function publishSnap(snap){
     for(let i=1;i<parts.length;i++){keep.add(id+"~"+i);await fs.doc("pub/"+id+"~"+i).set({b:parts[i]})}};
   for(const pid of Object.keys(snap.p||{}))await put("p_"+pid,snap.p[pid]);
   for(const k of Object.keys(snap.x||{}))await put("x_"+k,snap.x[k]);
+  /* Eigentraining-Dateien: ändern sich nie (neue Datei = neue ID), deshalb nur neue hochladen; Liste mit Teilezahl in linkmeta */
+  let ff0={};try{const m0=await fs.doc("linkmeta/main").get();ff0=(m0.exists&&m0.data().ff)||{}}catch(e){}
+  const ff={};for(const fid of Object.keys(snap.f||{})){if(ff0[fid]){ff[fid]=ff0[fid];keep.add("f_"+fid);for(let i=1;i<ff0[fid];i++)keep.add("f_"+fid+"~"+i);continue}
+    await put("f_"+fid,snap.f[fid]);ff[fid]=Math.max(1,Math.ceil(snap.f[fid].length/CH))}
   if(snap.bg){let bg=clean(snap.bg);if(JSON.stringify(bg).length>900000)bg={L:bg.L||"",D:bg.D||"",i:""};keep.add("bg");await fs.doc("pub/bg").set(bg)}
   keep.add("scout");
   const all=await fs.collection("pub").get();
   for(const d of all.docs){if(!keep.has(d.id)&&d.id.slice(0,2)!=="a_")await fs.doc("pub/"+d.id).delete()}
-  await fs.doc("linkmeta/main").set({u:snap.u,k:snap.k||{},xk:snap.xk||{},fp:snap.fp||"",fa:snap.fa||"",fs:snap.fs||"",dzs:snap.dzs||""});
+  await fs.doc("linkmeta/main").set({u:snap.u,k:snap.k||{},xk:snap.xk||{},fp:snap.fp||"",fa:snap.fa||"",fs:snap.fs||"",dzs:snap.dzs||"",ff});
 }
 /* Kurzlinks (Trainer): Passwort-Paket veröffentlichen/entfernen; das geheime Zeichen liegt nur für Trainer lesbar in „aliasauth“ */
 if(!isViewerHash&&!isScout)window.__kurzTr={
@@ -410,6 +420,151 @@ window.__webOwnerSnap=function(cb){
   fs.collection("pub").onSnapshot((s)=>{docs=s.docs;later()},()=>{});
   fs.doc("linkmeta/main").onSnapshot((s)=>{meta=s.exists?s.data():{};later()},()=>{});
 };
+
+/* ---------- Konten für Spieler und Eltern ----------
+   Spielerlink (#sp/<Schlüssel>): Konto anlegen, ohne Genehmigung mit dem Spieler verknüpft (höchstens 4 Konten je Spieler).
+   Mannschaftslink (#mt/<Schlüssel>): Konto anlegen und Anfrage schicken, der Trainer ordnet zu und genehmigt.
+   Danach (#konto): Der Schlüssel zum verschlüsselten Spielerstand kommt aus „kkey/<spieler>“ (nur für verknüpfte Konten lesbar),
+   die Ansicht ist dieselbe wie beim Spielerlink. Rolle und Name stehen im Konto, „Wer bist du?“ entfällt. */
+const mkeyOf=(em)=>String(em||"").toLowerCase().replace(/[.]/g,"_").replace(/@/g,"_at_");
+const kEm=()=>(((auth&&auth.currentUser&&auth.currentUser.email)||"")+"").toLowerCase();
+const nm2=(s)=>String(s||"").trim().split(/\s+/).filter(Boolean).length>=2;
+const kls={get:(k)=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}}};
+async function myLinks(){try{const r=await fs.collection("kverkn").where("email","==",kEm()).get();return r.docs.map((d)=>({id:d.id,...d.data()}))}catch(e){return null}}
+async function myAnfrage(){try{const s=await fs.doc("kanfr/"+mkeyOf(kEm())).get();return s.exists?s.data():null}catch(e){return null}}
+/* Nach einer Trainer-Anmeldung ohne Trainer-Zugang: hat die Person ein Konto als Spieler/Elternteil? */
+async function kontoHas(){const l=await myLinks();if(l&&l.length)return true;return!!(await myAnfrage())}
+const kSo='<button class="ln" id="u13so" style="margin-top:6px">Abmelden</button>';
+function kMsg(title,text,bad){const o=overlay('<div class="ms '+(bad?"er":"ok")+'" style="font-size:16px;font-weight:600">'+E(title)+'</div><p class="sb" style="font-size:14px">'+text+'</p><div class="sb">Angemeldet als <b>'+E(kEm())+'</b></div>'+kSo+'<button class="ln" id="kdel" style="margin:6px 0 0 16px">Konto löschen</button><div class="ms" id="kdm"></div>');
+  o.querySelector("#u13so").onclick=()=>signOutClean();
+  const d=o.querySelector("#kdel");d.onclick=async()=>{if(!d.dataset.arm){d.dataset.arm="1";d.textContent="Wirklich löschen?";return}
+    try{const l=(await myLinks())||[];for(const x of l)await fs.doc("kverkn/"+x.id).delete();try{await fs.doc("kanfr/"+mkeyOf(kEm())).delete()}catch(x){}await auth.currentUser.delete();signOutClean()}
+    catch(x){const m=o.querySelector("#kdm");m.className="ms er";m.textContent="Bitte melde dich ab, wieder an und tippe dann noch einmal auf „Konto löschen“."}};
+  return new Promise(()=>{})}
+/* Wer bist du? Erst Spieler oder Elternteil, danach nur die Namen, die noch fehlen.
+   o.sp = Name des Spielers (Spielerlink: Spieler müssen gar nichts eintippen), sonst Mannschaftslink. */
+function kForm(o){
+  return new Promise((res)=>{
+    const sp=o.sp||"",step=(r)=>{
+      const kid=!sp&&r==="eltern";
+      const ov=overlay('<div style="font-size:17px;font-weight:600;margin:0 0 4px">Wer bist du?</div><p class="sb" style="margin-bottom:12px">Angemeldet als&nbsp;<b>'+E(kEm())+'</b></p>'
+        +(r?'<div style="margin:0 0 2px;font-weight:600">'+(r==="spieler"?"Ich bin Spieler":"Ich bin Elternteil"+(sp?" von "+E(sp):""))+'</div><button class="ln" id="kfz" style="margin:0 0 12px">Auswahl ändern</button>'
+          +'<label class="sb" for="kfn" style="display:block;margin:0 0 4px">'+(r==="spieler"?"Dein Vor- und Nachname":"Dein Vor- und Nachname (Elternteil)")+'</label><input id="kfn" maxlength="60" autocomplete="name" placeholder="Vor- und Nachname">'
+          +(kid?'<label class="sb" for="kfk" style="display:block;margin:0 0 4px">Vor- und Nachname deines Kindes</label><input id="kfk" maxlength="60" placeholder="Vor- und Nachname des Kindes">':"")
+          +'<div class="ms" id="kfm"></div><button class="pr" id="kfgo">'+E(o.btn)+'</button>'
+        :'<button class="pr" data-kr="spieler">Ich bin '+(sp?E(sp):"Spieler")+'</button><button data-kr="eltern">Ich bin Elternteil'+(sp?" von "+E(sp):"")+'</button>')
+        +kSo);
+      ov.querySelector("#u13so").onclick=()=>signOutClean();
+      ov.querySelectorAll("[data-kr]").forEach((b)=>{b.onclick=()=>{const v=b.dataset.kr;if(v==="spieler"&&sp){res({rolle:"spieler",name:sp,kind:sp});return}step(v)}});
+      const z=ov.querySelector("#kfz");if(z)z.onclick=()=>step("");
+      const go=ov.querySelector("#kfgo");if(!go)return;const n=ov.querySelector("#kfn");n.focus();
+      go.onclick=()=>{const name=n.value.trim(),k=kid?ov.querySelector("#kfk").value.trim():"",m=ov.querySelector("#kfm");
+        if(!nm2(name)){m.className="ms er";m.textContent="Bitte Vor- und Nachnamen eintragen.";return}
+        if(kid&&!nm2(k)){m.className="ms er";m.textContent="Bitte Vor- und Nachnamen deines Kindes eintragen.";return}
+        res({rolle:r,name,kind:r==="spieler"?name:k})};
+    };step("");
+  });
+}
+async function kClaimSp(tok){
+  let e=null;try{const s=await fs.doc("spielereinl/"+tok).get();e=s.exists?s.data():null}catch(x){e=null}
+  if(!e||e.aktiv!==true)return"bad";
+  const kid=e.pid+"~"+mkeyOf(kEm());
+  try{const ex=await fs.doc("kverkn/"+kid).get();if(ex.exists)return"ok"}catch(x){}
+  const f=await kForm({sp:e.n||"",btn:"Weiter"});
+  const zr=fs.doc("kzaehl/"+e.pid);let n=0;
+  try{const z=await zr.get();if(z.exists)n=+z.data().n||0}catch(x){}
+  if(n>=4)return"voll";
+  const b=fs.batch();b.set(fs.doc("kverkn/"+kid),{pid:e.pid,email:kEm(),rolle:f.rolle,name:f.name.slice(0,60),pn:String(e.n||"").slice(0,80),at:new Date().toISOString(),s:tok});
+  if(n)b.update(zr,{n:n+1});else b.set(zr,{n:1});
+  try{await b.commit();kls.set("u13kpid",e.pid);return"ok"}catch(x){return denied(x)?"voll":"fehler"}
+}
+async function kAnfrage(tok){
+  let e=null;try{const s=await fs.doc("mteinl/"+tok).get();e=s.exists?s.data():null}catch(x){e=null}
+  if(!e||e.aktiv!==true)return"bad";
+  if(await myAnfrage())return"offen";
+  const f=await kForm({btn:"Anfrage senden"});
+  try{await fs.doc("kanfr/"+mkeyOf(kEm())).set({email:kEm(),name:f.name.slice(0,60),kind:f.kind.slice(0,60),rolle:f.rolle,at:new Date().toISOString(),s:tok,status:"offen"});return"gesendet"}catch(x){return"fehler"}
+}
+async function kontoStart(){
+  OVSUB="Für Spieler und Eltern";
+  LINTRO='<p class="sb" style="font-size:14px;color:inherit;margin:0 0 12px">Melde dich an oder lege mit Google oder deiner E-Mail-Adresse ein Konto an. Das geht einmal, danach bleibst du auf diesem Gerät angemeldet.</p>';
+  if(!cfgOk()){showSetup();return}
+  /* Einladung merken: übersteht Anmeldung, Bestätigungs-E-Mail und Neuladen */
+  const tk=H.match(/^#(sp|mt)\/([A-Za-z0-9_-]{16,80})$/);if(tk)kls.set("u13ktok",tk[1]+"/"+tk[2]);
+  try{for(const f of["firebase-app-compat.js","firebase-auth-compat.js","firebase-firestore-compat.js"])await loadScript(SDK+f)}
+  catch(e){overlay('<div class="ms er">Die Verbindung konnte nicht aufgebaut werden. Bitte die Internetverbindung prüfen und die Seite neu laden.</div>');return}
+  fb=window.firebase;fb.initializeApp(CFG);auth=fb.auth();fs=fb.firestore();
+  if(SHARED){try{await auth.setPersistence(fb.auth.Auth.Persistence.SESSION)}catch(e){}}
+  let u=await firstUser();
+  if(!u){await showLogin();u=auth.currentUser}
+  if(needsVerify(u)){try{await u.reload()}catch(e){}u=auth.currentUser;if(needsVerify(u)){await showVerify(u);u=auth.currentUser}}
+  window.__webFs=fs;
+  const t=(kls.get("u13ktok")||"").split("/");
+  if(t[0]==="sp"&&t[1]){const r=await kClaimSp(t[1]);kls.set("u13ktok",null);
+    if(r==="bad")await kMsg("Dieser Link gilt nicht mehr.","Der Link wurde erneuert oder beendet. Bitte frag den Trainer nach dem aktuellen Link.",1);
+    if(r==="voll")await kMsg("Dieser Link ist schon vergeben.","Pro Spieler können sich höchstens 4 Konten über den Link anmelden. Bitte frag den Trainer, ob er dich freischaltet.",1);
+    if(r==="fehler")await kMsg("Das hat nicht geklappt.","Bitte öffne den Link noch einmal. Wenn es wieder nicht geht, frag den Trainer nach einem neuen Link.",1)}
+  if(t[0]==="mt"&&t[1]){const r=await kAnfrage(t[1]);kls.set("u13ktok",null);
+    if(r==="bad")await kMsg("Dieser Link gilt nicht mehr.","Der Link wurde erneuert oder beendet. Bitte frag den Trainer nach dem aktuellen Link.",1);
+    if(r==="fehler")await kMsg("Das hat nicht geklappt.","Bitte öffne den Link noch einmal.",1);
+    const l0=(await myLinks())||[];
+    if(!l0.length){await kMsg(r==="gesendet"?"Danke, deine Anfrage ist angekommen.":"Deine Anfrage wartet noch auf den Trainer.","Der Trainer prüft sie und schaltet dich frei. Danach öffnest du einfach wieder denselben Link oder die App und bist direkt drin.");}}
+  if(location.hash!=="#konto")try{history.replaceState(null,"",location.pathname+location.search+"#konto")}catch(e){}
+  const all=await myLinks();
+  if(all===null)return kMsg("Keine Verbindung.","Bitte die Internetverbindung prüfen und die Seite neu laden.",1);
+  const act=all.filter((l)=>l.gesperrt!==true);
+  if(!act.length){
+    if(all.length)return kMsg("Dein Zugang ist gesperrt.","Bitte wende dich an den Trainer.",1);
+    if(await myAnfrage())return kMsg("Deine Anfrage wartet noch auf den Trainer.","Der Trainer prüft sie und schaltet dich frei. Danach öffnest du diese Seite einfach wieder.");
+    return kMsg("Noch kein Spieler verknüpft.","Bitte öffne den Link, den du vom Trainer bekommen hast (Mannschaftslink oder Spielerlink).",1)}
+  const want=kls.get("u13kpid"),cur=act.find((l)=>l.pid===want)||act[0];kls.set("u13kpid",cur.pid);
+  let key="";try{const s=await fs.doc("kkey/"+cur.pid).get();key=(s.exists&&s.data()&&s.data().k)||""}catch(e){key=""}
+  if(!key)return kMsg("Gleich geht’s los.","Der Trainer hat die Ansicht für "+E(cur.pn||"deinen Spieler")+" noch nicht freigeschaltet. Bitte öffne die Seite später noch einmal.");
+  kls.set("u13wer."+cur.pid,JSON.stringify(cur.rolle==="spieler"?{r:"s"}:{r:"e",n:cur.name}));
+  window.__KONTO={email:kEm(),links:act,cur,render:kRender};
+  hideOverlay();
+  window.__showViewer(cur.pid,key);
+}
+window.__kontoStart=()=>{kontoStart().catch((e)=>{overlay('<div class="ms er">Das hat nicht geklappt. Bitte die Seite neu laden.</div>')})};
+/* Reiter „Einstellungen“ in der Konto-Ansicht */
+const KS={msg:"",bad:false,arm:"",anf:undefined,r:"",n:null};   /* r, n: gewählte Rolle und eingetippter Name, bis gespeichert */
+function kRender(el){
+  const K=window.__KONTO;if(!K||!el)return;const c=K.cur,rr=KS.r||c.rolle,sp=rr==="spieler";
+  if(KS.anf===undefined){KS.anf=null;myAnfrage().then((a)=>{KS.anf=a||false;kRender(el)})}
+  const radio=(v,t)=>'<label style="display:flex;gap:8px;align-items:center;margin:4px 0"><input type="radio" name="krl" value="'+v+'"'+(rr===v?" checked":"")+'>'+t+'</label>';
+  el.innerHTML='<div class="card" style="margin:0 0 12px"><h3 style="margin-top:0">Dein Konto</h3><div class="note">Angemeldet als <b>'+E(K.email)+'</b></div>'
+    +'<div style="margin:10px 0 4px;font-weight:600">Ich bin</div>'+radio("spieler",(c.pn?E(c.pn):"der Spieler")+" selbst")+radio("eltern","Elternteil"+(c.pn?" von "+E(c.pn):""))
+    +'<div id="kstn"'+(sp?" hidden":"")+'><label class="note" for="kstni">Dein Vor- und Nachname</label><input id="kstni" maxlength="60" autocomplete="name" value="'+E(KS.n!=null?KS.n:c.rolle==="spieler"?"":c.name)+'" style="width:100%;box-sizing:border-box;margin-top:2px"></div>'
+    +'<div class="bar" style="margin:10px 0 0"><button class="btn" data-ks="save">Speichern</button></div></div>'
+    +'<div class="card" style="margin:0 0 12px"><h3 style="margin-top:0">'+(K.links.length>1?"Deine Spieler":"Dein Spieler")+'</h3>'
+    +K.links.map((l)=>'<div class="vd-row"><div style="flex:1;min-width:0"><b>'+E(l.pn||"Spieler")+'</b><div class="note">'+(l.rolle==="spieler"?"als Spieler":"als Elternteil")+'</div></div>'+(l.pid===c.pid?'<span class="note">wird gerade angezeigt</span>':'<button class="btn" data-ks="go" data-pid="'+E(l.pid)+'">Anzeigen</button>')+'</div>').join("")
+    +'<div style="margin-top:10px"><b>Weiteres Kind (Geschwister)</b>'
+    +(KS.anf?'<div class="note" style="margin-top:4px">Deine Anfrage für <b>'+E(KS.anf.kind)+'</b> wartet auf den Trainer.</div>'
+      :KS.anf===null?'<div class="note">Wird geladen …</div>'
+      :'<div class="note" style="margin:2px 0 6px">Der Trainer bekommt eine Anfrage und schaltet das Kind frei.</div><input id="kstk" maxlength="60" placeholder="Vor- und Nachname des Kindes" style="width:100%;box-sizing:border-box"><div class="bar" style="margin:8px 0 0"><button class="btn" data-ks="kid">Anfrage senden</button></div>')
+    +'</div></div>'
+    +'<div class="card" style="margin:0 0 12px"><h3 style="margin-top:0">Benachrichtigungen</h3><div class="note">Speichere die Seite als App auf deinem Handy (Anleitung auf der Übersicht). In der App schaltest du die Benachrichtigungen ganz unten auf der Seite ein oder aus.</div></div>'
+    +'<div class="card" style="margin:0 0 12px"><h3 style="margin-top:0">Abmelden oder Konto löschen</h3><div class="bar" style="margin:0"><button class="btn" data-ks="out">Abmelden</button><button class="btn" data-ks="del" style="color:var(--r)">'+(KS.arm==="del"?"Wirklich löschen? Dann ist alles weg.":"Konto löschen")+'</button></div></div>'
+    +'<div class="note'+(KS.bad?" warn":"")+'" id="kstm" role="status">'+E(KS.msg)+'</div>';
+  el.querySelectorAll('[name="krl"]').forEach((r)=>{r.onchange=()=>{if(r.checked)KS.r=r.value;el.querySelector("#kstn").hidden=KS.r==="spieler"}});
+  el.querySelector("#kstni").oninput=(ev)=>{KS.n=ev.target.value};
+  el.onclick=async(ev)=>{const b=ev.target.closest&&ev.target.closest("[data-ks]");if(!b)return;const k=b.dataset.ks,say=(t,bad)=>{KS.msg=t;KS.bad=!!bad;kRender(el)};
+    if(k!=="del")KS.arm="";
+    if(k==="save"){const r=(el.querySelector('[name="krl"]:checked')||{}).value||c.rolle,n=r==="spieler"?(c.rolle==="spieler"?c.name:(c.pn||c.name)):el.querySelector("#kstni").value.trim();
+      if(r==="eltern"&&!nm2(n)){say("Bitte deinen Vor- und Nachnamen eintragen.",1);return}
+      try{await fs.doc("kverkn/"+c.id).update({name:n.slice(0,60),rolle:r});kls.set("u13wer."+c.pid,JSON.stringify(r==="spieler"?{r:"s"}:{r:"e",n}));KS.msg="";location.reload()}catch(x){say("Das hat nicht geklappt. Bitte später noch einmal versuchen.",1)}return}
+    if(k==="go"){kls.set("u13kpid",b.dataset.pid);location.reload();return}
+    if(k==="kid"){const n=el.querySelector("#kstk").value.trim();if(!nm2(n)){say("Bitte Vor- und Nachnamen des Kindes eintragen.",1);return}
+      const a={email:K.email,name:String(c.rolle==="spieler"?c.pn||c.name:c.name).slice(0,60),kind:n.slice(0,60),rolle:"eltern",at:new Date().toISOString(),via:c.pid,status:"offen"};
+      try{await fs.doc("kanfr/"+mkeyOf(K.email)).set(a);KS.anf=a;say("Anfrage gesendet. Der Trainer schaltet das Kind frei.")}catch(x){say("Das hat nicht geklappt. Bitte später noch einmal versuchen.",1)}return}
+    if(k==="out"){signOutClean();return}
+    if(k==="del"){if(KS.arm!=="del"){KS.arm="del";kRender(el);return}KS.arm="";
+      try{const l=(await myLinks())||[];for(const x of l)await fs.doc("kverkn/"+x.id).delete();try{await fs.doc("kanfr/"+mkeyOf(K.email)).delete()}catch(x){}}catch(x){say("Das hat nicht geklappt. Bitte später noch einmal versuchen.",1);return}
+      try{await auth.currentUser.delete();signOutClean()}
+      catch(x){say("Deine Verbindungen zu den Spielern sind gelöscht. Um auch das Konto selbst zu löschen, melde dich bitte ab, wieder an und tippe noch einmal auf „Konto löschen“.",1)}
+      return}
+  };
+}
 
 /* ---------- Schnittstelle zur App ---------- */
 let dbP=null;

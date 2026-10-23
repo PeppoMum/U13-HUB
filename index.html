@@ -76,9 +76,20 @@ svg text{fill:var(--mu);font-size:10px}
 #bwtb th,#bwtb td{text-align:center}#bwtb tr.bwtr{cursor:pointer}#bwtb tr.bwsel td{background:var(--acs)}
 @media(max-width:560px){.bwb{width:48px}.bwc{min-width:54px}}
 .og{border-top:1px solid var(--ln);padding:6px 0}.og>summary{cursor:pointer;padding:6px 0}.og .nt{padding:8px 0 8px 14px}.nt{padding:12px 0;border-bottom:1px solid var(--ln)}.nt:last-child{border:0}.nt .h{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:4px}.nt p{margin:0;white-space:pre-wrap}.pv{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--acs);color:var(--ac)}.zl{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--os);color:var(--o)}
+/* Startseite: ＋ in den Kacheln „Zu erledigen“/„Notizen“ und Fenster zum schnellen Anlegen; Aufzählungspunkte in Notizen und To-Dos */
+h3:has(>.hplus){display:flex;align-items:center;gap:8px}.hplus{margin-left:auto;flex:none;width:32px;height:32px;border-radius:50%;border:0;background:var(--ac);color:#fff;font:600 20px/1 var(--font);display:grid;place-items:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.18);transition:transform .12s}.hplus:hover{transform:scale(1.08)}.hplus:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.bli{display:block;position:relative;padding-left:1.1em}.bli::before{content:"•";position:absolute;left:.25em;color:var(--ac);font-weight:700}
+.qa{position:fixed;inset:0;z-index:500}.qa-bg{position:absolute;inset:0;background:rgba(0,0,0,.45);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.qa-box{position:relative;margin:max(8vh,calc(env(safe-area-inset-top,0px) + 12px)) auto 0;width:min(520px,calc(100% - 24px));max-height:calc(100dvh - 16vh);overflow:auto;background:var(--card);color:var(--tx);border:1px solid var(--ln);border-radius:18px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.35);display:grid;gap:12px;animation:qaIn .16s ease-out}
+.qa-box h3{margin:0;color:var(--tx);text-transform:none;letter-spacing:0;font-size:19px;font-weight:700}.qa-box h3::before{content:"";display:inline-block;width:6px;height:18px;border-radius:3px;background:var(--ac);margin-right:10px;vertical-align:-2px}
+.qa-tb{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.qa-tb .btn{font-weight:600}
+#qat{width:100%;font-size:16px;min-height:140px;padding:10px 12px;border-radius:12px;resize:vertical;background:var(--bg)}#qat:focus{outline:2px solid var(--ac);outline-offset:-1px}
+.qa-row{display:flex;gap:12px;flex-wrap:wrap}.qa-row label{flex:1;min-width:150px;display:grid;gap:4px}.qa-row select,.qa-row input{width:100%}
+.qa-btns{display:flex;gap:10px;justify-content:flex-end}.qa-btns .btn{min-height:42px;padding:8px 16px}.qa-ok{background:var(--ac);color:#fff;border-color:var(--ac);font-weight:600;min-width:130px}
+@keyframes qaIn{from{opacity:0;transform:translateY(10px) scale(.98)}}@media(prefers-reduced-motion:reduce){.qa-box{animation:none}}
 body.ro .rm,body.ro .s,body.ro .chips button,body.ro #av,body.ro #gl tr[data-g] .rm{pointer-events:none}body.ro .rm{display:none}#mt th,#mt td{text-align:center}#mt tr.mwe td{background:var(--grs)}#mt tr.mwe td:first-child{box-shadow:inset 4px 0 0 var(--tx)}.hl{border:0;border-top:2px solid var(--ln);margin:22px 0 16px}#gpl.notw .gtwc{display:none}#gpl .gtw{width:70px}.kpi .note{margin-top:2px}.empty{padding:28px;text-align:center;color:var(--mu)}
 @media(max-width:760px){.app{display:block}nav{position:fixed;bottom:0;left:0;right:0;top:auto;height:auto;z-index:9;display:flex;padding:8px 6px calc(9px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--ln);border-right:0}nav h1,nav small{display:none}nav{overflow-x:auto}nav button{flex-direction:column;align-items:center;gap:2px;font-size:11px;padding:8px 8px;min-width:64px;flex:none;width:auto}main{padding:16px 16px 104px}h2{font-size:24px}}
-#vw2{max-width:1100px;margin:0 auto;padding:16px 16px 40px}.vh{display:flex;align-items:center;gap:10px;margin-bottom:14px}.vh img{width:68px;height:68px;object-fit:contain}.hn{border-radius:12px;padding:10px 14px;margin:0 0 12px;white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid;border-left-width:6px;color:var(--tx)}.hb{background:var(--bs);border-color:var(--b)}.hy{background:var(--ys);border-color:var(--y)}.hr{background:var(--rs);border-color:var(--r)}.hg{background:var(--gs);border-color:var(--g)}.vf{margin-top:18px;text-align:center;color:var(--mu);font-size:12px}.btn.arm{background:var(--rs);color:var(--r)}
+#vw2{max-width:1100px;margin:0 auto;padding:16px 16px 40px}.vh{display:flex;align-items:center;gap:10px;margin-bottom:14px}.vh img{width:68px;height:68px;object-fit:contain}.hn{border-radius:12px;padding:10px 14px;margin:0 0 12px;white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid;border-left-width:6px;color:var(--tx)}.hb{background:var(--bs);border-color:var(--b)}.hy{background:var(--ys);border-color:var(--y)}.hr{background:var(--rs);border-color:var(--r)}.hg{background:var(--gs);border-color:var(--g)}.hn a{color:inherit;font-weight:600;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:2px;overflow-wrap:anywhere}.vf{margin-top:18px;text-align:center;color:var(--mu);font-size:12px}.btn.arm{background:var(--rs);color:var(--r)}
 #sdt td:nth-child(5),#sdt th:nth-child(5){text-align:center}.chip.pN{background:var(--acs);color:var(--ac);font-weight:500}.chip.pS{background:var(--ac);color:#fff}
 body.bgimg :is(#vprof .ph,#vprof>.ph,main>section>h2,main>section>.sub,main>section>h3,main>section>p.note,main>section>.leg,.vh,.vf,#vw2>h3,#vw2 p.note,#vw2 .bar,#vw2 .leg,main>section>.bar,main>section>.kpis>.kpi:not(.card)){background:var(--bg);padding:6px 10px;border-radius:10px;width:fit-content;max-width:100%}
 @media(min-width:1200px){#htd .kpi,#bwt .kpi{display:grid;grid-template-columns:minmax(220px,320px) 90px 1fr;align-items:baseline;gap:4px 20px;padding:12px 20px;margin-bottom:8px}#htd .kpi b,#bwt .kpi b{font-size:24px;line-height:1.1}#htd .kpi span,#bwt .kpi span{display:block!important;font-size:13px}#htd .kpi span:first-child,#bwt .kpi span:first-child{font-weight:600;color:var(--tx)}#htd .kpi .trx,#bwt .kpi .trx{grid-column:1/-1;margin-top:2px;padding-top:6px}#htd .kpi .trx>div:nth-child(2),#bwt .kpi .trx>div:nth-child(2){margin-top:4px}}
@@ -311,7 +322,7 @@ input.dsf-d{width:9.5em}input.dsf-t{width:5.5em}input.dsbad{border-color:var(--r
 </div>
 <div class="etp" id="etp-l" hidden>
 <div class="card" id="lkh" style="margin-bottom:12px"><h3>Hinweise in Spielerlinks</h3><p class="note" style="margin-top:0">Farbiger Hinweis oben im Link („Gesamter Link“: in beiden Reitern und im Terminplan-Link) oder nur in den Terminplänen. Ohne Datum bleibt er sichtbar, bis du ihn entfernst. Wirkt in den Links bei der nächsten Aktualisierung (alle 6 Stunden).</p><div id="hnl"></div>
-<div class="bar" style="margin:12px 0 0;align-items:flex-start"><label class="note" style="flex:1;min-width:240px">Hinweis<br><textarea id="hnt" rows="2" style="width:100%" placeholder="z. B. Training fällt am Freitag aus"></textarea></label><label class="note">Farbe<br><select autocomplete="off" id="hnf"><option value="blau">Blau – Info</option><option value="gelb">Gelb – Achtung</option><option value="rot">Rot – Wichtig</option><option value="gruen">Grün – Positiv</option></select></label><label class="note">Anzeigen bei<br><select autocomplete="off" id="hnw"><option value="alle">Gesamter Link</option><option value="plan">Nur Terminpläne</option></select></label></div>
+<div class="bar" style="margin:12px 0 0;align-items:flex-start"><div style="flex:1;min-width:240px"><label class="note" style="display:block">Hinweis<br><textarea id="hnt" rows="2" style="width:100%" placeholder="z. B. Training fällt am Freitag aus"></textarea></label><div class="bar" style="margin:4px 0 0"><button class="btn" type="button" id="hnlk">🔗 Link einfügen</button><span class="note">Adressen werden im Spielerlink automatisch anklickbar.</span></div><div class="bar" id="hnlf" hidden style="margin:6px 0 0;align-items:flex-end"><label class="note">Adresse<br><input id="hnlu" style="width:220px;max-width:100%" autocomplete="off" inputmode="url" placeholder="https://…"></label><label class="note">Name (so steht es im Link)<br><input id="hnln" style="width:220px;max-width:100%" autocomplete="off" placeholder="z. B. Anmeldung"></label><button class="btn" type="button" id="hnli">Einfügen</button><button class="btn" type="button" id="hnlc">Abbrechen</button></div></div><label class="note">Farbe<br><select autocomplete="off" id="hnf"><option value="blau">Blau – Info</option><option value="gelb">Gelb – Achtung</option><option value="rot">Rot – Wichtig</option><option value="gruen">Grün – Positiv</option></select></label><label class="note">Anzeigen bei<br><select autocomplete="off" id="hnw"><option value="alle">Gesamter Link</option><option value="plan">Nur Terminpläne</option></select></label></div>
 <div class="bar" style="margin:8px 0 0"><label class="note">Sichtbar ab (optional)<br><input type="date" id="hnv"></label><label class="note">Sichtbar bis (optional)<br><input type="date" id="hnb"></label></div>
 <div id="hnpw" style="display:none;margin:10px 0 0"><div class="note" style="margin-bottom:4px">Nur in diesen Monaten (leer = in allen)</div><div class="chips" id="hnmo" style="flex-wrap:wrap"></div><label class="note" style="display:block;margin-top:8px">Und/oder nur in diesen Kalenderwochen (z. B. 41 oder 43–45, 48)<br><input id="hnkw" style="width:220px" autocomplete="off" placeholder="leer = in allen"></label><p class="note" id="hnph" style="margin:6px 0 0">Der Hinweis erscheint nur, wenn der angezeigte Monat bzw. die angezeigte Woche dazu passt. Beispiel: „November“ → im Novemberplan und in allen Wochen, die in den November fallen.</p></div>
 <div class="bar" style="margin:10px 0 0"><button class="btn" id="hna" style="background:var(--ac);color:#fff;border-color:var(--ac)">＋ Hinweis speichern</button><button class="btn" id="hnc" hidden>Abbrechen</button><span class="note" id="hnm"></span></div></div>
@@ -330,7 +341,7 @@ input.dsf-d{width:9.5em}input.dsf-t{width:5.5em}input.dsbad{border-color:var(--r
 </div></section>
 </main></div>
 <script type="application/json" id="snap">{}</script><script type="text/plain" id="src"></script>
-<script>window.__SCOUT=/^#scout\.[A-Za-z0-9_-]{16,}$/.test(location.hash);window.__CO=null&&(location.hash.match(/^#co([A-Za-z0-9]+)\.([A-Za-z0-9_-]{16,})$/)||null);window.__VIEWER=!window.__SCOUT&&!window.__CO&&(/^#[A-Za-z0-9]+\.[A-Za-z0-9_-]{16,}$/.test(location.hash)||/^#k\/[A-Za-z0-9_-]{4,40}$/.test(location.hash));if(window.__CO)document.documentElement.classList.add("cogate")</script>
+<script>window.__SCOUT=/^#scout\.[A-Za-z0-9_-]{16,}$/.test(location.hash);window.__CO=null&&(location.hash.match(/^#co([A-Za-z0-9]+)\.([A-Za-z0-9_-]{16,})$/)||null);window.__VIEWER=!window.__SCOUT&&!window.__CO&&(/^#[A-Za-z0-9]+\.[A-Za-z0-9_-]{16,}$/.test(location.hash)||/^#k\/[A-Za-z0-9_-]{4,40}$/.test(location.hash)||/^#(konto|sp\/[A-Za-z0-9_-]{16,80}|mt\/[A-Za-z0-9_-]{16,80})$/.test(location.hash));if(window.__CO)document.documentElement.classList.add("cogate")</script>
 <script>/* U13 – Berechnungsmodul (reine Funktionen, keine Abhängigkeit zu Oberfläche oder Datenbank).
    Läuft im Browser (window.U13) und in Node (require). Eingabe: Datenmodell aus seed.json. */
 (function (root) {
@@ -674,6 +685,12 @@ const mann=()=>(D.config&&D.config.mannschaft)||"U13";
 const twOf=(p)=>stammOf(p).includes("TW"),anw=(P,t)=>{const x=P.filter((p)=>(t.spieler||{})[p.id]==="x"),g=x.filter(twOf).length,k=P.filter((p)=>(t.spieler||{})[p.id]==="K").length;return{f:x.length-g,g,c:x.length+k,k,tot:P.filter((p)=>(t.spieler||{})[p.id]).length}};
 function row(n,p){const pos=p&&p.positionen||[],st=stammOf(p);return'<tr data-slot="'+n+'" class="'+(p?"":"free")+'"><td>'+n+'</td><td><input class="f-name" value="'+esc(p&&p.name)+'" placeholder="Platz '+n+' – frei" autocomplete="off"></td><td><input class="f-vor" value="'+esc(p&&p.vorname)+'" placeholder="Vorname" autocomplete="off"></td><td><input class="f-geb" type="date" value="'+esc(p&&p.geburtsdatum)+'"></td><td>'+(p?age(p.geburtsdatum):"")+'</td><td><div class="chips">'+posFor(pos).map((x)=>'<button type="button" data-pos="'+x+'" class="'+(st.includes(x)?"on pS":pos.includes(x)?"on pN":"")+'" title="Klick: Nebenposition → Stammposition → aus">'+x+"</button>").join("")+'</div></td><td><input class="f-tw" type="checkbox" '+(p&&p.torwart?"checked":"")+'></td><td><input class="f-ak" type="checkbox" '+(!p||p.aktiv!==false?"checked":"")+'></td><td><input class="f-nr" style="width:60px;min-width:0" value="'+esc(p&&p.nr)+'" placeholder="#" autocomplete="off"></td></tr>'}
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+/* Hinweistext mit anklickbaren Adressen: [Name](https://…) zeigt nur den Namen, nackte http(s)-Adressen werden selbst zum Link. Alles andere bleibt Text (escaped). */
+function hnFmt(t){const s=String(t==null?"":t),re=/\[([^\[\]\n]+)\]\((https?:\/\/[^\s()<>"']+)\)|https?:\/\/[^\s<>"']+/gi;let o="",i=0,m;
+  while((m=re.exec(s))){let u=m[2]||m[0],end=re.lastIndex;if(!m[2]){const k=u.match(/[.,;:!?)]+$/);if(k){u=u.slice(0,-k[0].length);end-=k[0].length;re.lastIndex=end}}
+    let gut=false;try{gut=/^https?:$/.test(new URL(u).protocol)&&/^https?:\/\/[^\/?#]/i.test(u)}catch(e){}if(!gut)continue;
+    o+=esc(s.slice(i,m.index))+'<a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">'+esc(m[2]?m[1].trim():u)+"</a>";i=end}
+  return o+esc(s.slice(i))}
 function renderStamm(){
   if($("#sdt").contains(document.activeElement))return; // nicht während der Eingabe neu zeichnen
   const m={};D.spieler.forEach((p)=>m[p.slot]=p);
@@ -1593,7 +1610,7 @@ function hnPush(id,o){const Q=window.__pushQ;if(!window.__WEB)return;
 function hnD(s){return s?s.slice(8)+"."+s.slice(5,7)+"."+s.slice(0,4):""}
 function renderHints(){
   const r=$("#hnl");if(!r)return;const L=hnList();
-  r.innerHTML=L.length?L.map((n)=>'<div class="hn '+(HNF[n.farbe]||HNF.blau)[0]+'" style="display:flex;gap:10px;align-items:flex-start"><div style="flex:1;min-width:0"><div style="white-space:pre-wrap;overflow-wrap:anywhere">'+esc(n.text)+'</div><div class="note" style="margin-top:4px">'+(n.wo==="plan"?"Nur Terminpläne":"Gesamter Link")+" · "+(n.von||n.bis?"sichtbar "+(n.von?"ab "+hnD(n.von):"")+(n.von&&n.bis?" ":"")+(n.bis?"bis "+hnD(n.bis):""):"bis zum Entfernen sichtbar")+(n.wo==="plan"&&((n.pm||[]).length||n.pw)?" · nur "+((n.pm||[]).length?(n.pm||[]).map(hnMn).join(" + "):"")+((n.pm||[]).length&&n.pw?" und ":"")+(n.pw?"KW "+esc(n.pw):""):"")+'</div></div><button class="rm" data-hne="'+n.id+'" title="Bearbeiten">✎</button><button class="rm'+(hnArm===n.id?" arm":"")+'" data-hnd="'+n.id+'">'+(hnArm===n.id?"Wirklich entfernen?":"✕")+"</button></div>").join(""):'<p class="note" style="margin:0">Aktuell kein Hinweis hinterlegt.</p>';
+  r.innerHTML=L.length?L.map((n)=>'<div class="hn '+(HNF[n.farbe]||HNF.blau)[0]+'" style="display:flex;gap:10px;align-items:flex-start"><div style="flex:1;min-width:0"><div style="white-space:pre-wrap;overflow-wrap:anywhere">'+hnFmt(n.text)+'</div><div class="note" style="margin-top:4px">'+(n.wo==="plan"?"Nur Terminpläne":"Gesamter Link")+" · "+(n.von||n.bis?"sichtbar "+(n.von?"ab "+hnD(n.von):"")+(n.von&&n.bis?" ":"")+(n.bis?"bis "+hnD(n.bis):""):"bis zum Entfernen sichtbar")+(n.wo==="plan"&&((n.pm||[]).length||n.pw)?" · nur "+((n.pm||[]).length?(n.pm||[]).map(hnMn).join(" + "):"")+((n.pm||[]).length&&n.pw?" und ":"")+(n.pw?"KW "+esc(n.pw):""):"")+'</div></div><button class="rm" data-hne="'+n.id+'" title="Bearbeiten">✎</button><button class="rm'+(hnArm===n.id?" arm":"")+'" data-hnd="'+n.id+'">'+(hnArm===n.id?"Wirklich entfernen?":"✕")+"</button></div>").join(""):'<p class="note" style="margin:0">Aktuell kein Hinweis hinterlegt.</p>';
   hnShow();
 }
 var hnMo=[];
@@ -1601,14 +1618,27 @@ function hnMoN(){return["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","
 function hnMn(m){return hnMoN()[+m.slice(5)-1]+" "+m.slice(0,4)}
 function hnMonths(){const y=parseInt(((D.config&&D.config.saison)||"2026/27"),10)||2026,o=[];for(let i=0;i<12;i++){const mm=(6+i)%12+1,yy=i<6?y:y+1;o.push(yy+"-"+String(mm).padStart(2,"0"))}return o}
 function hnShow(){const p=$("#hnw").value==="plan";$("#hnpw").style.display=p?"block":"none";$("#hnmo").innerHTML=hnMonths().map((m)=>'<button type="button" data-hm="'+m+'" class="'+((hnMo||[]).includes(m)?"on":"")+'">'+hnMoN()[+m.slice(5)-1]+"</button>").join("")}
-function hnReset(){hnEdit=null;["#hnt","#hnv","#hnb","#hnkw"].forEach((q)=>$(q).value="");hnMo=[];$("#hnf").value="blau";$("#hnw").value="alle";$("#hna").textContent="＋ Hinweis speichern";$("#hnc").hidden=true;hnShow()}
+function hnReset(){hnEdit=null;["#hnt","#hnv","#hnb","#hnkw"].forEach((q)=>$(q).value="");hnMo=[];$("#hnf").value="blau";$("#hnw").value="alle";$("#hna").textContent="＋ Hinweis speichern";$("#hnc").hidden=true;hnLkClose();hnShow()}
+function hnLkClose(){$("#hnlf").hidden=true;$("#hnlu").value="";$("#hnln").value=""}
+/* „Link einfügen“: setzt [Name](Adresse) bzw. nur die Adresse an der Cursorstelle in den Hinweistext */
+function hnLkInsert(){const m=$("#hnm"),t=$("#hnt"),nm=$("#hnln").value.replace(/[\[\]\n]+/g," ").trim();let u=$("#hnlu").value.trim(),gut=false;
+  if(u&&!/^https?:\/\//i.test(u)&&!/^[a-z][a-z0-9+.-]*:(?!\d)/i.test(u))u="https://"+u.replace(/^\/+/,"");
+  u=u.replace(/\(/g,"%28").replace(/\)/g,"%29");
+  try{const x=new URL(u);gut=/^https?:$/.test(x.protocol)&&x.hostname.includes(".")&&!/[\s<>"']/.test(u)}catch(e){}
+  if(!gut){m.textContent="Bitte eine gültige Internetadresse eingeben, z. B. www.tus-haltern.de";m.className="note warn";$("#hnlu").focus();return}
+  const v=t.value,a=t.selectionStart==null?v.length:t.selectionStart,b=t.selectionEnd==null?a:t.selectionEnd,vor=a&&!/\s/.test(v[a-1])?" ":"",nach=b<v.length&&!/\s/.test(v[b])?" ":"",ins=vor+(nm?"["+nm+"]("+u+")":u)+nach;
+  t.value=v.slice(0,a)+ins+v.slice(b);t.focus();t.selectionStart=t.selectionEnd=a+ins.length;hnLkClose();m.textContent="";m.className="note"}
 $("#lkh").addEventListener("change",(e)=>{if(e.target.id==="hnw")hnShow()});
+$("#lkh").addEventListener("keydown",(e)=>{if(e.key==="Enter"&&(e.target.id==="hnlu"||e.target.id==="hnln")){e.preventDefault();hnLkInsert()}else if(e.key==="Escape"&&e.target.closest("#hnlf"))hnLkClose()});
 $("#lkh").addEventListener("click",(e)=>{
   const m=$("#hnm"),de=e.target.closest("[data-hne]"),dd=e.target.closest("[data-hnd]");
   if(de){const n=hnList().find((x)=>x.id===de.dataset.hne);if(!n)return;hnEdit=n.id;$("#hnt").value=n.text;$("#hnf").value=n.farbe||"blau";$("#hnw").value=n.wo==="plan"?"plan":"alle";$("#hnv").value=n.von||"";$("#hnb").value=n.bis||"";hnMo=(n.pm||[]).slice();$("#hnkw").value=n.pw||"";$("#hna").textContent="💾 Änderung speichern";$("#hnc").hidden=false;hnShow();$("#hnt").scrollIntoView({behavior:"smooth",block:"center"});return}
   if(dd){const id=dd.dataset.hnd;if(hnArm===id){hnArm=null;cfgSave({hinweise:hnList().filter((x)=>x.id!==id)});hnPush(id,null);m.innerHTML='Entfernt. Eltern sehen die Änderung bei der nächsten Aktualisierung (alle 6 Stunden). <span class="ownonly"><button class="btn" data-lkgo="u" type="button">Jetzt Links aktualisieren</button></span><span class="coonly">Bitte den Besitzer, die Links zu aktualisieren.</span>'}else{hnArm=id;renderHints()}return}
   const hm=e.target.closest("[data-hm]");if(hm){const v=hm.dataset.hm,i=hnMo.indexOf(v);i<0?hnMo.push(v):hnMo.splice(i,1);hm.classList.toggle("on");return}
   if(e.target.id==="hnc"){hnReset();m.textContent="";return}
+  if(e.target.id==="hnlk"){const f=$("#hnlf");f.hidden=!f.hidden;if(!f.hidden)$("#hnlu").focus();return}
+  if(e.target.id==="hnlc"){hnLkClose();m.textContent="";return}
+  if(e.target.id==="hnli"){hnLkInsert();return}
   if(e.target.id==="hna"){
     const text=$("#hnt").value.trim();if(!text){m.textContent="Bitte einen Hinweistext eingeben.";m.className="note warn";return}
     const v=$("#hnv").value,b=$("#hnb").value;if(v&&b&&b<v){m.textContent="„Sichtbar bis“ liegt vor „Sichtbar ab“.";m.className="note warn";return}
@@ -1964,7 +1994,7 @@ V.pkg=(pid)=>({vc:V.clipsFor(pid),vg:V.games(),fk:V.fbKey,ds:V.dienste(pid)});
 function startTrainer(){
   if(V.started||!db||window.__VIEWER||window.__SCOUT||window.__ROLE==="scout")return;V.started=true;addCss();
   db.collection("clips").onSnapshot((s)=>{V.clips=s.docs.map((d)=>({id:d.id,...d.data()})).sort((a,b)=>(a.at||"")<(b.at||"")?1:-1);watchKom();render();typeof renderLinks==="function"&&renderLinks()},()=>{});
-  db.collection("fbin").onSnapshot((s)=>{V.fb=s.docs.map((d)=>({id:d.id,...d.data()})).sort((a,b)=>(a.at||"")<(b.at||"")?1:-1);badge();render()},()=>{});
+  db.collection("fbin").onSnapshot((s)=>{V.fb=s.docs.map((d)=>({id:d.id,...d.data()})).sort((a,b)=>(a.at||"")<(b.at||"")?1:-1);badge();render();window.__et&&window.__et.fbChanged()},()=>{});
   (async()=>{try{const r=await db.doc("config/feedback").get();let k=r&&r.exists!==false&&r.data&&r.data()&&r.data().k;if(!k&&canW()&&window.__ROLE==="voll"){k=b64u(crypto.getRandomValues(new Uint8Array(18)));await db.doc("config/feedback").set({k})}V.fbKey=k||"";typeof renderLinks==="function"&&renderLinks()}catch(e){}})();
 }
 V.start=startTrainer;
@@ -2092,9 +2122,12 @@ async function postKom(){
   const c=V.clips.find((x)=>x.id===V.sel),ta=$("#vdrt");if(!c||!ta)return;const t=ta.value.trim();if(!t)return;
   const id=nid("k"),o={p:"T",n:myName(),t,r:V.repTo||"",tr:true},an=V.repTo&&(V.kom[c.id]||[]).find((k)=>k.id===V.repTo&&!k.tr&&k.p);
   try{const b=await window.__lk.seal(c.ck,o);await db.collection("kom").doc(c.s).collection("m").doc(id).set({b,at:new Date().toISOString()});if(an)pushQ(nid("q"),{art:"kom",an:[an.p]});ta.value="";V.repTo=null;draw()}catch(e){msg("Das konnte nicht gesendet werden.",true)}}
-async function fbReply(x,t){
+/* Antwort des Trainers (auch für Stufen-Anfragen aus eigentraining.js) */
+V.fbAnswer=async(x,t)=>{
   const id=nid("a"),now=new Date().toISOString(),von=myName();
-  try{await db.collection("fbaus").doc(x.r).collection("m").doc(id).set({id,at:now,text:t,von,t:"trainer",re:x.id});await db.doc("fbin/"+x.id).update({antwort:t,antwortVon:von,antwortAm:now,gelesen:true});pushQ(nid("q"),{art:"antwort",r:x.r});msg("Antwort gesendet. Sie erscheint im Link unter „Feedback“.")}catch(e){msg("Das konnte nicht gesendet werden.",true)}}
+  await db.collection("fbaus").doc(x.r).collection("m").doc(id).set({id,at:now,text:t,von,t:"trainer",re:x.id});await db.doc("fbin/"+x.id).update({antwort:t,antwortVon:von,antwortAm:now,gelesen:true});pushQ(nid("q"),{art:"antwort",r:x.r})};
+async function fbReply(x,t){
+  try{await V.fbAnswer(x,t);msg("Antwort gesendet. Sie erscheint im Link unter „Feedback“.")}catch(e){msg("Das konnte nicht gesendet werden.",true)}}
 document.addEventListener("click",async(e)=>{
   const el=sec(),fe=fsec();if(!e.target.closest||!((el&&el.contains(e.target))||(fe&&fe.contains(e.target))))return;const q=(s)=>e.target.closest(s);
   let b;
@@ -2165,7 +2198,7 @@ function uebHtml(d,pid){
   for(const x of days){(T.days[x]||[]).forEach((o)=>{if(o.ty!=="Ferien"&&nx.length<4)nx.push({d:x,...o})});if(nx.length>=4)break}
   const clips=(d.vc||[]),open=r&&r.r==="s"?clips.filter((c)=>c.a&&VW.kom&&VW.kom[c.id]&&!mineTop(VW.kom[c.id],pid)):[],neu=r&&r.r==="s"?clips.filter((c)=>!seenGet(pid).has(c.id)):[];
   const rep=newReplies(d,pid);
-  return(r&&r.r==="s"?hintHtml(d,pid):"")+dsHtml(d,pid)
+  return(r&&r.r==="s"?hintHtml(d,pid):"")+dsHtml(d,pid)+(window.__et?window.__et.ueb(d,pid,r):"")
     +'<div class="card" style="margin:0 0 12px"><h3 style="margin-top:0">Als Nächstes</h3>'+(nx.length?nx.map((o)=>'<div class="vd-row"><div style="min-width:86px;font-weight:600">'+esc(dShort(o.d))+'</div><div style="flex:1;min-width:0"><span class="pill">'+esc(o.tl||o.ty)+"</span> "+esc(o.tx||"")+(o.u?'<div class="note" style="color:var(--o)">⚠ '+esc(o.u)+"</div>":"")+'</div><div style="font-weight:600;white-space:nowrap">'+esc(o.z||"")+"</div></div>").join(""):'<div class="note">Keine Termine in nächster Zeit.</div>')+(d.t?'<div class="bar" style="margin:8px 0 0"><button class="btn" data-vgo="t">Zum Terminplan</button></div>':"")+"</div>"
     +(r&&r.r==="s"&&clips.length?'<div class="card" style="margin:0 0 12px"><h3 style="margin-top:0">Videos</h3>'+(open.length?open.map((c)=>'<div class="vd-row"><div style="flex:1;min-width:0"><b>'+esc(c.ti)+'</b><div class="note">Aufgabe offen'+(c.f?" · bis "+esc(fristTxt(c.f)):"")+"</div></div></div>").join(""):'<div class="note">'+(VW.kom?"Keine offenen Aufgaben. Stark!":"Wird geladen …")+"</div>")+(neu.length?'<div class="note" style="margin-top:6px">'+neu.length+(neu.length===1?" neuer Clip":" neue Clips")+"</div>":"")+'<div class="bar" style="margin:8px 0 0"><button class="btn" data-vgo="v">Zu den Videos</button></div></div>':"")
     +(rep.length?'<div class="card" style="margin:0 0 12px"><h3 style="margin-top:0">Neue Antworten vom Trainer</h3>'+rep.map((x)=>'<div class="vd-row"><div style="flex:1;min-width:0"><b>'+esc(x.wo)+'</b><div class="note">'+esc(x.n)+": "+esc(String(x.t).slice(0,120))+"</div></div><button class=\"btn\" data-vgo=\""+x.go+"\">Ansehen</button></div>").join("")+"</div>":"")}
@@ -2208,6 +2241,11 @@ async function loadAll(d,pid){const n=net();if(!n)return;
   if(r&&r.r==="s"){const K={};await Promise.all((d.vc||[]).map(async(c)=>{const x=await loadKom(c);if(x)K[c.id]=x}));VW.kom=K}
   if(d.fk&&r){try{VW.fb=await n.list("fbaus/"+fbDev(pid)+"/m")}catch(e){}}
 }
+/* Nachricht an den Trainer (Feedback-Eingang); auch für „Ich möchte in Stufe …“ aus eigentraining.js (eigene id) */
+V.fbSend=async(d,pid,art,t,id0)=>{const n=net(),r=role(pid);if(!n||!d.fk||!r)throw new Error("kein Feedback");
+  const id=id0||nid("f"),at=new Date().toISOString(),von=r.r==="e"?(r.n||""):d.n||"",dev=fbDev(pid);
+  await n.create("fbin",id,{id,at,k:d.fk,art,text:t,von,rolle:r.r,pid,r:dev});await n.create("fbaus/"+dev+"/m",id,{id,at,k:d.fk,art,text:t,von,t:"ich"});n.create("pushq",nid("q"),{art:"fb",k:d.fk,t:Date.now()}).catch(()=>{});
+  try{VW.fb=await n.list("fbaus/"+dev+"/m")}catch(e){}return id};
 const fbDev=(pid)=>{let r=ls.get("u13fbdev."+pid,"");if(!/^[0-9a-f]{64}$/.test(r)){r=hex(32);ls.set("u13fbdev."+pid,r)}return r};
 /* Einstieg aus links.js: Reiter Übersicht/Videos/Feedback füllen */
 V.viewer=(d,pid,api)=>{
@@ -2247,10 +2285,456 @@ document.addEventListener("click",async(e)=>{
     b.disabled=true;try{await n.update("kom/"+c.s+"/m/"+kid,{b:await window.__lk.seal(c.ck,{p:pid,n:d.n||"",t,r:k.r||"",ed:true})});const K=await loadKom(c);if(K)VW.kom[c.id]=K;VW.paint("v")}catch(x){b.disabled=false;window.__toast&&window.__toast("Ändern hat nicht geklappt (nur 30 Minuten lang möglich).",true)}return}
   if((b=q("[data-fa]"))){VW.art=b.dataset.fa;document.querySelectorAll("#vfart button").forEach((x)=>{x.classList.toggle("on",x===b);x.setAttribute("aria-pressed",x===b)});return}
   if((b=q("#vfs"))){const t=document.getElementById("vft").value.trim(),m=document.getElementById("vfm"),r=role(pid);if(!t){m.textContent="Bitte zuerst etwas schreiben.";return}if(!n||!d.fk||!r)return;
-    b.disabled=true;const id=nid("f"),at=new Date().toISOString(),art=VW.art||"Idee",von=r.r==="e"?(r.n||""):d.n||"",dev=fbDev(pid);
-    try{await n.create("fbin",id,{id,at,k:d.fk,art,text:t,von,rolle:r.r,pid,r:dev});await n.create("fbaus/"+dev+"/m",id,{id,at,k:d.fk,art,text:t,von,t:"ich"});n.create("pushq",nid("q"),{art:"fb",k:d.fk,t:Date.now()}).catch(()=>{});
-      VW.fb=await n.list("fbaus/"+dev+"/m");VW.art="Idee";VW.paint("f");const m2=document.getElementById("vfm");if(m2)m2.textContent="Danke! Deine Nachricht ist beim Trainer angekommen."}
+    b.disabled=true;
+    try{await V.fbSend(d,pid,VW.art||"Idee",t);VW.art="Idee";VW.paint("f");const m2=document.getElementById("vfm");if(m2)m2.textContent="Danke! Deine Nachricht ist beim Trainer angekommen."}
     catch(x){b.disabled=false;m.className="note warn";m.textContent="Das hat nicht geklappt. Bitte später noch einmal versuchen."}return}
+});
+})();
+</script>
+<script>/* ===== Konten für Spieler und Eltern (nur Web-Version, Trainer mit vollem Zugriff) =====
+   Mannschaftslink (Anfrage, Trainer genehmigt), Spielerlink je Spieler (ohne Genehmigung, höchstens 4 Konten), Konten sehen/sperren/entfernen.
+   Den Schlüssel zum verschlüsselten Spielerstand bekommen nur verknüpfte Konten („kkey/<spieler>“); beim Sperren oder Entfernen gibt es einen neuen.
+   Die Seite für Spieler und Eltern steht in web/web.js (kontoStart). */
+(function(){
+"use strict";
+const W=window;
+if(!W.__WEB||W.__VIEWER||W.__SCOUT||W.__NOKONTEN)return;   /* __NOKONTEN: nur Prüfungen der früheren Kurzlink-Technik für Spieler (t_web3, t_sicher) */
+const E=(s)=>String(s==null?"":s).replace(/[&<>"]/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const q=(s,r)=>(r||document).querySelector(s);
+const mkeyOf=(em)=>String(em||"").toLowerCase().replace(/[.]/g,"_").replace(/@/g,"_at_");
+const rnd=()=>{const a=new Uint8Array(18);crypto.getRandomValues(a);return btoa(String.fromCharCode.apply(null,a)).replace(/\+/g,"-").replace(/\//g,"_").replace(/=/g,"")};
+const K={acc:[],anf:[],ein:[],mt:[],kk:{},fs:null,msg:"",bad:false,sel:{},arm:""};
+W.__konten=K;
+const can=()=>W.__ROLE==="voll"&&!!K.fs;
+const L=()=>W.__links||{};
+const pl=(pid)=>((typeof D!=="undefined"&&D.spieler)||[]).find((p)=>p.id===pid);
+const pname=(pid)=>{const p=pl(pid);return p?(p.vorname+" "+p.name).trim():""};
+const base=()=>W.__WEB_BASE0||W.__WEB_BASE||(location.origin+location.pathname);
+const say=(t,bad)=>{K.msg=t||"";K.bad=!!bad;draw();if(t&&W.__toast)W.__toast(t,bad)};
+/* ---------- Daten abonnieren ---------- */
+function subscribe(){
+  const fs=W.__webFs;if(!fs||K.fs===fs||W.__ROLE!=="voll")return;K.fs=fs;
+  const sub=(coll,fn)=>{try{fs.collection(coll).onSnapshot((s)=>{fn(s.docs.map((d)=>({id:d.id,...d.data()})));after()},()=>{})}catch(e){}};
+  sub("kverkn",(r)=>{K.acc=r});sub("kanfr",(r)=>{K.anf=r});sub("spielereinl",(r)=>{K.ein=r});sub("mteinl",(r)=>{K.mt=r});
+  sub("kkey",(r)=>{K.kk={};r.forEach((x)=>{K.kk[x.id]=x.k});K.kkOk=true});
+}
+let tm=null;function after(){clearTimeout(tm);tm=setTimeout(()=>{draw();home();keySync();if(W.renderLinks)W.renderLinks()},150)}
+const accOf=(pid)=>K.acc.filter((a)=>a.pid===pid);
+const spEin=(pid)=>K.ein.find((x)=>x.pid===pid&&x.aktiv===true);
+const mtEin=()=>K.mt.find((x)=>x.aktiv===true);
+const spLink=(pid)=>{const e=spEin(pid);return e?base()+"#sp/"+e.id:""};
+const mtLink=()=>{const e=mtEin();return e?base()+"#mt/"+e.id:""};
+/* Spielerdaten freigeben (Link aktiv mit Schlüssel), sobald ein Spieler eingeladen oder verknüpft wird */
+async function activate(pid){const l=L()[pid]||{};if(l.aktiv&&l.key)return;await W.__lkSaveLink(pid,{key:l.key||W.__lkNewKey(),aktiv:true})}
+/* Neuer Schlüssel: Wer gesperrt oder entfernt wurde, kann einen früher gelesenen Schlüssel nicht weiter benutzen */
+async function rekey(pid){const l=L()[pid]||{};if(!l.key)return;await W.__lkSaveLink(pid,{key:W.__lkNewKey(),aktiv:!!l.aktiv})}
+/* Schlüssel für die Konten bereitstellen: nur aktive Spieler, sonst entfernen */
+let ksBusy=false;
+async function keySync(){
+  if(ksBusy||!can()||!K.kkOk||typeof D==="undefined"||!D.ready)return;ksBusy=true;
+  try{const want={};(typeof active==="function"?active():[]).forEach((p)=>{const l=L()[p.id];if(l&&l.aktiv&&l.key)want[p.id]=l.key});
+    for(const pid of Object.keys(want))if(K.kk[pid]!==want[pid]){await K.fs.doc("kkey/"+pid).set({k:want[pid]});K.kk[pid]=want[pid]}
+    for(const pid of Object.keys(K.kk))if(!want[pid]){await K.fs.doc("kkey/"+pid).delete();delete K.kk[pid]}
+  }catch(e){}ksBusy=false}
+/* ---------- Karte oben in „Spielerlinks“: Mannschaftslink und Anfragen ---------- */
+const TXT='Spieler und Eltern melden sich mit einem eigenen Konto an (Google oder E-Mail) und sehen dann Übersicht, Profil, Terminplan, Liga und Videos. '
+  +'<b>Mannschaftslink</b>: für die WhatsApp-Gruppe. Wer sich darüber anmeldet, schickt dir eine Anfrage, die du hier genehmigst. '
+  +'<b>Spielerlink</b>: für einen einzelnen Spieler. Wer sich darüber anmeldet, ist ohne Genehmigung freigeschaltet (höchstens 4 Konten je Spieler). '
+  +'„Aktiv“ heißt: Die Daten des Spielers sind für seine Konten freigegeben. Bitte nur mit Einwilligung der Eltern.';
+function ensureCard(){
+  const host=q("#lkc");if(!host||!can())return;
+  const p=host.querySelector(":scope > p.note");if(p&&!p.dataset.kt){p.dataset.kt="1";p.innerHTML=TXT}
+  if(!q("#kcc")){const c=document.createElement("div");c.id="kcc";c.style.margin="10px 0 12px";const ref=q("#kzstd",host)||q(".bar",host);host.insertBefore(c,ref);draw()}}
+function draw(){
+  const c=q("#kcc");if(!c||!can())return;
+  if(c.contains(document.activeElement)&&/SELECT|INPUT/.test(document.activeElement.tagName))return;
+  const act=(typeof active==="function"?active():[]),mt=mtLink();
+  let h='<div class="card" style="margin:0 0 10px"><b>Mannschaftslink</b><div class="note" style="margin:2px 0 6px">Für die ganze Mannschaft. Wer ihn öffnet, legt ein Konto an und schickt dir eine Anfrage.</div>'
+    +(mt?'<input readonly data-k="mtl" value="'+E(mt)+'" style="width:100%;box-sizing:border-box"><div class="bar" style="margin:6px 0 0"><button class="btn" data-k="mtc">Kopieren</button><button class="btn" data-k="mtn">'+(K.arm==="mtn"?"Wirklich neu? Der alte gilt dann nicht mehr":"Erneuern")+'</button><button class="btn" data-k="mtx">'+(K.arm==="mtx"?"Wirklich beenden?":"Beenden")+'</button></div>'
+      :'<button class="btn" data-k="mtn" style="background:var(--ac);color:#fff;border-color:var(--ac)">Mannschaftslink erstellen</button>')+'</div>';
+  if(K.anf.length){h+='<div class="card" style="margin:0 0 10px;border-color:var(--ac)"><b>'+K.anf.length+(K.anf.length===1?" Anfrage":" Anfragen")+'</b>';
+    K.anf.forEach((a)=>{const kid=String(a.kind||"").toLowerCase().trim(),guess=a.via?null:act.find((p)=>(p.vorname+" "+p.name).toLowerCase()===kid)||act.find((p)=>kid&&kid.includes(String(p.vorname||"").toLowerCase()));
+      const s=a.id in K.sel?K.sel[a.id]:(guess&&guess.id)||"";
+      h+='<div class="vd-row" style="flex-wrap:wrap;gap:8px;padding:8px 0;border-top:1px solid var(--ln)"><div style="flex:1;min-width:180px"><b>'+E(a.name)+'</b> ('+(a.rolle==="spieler"?"Spieler":"Elternteil")+')<div class="note">'+(a.rolle==="spieler"?"":"Kind: "+E(a.kind)+" · ")+E(a.email)+(a.via?" · weiteres Kind":"")+'</div></div>'
+        +'<select data-k="asel" data-id="'+E(a.id)+'" aria-label="Spieler wählen"><option value="">Spieler wählen …</option>'+act.map((p)=>'<option value="'+E(p.id)+'"'+(s===p.id?" selected":"")+'>'+E(pname(p.id))+'</option>').join("")+'</select>'
+        +'<button class="btn" data-k="aok" data-id="'+E(a.id)+'" style="background:var(--ac);color:#fff;border-color:var(--ac)">Genehmigen</button><button class="btn" data-k="ano" data-id="'+E(a.id)+'">Ablehnen</button></div>'});
+    h+='</div>'}
+  h+='<div class="note'+(K.bad?" warn":"")+'" id="kcm">'+E(K.msg)+'</div>';
+  if(c.__h!==h){c.__h=h;c.innerHTML=h}}
+/* Zelle je Spieler in der Tabelle „Spielerlinks“ */
+K.cell=(pid)=>{if(!can())return'<span class="note">Konten verwaltet der Besitzer bzw. ein Trainer mit vollem Zugriff.</span>';const n=accOf(pid).length,l=spLink(pid);
+  return'<div data-kp="'+E(pid)+'" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><button class="btn" data-k="acc" title="Verknüpfte Konten">👤 '+n+(n===1?" Konto":" Konten")+'</button>'
+    +(l?'<button class="btn" data-k="spc">Spielerlink kopieren</button><button class="btn" data-k="spn" title="Der bisherige Spielerlink gilt dann nicht mehr">'+(K.arm==="spn"+pid?"Wirklich neu?":"Erneuern")+'</button><button class="btn" data-k="spx">'+(K.arm==="spx"+pid?"Wirklich beenden?":"Beenden")+'</button>'
+      :'<button class="btn" data-k="spn">Spielerlink erstellen</button>')+'</div>'};
+/* ---------- Aktionen ---------- */
+const copy=async(t)=>{try{await navigator.clipboard.writeText(t);say("Link kopiert.")}catch(e){say("Bitte den Link von Hand kopieren: "+t)}};
+async function newEin(coll,data){const id=rnd();await K.fs.doc(coll+"/"+id).set({...data,aktiv:true,am:new Date().toISOString()});return id}
+async function endEin(coll,list,pid){for(const e of list){if(e.aktiv===true&&(!pid||e.pid===pid))await K.fs.doc(coll+"/"+e.id).set({...(({id,...r})=>r)(e),aktiv:false})}}
+function openAcc(pid){
+  let o=q("#kcpop");if(o)o.remove();
+  const draw1=()=>{const a=accOf(pid);
+    o.innerHTML='<div class="card" style="width:100%;max-width:480px;max-height:calc(100dvh - 32px);overflow:auto"><h3 style="margin-top:0">Konten für '+E(pname(pid))+'</h3>'
+      +(a.length?a.map((x)=>'<div class="vd-row" style="flex-wrap:wrap;gap:8px;padding:8px 0;border-top:1px solid var(--ln)"><div style="flex:1;min-width:180px"><b>'+E(x.name)+'</b> ('+(x.rolle==="spieler"?"Spieler":"Elternteil")+')<div class="note">'+E(x.email)+' · seit '+E(String(x.at||"").slice(8,10)+"."+String(x.at||"").slice(5,7)+"."+String(x.at||"").slice(0,4))+(x.gesperrt?' · <b class="warn">gesperrt</b>':"")+'</div></div><button class="btn" data-k="sp1" data-id="'+E(x.id)+'">'+(x.gesperrt?"Entsperren":"Sperren")+'</button><button class="btn" data-k="rm1" data-id="'+E(x.id)+'">'+(K.arm==="rm"+x.id?"Wirklich entfernen?":"Entfernen")+'</button></div>').join("")
+        :'<div class="note">Noch kein Konto verknüpft. Schick dem Spieler seinen Spielerlink oder genehmige eine Anfrage über den Mannschaftslink.</div>')
+      +'<div class="bar" style="margin:12px 0 0"><button class="btn" data-k="cl">Schließen</button></div></div>'};
+  o=document.createElement("div");o.id="kcpop";o.style.cssText="position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.5)";
+  draw1();document.body.appendChild(o);
+  o.onclick=async(e)=>{const b=e.target.closest("[data-k]");if(!b){if(e.target===o)o.remove();return}
+    const id=b.dataset.id,x=K.acc.find((y)=>y.id===id);
+    if(b.dataset.k==="cl"){o.remove();return}
+    try{
+      if(b.dataset.k==="sp1"&&x){await K.fs.doc("kverkn/"+id).update({gesperrt:!x.gesperrt});x.gesperrt=!x.gesperrt;if(x.gesperrt)await rekey(pid);say(x.gesperrt?x.name+" ist gesperrt.":x.name+" ist wieder freigeschaltet.");draw1()}
+      if(b.dataset.k==="rm1"&&x){if(K.arm!=="rm"+id){K.arm="rm"+id;draw1();return}K.arm="";
+        await K.fs.doc("kverkn/"+id).delete();K.acc=K.acc.filter((y)=>y.id!==id);
+        if(x.s){const zr=K.fs.doc("kzaehl/"+x.pid),z=await zr.get();if(z.exists&&z.data().n>0)await zr.set({n:z.data().n-1})}
+        await rekey(pid);say(x.name+" ist entfernt.");draw1()}
+    }catch(er){say("Das hat nicht geklappt"+(er&&er.code?" ("+er.code+")":"")+".",1)}}}
+document.addEventListener("click",async(e)=>{
+  const b=e.target.closest&&e.target.closest("#kcc [data-k],#lkt [data-kp] [data-k]");if(!b||!can())return;
+  const k=b.dataset.k,pid=(b.closest("[data-kp]")||{dataset:{}}).dataset.kp;
+  if(k!=="mtn"&&k!=="mtx"&&k!=="spn"&&k!=="spx")K.arm="";
+  try{
+    if(k==="acc"){openAcc(pid);return}
+    if(k==="mtc"){await copy(mtLink());return}
+    if(k==="mtn"){if(mtLink()&&K.arm!=="mtn"){K.arm="mtn";draw();return}K.arm="";await endEin("mteinl",K.mt);await newEin("mteinl",{});say("Der Mannschaftslink ist aktiv.");return}
+    if(k==="mtx"){if(K.arm!=="mtx"){K.arm="mtx";draw();return}K.arm="";await endEin("mteinl",K.mt);say("Der Mannschaftslink ist beendet.");return}
+    if(k==="spc"){await copy(spLink(pid));return}
+    if(k==="spn"){if(spLink(pid)&&K.arm!=="spn"+pid){K.arm="spn"+pid;W.renderLinks&&W.renderLinks();return}K.arm="";
+      await endEin("spielereinl",K.ein,pid);await newEin("spielereinl",{pid,n:pname(pid)});await activate(pid);say("Der Spielerlink für "+pname(pid)+" ist aktiv.");return}
+    if(k==="spx"){if(K.arm!=="spx"+pid){K.arm="spx"+pid;W.renderLinks&&W.renderLinks();return}K.arm="";await endEin("spielereinl",K.ein,pid);say("Der Spielerlink für "+pname(pid)+" ist beendet. Schon verknüpfte Konten bleiben.");return}
+    if(k==="aok"){const a=K.anf.find((x)=>x.id===b.dataset.id),sel=q('#kcc [data-k="asel"][data-id="'+b.dataset.id+'"]'),p=sel&&sel.value;if(!a)return;if(!p){say("Bitte zuerst den Spieler wählen.",1);return}
+      await K.fs.doc("kverkn/"+p+"~"+mkeyOf(a.email)).set({pid:p,email:String(a.email).toLowerCase(),rolle:a.rolle==="spieler"?"spieler":"eltern",name:String(a.name||"").slice(0,60),pn:pname(p),at:new Date().toISOString()});
+      await K.fs.doc("kanfr/"+a.id).delete();await activate(p);say(a.name+" ist jetzt mit "+pname(p)+" verknüpft.");return}
+    if(k==="ano"){await K.fs.doc("kanfr/"+b.dataset.id).delete();say("Anfrage abgelehnt.");return}
+  }catch(er){say("Das hat nicht geklappt"+(er&&er.code?" ("+er.code+")":"")+".",1)}
+});
+document.addEventListener("change",(e)=>{const t=e.target;if(t&&t.dataset&&t.dataset.k==="asel")K.sel[t.dataset.id]=t.value});
+/* Hinweis auf der Übersicht, wenn Anfragen warten */
+function home(){
+  const h=q("#hsub");if(!h)return;let c=q("#kanh");
+  if(!can()||!K.anf.length){if(c)c.remove();return}
+  if(!c){c=document.createElement("div");c.id="kanh";c.className="card";c.style.cssText="margin:0 0 14px;border-color:var(--ac)";h.insertAdjacentElement("afterend",c)}
+  const t='<div class="bar" style="margin:0;align-items:center"><span style="flex:1"><b>👤 '+K.anf.length+(K.anf.length===1?" neue Anfrage":" neue Anfragen")+'</b> für ein Konto (Spieler oder Eltern)</span><button class="btn" data-kgo>Ansehen</button></div>';
+  if(c.__h!==t){c.__h=t;c.innerHTML=t}}
+document.addEventListener("click",(e)=>{if(!(e.target.closest&&e.target.closest("[data-kgo]")))return;const n=q('nav button[data-s="e"]');if(n)n.click();if(W.__etab)W.__etab("l");setTimeout(()=>{const c=q("#kcc");if(c)c.scrollIntoView({behavior:"smooth",block:"center"})},80)});
+/* ---------- Takt ---------- */
+setInterval(()=>{try{subscribe();ensureCard();home();keySync()}catch(e){}},1500);
+})();
+</script><script>/* Eigentraining: eigene Trainingspläne (PDF oder Bild, optional mit Stufen) hochladen und pro Spieler freigeben.
+   Trainer: Reiter „Training“ → Umschalter „Eigentraining“ (Pläne, Freigaben, Stufen-Anfragen), kurz im Profil, Anfragen auf der Startseite.
+   Freigabe: Spieler, Plan, Stufe, Zeitraum (nur innerhalb der Saison) und Wunschtage. Liegt an einem Wunschtag ein Termin der Mannschaft,
+   rutscht das Eigentraining auf den nächsten freien Tag derselben Woche (nicht auf einen anderen Wunschtag); ist keiner frei, fällt es aus.
+   Spielerlink: Karte in der Übersicht, Einträge im Terminplan, „Ich möchte in Stufe …“ (geht über den Feedback-Eingang, der Trainer sagt Ja oder Nein).
+   Daten: etplan (Pläne), etzu (Freigaben), etdatei (verschlüsselte Datei in Teilen, nur Trainer). Im Link steht nur der eigene Plan mit dem
+   Schlüssel der Datei; die Datei selbst liegt verschlüsselt unter pub/f_<id> (Artifact: SNAP.f). */
+(function(){
+"use strict";
+const ET={plans:[],zu:[],blobs:{}};window.__et=ET;
+const WK=["Mo","Di","Mi","Do","Fr","Sa","So"],WT=["So","Mo","Di","Mi","Do","Fr","Sa"];
+const MAXB=5e6,CH=700000;
+const P2=(n)=>String(n).padStart(2,"0"),isoD=(d)=>d.getFullYear()+"-"+P2(d.getMonth()+1)+"-"+P2(d.getDate());
+const pd=(s)=>{const a=s.split("-").map(Number);return new Date(a[0],a[1]-1,a[2],12)};
+const add=(s,n)=>{const d=pd(s);d.setDate(d.getDate()+n);return isoD(d)};
+const wdi=(s)=>(pd(s).getDay()+6)%7+1;   /* 1 = Montag … 7 = Sonntag */
+const mon=(s)=>add(s,1-wdi(s));
+const tdy=()=>isoD(new Date());
+const dm=(s)=>s?+s.slice(8)+"."+ +s.slice(5,7)+".":"";
+const dmy=(s)=>s?s.slice(8)+"."+s.slice(5,7)+"."+s.slice(0,4):"";
+const dsh=(s)=>WT[pd(s).getDay()]+", "+dm(s);
+const E=(s)=>String(s==null?"":s).replace(/[&<>"']/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const hex=(n)=>[...crypto.getRandomValues(new Uint8Array(n))].map((x)=>x.toString(16).padStart(2,"0")).join("");
+const nid=(p)=>p+Date.now().toString(36)+hex(3);
+const newKey=()=>btoa(String.fromCharCode.apply(null,crypto.getRandomValues(new Uint8Array(16)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const tageTxt=(t)=>(t||[]).slice().sort().map((x)=>WK[x-1]).join(", ");
+const stName=(p,i)=>{const s=(p.stufen||[])[i];return(s&&s.n)||"Stufe "+(i+1)};
+const multi=(p)=>(p.stufen||[]).length>1;
+const inSt=(n)=>/^stufe\b/i.test(n)?"in "+n:"in die nächste Stufe („"+n+"“)";   /* „in Stufe 3“ bzw. „in die nächste Stufe („Profi“)“ */
+
+/* ---------- Saison und Termine ---------- */
+function season(){const y=parseInt(String((typeof D!=="undefined"&&D.config&&D.config.saison)||""),10),t=tdy(),y0=y||(+t.slice(5,7)>=7?+t.slice(0,4):+t.slice(0,4)-1);return[y0+"-07-01",(y0+1)+"-06-30"]}
+ET.season=season;
+/* Tage eines Plans: je Woche die Wunschtage; liegt dort ein Termin (alles außer Ferien), der nächste freie Tag bis Sonntag,
+   der kein anderer Wunschtag ist. Nur innerhalb von Zeitraum und Saison. days = Terminplan wie im Link ({datum:[Einträge]}). */
+ET.dates=(z,days)=>{
+  const[s0,e0]=season(),from=z.von&&z.von>s0?z.von:s0,to=z.bis&&z.bis<e0?z.bis:e0,W=[...new Set((z.tage||[]).map(Number))].filter((x)=>x>=1&&x<=7).sort(),out=[];
+  if(!W.length||from>to)return out;
+  const busy=(d)=>((days||{})[d]||[]).some((o)=>o&&o.ty!=="Ferien");
+  for(let m=mon(from);m<=to;m=add(m,7)){const wish=W.map((w)=>add(m,w-1)),su=add(m,6),used=new Set();
+    wish.forEach((w0)=>{if(w0<from||w0>to)return;for(let c=w0;c<=su&&c<=to;c=add(c,1)){if(busy(c)||used.has(c)||(c!==w0&&wish.includes(c)))continue;used.add(c);out.push(c);break}})}
+  return out.sort()};
+const daysNow=()=>{try{return typeof planSnap==="function"?planSnap().days:{}}catch(e){return{}}};
+
+/* ---------- Für die Spielerlinks ---------- */
+const liveZu=(z)=>{const[s0]=season();return(!z.bis||z.bis>=tdy())&&(!z.bis||z.bis>=s0)};
+/* Pläne eines Spielers für seinen Link; files sammelt die nötigen Dateien (id -> Kopf) */
+ET.pkg=(pid,days,files)=>ET.zu.filter((z)=>z.pid===pid&&liveZu(z)).map((z)=>{const p=ET.plans.find((x)=>x.id===z.plan);if(!p||!(p.stufen||[]).length)return null;
+  const n=p.stufen.length,c=Math.min(Math.max(+z.st||0,0),n-1);
+  p.stufen.forEach((s)=>{if(s.f&&s.f.id&&files)files[s.f.id]=s.f});
+  return{i:z.id,t:p.titel||"Eigentraining",h:p.hinweis||"",s:p.stufen.map((s,i)=>({n:n>1?stName(p,i):"",f:s.f?{id:s.f.id,k:s.f.k,n:s.f.name||"",t:s.f.typ||""}:null})),c,v:z.von||"",b:z.bis||"",w:(z.tage||[]).slice().sort(),d:ET.dates(z,days),ab:z.ab||null}}).filter(Boolean);
+/* Fingerabdruck: ändert sich, wenn Pläne oder Freigaben sich ändern */
+ET.sig=()=>JSON.stringify([ET.plans.map((p)=>[p.id,p.titel,p.hinweis||"",(p.stufen||[]).map((s)=>[s.n||"",s.f&&s.f.id])]).sort(),ET.zu.map((z)=>[z.id,z.pid,z.plan,z.st,z.von,z.bis,z.tage,z.ab]).sort()]);
+/* verschlüsselte Datei aus der Datenbank (in Teilen), einmal je Sitzung */
+ET.blob=async(f)=>{if(ET.blobs[f.id])return ET.blobs[f.id];
+  const parts=await Promise.all(Array.from({length:f.parts||1},(_,i)=>db.collection("etdatei").doc(f.id+"_"+i).get()));
+  const b=parts.map((d)=>{const x=d&&(typeof d.data==="function"?d.data():d);if(!x||typeof x.b!=="string")throw new Error("Datei unvollständig");return x.b}).join("");
+  ET.blobs[f.id]=b;return b};
+
+/* ---------- Datei öffnen (Trainer und Link) ---------- */
+let ovUrl="";
+function fileView(o,msg){
+  let ov=document.getElementById("etov");
+  if(!ov){ov=document.createElement("div");ov.id="etov";ov.setAttribute("role","dialog");ov.setAttribute("aria-modal","true");document.body.appendChild(ov)}
+  if(ovUrl){URL.revokeObjectURL(ovUrl);ovUrl=""}
+  let body;
+  if(!o)body='<p class="note" style="margin:8px 0">'+E(msg||"Wird geladen …")+"</p>";
+  else{const bin=atob(o.d.split(",")[1]||""),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+    ovUrl=URL.createObjectURL(new Blob([u],{type:o.t||"application/octet-stream"}));
+    body=(/^image\//.test(o.t)?'<img alt="" src="'+ovUrl+'" style="display:block;max-width:100%;max-height:68vh;margin:0 auto 10px;border-radius:8px">':'<p class="note" style="margin:6px 0 12px">Der Plan ist eine PDF-Datei. Tippe auf „Öffnen“.</p>')
+      +'<div class="bar" style="margin:0"><a class="btn" href="'+ovUrl+'" target="_blank" rel="noopener" style="text-decoration:none">Öffnen</a><a class="btn" href="'+ovUrl+'" download="'+E(o.n||"Plan")+'" style="text-decoration:none">Speichern</a></div>'}
+  ov.innerHTML='<div class="etov-c card"><div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><b style="flex:1;min-width:0;overflow-wrap:anywhere">'+E((o&&o.ti)||"Trainingsplan")+'</b><button type="button" class="btn" data-etx aria-label="Schließen">✕</button></div>'+body+"</div>";
+  ov.hidden=false;
+}
+function fileClose(){const ov=document.getElementById("etov");if(ov)ov.hidden=true;if(ovUrl){URL.revokeObjectURL(ovUrl);ovUrl=""}}
+async function openFile(getBlob,f,ti){
+  fileView(null);
+  try{const b=await getBlob();if(!b)throw new Error("fehlt");const o=await window.__lk.unseal(f.k,b);o.ti=ti;fileView(o)}
+  catch(e){fileView(null,"Der Plan konnte nicht geladen werden. Bitte später noch einmal versuchen.")}
+}
+document.addEventListener("click",(e)=>{if(!e.target.closest)return;const ov=document.getElementById("etov");if(!ov||ov.hidden)return;if(e.target.closest("[data-etx]")||e.target===ov)fileClose()});
+document.addEventListener("keydown",(e)=>{if(e.key==="Escape")fileClose()});
+
+/* ---------- CSS ---------- */
+function css(){if(document.getElementById("etcss"))return;const st=document.createElement("style");st.id="etcss";
+  st.textContent="#etov{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px}#etov[hidden]{display:none}"
+  +".etov-c{width:100%;max-width:640px;max-height:92vh;overflow:auto;margin:0!important}"
+  +"#t.etm>:not(h2):not(#etseg):not(#etw){display:none!important}#etseg{margin:0 0 12px}#etseg .etb{display:inline-block;min-width:18px;margin-left:6px;padding:0 6px;border-radius:9px;background:var(--o);color:#fff;font-size:12px;line-height:18px;text-align:center}"
+  +".et-row{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--ln)}.et-row:last-child{border-bottom:0}.et-row>.et-m{flex:1;min-width:200px}"
+  +".et-f{border:1px solid var(--ln);border-radius:12px;padding:12px;margin:10px 0}.et-f label{display:block;margin:0 0 8px}.et-f input[type=text],.et-f textarea{width:100%;box-sizing:border-box}"
+  +".et-days{display:flex;flex-wrap:wrap;gap:6px}.et-days label{display:inline-flex!important;gap:4px;align-items:center;margin:0!important;border:1px solid var(--ln);border-radius:9px;padding:4px 8px}"
+  +".et-pl{display:flex;flex-wrap:wrap;gap:6px 14px;max-height:220px;overflow:auto}.et-pl label{display:inline-flex!important;gap:6px;align-items:center;margin:0!important}"
+  +".et-st{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 8px}.et-st input[type=text]{flex:1;min-width:140px;width:auto}"
+  +".et-req{border-left:4px solid var(--o);padding-left:10px}";
+  document.head.appendChild(st)}
+
+/* =====================================================================
+   Trainer
+   ===================================================================== */
+const canEdit=()=>typeof db!=="undefined"&&!!db&&window.__ROLE!=="lesen"&&window.__ROLE!=="scout"&&!window.__RO&&!window.__DEMO;
+const players=()=>typeof active==="function"?active():[];
+const pName=(pid)=>{const p=(typeof D!=="undefined"&&D.spieler||[]).find((x)=>x.id===pid);return p?(p.vorname+" "+p.name).trim():"(ausgeschieden)"};
+const UI={mode:"e",pf:null,zf:null,arm:null,busy:false,msg:"",bad:false};
+let pubT=null;const pubSoon=()=>{if(!window.__WEB||!window.__lkPublish||window.__ROLE==="lesen")return;clearTimeout(pubT);pubT=setTimeout(()=>{try{window.__lkPublish(true)}catch(e){}},2500)};
+
+/* Stufen-Anfragen aus dem Feedback-Eingang: id „st-<Freigabe>-<Stufe>-…“, art „Stufe“ */
+const parseReq=(x)=>{const m=/^st-([A-Za-z0-9]+)-(\d+)-/.exec(x.id||"");return m?{zid:m[1],st:+m[2]}:null};
+ET.requests=()=>{const V=window.__vid;return((V&&V.fb)||[]).filter((x)=>x.art==="Stufe"&&!x.et&&parseReq(x)).map((x)=>{const r=parseReq(x),z=ET.zu.find((y)=>y.id===r.zid),p=z&&ET.plans.find((q)=>q.id===z.plan);return{x,z,p,st:r.st}}).filter((o)=>o.z&&o.p&&o.st>=0&&o.st<(o.p.stufen||[]).length)};
+const reqText=(o)=>"möchte bei „"+(o.p.titel||"Eigentraining")+"“ "+inSt(stName(o.p,o.st))+" wechseln (jetzt: "+stName(o.p,Math.min(+o.z.st||0,o.p.stufen.length-1))+").";
+function reqRows(list,small){return list.map((o)=>'<div class="et-row et-req"><div class="et-m"><b>'+E(pName(o.z.pid))+"</b> "+E(reqText(o))+(small?"":'<div class="note">'+E(o.x.von&&o.x.rolle==="e"?"Gesendet von "+o.x.von+" (Elternteil)":"")+"</div>")+"</div>"
+  +(canEdit()?'<button class="btn" data-etok="'+E(o.x.id)+'" style="background:var(--g);color:#fff;border-color:var(--g)">Ja</button><button class="btn" data-etno="'+E(o.x.id)+'">Nein</button>':"")+"</div>").join("")}
+async function answer(fid,yes){
+  const o=ET.requests().find((r)=>r.x.id===fid),V=window.__vid;if(!o||!V||!V.fbAnswer||!canEdit())return;
+  const plan=o.p.titel||"Eigentraining",neu=stName(o.p,o.st),alt=stName(o.p,Math.min(+o.z.st||0,o.p.stufen.length-1));
+  try{
+    if(yes){await save("etzu",o.z.id,{...strip(o.z),st:o.st,ab:null});await V.fbAnswer(o.x,"Passt! Ab jetzt machst du bei „"+plan+"“ "+neu+". Der neue Plan steht gleich in deinem Link.")}
+    else{await save("etzu",o.z.id,{...strip(o.z),ab:{s:o.st,am:new Date().toISOString()}});await V.fbAnswer(o.x,"Noch nicht ganz. Bleib bei „"+plan+"“ erst noch bei "+alt+". Wir sprechen darüber.")}
+    await db.doc("fbin/"+o.x.id).update({et:yes?"ja":"nein"});o.x.et=yes?"ja":"nein";
+    pubSoon();window.__toast&&window.__toast(yes?pName(o.z.pid)+" ist jetzt in "+neu+".":"Abgelehnt. "+pName(o.z.pid)+" bleibt in "+alt+".")}
+  catch(e){window.__toast&&window.__toast("Das hat nicht geklappt. Bitte noch einmal versuchen.",true)}
+  ET.refresh()}
+const strip=(o)=>{const c={...o};delete c.id;return c};
+
+/* Umschalter im Reiter Training */
+function seg(){const t=document.getElementById("t");if(!t)return null;let s=document.getElementById("etseg");
+  if(!s){s=document.createElement("div");s.className="seg";s.id="etseg";s.innerHTML='<button type="button" data-etm="e" class="on">Einheiten</button><button type="button" data-etm="et">Eigentraining</button>';
+    const h=t.querySelector("h2");h.insertAdjacentElement("afterend",s);const w=document.createElement("div");w.id="etw";w.hidden=true;s.insertAdjacentElement("afterend",w)}
+  const n=ET.requests().length,b=s.querySelector('[data-etm="et"]');b.innerHTML="Eigentraining"+(n?'<span class="etb">'+n+"</span>":"");return s}
+function setMode(m){UI.mode=m;const t=document.getElementById("t"),s=seg();if(!t||!s)return;t.classList.toggle("etm",m==="et");document.getElementById("etw").hidden=m!=="et";s.querySelectorAll("[data-etm]").forEach((b)=>b.classList.toggle("on",b.dataset.etm===m));if(m==="et")render()}
+ET.show=()=>{if(typeof go==="function")go("t");setMode("et")};
+
+function render(){
+  const w=document.getElementById("etw");if(!w||w.hidden)return;
+  const a=document.activeElement;if(a&&w.contains(a)&&a.matches("input[type=text],textarea")&&!UI.force)return;UI.force=false;
+  const ed=canEdit(),req=ET.requests(),days=daysNow(),t=tdy(),[s0,e0]=season();
+  const zs=ET.zu.slice().sort((x,y)=>pName(x.pid).localeCompare(pName(y.pid),"de")||(x.von||"").localeCompare(y.von||""));
+  const cur=zs.filter((z)=>!z.bis||z.bis>=t),old=zs.filter((z)=>z.bis&&z.bis<t);
+  const zRow=(z)=>{const p=ET.plans.find((x)=>x.id===z.plan),n=p?(p.stufen||[]).length:0,c=Math.min(+z.st||0,Math.max(n-1,0)),nx=ET.dates(z,days).find((d)=>d>=t);
+    return'<div class="et-row" data-zid="'+E(z.id)+'"><div class="et-m"><b>'+E(pName(z.pid))+"</b> · "+E(p?p.titel:"(Plan gelöscht)")
+      +(p&&n>1?(ed?' · <select data-etst="'+E(z.id)+'" aria-label="Stufe">'+p.stufen.map((s,i)=>'<option value="'+i+'"'+(i===c?" selected":"")+">"+E(stName(p,i))+"</option>").join("")+"</select>":" · "+E(stName(p,c))):"")
+      +'<div class="note">'+E(dmy(z.von))+" – "+E(dmy(z.bis))+" · "+E(tageTxt(z.tage))+(nx?" · Nächstes Mal: "+E(dsh(nx)):z.bis&&z.bis<t?" · beendet":"")+"</div></div>"
+      +(ed?'<button class="btn" data-etze="'+E(z.id)+'">Bearbeiten</button><button class="btn" data-etzd="'+E(z.id)+'">'+(UI.arm==="z"+z.id?"Wirklich beenden?":"Beenden")+"</button>":"")+"</div>"};
+  const pRow=(p)=>{const nz=ET.zu.filter((z)=>z.plan===p.id&&(!z.bis||z.bis>=t)).length;
+    return'<div class="et-row"><div class="et-m"><b>'+E(p.titel)+"</b>"+(multi(p)?' <span class="note">· '+p.stufen.length+" Stufen</span>":"")+(p.hinweis?'<div class="note">'+E(p.hinweis)+"</div>":"")
+      +'<div class="note">'+(p.stufen||[]).map((s,i)=>'<button type="button" class="rm" data-etv="'+E(p.id)+":"+i+'" style="text-decoration:underline;color:var(--ac);display:inline">'+E(multi(p)?stName(p,i):"Plan ansehen")+"</button>").join(" · ")+" · "+(nz?nz+(nz===1?" Spieler":" Spieler"):"noch niemandem freigegeben")+"</div></div>"
+      +(ed?'<button class="btn" data-etpe="'+E(p.id)+'">Bearbeiten</button><button class="btn" data-etpd="'+E(p.id)+'">'+(UI.arm==="p"+p.id?(nz?"Plan und "+nz+" Freigabe(n) löschen?":"Wirklich löschen?"):"Löschen")+"</button>":"")+"</div>"};
+  w.innerHTML=(req.length?'<div class="card"><h3>Anfragen für eine neue Stufe</h3>'+reqRows(req)+'<p class="note" style="margin:8px 0 0">Bei „Ja“ bekommt der Spieler sofort die neue Stufe, bei „Nein“ bleibt alles, wie es ist. Er bekommt in beiden Fällen eine kurze Antwort im Link unter „Feedback“.</p></div>':"")
+    +'<div class="card"><h3>Freigaben</h3><p class="note" style="margin-top:0">Wer welchen Plan macht. Die Tage erscheinen nur im Terminplan dieses Spielers. Ist an einem Wunschtag ein Termin, rutscht das Eigentraining auf den nächsten freien Tag derselben Woche.</p>'
+    +(ed&&!UI.zf?'<div class="bar" style="margin:0 0 6px"><button class="btn" data-etzn style="background:var(--ac);color:#fff;border-color:var(--ac)"'+(ET.plans.length?"":" disabled")+">＋ Plan freigeben</button>"+(ET.plans.length?"":'<span class="note">Zuerst unten einen Plan hochladen.</span>')+"</div>":"")
+    +(UI.zf?zForm():"")
+    +(cur.length?cur.map(zRow).join(""):'<p class="note">Noch keine Freigaben.</p>')
+    +(old.length?'<details style="margin-top:8px"><summary class="note" style="cursor:pointer">Beendete Freigaben ('+old.length+")</summary>"+old.map(zRow).join("")+"</details>":"")+"</div>"
+    +'<div class="card"><h3>Pläne</h3><p class="note" style="margin-top:0">PDF oder Bild, höchstens 5 MB je Datei. Hat ein Plan Stufen, gibst du jeder Stufe eine eigene Datei. Austauschen geht jederzeit, die Spieler sehen dann die neue Datei.</p>'
+    +(ed&&!UI.pf?'<div class="bar" style="margin:0 0 6px"><button class="btn" data-etpn style="background:var(--ac);color:#fff;border-color:var(--ac)">＋ Neuer Plan</button></div>':"")
+    +(UI.pf?pForm():"")
+    +(ET.plans.length?ET.plans.slice().sort((a,b)=>(a.titel||"").localeCompare(b.titel||"","de")).map(pRow).join(""):'<p class="note">Noch keine Pläne.</p>')+"</div>"
+    +'<p class="note" id="etmsg"'+(UI.bad?' style="color:var(--r)"':"")+">"+E(UI.msg)+"</p>";
+  if(UI.zf)zFormFill();
+}
+ET.refresh=()=>{try{seg();render();startRows();profCard()}catch(e){try{console.error(e)}catch(x){}}};
+
+/* --- Formular Plan --- */
+function pForm(){const f=UI.pf;
+  return'<div class="et-f" id="etpf"><label>Name des Plans<br><input type="text" id="etpt" maxlength="80" placeholder="z. B. Stabi-Plan" value="'+E(f.titel)+'"></label>'
+    +'<label>Hinweis für die Spieler (freiwillig)<br><textarea id="etph" rows="2" maxlength="300" placeholder="z. B. Jede Übung 3 × 30 Sekunden">'+E(f.hinweis)+"</textarea></label>"
+    +'<div class="note" style="margin:0 0 6px">'+(f.st.length>1?"Stufen (Reihenfolge = Stufe 1, 2, 3 …)":"Datei")+"</div>"
+    +f.st.map((s,i)=>'<div class="et-st" data-esi="'+i+'">'+(f.st.length>1?'<input type="text" data-esn="'+i+'" maxlength="60" placeholder="Stufe '+(i+1)+'" value="'+E(s.n)+'">':"")
+      +'<span class="note">'+(s.file?E(s.file.name):s.f?E(s.f.name||"Datei vorhanden"):"Noch keine Datei")+'</span><label class="btn" style="margin:0!important;cursor:pointer">'+(s.f||s.file?"Austauschen":"Datei wählen")+'<input type="file" data-esf="'+i+'" accept="application/pdf,image/*" hidden></label>'
+      +(f.st.length>1?'<button type="button" class="btn" data-esx="'+i+'" aria-label="Stufe entfernen">✕</button>':"")+"</div>").join("")
+    +'<div class="bar" style="margin:4px 0 10px"><button type="button" class="btn" data-esa>＋ '+(f.st.length>1?"Weitere Stufe":"Stufen anlegen (weitere Datei)")+"</button></div>"
+    +'<div class="bar" style="margin:0"><button type="button" class="btn" data-etps style="background:var(--ac);color:#fff;border-color:var(--ac)"'+(UI.busy?" disabled":"")+">"+(UI.busy?"Lädt hoch …":"Speichern")+'</button><button type="button" class="btn" data-etpc>Abbrechen</button></div></div>'}
+function pRead(){const f=UI.pf;if(!f)return;const t=document.getElementById("etpt"),h=document.getElementById("etph");if(t)f.titel=t.value;if(h)f.hinweis=h.value;document.querySelectorAll("[data-esn]").forEach((i)=>{const s=f.st[+i.dataset.esn];if(s)s.n=i.value})}
+async function readFile(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result));r.onerror=()=>rej(r.error);r.readAsDataURL(file)})}
+async function upload(file){
+  const fid=hex(12),k=newKey(),d=await readFile(file),blob=await window.__lk.seal(k,{n:file.name,t:file.type||"",d}),parts=[];
+  for(let i=0;i<blob.length;i+=CH)parts.push(blob.slice(i,i+CH));if(!parts.length)parts.push("");
+  for(let i=0;i<parts.length;i++)await db.collection("etdatei").doc(fid+"_"+i).set({b:parts[i]});
+  ET.blobs[fid]=blob;return{id:fid,k,name:file.name,typ:file.type||"",size:file.size,parts:parts.length}}
+const dropFile=(f)=>{if(!f||!f.id)return;for(let i=0;i<(f.parts||1);i++)db.collection("etdatei").doc(f.id+"_"+i).delete().catch(()=>{});delete ET.blobs[f.id]};
+async function pSave(){
+  pRead();const f=UI.pf,titel=f.titel.trim();
+  if(!titel){note("Bitte einen Namen für den Plan eintragen.",true);return}
+  if(f.st.some((s)=>!s.f&&!s.file)){note(f.st.length>1?"Bitte für jede Stufe eine Datei wählen.":"Bitte eine Datei wählen.",true);return}
+  UI.busy=true;UI.force=true;render();
+  try{const old=f.id?ET.plans.find((p)=>p.id===f.id):null,gone=[],st=[];
+    for(const s of f.st){let fi=s.f;if(s.file){fi=await upload(s.file);if(s.f)gone.push(s.f)}st.push({n:f.st.length>1?s.n.trim():"",f:fi})}
+    if(old)(old.stufen||[]).forEach((s)=>{if(s.f&&!st.some((x)=>x.f&&x.f.id===s.f.id)&&!gone.some((g)=>g.id===s.f.id))gone.push(s.f)});
+    const id=f.id||nid("ep");await save("etplan",id,{titel,hinweis:f.hinweis.trim(),stufen:st,am:new Date().toISOString()});
+    gone.forEach(dropFile);
+    if(old&&st.length<(old.stufen||[]).length)ET.zu.filter((z)=>z.plan===id&&(+z.st||0)>=st.length).forEach((z)=>save("etzu",z.id,{...strip(z),st:st.length-1}));
+    UI.pf=null;UI.busy=false;note("Plan „"+titel+"“ gespeichert.");pubSoon()}
+  catch(e){UI.busy=false;note("Das Hochladen hat nicht geklappt. Bitte noch einmal versuchen.",true)}
+  UI.force=true;render()}
+async function pDelete(id){const p=ET.plans.find((x)=>x.id===id);if(!p)return;
+  try{for(const z of ET.zu.filter((z)=>z.plan===id))await save("etzu",z.id,null);await save("etplan",id,null);(p.stufen||[]).forEach((s)=>dropFile(s.f));note("Plan „"+p.titel+"“ gelöscht.");pubSoon()}catch(e){note("Das hat nicht geklappt.",true)}}
+
+/* --- Formular Freigabe --- */
+function zForm(){const f=UI.zf,P=players(),[s0,e0]=season(),p=ET.plans.find((x)=>x.id===f.plan);
+  return'<div class="et-f" id="etzf">'+(f.id?'<div style="margin:0 0 8px"><b>'+E(pName(f.pids[0]))+"</b></div>":'<div class="note" style="margin:0 0 4px">Spieler</div><div class="et-pl" style="margin:0 0 10px">'+P.map((x)=>'<label><input type="checkbox" data-ezp="'+E(x.id)+'"'+(f.pids.includes(x.id)?" checked":"")+"> "+E(x.vorname+" "+x.name)+"</label>").join("")+"</div>")
+    +'<div class="bar" style="margin:0 0 8px"><label style="margin:0!important">Plan <select id="ezpl">'+ET.plans.map((x)=>'<option value="'+E(x.id)+'"'+(x.id===f.plan?" selected":"")+">"+E(x.titel)+"</option>").join("")+"</select></label>"
+    +(p&&multi(p)?'<label style="margin:0!important">Stufe <select id="ezst">'+p.stufen.map((s,i)=>'<option value="'+i+'"'+(i===(+f.st||0)?" selected":"")+">"+E(stName(p,i))+"</option>").join("")+"</select></label>":"")+"</div>"
+    +'<div class="bar" style="margin:0 0 8px"><label style="margin:0!important">Von <input type="date" id="ezv" min="'+s0+'" max="'+e0+'"></label><label style="margin:0!important">Bis <input type="date" id="ezb" min="'+s0+'" max="'+e0+'"></label></div>'
+    +'<div class="note" style="margin:0 0 4px">Wunschtage</div><div class="et-days" style="margin:0 0 10px">'+WK.map((d,i)=>'<label><input type="checkbox" data-ezd="'+(i+1)+'"'+(f.tage.includes(i+1)?" checked":"")+"> "+d+"</label>").join("")+"</div>"
+    +'<div class="bar" style="margin:0"><button type="button" class="btn" data-etzs style="background:var(--ac);color:#fff;border-color:var(--ac)">'+(f.id?"Speichern":"Freigeben")+'</button><button type="button" class="btn" data-etzc>Abbrechen</button></div></div>'}
+function zFormFill(){const f=UI.zf,v=document.getElementById("ezv"),b=document.getElementById("ezb");if(v)v.value=f.von||"";if(b)b.value=f.bis||""}
+function zRead(){const f=UI.zf;if(!f)return;if(!f.id)f.pids=[...document.querySelectorAll("[data-ezp]:checked")].map((x)=>x.dataset.ezp);
+  const pl=document.getElementById("ezpl"),st=document.getElementById("ezst"),v=document.getElementById("ezv"),b=document.getElementById("ezb");
+  if(pl)f.plan=pl.value;f.st=st?+st.value:0;if(v)f.von=v.value;if(b)f.bis=b.value;f.tage=[...document.querySelectorAll("[data-ezd]:checked")].map((x)=>+x.dataset.ezd)}
+async function zSave(){
+  zRead();const f=UI.zf,[s0,e0]=season();
+  if(!f.pids.length){note("Bitte mindestens einen Spieler auswählen.",true);return}
+  if(!f.plan){note("Bitte einen Plan auswählen.",true);return}
+  if(!f.von||!f.bis){note("Bitte Von und Bis eintragen.",true);return}
+  if(f.von>f.bis){note("„Bis“ liegt vor „Von“.",true);return}
+  if(f.von<s0||f.bis>e0){note("Der Zeitraum muss in der Saison liegen ("+dmy(s0)+" bis "+dmy(e0)+").",true);return}
+  if(!f.tage.length){note("Bitte mindestens einen Wunschtag ankreuzen.",true);return}
+  try{for(const pid of f.pids){const id=f.id||nid("z"),old=ET.zu.find((z)=>z.id===id);
+      await save("etzu",id,{pid,plan:f.plan,st:f.st||0,von:f.von,bis:f.bis,tage:f.tage.slice().sort(),ab:old&&old.plan===f.plan?old.ab||null:null,am:new Date().toISOString()})}
+    note(f.id?"Freigabe gespeichert.":f.pids.length===1?"Plan für "+pName(f.pids[0])+" freigegeben.":"Plan für "+f.pids.length+" Spieler freigegeben.");UI.zf=null;pubSoon()}
+  catch(e){note("Das hat nicht geklappt.",true)}
+  UI.force=true;render()}
+const note=(t,bad)=>{UI.msg=bad?t:"";UI.bad=!!bad;const m=document.getElementById("etmsg");if(m){m.textContent=UI.msg;m.style.color=bad?"var(--r)":""}if(t&&window.__toast)window.__toast(t,bad)};   /* Fehler bleiben stehen, Erfolg nur als kurze Meldung */
+
+/* --- Klicks und Änderungen (Trainer) --- */
+document.addEventListener("click",async(e)=>{
+  if(!e.target.closest)return;const q=(s)=>e.target.closest(s);let b;
+  if((b=q("[data-etm]"))){setMode(b.dataset.etm);return}
+  if((b=q("[data-etok]"))||(b=q("[data-etno]"))){b.disabled=true;await answer(b.dataset.etok||b.dataset.etno,!!b.dataset.etok);return}
+  if((b=q("[data-etgo]"))){ET.show();return}
+  const w=document.getElementById("etw");if(!w||!w.contains(e.target))return;
+  if((b=q("[data-etv]"))){const[pid,i]=b.dataset.etv.split(":"),p=ET.plans.find((x)=>x.id===pid),s=p&&p.stufen[+i];if(s&&s.f)openFile(()=>ET.blob(s.f),s.f,p.titel+(multi(p)?" · "+stName(p,+i):""));return}
+  if(!canEdit())return;
+  if(q("[data-etpn]")){UI.pf={id:null,titel:"",hinweis:"",st:[{n:"",f:null,file:null}]};UI.msg="";UI.force=true;render();const t=document.getElementById("etpt");t&&t.focus();return}
+  if((b=q("[data-etpe]"))){const p=ET.plans.find((x)=>x.id===b.dataset.etpe);if(!p)return;UI.pf={id:p.id,titel:p.titel||"",hinweis:p.hinweis||"",st:(p.stufen||[]).map((s)=>({n:s.n||"",f:s.f||null,file:null}))};UI.msg="";UI.force=true;render();return}
+  if(q("[data-etpc]")){UI.pf=null;UI.force=true;render();return}
+  if(q("[data-esa]")){pRead();const f=UI.pf;if(f.st.length===1&&!f.st[0].n)f.st[0].n="Stufe 1";f.st.push({n:"Stufe "+(f.st.length+1),f:null,file:null});UI.force=true;render();return}
+  if((b=q("[data-esx]"))){pRead();UI.pf.st.splice(+b.dataset.esx,1);UI.force=true;render();return}
+  if(q("[data-etps]")){if(!UI.busy)pSave();return}
+  if((b=q("[data-etpd]"))){const k="p"+b.dataset.etpd;if(UI.arm!==k){UI.arm=k;render();return}UI.arm=null;await pDelete(b.dataset.etpd);return}
+  if(q("[data-etzn]")){const[s0,e0]=season(),t=tdy(),v=t<s0?s0:t>e0?e0:t,b2=add(v,90)>e0?e0:add(v,90);UI.zf={id:null,pids:[],plan:(ET.plans[0]||{}).id||"",st:0,von:v,bis:b2,tage:[2,4]};UI.msg="";UI.force=true;render();return}
+  if((b=q("[data-etze]"))){const z=ET.zu.find((x)=>x.id===b.dataset.etze);if(!z)return;UI.zf={id:z.id,pids:[z.pid],plan:z.plan,st:+z.st||0,von:z.von,bis:z.bis,tage:(z.tage||[]).slice()};UI.msg="";UI.force=true;render();document.getElementById("etzf").scrollIntoView({block:"nearest"});return}
+  if(q("[data-etzc]")){UI.zf=null;UI.force=true;render();return}
+  if(q("[data-etzs]")){zSave();return}
+  if((b=q("[data-etzd]"))){const k="z"+b.dataset.etzd;if(UI.arm!==k){UI.arm=k;render();return}UI.arm=null;const z=ET.zu.find((x)=>x.id===b.dataset.etzd);if(z){await save("etzu",z.id,null);note("Freigabe für "+pName(z.pid)+" beendet.");pubSoon()}return}
+});
+document.addEventListener("change",(e)=>{
+  const w=document.getElementById("etw");if(!w||!w.contains(e.target)||!canEdit())return;const t=e.target;
+  if(t.dataset.esf!=null){const f=t.files&&t.files[0];if(!f)return;if(f.size>MAXB){note("Die Datei ist zu groß (höchstens 5 MB). Tipp: als PDF in kleinerer Qualität speichern.",true);t.value="";return}
+    if(!/^(application\/pdf|image\/)/.test(f.type||"")&&!/\.pdf$/i.test(f.name)){note("Bitte eine PDF-Datei oder ein Bild wählen.",true);t.value="";return}
+    pRead();UI.pf.st[+t.dataset.esf].file=f;UI.force=true;render();return}
+  if(t.id==="ezpl"){zRead();UI.zf.st=0;UI.force=true;render();return}
+  if(t.dataset.etst!=null){const z=ET.zu.find((x)=>x.id===t.dataset.etst);if(!z)return;save("etzu",z.id,{...strip(z),st:+t.value,ab:null});const p=ET.plans.find((x)=>x.id===z.plan);note(pName(z.pid)+" ist jetzt in "+(p?stName(p,+t.value):"Stufe "+(+t.value+1))+".");pubSoon()}
+});
+
+/* --- Startseite: Anfragen unter „Zu erledigen“ --- */
+function startRows(){
+  const hg=document.getElementById("hg");if(!hg)return;const old=document.getElementById("etst");if(old)old.remove();
+  const req=ET.requests();if(!req.length)return;
+  const h=[...hg.querySelectorAll(".card h3")].find((x)=>/^\s*Zu erledigen/.test(x.textContent));if(!h)return;
+  const d=document.createElement("div");d.id="etst";d.innerHTML=reqRows(req,true)+'<div class="bar" style="margin:4px 0 8px"><button class="btn" data-etgo>Zum Eigentraining</button></div>';
+  h.insertAdjacentElement("afterend",d);
+  [...h.parentElement.querySelectorAll(":scope>p.note")].forEach((p)=>{if(/Alles erledigt/.test(p.textContent))p.remove()})}
+/* --- Profil: kurz Plan und Stufe (nur Trainer, nie im Link: .trnonly) --- */
+function profCard(){
+  const pn=document.getElementById("pnt"),old=document.getElementById("petc");if(old)old.remove();
+  if(!pn||window.__PUB||typeof PID==="undefined"||!PID)return;
+  const t=tdy(),L=ET.zu.filter((z)=>z.pid===PID&&(!z.bis||z.bis>=t));if(!L.length)return;const days=daysNow();
+  const c=document.createElement("div");c.className="card trnonly";c.id="petc";
+  c.innerHTML="<h3>Eigentraining</h3>"+L.map((z)=>{const p=ET.plans.find((x)=>x.id===z.plan);if(!p)return"";const n=(p.stufen||[]).length,nx=ET.dates(z,days).find((d)=>d>=t);
+    return'<div class="row"><span><b>'+E(p.titel)+"</b>"+(n>1?" · "+E(stName(p,Math.min(+z.st||0,n-1)))+" von "+n:"")+'<br><span class="note">'+E(tageTxt(z.tage))+" · bis "+E(dmy(z.bis))+(nx?" · Nächstes Mal: "+E(dsh(nx)):"")+"</span></span></div>"}).join("")+'<div class="bar" style="margin:8px 0 0"><button class="btn" data-etgo>Zum Eigentraining</button></div>';
+  const host=pn.closest(".card")||pn;host.insertAdjacentElement("beforebegin",c)}
+
+/* --- Start (Trainer) --- */
+function startTrainer(){
+  if(ET.started||typeof db==="undefined"||!db||window.__VIEWER||window.__SCOUT||window.__ROLE==="scout")return;ET.started=true;css();seg();
+  db.collection("etplan").onSnapshot((s)=>{ET.plans=s.docs.map((d)=>({id:d.id,...d.data()}));ET.refresh()},()=>{});
+  db.collection("etzu").onSnapshot((s)=>{ET.zu=s.docs.map((d)=>({id:d.id,...d.data()}));ET.refresh()},()=>{});
+  if(typeof renderStart==="function"){const o=renderStart;renderStart=function(){const r=o.apply(this,arguments);try{startRows()}catch(e){}return r}}
+  if(typeof renderProfile==="function"){const o=renderProfile;renderProfile=function(){const r=o.apply(this,arguments);try{profCard()}catch(e){}return r}}
+  ET.refresh();
+}
+ET.fbChanged=()=>ET.refresh();
+const boot=()=>{if(window.__VIEWER||window.__SCOUT)return;if(typeof db!=="undefined"&&db&&window.__dbUp)startTrainer();else setTimeout(boot,400)};
+setTimeout(boot,300);
+
+/* =====================================================================
+   Spielerlink
+   ===================================================================== */
+const ls={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const VX={d:null,pid:null};
+/* Eigentraining-Tage in den Terminplan des Links (nur dieser Spieler) */
+ET.merge=(T,et)=>{if(!T||!et||!et.length)return T;const days={};Object.keys(T.days||{}).forEach((k)=>{days[k]=T.days[k].slice()});
+  et.forEach((x)=>{const st=x.s.length>1?x.s[x.c].n:"";(x.d||[]).forEach((d)=>{(days[d]=days[d]||[]).push({ty:"Eigentraining",tx:x.t+(st?" · "+st:""),g:0,b:[["o","Eigentraining: "+x.t+(st?" ("+st+")":"")]]})})});
+  return{...T,days}};
+const pend=(pid,x)=>{const p=ls.get("u13etw."+pid+"."+x.i,null);if(!p)return null;
+  if(x.c>=p.s||(x.ab&&x.ab.s===p.s&&x.ab.am>p.at)){ls.set("u13etw."+pid+"."+x.i,null);return null}return p};
+ET.ueb=(d,pid,r)=>{if(!d||!d.et||!d.et.length)return"";VX.d=d;VX.pid=pid;css();const t=tdy(),V=window.__vid,canAsk=!!(r&&r.r==="s"&&d.fk&&window.__vidNet&&V&&V.fbSend);
+  return'<div class="card" id="vetc" style="margin:0 0 12px"><h3 style="margin-top:0">Eigentraining</h3>'+d.et.map((x)=>{const n=x.s.length,nx=(x.d||[]).find((y)=>y>=t),p=pend(pid,x),nxt=x.c+1<n?x.c+1:-1;
+    const ask=!canAsk||nxt<0?"":p?'<div class="note" style="margin-top:6px">Deine Anfrage für <b>'+E(x.s[p.s].n)+"</b> ist beim Trainer. Er meldet sich bei dir.</div>"
+      :(x.ab&&x.ab.s===nxt?'<div class="note" style="margin-top:6px">Dein Trainer möchte, dass du noch bei <b>'+E(x.s[x.c].n)+"</b> bleibst. Bleib dran!</div>":"")+'<div class="bar" style="margin:6px 0 0"><button class="btn" data-etw="'+E(x.i)+'">Ich möchte '+E(inSt(x.s[nxt].n))+"</button></div>";
+    return'<div class="vd-row" style="display:block"><b>'+E(x.t)+"</b>"+(n>1?' <span class="pill">'+E(x.s[x.c].n)+" von "+n+"</span>":"")
+      +'<div class="note">'+E(tageTxt(x.w))+(x.b?" · bis "+E(dm(x.b)):"")+"</div>"+(x.h?'<div style="margin-top:4px;white-space:pre-wrap">'+E(x.h)+"</div>":"")
+      +'<div style="margin-top:4px">'+(nx?"Nächstes Mal: <b>"+E(dsh(nx))+"</b>":"Keine weiteren Tage geplant.")+"</div>"
+      +'<div class="bar" style="margin:6px 0 0">'+(x.s[x.c].f?'<button class="btn" data-eto="'+E(x.i)+":"+x.c+'" style="background:var(--ac);color:#fff;border-color:var(--ac)">Plan öffnen</button>':"")+"</div>"
+      +(n>1?'<details style="margin-top:6px"><summary class="note" style="cursor:pointer">Alle Stufen ansehen</summary>'+x.s.map((s,i)=>'<div style="display:flex;gap:8px;align-items:center;margin:4px 0"><span style="flex:1">'+E(s.n)+(i===x.c?" (deine Stufe)":"")+"</span>"+(s.f?'<button class="btn" data-eto="'+E(x.i)+":"+i+'">Ansehen</button>':"")+"</div>").join("")+"</details>":"")
+      +ask+"</div>"}).join("")+"</div>"};
+const fileBlob=(id)=>window.__webFile?window.__webFile(id):Promise.resolve(((window.__lk&&window.__lk.getSnap().f)||{})[id]||null);
+document.addEventListener("click",async(e)=>{
+  const root=document.getElementById("vw2");if(!root||!VX.d||!e.target.closest||!root.contains(e.target))return;let b;
+  if((b=e.target.closest("[data-eto]"))){const[i,k]=b.dataset.eto.split(":"),x=VX.d.et.find((y)=>y.i===i),s=x&&x.s[+k];if(s&&s.f)openFile(()=>fileBlob(s.f.id),s.f,x.t+(x.s.length>1?" · "+s.n:""));return}
+  if((b=e.target.closest("[data-etw]"))){const x=VX.d.et.find((y)=>y.i===b.dataset.etw),V=window.__vid;if(!x||!V||!V.fbSend)return;const s=x.c+1;if(s>=x.s.length)return;
+    b.disabled=true;const at=new Date().toISOString();
+    try{await V.fbSend(VX.d,VX.pid,"Stufe","Ich möchte bei „"+x.t+"“ "+inSt(x.s[s].n)+" wechseln.","st-"+x.i+"-"+s+"-"+hex(3));ls.set("u13etw."+VX.pid+"."+x.i,{s,at});
+      const c=document.getElementById("vetc"),r=ls.get("u13wer."+VX.pid,null);if(c)c.outerHTML=ET.ueb(VX.d,VX.pid,r);window.__toast&&window.__toast("Anfrage gesendet. Dein Trainer meldet sich bei dir.")}
+    catch(x2){b.disabled=false;window.__toast&&window.__toast("Das hat nicht geklappt. Bitte später noch einmal versuchen.",true)}}
 });
 })();
 </script>
@@ -2302,7 +2786,7 @@ function hnRanges(n,sy){const o=[];(n.pm||[]).forEach((m)=>{const y=+m.slice(0,4
   String(n.pw||"").split(/[,;]/).forEach((t)=>{const m=t.trim().match(/^(\d{1,2})(?:\s*[-–]\s*(\d{1,2}))?$/);if(!m)return;const a=+m[1],z=+(m[2]||m[1]);for(let k=a;k<=z;k++){const yr=k>=27?sy:sy+1,j=new Date(yr,0,4),mo=new Date(yr,0,4-((j.getDay()+6)%7)+7*(k-1)),su=new Date(mo.getFullYear(),mo.getMonth(),mo.getDate()+6),p=(x)=>String(x).padStart(2,"0"),f=(d)=>d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());o.push([f(mo),f(su)])}});return o}
 function hnItems(list,wo,rng,sy){const td=(()=>{const d=new Date(),p=(n)=>String(n).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())})();
   return(list||[]).filter((n)=>{if(!n||!n.text||(n.wo==="plan"?"plan":"alle")!==wo||(n.von&&td<n.von)||(n.bis&&td>n.bis))return false;if(wo!=="plan"||!rng)return true;const R=hnRanges(n,sy||2026);return!R.length||R.some((r)=>rng[1]>=r[0]&&rng[0]<=r[1])})}
-const hnHtml=(items)=>items.map((n)=>'<div class="hn '+(HNC[n.farbe]||"hb")+'">'+esc(n.text)+"</div>").join("");
+const hnHtml=(items)=>items.map((n)=>'<div class="hn '+(HNC[n.farbe]||"hb")+'">'+hnFmt(n.text)+"</div>").join("");
 /* ---------- Terminplan im Spielerlink (nur Anzeige) ---------- */
 function vPlan(root,T){
   const WT=["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"],P2=(n)=>String(n).padStart(2,"0"),pd=(s)=>{const a=s.split("-").map(Number);return new Date(a[0],a[1]-1,a[2])},iso=(d)=>d.getFullYear()+"-"+P2(d.getMonth()+1)+"-"+P2(d.getDate()),add=(s,n)=>{const d=pd(s);d.setDate(d.getDate()+n);return iso(d)},wd=(s)=>pd(s).getDay(),ddm=(s)=>s.slice(8)+"."+s.slice(5,7)+".",dfull=(s)=>ddm(s)+s.slice(0,4);
@@ -2392,16 +2876,17 @@ function viewPlayer(d,pid){
   const demo=d.k==="demosp";if(demo&&window.__vid)window.__vidNet=demoNet(d);
   if(demo&&!document.getElementById("demospcss"))document.head.insertAdjacentHTML("beforeend",'<style id="demospcss">#u13vinst{display:none!important}</style>');   /* kein „Als App speichern“ in der Demo */
   useBg();dzApply(d);const v=shell(),cur=document.documentElement.getAttribute("data-theme")||"";
-  const VD=window.__vid,hasU=!!(VD&&(d.t||(d.vc&&d.vc.length)||(d.vg&&d.vg.length)||d.fk||(d.ds&&d.ds.length)));
-  const tabsHtml=()=>{const w=VD&&hasU?VD.viewerTabs(d,pid):{};return(hasU?'<button data-v="u">Übersicht</button>':"")+(d.h?'<button data-v="p">Profil</button>':"")+(d.t?'<button data-v="t">Terminplan</button>':"")+(d.li?'<button data-v="l">Liga</button>':"")+(w.v?'<button data-v="v">'+esc(VD.vidLabel?VD.vidLabel(d,pid):"Videos")+"</button>":"")+(w.f?'<button data-v="f">Feedback</button>':"")};
-  const multi=hasU||d.t||d.li;
-  v.innerHTML='<div class="vh">'+(d.f?'<img alt="" class="vfoto" style="border-radius:50%;object-fit:cover" src="'+esc(d.f)+'">':d.l?'<img alt="" data-lg src="'+esc(d.l)+'">':"")+'<div><b style="font-size:22px;line-height:1.2">'+(d.n?"Hey "+esc(d.n)+"!":"Hey!")+'</b><div class="note" style="font-size:14px">Deine '+esc(d.m||"U13")+'-Zentrale · Saison '+esc(d.s||"")+'</div></div><span style="flex:1"></span><select id="vth" aria-label="Darstellung"><option value="">Darstellung: Auto</option><option value="light">Hell</option><option value="dark">Dunkel</option></select></div>'+(demo?'<div class="card" id="demohint" style="margin:0 0 14px;border-color:var(--y);background:var(--ys)"><b>Demo-Spielerlink</b><div class="note" style="color:inherit;margin-top:2px">So sieht ein Spielerlink aus. Spieler, Termine, Videos und Feedback sind erfunden und haben nichts mit echten Personen zu tun. Was du hier schreibst, wird nicht gesendet.</div></div>':"")+hnHtml(hnItems(d.hn,"alle"))+(multi?'<div class="seg" id="vtab" style="margin-bottom:14px">'+tabsHtml()+'</div>':"")+(hasU?'<div id="vueb"></div>':"")+'<div id="vprof"'+(hasU?" hidden":"")+'>'+(d.h||(multi?"":'<div class="card"><div class="note">Ein Spielerprofil ist für diesen Link nicht freigegeben.</div></div>'))+'</div>'+(d.t?'<div id="vplan" hidden></div>':"")+(d.li?'<div id="vliga" hidden></div>':"")+(hasU?'<div id="vvid" hidden></div><div id="vfb" hidden></div>':"")+'<div class="vf">Stand: '+esc(dt(d.u))+(demo?" · Demo mit erfundenen Daten":" · Persönlicher Link, bitte nicht weitergeben.")+'<span id="vwer"></span></div>';
+  if(d.et&&window.__et)d.t=window.__et.merge(d.t,d.et);   /* Eigentraining nur in diesem Link */
+  const VD=window.__vid,hasU=!!(VD&&(d.t||(d.vc&&d.vc.length)||(d.vg&&d.vg.length)||d.fk||(d.ds&&d.ds.length)||(d.et&&d.et.length))),KT=!demo&&!!window.__KONTO;   /* KT: Ansicht über ein Konto (Spieler/Eltern), mit Reiter „Einstellungen“ */
+  const tabsHtml=()=>{const w=VD&&hasU?VD.viewerTabs(d,pid):{};return(hasU?'<button data-v="u">Übersicht</button>':"")+(d.h?'<button data-v="p">Profil</button>':"")+(d.t?'<button data-v="t">Terminplan</button>':"")+(d.li?'<button data-v="l">Liga</button>':"")+(w.v?'<button data-v="v">'+esc(VD.vidLabel?VD.vidLabel(d,pid):"Videos")+"</button>":"")+(w.f?'<button data-v="f">Feedback</button>':"")+(KT?'<button data-v="k">Einstellungen</button>':"")};
+  const multi=hasU||d.t||d.li||KT;
+  v.innerHTML='<div class="vh">'+(d.f?'<img alt="" class="vfoto" style="border-radius:50%;object-fit:cover" src="'+esc(d.f)+'">':d.l?'<img alt="" data-lg src="'+esc(d.l)+'">':"")+'<div><b style="font-size:22px;line-height:1.2">'+(d.n?"Hey "+esc(d.n)+"!":"Hey!")+'</b><div class="note" style="font-size:14px">Deine '+esc(d.m||"U13")+'-Zentrale · Saison '+esc(d.s||"")+'</div></div><span style="flex:1"></span><select id="vth" aria-label="Darstellung"><option value="">Darstellung: Auto</option><option value="light">Hell</option><option value="dark">Dunkel</option></select></div>'+(demo?'<div class="card" id="demohint" style="margin:0 0 14px;border-color:var(--y);background:var(--ys)"><b>Demo-Spielerlink</b><div class="note" style="color:inherit;margin-top:2px">So sieht ein Spielerlink aus. Spieler, Termine, Videos und Feedback sind erfunden und haben nichts mit echten Personen zu tun. Was du hier schreibst, wird nicht gesendet.</div></div>':"")+hnHtml(hnItems(d.hn,"alle"))+(multi?'<div class="seg" id="vtab" style="margin-bottom:14px">'+tabsHtml()+'</div>':"")+(hasU?'<div id="vueb"></div>':"")+'<div id="vprof"'+(hasU?" hidden":"")+'>'+(d.h||(multi?"":'<div class="card"><div class="note">Ein Spielerprofil ist für diesen Link nicht freigegeben.</div></div>'))+'</div>'+(d.t?'<div id="vplan" hidden></div>':"")+(d.li?'<div id="vliga" hidden></div>':"")+(hasU?'<div id="vvid" hidden></div><div id="vfb" hidden></div>':"")+(KT?'<div id="vkonto" hidden></div>':"")+'<div class="vf">Stand: '+esc(dt(d.u))+(demo?" · Demo mit erfundenen Daten":KT?"":" · Persönlicher Link, bitte nicht weitergeben.")+'<span id="vwer"></span></div>';
   bgPick();if(d.f){const av=v.querySelector("#vprof #av");if(av)av.remove()}else vLogo(v,d.l);const s=document.getElementById("vth");s.value=cur;s.onchange=()=>{applyTheme(s.value);try{s.value?localStorage.setItem("u13theme",s.value):localStorage.removeItem("u13theme")}catch(e){}};
   if(multi){const tb=document.getElementById("vtab");let ready=false,curV="";
     const show=(v)=>{curV=v;tb.querySelectorAll("button").forEach((x)=>x.classList.toggle("on",x.dataset.v===v));const pe=document.getElementById("vplan"),le=document.getElementById("vliga");document.getElementById("vprof").hidden=v!=="p";if(pe)pe.hidden=v!=="t";if(le){le.hidden=v!=="l";if(v==="l"&&!le.innerHTML&&window.__FD)le.innerHTML=window.__FD.view(d.li)}if(v==="t"&&!ready&&pe){ready=true;vPlan(pe,{...d.t,s:d.s,lg:d.l,hn:d.hn})}
-      [["u","vueb"],["v","vvid"],["f","vfb"]].forEach(([k,id])=>{const el=document.getElementById(id);if(el)el.hidden=v!==k});if(hasU&&"uvf".includes(v))VD.shown(v)};
+      [["u","vueb"],["v","vvid"],["f","vfb"],["k","vkonto"]].forEach(([k,id])=>{const el=document.getElementById(id);if(el)el.hidden=v!==k});if(v==="k"&&KT)window.__KONTO.render(document.getElementById("vkonto"));if(hasU&&"uvf".includes(v))VD.shown(v)};
     tb.onclick=(e)=>{const b=e.target.closest("button");if(!b)return;show(b.dataset.v);try{window.scrollTo(0,0)}catch(x){}};
-    const wer=()=>{const el=document.getElementById("vwer"),r=(()=>{try{return JSON.parse(localStorage.getItem("u13wer."+pid)||"null")}catch(e){return null}})();if(el)el.innerHTML=r&&hasU?' · Du bist hier als '+esc(r.r==="e"?(r.n||"Elternteil")+" (Elternteil)":d.n||"Spieler")+' · <button type="button" data-wchg style="border:0;background:none;padding:0;font:inherit;color:var(--ac);text-decoration:underline;cursor:pointer">Ändern</button>':""};
+    const wer=()=>{const el=document.getElementById("vwer"),r=(()=>{try{return JSON.parse(localStorage.getItem("u13wer."+pid)||"null")}catch(e){return null}})();if(el)el.innerHTML=KT?' · Angemeldet als '+esc(r&&r.r==="e"?(r.n||"Elternteil")+" (Elternteil)":d.n||"Spieler"):r&&hasU?' · Du bist hier als '+esc(r.r==="e"?(r.n||"Elternteil")+" (Elternteil)":d.n||"Spieler")+' · <button type="button" data-wchg style="border:0;background:none;padding:0;font:inherit;color:var(--ac);text-decoration:underline;cursor:pointer">Ändern</button>':""};
     const refresh=()=>{tb.innerHTML=tabsHtml();if(!tb.querySelector('[data-v="'+curV+'"]'))curV=tb.querySelector("button").dataset.v;show(curV);wer()};
     if(hasU)VD.viewer(d,pid,{refresh,go:(v)=>{if(tb.querySelector('[data-v="'+v+'"]'))show(v)}});
     if(demo)window.__pushCtx=()=>null;
@@ -2420,7 +2905,7 @@ function demoNet(d){
     async create(coll,id,obj){if(/^kom\//.test(coll))(S[coll]=S[coll]||[]).push({id,at:new Date().toISOString(),server:true,b:obj.b});else if(/^fbaus\//.test(coll))fb.push({...obj})},
     async update(path,obj){const p=path.split("/"),L=S[p.slice(0,3).join("/")]||[],x=L.find((y)=>y.id===p[3]);if(x){x.b=obj.b;delete x.o}}};
 }
-window.showAccess=showAccess;
+window.showAccess=showAccess;window.__showViewer=showViewer;
 
 /* ---------- Kurzlinks (Web): /name -> Passwort -> Ansicht. Das Passwort entschlüsselt Profil-Schlüssel; ohne Passwort ist nichts lesbar. ---------- */
 const KZ_OK=/^[a-z0-9][a-z0-9_-]{3,39}$/,KZ_RES=["index","scout","admin","login","app","www","api","404"],KZ_IT=300000,KZ_IT2=600000,KZ_MIN=12;
@@ -2520,7 +3005,7 @@ const fingerprintParts=async()=>{
   const notes=D.notizen.filter((n)=>n.art!=="beobachtung"&&n.sichtbar).sort((a,b)=>a.id<b.id?-1:1);
   const evs=evAll().map((e)=>{const q={};Object.keys(e).sort().forEach((k)=>{if(k==="id"||k==="virt"||k==="trainId"||k==="schwerpunkt"||k==="ctask"||(k==="detail"&&e.typ==="Training"))return;const v=e[k];if(v===""||v==null||(k==="eltern"&&v!==false))return;q[k]=v});return q}).sort((a,b)=>JSON.stringify(a)<JSON.stringify(b)?-1:1);
   const gs=D.spiele.filter(U13.erreicht).map((g)=>{const q={...g};delete q.live;return q}),ts=D.trainings.filter(U13.erreicht);
-  const a=(await sha(JSON.stringify([D.spieler,evs,D.dienste,notes,null,cfg,window.__vid?window.__vid.sig():null,ligaSnap(false)]))).slice(0,16),s=(await sha(JSON.stringify([gs,ts,(ligaSnap()||{}).t||null]))).slice(0,16);
+  const a=(await sha(JSON.stringify([D.spieler,evs,D.dienste,notes,null,cfg,window.__vid?window.__vid.sig():null,ligaSnap(false)].concat(window.__et&&window.__et.zu.length+window.__et.plans.length?[window.__et.sig()]:[])))).slice(0,16),s=(await sha(JSON.stringify([gs,ts,(ligaSnap()||{}).t||null]))).slice(0,16);
   return{a,s}};
 /* Reiter „Liga“ im Spielerlink: die selbst unter „Spiele“ eingetragenen Spiele (nicht FUSSBALL.DE).
    Nur Datum, Anstoß, Gegner, Heim/Auswärts, Ort, Spielart und Ergebnis – keine Aufstellung, Minuten oder Notizen.
@@ -2667,12 +3152,14 @@ const useBg=()=>{const b=SNAP.bg;if(!b||!window.applyBg)return;let v="";try{v=lo
 const bgPick=()=>{const b=SNAP.bg,t=document.getElementById("vth")||document.getElementById("th");if(!b||!b.i||!t||document.getElementById("vbg"))return;let v="";try{v=localStorage.getItem("u13vbg")||""}catch(e){}
   const e=document.createElement("select");e.id="vbg";e.setAttribute("aria-label","Hintergrund");e.innerHTML='<option value="">Hintergrund: Standard</option><option value="bild">Hintergrund: Bild</option>';e.value=v;
   e.onchange=()=>{try{e.value?localStorage.setItem("u13vbg",e.value):localStorage.removeItem("u13vbg")}catch(x){}useBg()};t.insertAdjacentElement("afterend",e)};
-/* LKV: Aufbau der Links. Erhöhen, wenn neuer Inhalt in die Links kommt – dann werden alle sofort neu veröffentlicht (2 = Spielerfoto im Kopf, 3 = Dienste in der Übersicht, 4 = Liga: Tabelle von FUSSBALL.DE, kein Ergebnis bei nicht gewerteten Spielen) */
-const LKV=4;
+/* LKV: Aufbau der Links. Erhöhen, wenn neuer Inhalt in die Links kommt – dann werden alle sofort neu veröffentlicht (2 = Spielerfoto im Kopf, 3 = Dienste in der Übersicht, 4 = Liga: Tabelle von FUSSBALL.DE, kein Ergebnis bei nicht gewerteten Spielen, 5 = anklickbare Adressen in Hinweisen) */
+const LKV=5;
 const dzSig=()=>JSON.stringify(Object.keys(L).sort().filter((k)=>L[k].aktiv&&L[k].key).map((k)=>[k]))+"|"+LKV;
 async function buildSnap(){
-  const LI=ligaSnap(),TP=planSnap(),HN=(D.config&&D.config.hinweise)||[],out={v:1,u:new Date().toISOString(),p:{},k:{}},logo=lgR(),sa=(D.config&&D.config.saison)||"";
-  for(const p of active()){const l=L[p.id];if(!l||!l.aktiv||!l.key)continue;out.p[p.id]=await seal(l.key,{...(window.__vid?window.__vid.pkg(p.id):{}),h:profExt()?profileHtml(p.id):"",l:logo,s:sa,m:mann(),u:out.u,t:TP,n:p.vorname,f:p.foto||"",hn:HN,li:LI,dz:"kobalt"});out.k[p.id]=await sha8(l.key)}
+  const LI=ligaSnap(),TP=planSnap(),HN=(D.config&&D.config.hinweise)||[],out={v:1,u:new Date().toISOString(),p:{},k:{}},logo=lgR(),sa=(D.config&&D.config.saison)||"",ETF={};
+  for(const p of active()){const l=L[p.id];if(!l||!l.aktiv||!l.key)continue;const et=window.__et?window.__et.pkg(p.id,TP.days,ETF):[];out.p[p.id]=await seal(l.key,{...(window.__vid?window.__vid.pkg(p.id):{}),h:profExt()?profileHtml(p.id):"",l:logo,s:sa,m:mann(),u:out.u,t:TP,n:p.vorname,f:p.foto||"",hn:HN,li:LI,dz:"kobalt",...(et.length?{et}:{})});out.k[p.id]=await sha8(l.key)}
+  /* Eigentraining: Dateien der freigegebenen Pläne (verschlüsselt mit eigenem Schlüssel, der nur im Link des Spielers steht) */
+  for(const id of Object.keys(ETF)){try{(out.f=out.f||{})[id]=await window.__et.blob(ETF[id])}catch(e){}}
   out.bg=await bgSnap();out.dzs=dzSig();out.x={};out.xk={};
   for(const k of XK){const l=L["x"+k];if(!l||!l.aktiv||!l.key)continue;out.x[k]=await seal(l.key,k==="demosp"?{...demoPlayer(),k,u:out.u,l:logo,s:sa,m:mann(),dz:"kobalt"}:k==="plan"?{k,u:out.u,t:TP,l:logo,s:sa,m:mann(),hn:HN,dz:"kobalt"}:{k,u:out.u,db:extData(k),dz:"kobalt"});out.xk[k]=await sha8(l.key)}
   {const f=await fingerprintParts();out.fp=f.a+f.s;out.fa=f.a;out.fs=f.s}return out;
@@ -2684,6 +3171,7 @@ function composeHtml(snap){
   const frag=src.replace(SNAP0,()=>OP+' type="application/json" id="snap">'+JSON.stringify(snap)+CL).replace(SRC0,()=>OP+' type="text/plain" id="src">'+esc2+CL);
   return HEAD+frag+"</body></html>";
 }
+window.__lkSaveLink=(pid,o)=>saveLink(pid,o);window.__lkNewKey=newKey;
 window.__lk={setSnap:(s)=>{SNAP=s},getSnap:()=>SNAP,seal,unseal,composeHtml,buildSnap,parseCode,extData,fingerprint,fingerprintParts};
 const saveLink=(pid,o)=>{
   const c=L[pid]||{};
@@ -2716,6 +3204,8 @@ async function kzRemove(pid){const l=L[pid]||{};if(!l.alias)return;await window.
    Es liegt NICHT im Programmtext, sondern nur in der Datenbank (Sammlung scoutkz, Dokument std: nur Trainer mit Schreibrecht).
    Automatisch: sobald ein Spielerlink aktiv ist, entsteht der Kurzlink  <Mannschaft><Vorname><Name>  (z. B. d1loganfrost), für den Teamlink  <Mannschaft>team. */
 const kzStd={pw:"",auto:true,loaded:false};
+/* Web-Version: Spieler und Eltern melden sich mit Konto an (konten.js), daher keine Direkt- und Kurzlinks für Spieler */
+const KW=()=>!!(window.__WEB&&window.__konten);
 const kzSlug=(s)=>String(s||"").toLowerCase().replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]/g,"");
 const kzPrefix=()=>kzSlug(window.__TID||mann()||"u13");
 const kzCanW=()=>!!(window.__kurzTr&&window.__ROLE==="voll"&&!window.__DEMO&&!window.__VIEWER&&typeof db!=="undefined"&&db);
@@ -2729,7 +3219,7 @@ async function kzFreeAlias(b0){
 let kzAutoBusy=false,kzAutoNext=0;const kzTry={};   /* gewählter Name je Link: bricht eine Anlage mittendrin ab (Netz), wird beim nächsten Versuch derselbe Name wieder verwendet statt „…2“ */
 function kzAutoKick(){
   if(kzAutoBusy||Date.now()<kzAutoNext||!kzStd.loaded||kzStd.auto===false||!kzCanW()||!D.ready)return;
-  const todo=active().filter((p)=>{const l=L[p.id]||{};return l.key&&l.aktiv&&!l.alias}),xp=L.xplan||{},plan=!!(xp.key&&xp.aktiv&&!xp.alias);
+  const todo=KW()?[]:active().filter((p)=>{const l=L[p.id]||{};return l.key&&l.aktiv&&!l.alias}),xp=L.xplan||{},plan=!!(xp.key&&xp.aktiv&&!xp.alias);
   if(!todo.length&&!plan)return;
   kzAutoBusy=true;
   (async()=>{try{
@@ -2746,12 +3236,17 @@ setInterval(()=>{try{kzAutoKick()}catch(e){}},15000);
 window.__kzState=()=>({busy:kzAutoBusy,next:kzAutoNext-Date.now(),std:{...kzStd},can:kzCanW(),ready:!!D.ready,act:active().map((p)=>[p.id,!!(L[p.id]||{}).key,!!(L[p.id]||{}).aktiv,(L[p.id]||{}).alias||""])});
 function renderStd(){
   const el=T("kzstd");if(!el)return;
-  if(!kzCanW()||!kzStd.loaded){el.innerHTML="";return}
+  if(!kzCanW()||!kzStd.loaded||KW()){el.innerHTML="";kzOld();return}
   if(document.activeElement&&document.activeElement.id==="kzstdin")return;
   const h='<div class="card" id="kzstdc" style="margin:10px 0"><h4 style="margin:0 0 6px">Kurzlinks</h4>'
    +'<label class="note" style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" id="kzauto" '+(kzStd.auto!==false?"checked":"")+'> <span>Kurzlinks automatisch anlegen: Spieler <b>'+esc(kzPrefix())+'vornamename</b> (z. B. '+esc(kzPrefix())+'loganfrost), Teamlink <b>'+esc(kzPrefix())+'team</b>. Jeder Spielerlink bekommt sein eigenes, zufälliges Passwort (steht in der Tabelle, Familien können es im Link selbst ändern).</span></label>'
    +'<div class="bar" style="margin:8px 0 0"><button class="btn" id="kzindiv" title="Jeder Spielerlink bekommt ein neues, eigenes Passwort">Allen Spielerlinks neue, eigene Passwörter geben</button> <button class="btn" id="kzfix" title="Entfernt Zahlen am Ende (z. B. d1loganfrost2) und stellt den Terminplan auf Teamlink um">Kurzlink-Namen bereinigen</button></div><div class="note" id="kzstdm"></div></div>';
   if(el.__h!==h){el.__h=h;el.innerHTML=h}}
+/* Frühere Kurzlinks der Spieler einmal entfernen (sie würden ohne Konto öffnen) */
+let kzOldDone=false;
+function kzOld(){if(kzOldDone||!KW()||!kzCanW()||!D.ready)return;kzOldDone=true;
+  const ids=active().map((p)=>p.id).filter((id)=>(L[id]||{}).alias);if(!ids.length)return;
+  (async()=>{for(const id of ids){try{await kzRemove(id)}catch(e){kzOldDone=false}}})()}
 async function kzApplyStd(pw,all){
   const m=T("kzstdm"),say=(t,bad)=>{if(m){m.className="note"+(bad?" warn":"");m.textContent=t}};
   let n=0,skip=0;
@@ -2892,8 +3387,9 @@ async function renderLinks(){if(window.__DEMO)return;
     if(!(document.activeElement&&document.activeElement.matches&&document.activeElement.matches("[data-xln],[data-kzin]")))xe.innerHTML='<tr><th style="text-align:left">Link</th><th>Aktiv</th><th style="text-align:left">Adresse</th><th></th><th style="text-align:left">Stand</th></tr>'+xr.map((r)=>{const st=r.want&&r.want===r.pub?'<span class="pill ok">online</span>':r.want?'<span class="pill busy">geht beim Aktualisieren online</span>':r.pub?'<span class="pill busy">wird beim Aktualisieren abgeschaltet</span>':'<span class="pill">aus</span>';
       return'<tr data-x="'+r.k+'"><td style="text-align:left"><b>'+XN[r.k][0]+'</b><div class="note" style="white-space:normal;max-width:260px">'+XN[r.k][1]+'</div></td><td><input type="checkbox" data-xak '+(r.l.aktiv?"checked":"")+'></td><td style="text-align:left">'+(r.l.key?'<input readonly data-xln value="'+esc(linkOf(r.k,r.l.key))+'" style="width:100%;min-width:230px">'+kzCell("x"+r.k):'<span class="note">noch kein Link</span>')+'</td><td style="white-space:nowrap">'+(r.l.key?'<button class="btn" data-xcp>Kopieren</button> <button class="btn'+(armed==="x"+r.k?" arm":"")+'" data-xnw title="Der bisherige Link wird ungültig">'+(armed==="x"+r.k?"Wirklich neu?":"Neu erzeugen")+"</button>":"")+'</td><td style="text-align:left">'+st+"</td></tr>"}).join("");
   }
-  el.innerHTML='<tr><th style="text-align:left">Spieler</th><th>Aktiv</th><th style="text-align:left">Link</th><th></th><th style="text-align:left">Stand</th></tr>'+cur.map((r)=>{
+  el.innerHTML='<tr><th style="text-align:left">Spieler</th><th>Aktiv</th><th style="text-align:left">'+(KW()?"Konten und Spielerlink":"Link")+'</th><th></th><th style="text-align:left">Stand</th></tr>'+cur.map((r)=>{
     const p=r.p,l=r.l,st=r.want&&r.want===r.pub?'<span class="pill ok">online</span>':r.want?'<span class="pill busy">geht beim Aktualisieren online</span>':r.pub?'<span class="pill busy">wird beim Aktualisieren abgeschaltet</span>':'<span class="pill">aus</span>';
+    if(KW())return'<tr data-p="'+p.id+'"><td style="text-align:left">'+esc(p.vorname+" "+p.name)+'</td><td><input type="checkbox" data-ak '+(l.aktiv?"checked":"")+'></td><td style="text-align:left">'+window.__konten.cell(p.id)+'</td><td></td><td style="text-align:left">'+st+"</td></tr>";
     return'<tr data-p="'+p.id+'"><td style="text-align:left">'+esc(p.vorname+" "+p.name)+'</td><td><input type="checkbox" data-ak '+(l.aktiv?"checked":"")+'></td><td style="text-align:left">'+(l.key?(l.alias?'<details><summary class="note" style="cursor:pointer">Direktlink ohne Passwort (nicht weitergeben)</summary><input readonly data-ln value="'+esc(linkOf(p.id,l.key))+'" style="width:100%;min-width:230px"></details>':'<input readonly data-ln value="'+esc(linkOf(p.id,l.key))+'" style="width:100%;min-width:230px">')+kzCell(p.id):'<span class="note">noch kein Link</span>')+'</td><td style="white-space:nowrap">'+(l.key?'<button class="btn" data-cp'+(l.alias?' title="Link ohne Passwort – nicht weitergeben">Direktlink kopieren':'>Kopieren')+'</button> <button class="btn'+(armed===p.id?" arm":"")+'" data-nw title="Der bisherige Link wird ungültig">'+(armed===p.id?"Wirklich neu?":"Neu erzeugen")+"</button>":"")+"</td><td style=\"text-align:left\">"+st+"</td></tr>"}).join("");
 }
 function initLinks(){
@@ -2979,6 +3475,7 @@ async function gateCo(){
 /* Start */
 const h=location.hash;
 if(window.__CO)gateCo();
+else if(window.__VIEWER&&/^#(konto|sp\/|mt\/)/.test(h)&&window.__kontoStart)window.__kontoStart();
 else if(window.__VIEWER){const kz=h.match(/^#k\/([A-Za-z0-9_-]{4,40})$/);if(kz)openKurz(kz[1]);else{const c=parseCode(h);c?showViewer(c.pid,c.key):showAccess()}}
 else if(window.__SCOUT){}
 else{if(window.__noDb)showAccess();if(window.__dbUp)initLinks()}
@@ -3119,21 +3616,56 @@ function renderStart(){
       const tage=last?dd(last):(ersterTag&&dd(ersterTag)>=30?dd(ersterTag):null);return tage!=null&&tage>=30?{p,tage,nie:!last}:null}).filter(Boolean).sort((x,y)=>y.tage-x.tage);
     if(faellig.length){const sh=faellig.slice(0,8),rest=faellig.length-sh.length;
       todo.push('<div class="row"><span style="min-width:0"><b>Seit über einem Monat keine Notiz</b> zu '+faellig.length+(faellig.length===1?" Spieler":" Spielern")+': '+sh.map((f)=>'<button class="rm" data-pid="'+f.p.id+'" title="'+(f.nie?"Noch nie eine Notiz":"Letzte Notiz vor "+f.tage+" Tagen")+'" style="text-decoration:underline">'+esc(nm(f.p))+"</button>").join(", ")+(rest>0?" … +"+rest+" weitere":"")+'</span><button class="rm" data-go="n">Notizen</button></div>')}}
-  const TD=(D.todos||[]).slice().sort((a,b)=>(a.datum||"9").localeCompare(b.datum||"9")||a.id.localeCompare(b.id)),tdRow=(x,c)=>'<div class="row"><span style="'+(c?"display:flex;gap:8px;align-items:flex-start;":"")+'white-space:pre-wrap;overflow-wrap:anywhere;min-width:0">'+(c?'<input type="checkbox" data-td="'+x.id+'" style="flex:none;margin:3px 0 0"><span class="tdb"><span class="tdt">'+dlTag(x)+whoTag(x)+'</span><span class="tdx">':dlTag(x)+whoTag(x))+esc(x.text)+(c?"</span></span>":"")+'</span><button class="rm" data-tdx="'+x.id+'" title="Entfernen">✕</button></div>',
+  const TD=(D.todos||[]).slice().sort((a,b)=>(a.datum||"9").localeCompare(b.datum||"9")||a.id.localeCompare(b.id)),tdRow=(x,c)=>'<div class="row"><span style="'+(c?"display:flex;gap:8px;align-items:flex-start;":"")+'white-space:pre-wrap;overflow-wrap:anywhere;min-width:0">'+(c?'<input type="checkbox" data-td="'+x.id+'" style="flex:none;margin:3px 0 0"><span class="tdb"><span class="tdt">'+dlTag(x)+whoTag(x)+'</span><span class="tdx">':dlTag(x)+whoTag(x))+bulHtml(x.text)+(c?"</span></span>":"")+'</span><button class="rm" data-tdx="'+x.id+'" title="Entfernen">✕</button></div>',
     tdo=TD.filter((x)=>x.typ==="todo"&&!x.done),tdd=TD.filter((x)=>x.typ==="todo"&&x.done),thn=TD.filter((x)=>x.typ==="hinweis");
   todo.push(...tdo.map((x)=>tdRow(x,true)));
   const tnotes=(D.notizen||[]).filter((n)=>n.pid==="team"&&n.art!=="ziel"&&n.art!=="beobachtung"&&n.ort!=="allg").sort((a,b)=>(b.datum||"").localeCompare(a.datum||"")).slice(0,5);
   const WN=S?S.rows.filter((r)=>r.warnSpielzeit).sort((x,y)=>(Math.min(x.spiel.gewichtet??1,x.spiel.l2mGewichtet??1))-(Math.min(y.spiel.gewichtet??1,y.spiel.l2mGewichtet??1))):[];
   const wnMin=!!wnGet(),wnHtml=WN.length?'<div class="card" style="grid-column:1/-1;'+(wnMin?'padding:8px 14px;':'border-color:var(--r);')+'"><h3 data-wnt="1" style="cursor:pointer;margin:0;'+(wnMin?'color:var(--mu);font-weight:600':'color:var(--r)')+'" title="'+(wnMin?"Anzeigen":"Minimieren")+'">'+(wnMin?'▸':'▾')+' ⚠ Spielzeit unter '+U13.grenzen().s[0]+' % ('+WN.length+')'+(wnMin?' <span class="note" style="text-transform:none;letter-spacing:0;font-weight:400">– '+esc(WN.map((r)=>nm(r.spieler)).join(", "))+'</span>':'')+'</h3>'+(wnMin?'':'<div style="margin-top:10px"></div>')+(wnMin?[]:WN).map((r)=>{const s=r.spiel,pr=(x)=>x==null?"–":Math.round(x*100)+" %",bad=(f)=>f?'<b class="dn">':"<b>";return'<div class="row"><span>'+esc(nm(r.spieler))+'</span><span class="note">Saison '+bad(r.warnSpielzeit.saison)+pr(s.gewichtet)+"</b> · letzte 60 Tage "+bad(r.warnSpielzeit.l2m)+pr(s.l2mGewichtet)+'</b> <button class="rm" data-pid="'+r.spieler.id+'">Profil</button></span></div>'}).join("")+(wnMin?"":'<p class="note" style="margin:8px 0 0">Spielzeit gewichtet, ohne Torhüter. Keine Warnung, wenn der Spieler in den letzten 60 Tagen nicht im Kader stand.</p>')+'</div>':"";
-  $("#hg").innerHTML=wnHtml+'<div class="card"><h3>Nächste Termine</h3>'+(up.length?up.map(evLine).join(""):'<p class="note">Keine Termine. Unter „Termine“ anlegen.</p>')+'</div><div class="card"><h3>Zu erledigen</h3>'+(todo.length?todo.join(""):'<p class="note">Alles erledigt ✓</p>')+(tdd.length?'<p class="note" style="margin:8px 0 0">'+tdd.length+' erledigt · <button class="rm" data-tdc="1">aufräumen</button></p>':"")+'</div><div class="card"><h3>Nächste Geburtstage</h3>'+(bd.length?bd.map((b)=>'<div class="row"><span>'+esc(bdn(b.p))+'</span><span class="note">'+esc(ddm(b.datum))+" · wird "+b.alter+"</span></div>").join(""):'<p class="note">Keine Geburtstage hinterlegt. Geburtsdaten unter „Stammdaten“ eintragen.</p>')+'</div><div class="card"><h3>Notizen</h3>'+tnotes.map((n)=>'<div class="row"><span style="white-space:pre-wrap;overflow-wrap:anywhere;min-width:0"><b>'+esc(ddm(n.datum))+"</b> · "+esc(n.text)+(n.autor?' <span class="note">(von '+esc(n.autor)+")</span>":"")+'</span><button class="rm'+(snArm===n.id?" arm":"")+'" data-snd="'+n.id+'" title="Notiz löschen">'+(snArm===n.id?"Löschen?":"✕")+"</button></div>").join("")+thn.map((x)=>tdRow(x,false)).join("")+(hin.length?hin.map((e)=>'<div class="row"><span><b>'+esc(ddm(e.datum))+(e.bis&&e.bis>e.datum?" – "+esc(ddm(e.bis)):"")+"</b> · "+esc(e.titel||e.typ)+"</span></div>").join(""):thn.length||tnotes.length?"":'<p class="note">Keine Notizen. Unter „Notizen“ anlegen.</p>')+"</div>";
+  $("#hg").innerHTML=wnHtml+'<div class="card"><h3>Nächste Termine</h3>'+(up.length?up.map(evLine).join(""):'<p class="note">Keine Termine. Unter „Termine“ anlegen.</p>')+'</div><div class="card"><h3>Zu erledigen'+qaBtn("todo")+'</h3>'+(todo.length?todo.join(""):'<p class="note">Alles erledigt ✓</p>')+(tdd.length?'<p class="note" style="margin:8px 0 0">'+tdd.length+' erledigt · <button class="rm" data-tdc="1">aufräumen</button></p>':"")+'</div><div class="card"><h3>Nächste Geburtstage</h3>'+(bd.length?bd.map((b)=>'<div class="row"><span>'+esc(bdn(b.p))+'</span><span class="note">'+esc(ddm(b.datum))+" · wird "+b.alter+"</span></div>").join(""):'<p class="note">Keine Geburtstage hinterlegt. Geburtsdaten unter „Stammdaten“ eintragen.</p>')+'</div><div class="card"><h3>Notizen'+qaBtn("note")+'</h3>'+tnotes.map((n)=>'<div class="row"><span style="white-space:pre-wrap;overflow-wrap:anywhere;min-width:0"><b>'+esc(ddm(n.datum))+"</b> · "+bulHtml(n.text)+(n.autor?' <span class="note">(von '+esc(n.autor)+")</span>":"")+'</span><button class="rm'+(snArm===n.id?" arm":"")+'" data-snd="'+n.id+'" title="Notiz löschen">'+(snArm===n.id?"Löschen?":"✕")+"</button></div>").join("")+thn.map((x)=>tdRow(x,false)).join("")+(hin.length?hin.map((e)=>'<div class="row"><span><b>'+esc(ddm(e.datum))+(e.bis&&e.bis>e.datum?" – "+esc(ddm(e.bis)):"")+"</b> · "+esc(e.titel||e.typ)+"</span></div>").join(""):thn.length||tnotes.length?"":'<p class="note">Keine Notizen. '+(qaOk()?"Mit ＋ oben rechts anlegen.":"Unter „Notizen“ anlegen.")+'</p>')+"</div>";
   $("#hn").innerHTML=[["a","👥","Beteiligung"],["q","🏆","Bilanz"],["p","👤","Profil"],["n","📝","Notizen"],["t","🏃","Training"],["g","⚽","Spiele"],["m","📅","Termine"],["w","🎯","Schwerpunkte"],["s","🗂","Stammdaten"],["k","🧩","Kader"],["e","⚙️","Einstellungen"]].map((a)=>'<button class="btn" data-go="'+a[0]+'" style="padding:12px 10px">'+(window.__dz&&window.__dz.icon&&window.__dz.icon(a[0])?'<span class="tic">'+window.__dz.icon(a[0])+"</span>":a[1]+" ")+a[2]+"</button>").join("");
 }
-$("#h").addEventListener("click",(e)=>{const sd=e.target.closest("[data-snd]");if(sd){const id=sd.dataset.snd;if(snArm===id){snArm=null;save("notes",id,null)}else{snArm=id;renderStart()}return}if(snArm){snArm=null;renderStart()}if(e.target.closest("[data-wnt]")){wnSet(wnGet()?"":"1");renderStart();return}const wp=e.target.closest("button[data-pid]");if(wp){PID=wp.dataset.pid;renderProfile();go("p");return}const b=e.target.closest("[data-go]");if(b)go(b.dataset.go);
+$("#h").addEventListener("click",(e)=>{const qb=e.target.closest("[data-qa]");if(qb){qaOpen(qb.dataset.qa);return}const sd=e.target.closest("[data-snd]");if(sd){const id=sd.dataset.snd;if(snArm===id){snArm=null;save("notes",id,null)}else{snArm=id;renderStart()}return}if(snArm){snArm=null;renderStart()}if(e.target.closest("[data-wnt]")){wnSet(wnGet()?"":"1");renderStart();return}const wp=e.target.closest("button[data-pid]");if(wp){PID=wp.dataset.pid;renderProfile();go("p");return}const b=e.target.closest("[data-go]");if(b)go(b.dataset.go);
   const x=e.target.closest("[data-tdx]");if(x){save("todos",x.dataset.tdx,null);return}
   if(e.target.closest("[data-tdc]")){(D.todos||[]).filter((t)=>t.done).forEach((t)=>save("todos",t.id,null));return}
 });
 $("#m").addEventListener("click",(e)=>{
   if(e.target.id==="tda"){const tx=$("#tdx").value.trim();if(!tx){$("#tdx").focus();return}const id="t"+Date.now().toString(36)+Math.random().toString(36).slice(2,4);save("todos",id,{id,typ:$("#tdt").value,text:tx,datum:$("#tdd").value||null,wer:$("#tdw").value||null,done:false});$("#tdx").value="";$("#tdd").value=""}});
+/* Schnell anlegen auf der Startseite: ＋ in den Kacheln „Zu erledigen“ und „Notizen“ öffnet ein Fenster (To-Do bzw. Teamnotiz), mit Aufzählungspunkten */
+const BUL=/^\s*[•\-–*]\s+/,bulHtml=(s)=>{const L=String(s==null?"":s).split("\n");return L.map((l,i)=>BUL.test(l)?'<span class="bli">'+esc(l.replace(BUL,""))+"</span>":esc(l)+(i<L.length-1&&!BUL.test(L[i+1])?"\n":"")).join("")};
+const qaOk=()=>!document.body.classList.contains("ro")&&window.__ROLE!=="lesen"&&window.__ROLE!=="scout",
+  qaBtn=(k)=>qaOk()?'<button type="button" class="hplus" data-qa="'+k+'" title="'+(k==="todo"?"Neues To-Do":"Neue Notiz")+'" aria-label="'+(k==="todo"?"Neues To-Do":"Neue Notiz")+'">＋</button>':"";
+function qaClose(){const w=document.getElementById("qa");if(w)w.remove()}
+function qaOpen(k){
+  qaClose();const td=k==="todo",w=document.createElement("div");w.id="qa";w.className="qa";
+  w.innerHTML='<div class="qa-bg" data-qax></div><form class="qa-box" role="dialog" aria-modal="true" aria-labelledby="qah"><h3 id="qah">'+(td?"Neues To-Do":"Neue Notiz")+'</h3>'
+    +'<div class="qa-tb"><button type="button" class="btn" data-qbul title="Aufzählungspunkt in dieser Zeile">• Aufzählung</button><span class="note">Enter = nächster Punkt, 2× Enter = Ende</span></div>'
+    +'<textarea id="qat" rows="5" placeholder="'+(td?"Was ist zu tun?":"Notiz eingeben …")+'" autocomplete="off"></textarea>'
+    +(td?'<div class="qa-row"><label class="note">Wer? (optional)<select id="qaw" aria-label="Zuständig"></select></label><label class="note">Bis wann? (optional)<input type="date" id="qad"></label></div>':'<p class="note" style="margin:0">Erscheint hier auf der Startseite und unter „Notizen“ (Team). Notizen zu einem Spieler weiter im Menü „Notizen“.</p>')
+    +'<p class="note warn" id="qam" hidden></p><div class="qa-btns"><button type="button" class="btn" data-qax>Abbrechen</button><button type="submit" class="btn qa-ok">Speichern</button></div></form>';
+  document.body.appendChild(w);
+  if(td){const s=$("#qaw"),src=$("#ntw");s.innerHTML=src?src.innerHTML:'<option value="">– niemand –</option>';s.value=""}
+  const ta=$("#qat"),bb=w.querySelector("[data-qbul]");ta.focus();
+  w.querySelector("form").onsubmit=(e)=>{e.preventDefault();qaSave(td)};
+  w.addEventListener("click",(e)=>{if(e.target.closest("[data-qax]"))qaClose()});
+  w.addEventListener("keydown",(e)=>{if(e.key==="Escape"){e.preventDefault();qaClose()}});
+  bb.addEventListener("pointerdown",(e)=>e.preventDefault());
+  bb.onclick=()=>{const v=ta.value,a=v.lastIndexOf("\n",ta.selectionStart-1)+1,m=v.slice(a).match(BUL);ta.focus();if(m)ta.setRangeText("",a,a+m[0].length,"end");else ta.setRangeText("• ",a,a,"end")};
+  ta.addEventListener("keydown",(e)=>{
+    if(e.key==="Enter"&&(e.metaKey||e.ctrlKey)){e.preventDefault();qaSave(td);return}
+    if(e.key!=="Enter"||e.shiftKey||e.isComposing)return;
+    const v=ta.value,c=ta.selectionStart,a=v.lastIndexOf("\n",c-1)+1,m=v.slice(a,c).match(BUL);if(!m)return;
+    e.preventDefault();const z=v.indexOf("\n",c),rest=v.slice(c,z<0?v.length:z);
+    if(v.slice(a,c)===m[0]&&!rest.trim())ta.setRangeText("",a,c,"end");else ta.setRangeText("\n• ",c,ta.selectionEnd,"end")});
+  ta.addEventListener("input",()=>{const c=ta.selectionStart,a=ta.value.lastIndexOf("\n",c-1)+1;if(/^[-*] $/.test(ta.value.slice(a,c)))ta.setRangeText("• ",a,c,"end")});
+}
+function qaSave(td){
+  const t=$("#qat").value.replace(/\n?[ \t]*•[ \t]*$/,"").trim(),m=$("#qam");
+  if(!t){m.textContent="Bitte einen Text eingeben.";m.hidden=false;$("#qat").focus();return}
+  if(td){const id="t"+Date.now().toString(36)+Math.random().toString(36).slice(2,4);save("todos",id,{id,typ:"todo",text:t,datum:$("#qad").value||null,wer:$("#qaw").value||null,done:false})}
+  else{const id="n"+Date.now().toString(36);save("notes",id,{id,pid:"team",datum:today(),kategorie:"Allgemein",art:"notiz",sichtbar:false,text:t,ort:"beide"})}
+  qaClose();
+}
 $("#h").addEventListener("change",(e)=>{const c=e.target.dataset.td;if(c){const t=(D.todos||[]).find((x)=>x.id===c);if(t)save("todos",c,{...t,done:e.target.checked})}});
 $("#tdx").addEventListener("keydown",(e)=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey))$("#tda").click()});
 const tdRow2=(x)=>'<div class="row"><span style="white-space:pre-wrap;overflow-wrap:anywhere;min-width:0"><input type="checkbox" data-td="'+x.id+'"'+(x.done?" checked":"")+' style="margin-right:8px">'+(x.typ==="hinweis"?'<span class="tag" style="margin-right:6px">Hinweis</span>':"")+dlTag(x)+whoTag(x)+(x.done?"<s>"+esc(x.text)+"</s>":esc(x.text))+'</span><button class="rm" data-tdx="'+x.id+'" title="Entfernen">✕</button></div>';
@@ -4141,7 +4673,7 @@ const SUBL={plan:"Positionen",feld:"Spielfeld",db:"Liste",pipe:"Ablauf",obs:"Spi
 const HINT={home:"Auf einen Blick: Wie voll ist der Kader, wie lange bis zur Frist, was ist als Nächstes fällig?",plan:"Wer soll auf welcher Position spielen? Soll, Zusagen und Prognose je Position.",feld:"Aufstellung je Spielsystem. Jede Position doppelt besetzen (Stamm und Ersatz).",db:"Alle Spieler (eigene und externe) in einer Liste. Namen antippen für Details.",pipe:"Wo steht wer im Ablauf (Kontakt, Gespräch, Probetraining, Zusage)? Was ist fällig?",obs:"Wann besuchst du welchen Verein, um Spieler anzusehen?",ver:"Vereine mit Entfernung und Anlage. Die Entfernung wird bei Spielbesuchen automatisch übernommen.","in":"Meldungen über den Scouting-Link. Übernehmen legt den Spieler in der Liste an.",set:""};
 const grpOfTab=(t)=>GROUPS.find((g)=>g[2].indexOf(t)>=0)||GROUPS[0];
 function head(pl){const g=grpOfTab(ks.tab);ks.sub[g[0]]=ks.tab;const nIn=KD.inbox.length;
-  return'<div class="khd"><h2 style="margin:0">Kader</h2><label class="note" style="display:flex;gap:6px;align-items:center">Planung '+sel('id="kps"',KD.plans.map((p)=>[p.id,p.name]),pl&&pl.id)+'</label><button class="btn" data-ka="np">＋ Neue Planung</button><span style="flex:1"></span>'+(window.__DEMO?'<span class="note kpriv">Demo mit erfundenen Daten</span>':'')+'<button class="btn" data-ka="sf" style="background:var(--ac);color:#fff;border-color:var(--ac)">📝 Scoutingbogen</button></div>'
+  return'<div class="khd"><h2 style="margin:0">Kader</h2><label class="note" style="display:flex;gap:6px;align-items:center">Planung '+sel('id="kps"',KD.plans.map((p)=>[p.id,p.name]),pl&&pl.id)+'</label><button class="btn" data-ka="np">＋ Neue Planung</button><span style="flex:1"></span>'+(window.__DEMO?'<span class="note kpriv">Demo mit erfundenen Daten</span>':'')+(()=>{const lv=(KD.obs||[]).filter((x)=>x.live&&x.live.ph!=="f").pop();return lv?'<button class="btn" data-ka="slo" data-id="'+lv.id+'" style="background:var(--ac);color:#fff;border-color:var(--ac)">👁 Beobachtung fortsetzen</button>':'<button class="btn" data-ka="slnew" style="background:var(--ac);color:#fff;border-color:var(--ac)">▶ Spiel beobachten</button>'})()+'<button class="btn" data-ka="sf" style="background:var(--ac);color:#fff;border-color:var(--ac)">📝 Scoutingbogen</button></div>'
    +'<div class="knav"><div class="kt" id="kmain">'+GROUPS.map((x)=>'<button data-kt="'+(ks.sub[x[0]]||x[2][0])+'"'+(x===g?' class="on"':"")+'>'+x[1]+(x[0]==="obs"&&nIn?" ("+nIn+")":"")+"</button>").join("")+"</div>"
    +(g[2].length>1?'<div class="seg ksub">'+g[2].map((t)=>'<button data-kt="'+t+'"'+(t===ks.tab?' class="on"':"")+">"+SUBL[t]+(t==="in"&&nIn?" ("+nIn+")":"")+"</button>").join("")+"</div>":"")+"</div>"
    +(HINT[ks.tab]?'<p class="note" style="margin:0 0 12px">'+HINT[ks.tab]+"</p>":"")}
@@ -4836,6 +5368,7 @@ async function unpack(enc,d){let u=unb64(d);if(enc==="gz"){const ds=new Blob([u]
 window.bkObj=function(){
   const o={app:"U13 Trainer-Cockpit",version:2,erstellt:new Date().toISOString(),config:D.config,players:D.spieler,games:D.spiele,trainings:D.trainings,notes:D.notizen,events:D.events||[],dienste:D.dienste||[],todos:D.todos||[],tipps:D.tipps||[]};
   if(window.__STready)o.spieltag=Object.values(window.__ST||{}).map((x)=>({...x}));
+  if(window.__et&&window.__et.started){o.etplan=window.__et.plans.map((x)=>({...x}));o.etzu=window.__et.zu.map((x)=>({...x}))}   /* Eigentraining (ohne die Dateien selbst) */
   const L=window.__links||{};o.links=Object.keys(L).map((k)=>({id:k,key:L[k].key,aktiv:!!L[k].aktiv}));
   try{const KK=window.__kader&&window.__kader.KD;if(KK)o.kader={plans:KK.plans,personen:KK.pers,beobachtungen:KK.obs,eingang:KK.inbox}}catch(e){}
   return o;
@@ -4897,6 +5430,7 @@ window.bkApply=async function(o){
   if(Array.isArray(o.links)){const L=window.__links||{},ids=new Set(o.links.map((x)=>x.id));Object.keys(L).forEach((k)=>{if(!ids.has(k))jobs.push(save("links",k,null))});o.links.forEach((x)=>jobs.push(save("links",x.id,{id:x.id,key:x.key,aktiv:!!x.aktiv})))}
   if(o.kader&&window.__kader){const KK=window.__kader.KD;[["kplan","plans","plans"],["kperson","pers","personen"],["kobs","obs","beobachtungen"],["kinbox","inbox","eingang"]].forEach(([coll,key,ok])=>{if(!Array.isArray(o.kader[ok]))return;const inn=o.kader[ok],ids=new Set(inn.map((x)=>x.id));(KK[key]||[]).forEach((x)=>{if(!ids.has(x.id))jobs.push(save(coll,x.id,null))});inn.forEach((x)=>jobs.push(save(coll,x.id,x)))})}
   if(Array.isArray(o.spieltag)&&window.__STready){const ST=window.__ST||{},ids=new Set(o.spieltag.map((x)=>x.id));Object.keys(ST).forEach((k)=>{if(!ids.has(k))jobs.push(save("spieltag",k,null))});o.spieltag.forEach((x)=>{const {id,...rest}=x;jobs.push(save("spieltag",id,rest))})}
+  if(window.__et&&window.__et.started)[["etplan","plans"],["etzu","zu"]].forEach(([coll,key])=>{if(!Array.isArray(o[coll]))return;const inn=o[coll],ids=new Set(inn.map((x)=>x.id));window.__et[key].forEach((x)=>{if(!ids.has(x.id))jobs.push(save(coll,x.id,null))});inn.forEach((x)=>{const {id,...rest}=x;jobs.push(save(coll,id,rest))})});
   if(o.config)jobs.push(save("config","main",o.config));
   await Promise.all(jobs);
 };
