@@ -3671,8 +3671,13 @@ const game=()=>D.spiele.find((g)=>g.id===gid);
 const pl=()=>active().slice().sort((a,b)=>(+a.nr||999)-(+b.nr||999)||String(a.vorname).localeCompare(b.vorname));
 const el=()=>{const c=L.clk||{};return Math.max(0,(c.base||0)+(c.run?Date.now()-c.t0:0))};
 const clkTxt=()=>{const s=Math.floor(el()/1000);return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")};
-const eqF=()=>{const g=game();return !!g&&isEq(g.form)},twinF=()=>{const g=game();return !!g&&/twin/i.test(g.form||"")},NS=()=>twinF()?Math.min(4,Math.max(2,+L.n||2)):2,SEG=()=>(+L.d||0)*60000/NS();
-const curMin=()=>Math.max(1,Math.round(el()/60000));
+const eqF=()=>{const g=game();return !!g&&isEq(g.form)},NS=()=>Math.min(4,Math.max(2,+L.n||2)),SEG=()=>(+L.d||0)*60000/NS();
+/* Abschnitte: L.clk.k = laufender Abschnitt. Die Uhr läuft über das Abschnittsende weiter (Nachspielzeit),
+   Wechsel zählen dann aber als letzte reguläre Minute; der nächste Abschnitt beginnt wieder bei der Sollzeit. */
+const segEnd=(k)=>k>=NS()?(+L.d||0)*60000:k*SEG(),segAt=(ms)=>SEG()>0?Math.min(NS(),Math.floor(ms/SEG())+1):1;
+const SK=()=>{const k=+(L.clk||{}).k;return k>=1&&k<=NS()?k:segAt(el())},gMs=()=>Math.min(el(),segEnd(SK())),over=()=>el()>segEnd(SK())+500;
+const segNm=(k)=>k+". "+(NS()===2?"Halbzeit":"Abschnitt");
+const curMin=()=>Math.max(1,Math.round(gMs()/60000));
 const ws=(p)=>(L.p[p]&&L.p[p].w||[]).map(num).filter((x)=>x!=null&&x>0).sort((a,b)=>a-b);
 /* Minuten eines Spielers; null = noch kein Eintrag */
 function minutes(p,d){const s=L.p[p]&&L.p[p].s;if(s!=="s"&&s!=="b")return null;let on=s==="s",last=0,t=0;ws(p).forEach((w)=>{w=Math.min(w,d);if(on)t+=w-last;on=!on;last=w});if(on)t+=Math.max(0,d-last);return t}
@@ -3698,9 +3703,9 @@ function open(id,tab){const g=D.spiele.find((x)=>x.id===id);if(!g)return;gid=id;
   o.hidden=false;document.body.style.overflow="hidden";render();clearInterval(tm);tm=setInterval(tick,250);
   try{if(navigator.wakeLock)navigator.wakeLock.request("screen").then((x)=>{wl=x}).catch(()=>{})}catch(e){}}
 function close(){persist(true);try{window.__mdClose&&window.__mdClose()}catch(e){}clearInterval(tm);const o=q("#lv");if(o)o.hidden=true;document.body.style.overflow="";try{wl&&wl.release()}catch(e){}wl=null;L=null;gid=null}
-function setEl(ms){const c=L.clk;ms=Math.max(0,ms);c.base=ms;if(c.run)c.t0=Date.now();mkClk();persist(true);render()}
-function tick(){const c=q("#lvclk");if(!c)return;c.textContent=clkTxt();const n=q("#lvon");if(n)n.innerHTML=onTxt()}
-function onTxt(){const g=game(),m=Math.floor(el()/60000),n=pl().filter((p)=>onAt(p.id,m)).length,z=g&&g.spielerzahl;return"Auf dem Feld (Min. "+m+"): <b"+(z&&n>z?' style="color:var(--r)"':"")+">"+n+(z?" / "+z:"")+"</b>"}
+function setEl(ms,k){const c=L.clk;ms=Math.max(0,ms);c.k=k||SK();if(!k&&ms<segEnd(c.k-1))c.k=segAt(ms);c.base=ms;if(c.run)c.t0=Date.now();mkClk();persist(true);render()}
+function tick(){const c=q("#lvclk");if(!c)return;c.textContent=clkTxt();const ot=q("#lvot");if(ot)ot.textContent=otTxt();const n=q("#lvon");if(n)n.innerHTML=onTxt()}
+function onTxt(){const g=game(),m=Math.floor(gMs()/60000),n=pl().filter((p)=>onAt(p.id,m)).length,z=g&&g.spielerzahl;return"Auf dem Feld (Min. "+m+"): <b"+(z&&n>z?' style="color:var(--r)"':"")+">"+n+(z?" / "+z:"")+"</b>"}
 function rowHtml(p){const d=+L.d||0,e=L.p[p.id]||{},s=e.s||"",m=minutes(p.id,d),x=s==="x",w=e.w||[],start=s==="s";
   const chips=w.map((v,i)=>{const on0=start?i%2===0?false:true:i%2===0?true:false;return'<span class="lvw"><i>'+(on0?"↑":"↓")+'</i><input type="number" inputmode="numeric" min="1" max="'+d+'" step="1" data-w="'+p.id+"."+i+'" value="'+esc(v)+'" placeholder="Min."><button type="button" data-wx="'+p.id+"."+i+'" aria-label="Wechsel entfernen">✕</button></span>'}).join("");
   const seg=[["s","Startelf"],["b","Bank"],["x","Nicht dabei"]].map((o)=>'<button type="button" data-st="'+p.id+"."+o[0]+'"'+(s===o[0]?' class="on"':"")+">"+o[1]+"</button>").join("");
@@ -3708,9 +3713,8 @@ function rowHtml(p){const d=+L.d||0,e=L.p[p.id]||{},s=e.s||"",m=minutes(p.id,d),
   return'<div class="lvr'+(x?" lvx":"")+'" data-r="'+p.id+'"><div class="lvh"><span class="lvn"><b>'+esc(p.nr!=null&&p.nr!==""?"#"+p.nr:"")+"</b> "+esc(nm(p))+'</span><span class="lvm" data-m="'+p.id+'">'+(m==null?"–":Math.round(m)+" Min."+(d?" · "+Math.round(m/d*100)+" %":""))+'</span></div><div class="lvs">'+seg+gr+"</div>"
    +(s==="s"||s==="b"?'<div class="lvt">'+chips+'<button type="button" class="lva" data-lwa="'+p.id+'">＋ '+((start?w.length%2===1:w.length%2===0)?"Einwechslung":"Auswechslung")+"</button></div>":"")+"</div>"}
 /* Abschnitt, der als nächstes beginnt, wenn die Uhr genau auf einer Grenze steht (sonst 0) */
-function nxtSeg(){const c=L.clk,n=NS(),sg=SEG();if(!(c.base>0)||c.run)return 0;for(let k=1;k<n;k++)if(Math.abs(c.base-k*sg)<500)return k+1;return 0}
-function lastSeg(){const c=L.clk;return NS()>2&&el()>=(NS()-1)*SEG()-500&&c.base>0}
-function curSeg(){const n=NS(),sg=SEG(),e=el();let k=1;while(k<n-1&&e>=k*sg-500)k++;return k}
+function nxtSeg(){const c=L.clk,k=SK();if(!(c.base>0)||c.run||k>=NS())return 0;return c.base>=segEnd(k)-500?k+1:0}
+function otTxt(){const c=L.clk;if(!(c.base>0||c.run))return"";const k=SK(),o=over()?" · Nachspielzeit +"+Math.floor((el()-segEnd(k))/60000)+" – Wechsel zählen als Min. "+Math.round(segEnd(k)/60000):"";return segNm(k)+o}
 const TABS=[["s","📄","Spielzettel","Zettel"],["a","📋","Aufstellung","Aufstellung"],["t","🗒","Ansprache","Ansprache"],["l","⏱","Live-Spielzeit","Live"],["n","✏️","Notizblatt","Notizen"]];
 function barHtml(g){return'<div class="lvbar"><b>🏟 Spieltag · Spiel '+g.nr+(g.gegner?" · "+esc(g.gegner):"")+'</b><span style="flex:1"></span><button class="btn" id="lvcl">Schließen</button></div><div class="lvtabs">'+TABS.map((t)=>'<button type="button" data-lvtab="'+t[0]+'"'+(TAB===t[0]?' class="on"':"")+"><i>"+t[1]+'</i> <span class="tf">'+t[2]+'</span><span class="ts">'+t[3]+"</span></button>").join("")+"</div>"}
 window.__lvBar=()=>{const g=game();return g?barHtml(g):""};window.__lvTab=()=>L?TAB:null;window.__lvRender=()=>{if(L)render()};
@@ -3721,8 +3725,8 @@ function setTab(t){if(t===TAB)return;if(TAB==="l")persist(true);try{window.__mdF
 function renderLive(){const g=game();if(!g)return;const o=q("#lv"),c=L.clk,P=pl(),done=L.done?"zuletzt übernommen: "+new Date(L.done).toLocaleString("de-DE",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"";
   const keep=o.scrollTop;
   o.innerHTML='<div class="lvb">'+barHtml(g)
-   +'<div class="card lvtop"><div class="lvck"><div id="lvclk">'+clkTxt()+'</div><div class="lvcb"><button class="btn" id="lvrun" style="background:var(--ac);color:#fff;border-color:var(--ac)">'+(c.run?"⏸ Pause":(nxtSeg()?"▶ "+nxtSeg()+(NS()===2?". Halbzeit":". Durchgang"):c.base?"▶ Weiter":"▶ Anpfiff"))+'</button>'+(lastSeg()?"":'<button class="btn" id="lvht" title="Stoppt die Uhr genau am Ende des Abschnitts">'+(NS()===2?"Halbzeit":"Ende Durchgang "+curSeg())+'</button>')+'<button class="btn" id="lvend" title="Stoppt die Uhr zum Abpfiff">Abpfiff</button><button class="btn" id="lvrst">'+(arm==="rst"?"Wirklich zurücksetzen?":"Uhr zurück")+'</button></div></div><div class="lvadj"><span class="note">Uhr stellen:</span><button class="btn" data-adj="-60">−1 Min.</button><button class="btn" data-adj="60">+1 Min.</button><button class="btn" data-adj="-300">−5</button><button class="btn" data-adj="300">+5</button><label class="note">auf Minute <input type="number" id="lvset" min="0" step="1" value="'+Math.floor(el()/60000)+'" style="width:64px"></label><button class="btn" id="lvsetb">Setzen</button></div>'
-   +'<div class="lvf"><label>Spielzeit (Min.) <input type="number" id="lvd" min="1" step="1" value="'+esc(L.d)+'" style="width:80px"></label>'+(twinF()?'<label>Durchgänge <select id="lvn">'+[2,3,4].map((k)=>'<option'+(NS()===k?" selected":"")+">"+k+"</option>").join("")+"</select></label>":"")+'<span id="lvon" class="note">'+onTxt()+"</span></div></div>"
+   +'<div class="card lvtop"><div class="lvck"><div><div id="lvclk">'+clkTxt()+'</div><div id="lvot" class="note">'+esc(otTxt())+'</div></div><div class="lvcb"><button class="btn" id="lvrun" style="background:var(--ac);color:#fff;border-color:var(--ac)">'+(c.run?"⏸ Pause":(nxtSeg()?"▶ "+segNm(nxtSeg()):c.base?"▶ Weiter":"▶ Anpfiff"))+'</button>'+(nxtSeg()&&over()?'<button class="btn" id="lvgo" title="Nachspielzeit weiterlaufen lassen">▶ Weiter</button>':"")+(SK()<NS()&&!nxtSeg()?'<button class="btn" id="lvht" title="Stoppt die Uhr und stellt sie auf den Beginn des nächsten Abschnitts">'+(NS()===2?"Halbzeit":"Ende "+segNm(SK()))+'</button>':"")+'<button class="btn" id="lvend" title="Stoppt die Uhr zum Abpfiff">Abpfiff</button><button class="btn" id="lvrst">'+(arm==="rst"?"Wirklich zurücksetzen?":"Uhr zurück")+'</button></div></div><div class="lvadj"><span class="note">Uhr stellen:</span><button class="btn" data-adj="-60">−1 Min.</button><button class="btn" data-adj="60">+1 Min.</button><button class="btn" data-adj="-300">−5</button><button class="btn" data-adj="300">+5</button><label class="note">auf Minute <input type="number" id="lvset" min="0" step="1" value="'+Math.floor(el()/60000)+'" style="width:64px"></label><button class="btn" id="lvsetb">Setzen</button></div>'
+   +'<div class="lvf"><label>Spielzeit (Min.) <input type="number" id="lvd" min="1" step="1" value="'+esc(L.d)+'" style="width:80px"></label>'+'<label title="Die Spielzeit wird gleichmäßig auf die Abschnitte verteilt">Abschnitte <select id="lvn">'+[2,3,4].map((k)=>'<option'+(NS()===k?" selected":"")+">"+k+"</option>").join("")+"</select></label>"+'<span id="lvon" class="note">'+onTxt()+"</span></div></div>"
    +'<p class="note" style="margin:8px 2px">Je Spieler Startelf oder Bank wählen, bei einem Wechsel „＋“ drücken (die Minute kommt aus der Uhr, sonst eintragen) – ↑ = rein, ↓ = raus. Wer nicht da ist: „Nicht dabei“. Die Minuten werden erst beim Übernehmen ins Spiel geschrieben. Ihr könnt zu zweit arbeiten: Änderungen des anderen Geräts erscheinen automatisch.</p>'
    +'<div class="lvg">'+P.map(rowHtml).join("")+'</div>'
    +'<div class="lvfoot"><span class="note">'+esc(done)+'</span><span style="flex:1"></span><button class="btn" id="lvok" style="background:var(--g);color:#fff;border-color:var(--g)">'+(arm==="ok"?"Wirklich übernehmen?":"✓ In Spiel übernehmen")+"</button></div></div>";
@@ -3739,12 +3743,12 @@ document.addEventListener("click",(e)=>{const t=e.target;
   if(!L||!t.closest("#lv"))return;
   const tb=t.closest("[data-lvtab]");if(tb){setTab(tb.dataset.lvtab);return}
   if(t.id==="lvcl"){close();return}
-  if(t.id==="lvrun"){const c=L.clk;if(c.run){c.base=el();c.run=false}else{c.t0=Date.now();c.run=true}mkClk();persist(true);render();return}
+  if(t.id==="lvrun"||t.id==="lvgo"){const c=L.clk;if(c.run){c.base=el();c.run=false}else{const nx=t.id==="lvrun"&&nxtSeg();if(nx){c.base=segEnd(nx-1);c.k=nx}else c.k=c.base>0?SK():1;c.t0=Date.now();c.run=true}mkClk();persist(true);render();return}
   if(t.dataset&&t.dataset.adj){setEl(el()+ +t.dataset.adj*1000);return}
-  if(t.id==="lvsetb"){const v=num(q("#lvset").value);if(v!=null&&v>=0)setEl(v*60000);return}
-  if(t.id==="lvht"){const c=L.clk,n=NS(),sg=SEG(),e=el();c.run=false;let k=1;while(k<n-1&&e>=k*sg-500)k++;setEl(k*sg);return}
-  if(t.id==="lvend"){const c=L.clk;c.run=false;setEl((+L.d||0)*60000);return}
-  if(t.id==="lvrst"){if(arm==="rst"){L.clk={run:false,base:0,t0:0};arm=false;mkClk();persist(true)}else arm="rst";render();return}
+  if(t.id==="lvsetb"){const v=num(q("#lvset").value);if(v!=null&&v>=0)setEl(v*60000,segAt(v*60000));return}
+  if(t.id==="lvht"){const k=SK();L.clk.run=false;setEl(segEnd(k),k);return}
+  if(t.id==="lvend"){const c=L.clk;c.run=false;setEl((+L.d||0)*60000,NS());return}
+  if(t.id==="lvrst"){if(arm==="rst"){L.clk={run:false,base:0,t0:0,k:1};arm=false;mkClk();persist(true)}else arm="rst";render();return}
   if(t.id==="lvok"){const any=pl().some((p)=>L.p[p.id]&&L.p[p.id].s);if(!any){arm=false;alert("Noch kein Spieler eingetragen.");return}
     if(arm!=="ok"){arm="ok";render();return}arm=false;const n=apply();render();if(n)alert(n+" Spieler ins Spiel übernommen. Du findest sie unter Spiele.");return}
   const st=t.dataset&&t.dataset.st;if(st){const [id,s]=st.split(".");const r=L.p[id]=L.p[id]||{};r.s=r.s===s?"":s;if(r.s==="s"||r.s==="b"){r.w=[]}if(r.s==="x"&&!r.a)r.a="a";arm=false;mkP(id);persist();render();return}
