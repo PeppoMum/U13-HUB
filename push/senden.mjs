@@ -21,7 +21,7 @@ const TX = {
 /* Wer bekommt den Eintrag? s = Anmeldung eines Geräts (ro: s Spieler, e Elternteil, t Trainer, leer = noch nicht gewählt) */
 export function passt(q, s) {
   if (q.art === "fb") return s.ro === "t";
-  if (q.art === "hinweis") return s.ro !== "t";
+  if (q.art === "hinweis") return s.ro !== "t" && (!Array.isArray(q.an) || (!!s.pid && q.an.includes(s.pid)));   /* Hinweis an einzelne Spieler: nur deren Geräte */
   if (q.art === "antwort") return !!q.r && s.r === q.r && s.ro !== "t";
   if (q.art === "clip" || q.art === "frist" || q.art === "kom") return s.ro !== "t" && s.ro !== "e" && !!s.pid && (q.an === "alle" || (Array.isArray(q.an) && q.an.includes(s.pid)));
   return false;
