@@ -5,26 +5,36 @@
 "use strict";
 if(window.__WEBINIT)return;window.__WEBINIT=true;
 const CFG=window.U13_FIREBASE||{};
-const SDK=(CFG.sdkBase||"https://www.gstatic.com/firebasejs/10.14.1/");   /* Version auch in sw.js anpassen (Offline-Start) */
-const XIDS=["plan","demo","demosp"];
+const SDK=(CFG.sdkBase||"https://www.gstatic.com/firebasejs/10.14.1/");
+const XIDS=["full","anon","plan","demo"];
 window.__WEB=true;
-window.__WEB_BASE=location.origin+location.pathname.replace(/index\.html$/,"");
-const IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
-/* Start der installierten Link-App („./?link“ ohne Link): den auf diesem Gerät gespeicherten Link wieder einsetzen */
-if(/[?&]link\b/.test(location.search)&&!location.hash){try{const s=localStorage.getItem("u13link");if(s&&/^#/.test(s))history.replaceState(null,"",location.pathname+location.search+s)}catch(e){}}
+window.__WEB_BASE0=location.origin+location.pathname.replace(/index\.html$/,"");
+window.__WEB_BASE=window.__WEB_BASE0;
 const H=location.hash;
 const isScout=/^#scout\.[A-Za-z0-9_-]{16,}$/.test(H);
 window.__SCOUTKEY=isScout?H.slice(7):"";
+/* Verein: Jede Mannschaft hat eigene Sammlungen („d1__players“ …). Gemeinsame Sammlungen des Vereins stehen in GLOB. */
+const KABKEY=/^#kab\.[A-Za-z0-9_-]{16,}$/.test(H)?H.slice(5):"";
+window.__KAB=!!KABKEY;
+const TQ=(new URLSearchParams(location.search).get("t")||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+const skt=()=>String(window.__SCOUTKEY||"").split("-")[0].toLowerCase().replace(/[^a-z0-9]/g,"");
+window.__TID="";
+const GLOB=new Set(["verein","mitglieder","plaene","kabinen","kablinks","kabzugang","protokoll","pub","aliasin","aliasauth","ownercheck","prefs","einladungen","anfragen","spielereinl","mteinl","kverkn","kzaehl","kanfr","kview","kabm","kabw","kfrei","kclaim","anliegen"]);
+const T=(p)=>{const i=p.indexOf("/"),c=i<0?p:p.slice(0,i);return GLOB.has(c)?p:window.__TID+"__"+p};
+window.__T=T;
 const isKurz=/^#k\/[A-Za-z0-9_-]{4,40}$/.test(H);
-/* Konto für Spieler und Eltern: #sp/<Schlüssel> (Spielerlink), #mt/<Schlüssel> (Mannschaftslink), #konto (eigene Ansicht nach der Anmeldung) */
-const isKonto=/^#(konto|sp\/[A-Za-z0-9_-]{16,80}|mt\/[A-Za-z0-9_-]{16,80})$/.test(H);
-const isViewerHash=(/^#[A-Za-z0-9]+\.[A-Za-z0-9_-]{16,}$/.test(H)&&!/^#co[A-Za-z0-9]+\./.test(H)&&!isScout)||isKurz||isKonto;
-/* Spieler-, Eltern- und externe Links als eigene App. Rechte ändern sich nicht: Die App zeigt dasselbe wie der Link im Browser.
-   Android/Computer: eigene App-Datei (manifest-link) mit Startadresse „./?link“; beim Start wird der zuletzt geöffnete Link auf diesem Gerät wieder eingesetzt (siehe oben).
-   iPhone/iPad: ohne App-Datei, dann speichert das iPhone genau die geöffnete Adresse samt Link. */
-if(isViewerHash)try{localStorage.setItem("u13link",isKonto?"#konto":H)}catch(e){}
-{const mf=isViewerHash?(IOS?"":"manifest-link.webmanifest"):"manifest.webmanifest";   /* App-Datei steht deshalb nicht fest in index.html */
-  if(mf){const l=document.createElement("link");l.rel="manifest";l.href=mf;document.head.appendChild(l)}}
+const EINKEY=/^#ein\/[A-Za-z0-9_-]{16,}$/.test(H)?H.slice(5):"";
+if(EINKEY){try{localStorage.setItem("vein",EINKEY+"|"+Date.now())}catch(e){}}
+const einKey=()=>{if(EINKEY)return EINKEY;try{const v=(localStorage.getItem("vein")||"").split("|");return v[0]&&Date.now()-(+v[1]||0)<3*864e5?v[0]:""}catch(e){return ""}};
+const einClear=()=>{try{localStorage.removeItem("vein")}catch(e){}};
+/* Konten für Spieler und Eltern: Spielerlink (#sp/…) verknüpft ein Kind, Mannschaftslink (#mt/…) stellt eine Anfrage an den Trainer */
+const SPKEY=/^#sp\/[A-Za-z0-9_-]{16,}$/.test(H)?H.slice(4):"",MTKEY=/^#mt\/[A-Za-z0-9_-]{16,}$/.test(H)?H.slice(4):"";
+if(SPKEY){try{localStorage.setItem("vsp",SPKEY+"|"+Date.now())}catch(e){}}
+if(MTKEY){try{localStorage.setItem("vmt",MTKEY+"|"+Date.now())}catch(e){}}
+const kKey=(n,cur)=>{if(cur)return cur;try{const v=(localStorage.getItem(n)||"").split("|");return v[0]&&Date.now()-(+v[1]||0)<3*864e5?v[0]:""}catch(e){return ""}};
+const kClear=(n)=>{try{localStorage.removeItem(n)}catch(e){}};
+const mkeyOf=(em)=>String(em||"").toLowerCase().replace(/[.]/g,"_").replace(/@/g,"_at_");
+const isViewerHash=(/^#[A-Za-z0-9]+\.[A-Za-z0-9_-]{16,}$/.test(H)&&!/^#co[A-Za-z0-9]+\./.test(H)&&!isScout&&!KABKEY)||isKurz;
 const cfgOk=()=>!!(CFG.apiKey&&CFG.projectId&&CFG.authDomain&&!/DEIN|EINTRAGEN|XXXX/i.test(CFG.apiKey+CFG.projectId));
 const E=(s)=>String(s==null?"":s).replace(/[&<>"]/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const clean=(o)=>o==null?o:JSON.parse(JSON.stringify(o));
@@ -56,13 +66,31 @@ async function restBlob(id){
 /* ---------- Scouting-Eingabe ohne Anmeldung: nur Schreiben in den Posteingang, abgesichert durch den geheimen Schlüssel im Link ---------- */
 const FSB=()=>"https://firestore.googleapis.com/v1/projects/"+encodeURIComponent(CFG.projectId)+"/databases/(default)/documents/";
 function toFs(v){if(v==null)return{nullValue:null};if(typeof v==="boolean")return{booleanValue:v};if(typeof v==="number")return Number.isInteger(v)?{integerValue:String(v)}:{doubleValue:v};if(Array.isArray(v))return{arrayValue:{values:v.map(toFs)}};if(typeof v==="object"){const f={};Object.keys(v).forEach((k)=>{f[k]=toFs(v[k])});return{mapValue:{fields:f}}}return{stringValue:String(v)}}
-const scoutGet=async()=>{let aus=false;try{const m=await restDoc("scout");aus=!!(m&&m.aus)}catch(e){}return{exists:true,data:()=>({kaderAus:aus})}};
+const scoutGet=async()=>{let aus=false;try{const m=await restDoc("scout_"+skt());aus=!!(m&&m.aus)}catch(e){}return{exists:true,data:()=>({kaderAus:aus})}};
 window.__scoutDb=()=>scoutDb;
+const kjCache={t:0,v:null};
+async function kjAll(){
+  if(kjCache.v&&Date.now()-kjCache.t<3e5)return kjCache.v;
+  const idx=await restDoc("kj_idx"),tids=((idx&&idx.t)||"").split(",").filter(Boolean),out={};
+  let bad=0;await Promise.all(tids.map(async(t)=>{try{const j=await restDoc("kj_"+t);if(j&&j.j)out[t]=String(j.j).split(",").filter(Boolean)}catch(e){bad++}}));
+  if(!bad&&Object.keys(out).length){kjCache.v=out;kjCache.t=Date.now()}return out}   /* Fehlgeschlagene Abrufe nicht zwischenspeichern, sonst bleibt die Jahrgangsliste fünf Minuten leer */
+window.__clubYears=async()=>{try{const a=await kjAll(),s=new Set();Object.keys(a).forEach((t)=>a[t].forEach((y)=>s.add(y)));return Array.from(s).sort().reverse()}catch(e){return[]}};
+async function postInbox(coll,id,f){
+  const r=await fetch(FSB()+coll+"?documentId="+encodeURIComponent(id)+"&key="+encodeURIComponent(CFG.apiKey),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({fields:f})});
+  if(r.status===409)return;
+  if(!r.ok)throw{code:r.status===403?"permission-denied":"http-"+r.status}}
 const scoutDb={doc:()=>({get:scoutGet}),collection:(c)=>({doc:(id)=>({get:scoutGet,set:async(o)=>{
   if(c!=="kinbox")throw{code:"unsupported"};
+  if(skt()==="club"){
+    /* Vereinsweiter Link: Kopien in den Eingang aller Mannschaften, deren Kaderplanung den Jahrgang umfasst; sonst in den allgemeinen Eingang */
+    const m=/(19|20)\d\d/.exec(String(o.geb||"")),jg=m?[m[0]]:(o.jg||[]).map(String).filter((y)=>/^(19|20)\d\d$/.test(y)).slice(0,5);
+    const all=await kjAll(),tg=Object.keys(all).filter((t)=>jg.some((y)=>all[t].indexOf(y)>=0));
+    const rec={...o,jg,gid:o.gid||o.id},f={};Object.keys(rec).forEach((k)=>{f[k]=toFs(rec[k])});
+    const dest=tg.length?tg:["club"];
+    for(const t of dest)await postInbox(t+"__kinbox",id,f);
+    return}
   const f={};Object.keys(o).forEach((k)=>{f[k]=toFs(o[k])});
-  const r=await fetch(FSB()+"kinbox?documentId="+encodeURIComponent(id)+"&key="+encodeURIComponent(CFG.apiKey),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({fields:f})});
-  if(!r.ok)throw{code:r.status===403?"permission-denied":"http-"+r.status}}})})};
+  await postInbox(skt()+"__kinbox",id,f)}})})};
 /* Kurzlinks: Passwort-Paket lesen und (mit Nachweis des alten Passworts) ersetzen, ohne Anmeldung */
 {const hd={"Content-Type":"application/json"},K=()=>"key="+encodeURIComponent(CFG.apiKey),fail=(r)=>{throw{code:r.status===403?"permission-denied":"http-"+r.status}};
 window.__kurzNet={
@@ -72,22 +100,10 @@ window.__kurzNet={
     r=await fetch(FSB()+"pub/"+encodeURIComponent(aid)+"?updateMask.fieldPaths=s&updateMask.fieldPaths=w&updateMask.fieldPaths=v&currentDocument.exists=true&"+K(),{method:"PATCH",headers:hd,body:JSON.stringify({fields:{s:{stringValue:o.s},w:{stringValue:o.w},v:{integerValue:String(o.v|0)}}})});
     fetch(FSB()+"aliasin/"+encodeURIComponent(aid)+"?"+K(),{method:"DELETE"}).catch(()=>{});
     if(!r.ok)fail(r)}};}
-/* Videos und Feedback im Spielerlink: Kommentare (geheimer Pfad, verschlüsselt) und Nachrichten an den Trainer, ohne Anmeldung */
-{const hd={"Content-Type":"application/json"},K=()=>"key="+encodeURIComponent(CFG.apiKey),P=(p)=>p.split("/").map(encodeURIComponent).join("/"),fail=(r)=>{throw{code:r.status===403?"permission-denied":"http-"+r.status}};
-const fromFs=(v)=>v.stringValue!=null?v.stringValue:v.integerValue!=null?+v.integerValue:v.doubleValue!=null?v.doubleValue:v.booleanValue!=null?v.booleanValue:v.timestampValue!=null?v.timestampValue:null;
-window.__vidNet={
-  async list(path){const out=[];let tok="";
-    do{const r=await fetch(FSB()+P(path)+"?pageSize=300&"+K()+(tok?"&pageToken="+encodeURIComponent(tok):""));if(r.status===404)return out;if(!r.ok)fail(r);const j=await r.json();
-      (j.documents||[]).forEach((x)=>{const o={id:x.name.split("/").pop()},F=x.fields||{};Object.keys(F).forEach((k)=>{o[k]=fromFs(F[k])});if(F.at&&F.at.timestampValue!=null){o.server=true;o.at=new Date(F.at.timestampValue).toISOString()}out.push(o)});tok=j.nextPageToken||""}while(tok&&out.length<3000);
-    return out},
-  async create(coll,id,obj,ts){const f={};Object.keys(obj).forEach((k)=>{f[k]=toFs(obj[k])});if(ts)f.at={timestampValue:new Date().toISOString()};
-    const r=await fetch(FSB()+P(coll)+"?documentId="+encodeURIComponent(id)+"&"+K(),{method:"POST",headers:hd,body:JSON.stringify({fields:f})});if(!r.ok)fail(r)},
-  async update(path,obj){const ks=Object.keys(obj),f={};ks.forEach((k)=>{f[k]=toFs(obj[k])});
-    const r=await fetch(FSB()+P(path)+"?"+ks.map((k)=>"updateMask.fieldPaths="+encodeURIComponent(k)).join("&")+"&currentDocument.exists=true&"+K(),{method:"PATCH",headers:hd,body:JSON.stringify({fields:f})});if(!r.ok)fail(r)}};}
-window.__webFile=(fid)=>/^[0-9a-f]{24}$/.test(fid)?restBlob("f_"+fid):Promise.resolve(null);   /* Eigentraining: verschlüsselte Datei */
 window.__webSnap=async function(pid){
   if(!cfgOk())throw new Error("config");
-  const x=XIDS.indexOf(pid)>=0,b=await restBlob((x?"x_":"p_")+pid),bg=await restDoc("bg"),s={p:{},x:{}};
+  const sp=String(pid).split("~"),tt=(sp.length>1?sp[0]:TQ).toLowerCase().replace(/[^a-z0-9]/g,""),pp=sp.length>1?sp[1]:String(pid);
+  const x=XIDS.indexOf(pp)>=0,b=await restBlob((x?"x_":"p_")+tt+"_"+pp),bg=await restDoc("bg_"+tt),s={p:{},x:{}};
   if(b)(x?s.x:s.p)[pid]=b;
   if(bg)s.bg={L:bg.L||"",D:bg.D||"",i:bg.i||""};
   return s;
@@ -100,33 +116,34 @@ const SHARED=(()=>{try{return localStorage.getItem("u13shared")==="1"}catch(e){r
 async function wipeLocal(){
   try{await fs.terminate()}catch(e){}
   try{await fs.clearPersistence()}catch(e){}
-  try{Object.keys(localStorage).filter((k)=>/^(u13v:|u13rolle$|u13role$|u13kz\.|u13wer\.|u13kpid$|u13ktok$)/.test(k)).forEach((k)=>localStorage.removeItem(k))}catch(e){}
+  try{Object.keys(localStorage).filter((k)=>/^(u13v:|u13rolle$|u13role$|u13kz\.)/.test(k)).forEach((k)=>localStorage.removeItem(k))}catch(e){}
 }
 async function signOutClean(){try{await auth.signOut()}catch(e){}await wipeLocal();location.reload()}
 
 function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement("script");s.src=src;s.async=false;s.onload=res;s.onerror=()=>rej(new Error("Konnte "+src+" nicht laden"));document.head.appendChild(s)})}
 const CSS='#u13login{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--bg,#f4f5f7);color:var(--tx,#1c1f24);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;overflow:auto}'
 +'#u13login .lc{width:100%;max-width:400px;background:var(--card,#fff);border:1px solid var(--ln,#e5e7eb);border-radius:16px;padding:22px 20px;box-shadow:0 8px 30px rgba(0,0,0,.08)}'
-+'#u13login h1{font-size:20px;margin:0 0 2px}#u13login .sb{display:block;height:auto;overflow:visible;border-radius:0;color:var(--mu,#6b7280);font-size:13px;margin:0 0 16px}'   /* .sb ist in der App ein Balken (feste Höhe) – hier normaler Text */
++'#u13login h1{font-size:20px;margin:0 0 2px}#u13login .sb{display:block;height:auto;max-height:none;overflow:visible;border-radius:0;background:none;border:0;padding:0;color:var(--mu,#6b7280);font-size:13px;line-height:1.45;margin:0 0 16px}'
 +'#u13login input{width:100%;box-sizing:border-box;margin:0 0 10px;padding:10px 12px;font:inherit;color:var(--tx,#1c1f24);background:var(--card,#fff);border:1px solid var(--ln,#d0d5dd);border-radius:10px}'
 +'#u13login button{width:100%;box-sizing:border-box;padding:10px 12px;margin:0 0 8px;font:inherit;font-weight:600;border-radius:10px;border:1px solid var(--ln,#d0d5dd);background:var(--card,#fff);color:var(--tx,#1c1f24);cursor:pointer}'
 +'#u13login button.pr{background:var(--ac,#2563eb);border-color:var(--ac,#2563eb);color:#fff}#u13login button:disabled{opacity:.55;cursor:default}'
 +'#u13login .ln{background:none;border:0;color:var(--ac,#2563eb);font-weight:500;padding:4px 0;margin:0;width:auto;display:inline-block}'
 +'#u13login .ms{min-height:20px;font-size:13px;margin:4px 0 10px}#u13login .ms.er{color:var(--r,#d64545)}#u13login .ms.ok{color:var(--g,#22a06b)}'
 +'#u13login .or{display:flex;align-items:center;gap:10px;color:var(--mu,#6b7280);font-size:12px;margin:10px 0}#u13login .or:before,#u13login .or:after{content:"";flex:1;border-top:1px solid var(--ln,#e5e7eb)}'
++'#u13login .ivc{display:flex;align-items:center;gap:10px;padding:8px 2px;font-size:15px;cursor:pointer}#u13login .ivc input{width:auto;margin:0;flex:none}#u13login .ivh{font-weight:600;margin:12px 0 4px}'
 +'#u13out{margin-left:10px;font:inherit;font-size:13px;padding:3px 9px;border-radius:8px;border:1px solid var(--ln,#e5e7eb);background:var(--card,#fff);color:var(--tx,#1c1f24);cursor:pointer;vertical-align:middle}';
 const ERR={"auth/invalid-credential":"E-Mail oder Passwort stimmt nicht.","auth/wrong-password":"E-Mail oder Passwort stimmt nicht.","auth/user-not-found":"E-Mail oder Passwort stimmt nicht.","auth/invalid-email":"Diese E-Mail-Adresse ist ungültig.","auth/email-already-in-use":"Zu dieser E-Mail gibt es schon ein Konto. Bitte anmelden.","auth/weak-password":"Das Passwort ist zu schwach (mindestens 10 Zeichen, am besten mehrere Wörter).","auth/too-many-requests":"Zu viele Versuche. Bitte kurz warten und erneut versuchen.","auth/network-request-failed":"Keine Verbindung zum Server.","auth/popup-closed-by-user":"Die Anmeldung wurde abgebrochen.","auth/cancelled-popup-request":"Die Anmeldung wurde abgebrochen.","auth/unauthorized-domain":"Diese Internetadresse ist in Firebase noch nicht freigegeben (Authentication → Einstellungen → Autorisierte Domains).","auth/operation-not-allowed":"Diese Anmeldeart ist in Firebase noch nicht eingeschaltet.","auth/missing-password":"Bitte ein Passwort eingeben.","auth/missing-email":"Bitte eine E-Mail-Adresse eingeben."};
 const errTxt=(e)=>ERR[e&&e.code]||("Das hat nicht geklappt"+(e&&(e.code||e.message)?" ("+(e.code||e.message)+")":"")+".");
-let ov=null,OVSUB="Nur für das Trainerteam",LINTRO="";
+let ov=null;
 function overlay(html){
   if(!document.getElementById("u13css")){const st=document.createElement("style");st.id="u13css";st.textContent=CSS;document.head.appendChild(st)}
   if(!ov){ov=document.createElement("div");ov.id="u13login";(document.body||document.documentElement).appendChild(ov)}
-  ov.innerHTML='<div class="lc"><h1>TuS Haltern · Teamzentrale</h1><p class="sb">'+OVSUB+'</p>'+html+"</div>";return ov;
+  ov.innerHTML='<div class="lc"><h1>TuS Haltern · Teamzentrale</h1><p class="sb">Für Trainer, Spieler und Eltern</p>'+html+"</div>";return ov;
 }
 const hideOverlay=()=>{if(ov){ov.remove();ov=null}};
 function showSetup(){overlay('<div class="ms er" style="font-size:15px">Die Verbindung zu Firebase ist noch nicht eingerichtet.</div><p class="sb">Bitte die Datei <b>firebase-config.js</b> mit den Werten aus dem Firebase-Projekt ausfüllen (siehe Anleitung) und die Dateien erneut hochladen.</p>')}
 function showDenied(email){
-  const o=overlay('<div class="ms er" style="font-size:15px">Dieses Konto ist nicht freigegeben.</div><p class="sb">Angemeldet als <b>'+E(email)+'</b>. Zugriff haben nur Personen, die der Besitzer unter Einstellungen → Mannschaft → „Zugang zur App“ freigegeben hat.</p><p class="sb">Spieler und Eltern: Bitte öffnet den Link, den ihr vom Trainer bekommen habt.</p><button id="u13so">Abmelden</button>');
+  const o=overlay('<div class="ms er" style="font-size:15px">Dieses Konto ist nicht freigegeben.</div><p class="sb">Angemeldet als <b>'+E(email)+'</b>. Zugriff haben nur Personen, die der Besitzer unter Einstellungen → Mannschaft → „Zugang zur App“ freigegeben hat.</p><button id="u13so">Abmelden</button>');
   o.querySelector("#u13so").onclick=()=>signOutClean();
 }
 function showVerify(user){
@@ -139,13 +156,21 @@ function showVerify(user){
 }
 function showLogin(){
   return new Promise((res)=>{
-    const o=overlay(LINTRO+'<button class="pr" id="lg">Mit Google anmelden</button><div class="or">oder mit E-Mail</div><input id="le" type="email" autocomplete="username" placeholder="E-Mail" inputmode="email"><input id="lp" type="password" autocomplete="current-password" placeholder="Passwort"><label class="note" style="display:flex;gap:8px;align-items:flex-start;margin:6px 0 10px;font-size:12.5px"><input type="checkbox" id="lsh" style="width:auto;margin:3px 0 0"><span>Gemeinsames Gerät (Schule, Verein, fremdes Gerät): nichts auf diesem Gerät speichern</span></label><div class="ms" id="lm"></div><button class="pr" id="li">Anmelden</button><button id="lr">Konto anlegen</button><button class="ln" id="lf">Passwort vergessen?</button>'),m=o.querySelector("#lm"),em=o.querySelector("#le"),pw=o.querySelector("#lp");
+    const o=overlay('<button class="pr" id="lg">Mit Google anmelden</button><div class="or">oder mit E-Mail</div><input id="le" type="email" autocomplete="username" placeholder="E-Mail" inputmode="email"><input id="lp" type="password" autocomplete="current-password" placeholder="Passwort"><input id="lp2" type="password" autocomplete="new-password" placeholder="Passwort wiederholen" hidden><button type="button" class="ln" id="lsp" aria-pressed="false">Passwort anzeigen</button><label class="note" style="display:flex;gap:8px;align-items:flex-start;margin:6px 0 10px;font-size:12.5px"><input type="checkbox" id="lsh" style="width:auto;margin:3px 0 0"><span>Gemeinsames Gerät (Schule, Verein, fremdes Gerät): nichts auf diesem Gerät speichern</span></label><div class="ms" id="lm"></div><button class="pr" id="li">Anmelden</button><button id="lr">Konto anlegen</button><button class="ln" id="lf">Passwort vergessen?</button>'),m=o.querySelector("#lm"),em=o.querySelector("#le"),pw=o.querySelector("#lp");
     const msg=(t,k)=>{m.className="ms"+(k?" "+k:"");m.textContent=t||""};
     const busy=(b)=>o.querySelectorAll("button").forEach((x)=>{x.disabled=b});
     const run=async(f)=>{busy(true);msg("");try{await f()}catch(e){msg(errTxt(e),"er")}busy(false)};
     o.querySelector("#lg").onclick=()=>run(async()=>{const p=new fb.auth.GoogleAuthProvider();try{await auth.signInWithPopup(p)}catch(e){if(e&&(e.code==="auth/popup-blocked"||e.code==="auth/operation-not-supported-in-this-environment")){await auth.signInWithRedirect(p);return}throw e}});
     o.querySelector("#li").onclick=()=>run(async()=>{await auth.signInWithEmailAndPassword(em.value.trim(),pw.value)});
-    o.querySelector("#lr").onclick=()=>run(async()=>{if(pw.value.length<10){msg("Bitte ein Passwort mit mindestens 10 Zeichen wählen (am besten mehrere Wörter).","er");return}const c=await auth.createUserWithEmailAndPassword(em.value.trim(),pw.value);try{await c.user.sendEmailVerification()}catch(e){}});
+    const pw2=o.querySelector("#lp2"),lr=o.querySelector("#lr"),lsp=o.querySelector("#lsp");let reg=false;
+    lsp.onclick=()=>{const show=pw.type==="password";pw.type=show?"text":"password";pw2.type=show?"text":"password";lsp.textContent=show?"Passwort verbergen":"Passwort anzeigen";lsp.setAttribute("aria-pressed",show?"true":"false")};
+    lr.onclick=()=>run(async()=>{
+      if(!reg){reg=true;pw2.hidden=false;lr.textContent="Konto jetzt anlegen";msg("Bitte das Passwort zur Sicherheit noch einmal eingeben.");pw2.focus();return}
+      if(!em.value.trim()){msg("Bitte die E-Mail-Adresse eintragen.","er");return}
+      if(pw.value.length<10){msg("Bitte ein Passwort mit mindestens 10 Zeichen wählen (am besten mehrere Wörter).","er");return}
+      if(pw.value!==pw2.value){msg("Die beiden Passwörter sind nicht gleich. Bitte noch einmal prüfen.","er");return}
+      const c=await auth.createUserWithEmailAndPassword(em.value.trim(),pw.value);try{await c.user.sendEmailVerification()}catch(e){}});
+    o.querySelector("#li").addEventListener("click",()=>{if(reg){reg=false;pw2.hidden=true;pw2.value="";lr.textContent="Konto anlegen"}});
     o.querySelector("#lf").onclick=()=>run(async()=>{if(!em.value.trim()){msg("Bitte oben die E-Mail-Adresse eintragen.","er");return}await auth.sendPasswordResetEmail(em.value.trim());msg("Nachricht zum Zurücksetzen wurde gesendet.","ok")});
     pw.addEventListener("keydown",(e)=>{if(e.key==="Enter")o.querySelector("#li").click()});
     const sh=o.querySelector("#lsh");sh.checked=SHARED;sh.onchange=()=>{try{sh.checked?localStorage.setItem("u13shared","1"):localStorage.removeItem("u13shared")}catch(e){}location.reload()};
@@ -156,228 +181,305 @@ function showLogin(){
 const needsVerify=(u)=>u&&!u.emailVerified&&(u.providerData||[]).every((p)=>p&&p.providerId==="password");
 function firstUser(){return new Promise((res)=>{const un=auth.onAuthStateChanged((u)=>{un();res(u)})})}
 
-/* ---------- Datenbank-Hülle: gleiche Aufrufe wie in der Artifact-Umgebung ---------- */
-const noWrite=()=>window.__ROLE==="lesen"?Promise.reject({code:"permission-denied"}):null;
-function docW(ref){return{get:()=>ref.get(),set:(d)=>noWrite()||ref.set(clean(d)),update:(d)=>noWrite()||ref.update(clean(d)),delete:()=>noWrite()||ref.delete(),onSnapshot:(a,b)=>ref.onSnapshot(a,b),collection:(n)=>colW(ref.collection(n))}}
+/* ---------- Datenbank-Hülle: gleiche Aufrufe wie in der Artifact-Umgebung, mit Mannschafts-Präfix ---------- */
+const KPATH=/__k(plan|person|obs|inbox)\//;
+const noWrite=(ref)=>(window.__ROLE==="lesen"||(window.__KRO&&ref&&KPATH.test(String(ref.path||ref._path||""))))?Promise.reject({code:"permission-denied"}):null;
+function docW(ref){return{get:()=>ref.get(),set:(d)=>noWrite(ref)||ref.set(clean(d)),update:(d)=>noWrite(ref)||ref.update(clean(d)),delete:()=>noWrite(ref)||ref.delete(),onSnapshot:(a,b)=>ref.onSnapshot(a,b),collection:(n)=>colW(ref.collection(n))}}
 function colW(ref){return{get:()=>ref.get(),onSnapshot:(a,b)=>ref.onSnapshot(a,b),doc:(id)=>docW(ref.doc(id))}}
-const wrap=()=>({collection:(n)=>colW(fs.collection(n)),doc:(p)=>docW(fs.doc(p))});
+const wrap=()=>({collection:(n)=>colW(fs.collection(T(n))),doc:(p)=>docW(fs.doc(T(p)))});
+
+/* ---------- Verein: Rollen, Mannschaften ---------- */
+/* Globale Rollen: admin, jugendleiter, platzwart, team. Bei "team" ergeben sich die Rechte je Mannschaft aus den Trainerarten (verein/main.arten). */
+const ROLLEN_V=["admin","jugendleiter","platzwart","team"];
+const RECHTE_ALLE=["sehen","bearbeiten","einstellungen","notizen","kader","kaderbearb","hinweise","fachlesen","tw","ath"];
+const ARTEN_STD=[
+ {id:"trainer",name:"Trainer",rechte:["sehen","bearbeiten","einstellungen","notizen","kader","kaderbearb","fachlesen"],gl:["kurz"]},
+ {id:"cotrainer",name:"Co-Trainer",rechte:["sehen","bearbeiten","notizen","kader","kaderbearb","fachlesen"],gl:["kurz"]},
+ {id:"sportleiter",name:"Sportlicher Leiter",rechte:["sehen","notizen","kader","hinweise"],gl:["plan"]},
+ {id:"torwart",name:"Torwarttrainer",rechte:["sehen","tw"],gl:[]},
+ {id:"athletik",name:"Athletiktrainer",rechte:["sehen","ath"],gl:[]},
+ {id:"lesen",name:"Nur lesen",rechte:["sehen","notizen","kader"],gl:[]},
+ {id:"scout",name:"Scout",rechte:["kader","kaderbearb"],gl:[]},
+ {id:"platzwart",name:"Platzwart",rechte:[],gl:["plan"]}];
+window.__ARTEN_STD=ARTEN_STD;window.__RECHTE_ALLE=RECHTE_ALLE;
+/* Vereinslogo: zentral (verein/main.logo) oder das mitgelieferte TuS-Wappen; gilt für alle Mannschaften */
+const LOGO_STD="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUAAAAFACAYAAADNkKWqAAAQAElEQVR4nOydBZgT19fGz78uSAUKxaW4uzvFvRR3d3df3N3di7u7eymLS1ukhTr9WirUv/ve3QmT2cjcZDKSvT~e~2STnSy7yeTMuUfe8wJJJBJJLOUFkkgkkliKNIASiSTWIg2gRCKJtUgDKAmI//77LyG7ScRWfLbieFmvs/UKWy95WK~rftxvbP3pYf0R/b1fvKwnbH37v//97yFJJAHwP5JIPMAMHIxbarZSRd~qv05BUUbMLvzDFozg3eh1T/P1Q2Yk/yWJRIM0gBIYu1fZTU62crOVK/o2C9nLyAXKf2x9ytZF9WIG8TFJYj3SAMYymLHDllVr7DKy9TwZxLfffks//d9P9NNPP9Fvv/1Gv//~Oz19~pT~~OMP1~0fT9nXfzwlZojo1VdepZdfeZlefvlleuWVV/gt7uPxuHHjUrz48eiNN96gt956iwzkPsU0il~TJFYhDWCYwwzey~wmH1tFoldhtt6mALh37x7dv3ef7t~/T188~ILff/ToEf3f//2fy~DBwIWS1~O8TvHjx6c34r9Bb775JiVLnoxSpU5FKVKkoJQpU/KV~N3EFAC/snWWrRNsnWTrNDOIT0gS1kgDGGYwg4f3FB7e~9GrKEUlInQBY3b9~nW6ffM23blzh27cuEH37t6jL774gpwCPMgUKVNQ6tSpKVOmTJQ~Q3rKkDEDZciQgXuYOkFc8Txb~6PXWWYQ/yRJWCENYBjAjF4ydlOWogwebt/R87y7d~/S2TNn6XLkZW70bt28Rd9//z2FM/AQYQgzZc5EefLmoUKFC/HttQ6QjT5K0QaRGcOrJHE80gA6FGb0krCbxmzVpahYnk/~/fdfunbtGp05fYYbvTNnztA3X39DEuIeYsFCBalgwYL8Nnny5HqehgzzGixmDC~TxJFIA~ggmNGDZ1eHoowe4nk~3z94c9u3bad9e/fR6VOn6ddffyWJfxIlSkSly5SmipUq8qWD2xRlDFcxY3ibJI5BGkCbw4weUp~12arHVgm2nvN1/J3bd2j3rt20a9cu~vjCxyQJjldffZVKlCxBlSpX4sZQx3b5E4oyhuuZMbxLElsjDaBNYYYP2dqWFOXxxfF17Lmz52jv3r20eeNmy5MVr732Gs/MfvvNtzyh4o8iRYtQ7jy56envT3kGGWUzuOWLPYat~~3bt~mHH34gO4BtcsXKFala9WqULFkyX4f~zdYOthaxtYcZw79JYjukAbQR0d5eM7ZaUFQhskf~/vtvOn7sOO3cuZP27NpD33xjTixPMW5JkiShpEmT8tt3k7zr~hq3cePF5ce2bdOWNm3Y5PdnDosYRh07d/R73MWPL1LE0Ag6deoU2YWsWbNS5aqVqXLlyjyp4gO8QcvZms8M4acksQ3SAFoMM3ooQC5DUd5eDfLRfbFzx04e04O398uTX8hs7nx~R2/GlIYNHUazZszye9yEiROoWYtmpAcY/gb1GtDhQ4d1HY~fmyplKoqMjKRLn1ziWe9QkSpVKqpUpRJVq1aNZ5d9cIyivEJskX8niaVIMQQLYcavGLvpx1Ylb8d8/vnntHTxUlq7Zi09fhya7q2076WlQoUK0coVK30eh6JnfwYQXR/wSNHpoYdXX3vV7f6qlavon3/~obfffpsXPKdMldKVlX3hhRdo0pRJlC93Pn6MPz6o/QHfsiq0btmatmzeQqEAReGzZ87mC95gk6ZNqE7dOhQvXjztocWjV0/2/o9jt2uZIfT/x0hCgvQATSa6UPkDtvqyldfTMWgV27plK61YtoKXqxgJWs~yZMnC69946Qdb77wTVTZYoVwFn4mTj9Z~RGXfL~u6P33qdLp58yZ9/fXX3Oh9/dXX9PPPP5MIS5YtoSpVq7juFy5YmCdy1L/v/oP7KUfOHK7HKpavSBfOXyB/f~e9L~7xbbsCvOcWzVq4Hde0eVNKmSIl9xKxzTYyhoqia8QKGzdt7GaINcAtncDWEvY7h7aNRhID6QGaBDN8L7KbJmz1ZiuDp2Pg7S1euJhWrVpl2BYXXhOSDDB08PLyF8jvySvhFC9e3KcBhKFTs3v3br~GyB~vv/66231tqQ573XhWW20AUczs7/9FB4ja~IEKFStwo6Ru16tatSrP8oK//vqLUiRNwbfaRoD/Z93adXxhi9yydUtq3Lgxb~dTAXWd2WwNZX/rVHY7hxnCn0hiCtIAhphow9ecojy~NJ6OOXH8BM2ZPYfX6xkJvI858~bQSy/5FnVBF8jRI0fp2LFjPo/76tFXbvffffdd19fYsiIR8k6id3ii5NLFS9yr8kecOO4J7t9~/S3GMfh5avT0G~fKHbM2/MUXX~TlLJs2PkvO5MyV0/U1OmKMMn5asEUePHAwjRs7jpo0aUJt27WlJEmTqA~B/NgYtvqxc2YGu50iFWtCjzSAIYKdxLjMY78Fjy9GawG8jY0bNtK8OfPo6tXQdFWhh9eX8fv1l18pV45c9OOPP5IevvrK3QAOHjqYhkYM5YZQ~/~MGTVGlwF87XV3Lw2e3t9/PTNChYsUprr16rodc/7cefJH7ty5PT6Oi4JiAJHBRpxR4eLFixRq4NnPnjWb5s6ZS1WrVaVOnTu5GWGKEpgdxFZ3dg7NYbcTmSGULTshQhpAg4mWm~rCVlfyoLqCOrcF8xdww/fdd99RKIFhxQfur7//4mUz8DTheSDpARRllUANIMQGvAFvUA/aLfCGTRt8Hj9h/AQut~WPHLmebZmRMHn~~Si1L8Qw8X9iq40yFjWIAZoF6hsR58VC1rhHzx5Urnw59SF4YXqx1YmdUwvZ7ThmCL8kiaE8RxJDYCfpc2y1Yl/eYms4aYwfPL6FCxZS3lx5aeTwkQEbP8S1kN3UAz5kJYuXpPRp01PL5i1pyeIlMba5SIboRbsFVgOD8tmnn3FDi5jX6dOnSQ/aOJ03kAEf0G8AjR873u~xiPOpjdv~fft5dhpAKaZ8hfL86~zZs7s975OLn5AVIO7asH5DKv9~eTp79qz225Cv6cTWLXZ~DWFL3wsm0YX0AA2AnZSIok9jK4f2ezBCG9ZvoHFjxtGDBw8oUJBFbNWmFf/w4gOOhMTJEyf9Pg/afWoghtC8RXPXfXRifLT6I9LDw4fuozdu37pNLVu0pEcPHwlnfxXUMUD8DHjG4P1y77ttDbt06kJ79~zV9TOzZsvq8vjA~fPn~X38TKDEAbNlz~b2f3/22WdkJfBAq1Sswr3UIUOHaIurYfgi2GrNzrc~FCXC8B9JgkJ6gEHATsQ0bG1kXx4hD8Zvz~49VKJYCerYvmNQxg/gQ129RnWXnl2tD2pRIGAbrAYxNr2gtU2dJED87uaNmwEbP/4zVB4g1GnGjxvPV8/uPd2O69u/L~klZ063mBovgt61c5frPgwMYpZ4TdXH2IUD~w9Q8aLFeTeNh/MGGaHVbJ1m514BkgSFNIABwE68uNFFrNfZimGJUBtXuUJlatywMTcQRoBYEUpCFBDMf~458bcP8TOU2yigyFipA9TDl18~C0MlThyQ8rILTTkI/fLLs9Kfy5cv8~20QrZs2VxbV3/kzedeXhl5KdItw44YIIQNUE6jYEYCRBS0EhbIW4B31XhQ8oHxgxFcEa0HKQkAaQAFYScbPD18MrENeVn9PXhCfXr1oRJFS9C5c~fISBAzVHtv6MiAZFMgQBpLjVIHpwd0gyigxhCGuH6D~tSlWxcaOXokzV84nzZv3UynzpzirXOVq1T2~rPivO5eAqM2gGDSxElu9/V6geoSGJSfQKofhv/ggYOux5EMUmNGAgRbWnU9ox7gcaOlEIYQ3UDqiyBFNTI0Yusie7w2SYSRBlAnqOdjaxhFyaS7ncWI8y1etJgnOJBowP1QsHnTZrf7NWvVpEA4ddJdUEBkG4xuDzWLliyi6TOn0~Ahg7lRwe9UtFhRSpc~HTfSvrxEbQZYawAR44TSjYIeLzBO3DiUJs2zckv11hbJGYV8~fO5Pe~TT0KbAIEk/7Yd2~jAoQO0fuN6XpQuAjptOnXoRGVLl/VUNoUZzevZ~bk~el6zRCfSAOog2uuD4RvK1ovq70FdGZnWvr376i4nCZRtW7e59cBWqlSJe2GiaA2gUZlgT6DWzhu4UGB7Ci~ND1b6KWYDhNYL7NOvD/kib1737e~lS88MIOKASjZYDYRjtYbdSJCR3rFrh6uPumSpkrRt57YYXqgeUKxdqngp6tyxsyeJMHiB16Q3qB~ZBfZBdBfHQLYGkMbw4UODyn5keEVBASxKM0QnqMFAHDx4kMqVi6oXg7cDjwgqMSIgjgePAsrHIG3atDwOqKe~Tl0LiEJq3MdCVhrGUbmvPObLsMDwwaPxxaGDh6hm9Zq80wQtfJDbSpgwodcyoly53DtA1B4gXm9kkmvUrOF2jJ7C6kCB8du8bbNHEYlguk7WfLSGtwjC827SrAnvfY5G8QZxYrZmj/sXZYzFSAPoBXYCoQZhFWnmbcBrQSEzWpqe/Cw2NRF9uKPHjOZxIMScPvzgQ~EMKkRPFQMIsOUUNYAArW9QK1FAOYx2i~0JlI8cOnSIGzfRvz9QtJlrX~DCAmOQJ18eypMnT4xuFPz~WgMYKuXsHDly0JZtW/iFCijeJ1SmQbADqHBB7NWzFy1btoymTptK2XO41TXCCyzEzuOm7PU4SBKPyC2wBqi1sNWNooZluxk/GC1sPwYNGCT84Y8YHkE7d~90BcEhULB7726XF6YXXPXVniO6BwRGPboIdBsMzwtqLWYZP1EQH5s8aTI1rNeQMqbLGENUAgZS~5h6m2wUeJ/Vxg9069LNZfyAURP4rly~wj1pGENNGCEpW/shssCW~EkSC5AGUAU7SfgJw9YUUs3SRfsaTl5U6kM4IBA0je8cTCPbu38vvZfuPdILyiHUJR34QEGIUwGlMcgOz5ozixYuXuj15ygGEMW/SNwgvhgbwLazbp26vKMExhBxNKNLYNDatnX7VjfjB~kwlPaoMXIEKbLDy5Ys44k4tdgDRWWK0ZZ5MXrMgkSF3AJHw04ODB1C87lbsAY1fY0bNObxqmBQd2T8~eefLvGApMmSck~wTu06uluxcIKj/EShZs2adP/efar9YW1eLI0YGUDCBL2~npILUEfGh0XbKRIbQGZZnV02EtQgrt~w3i3DvXrVahoxfISbliL4/jvjZzAjmdS2dVteQzl2/Fje~hcNQjrHoutXh7Ft8V8kkR4gOyFeYmsB~xL9YG7GD0rMZUuVDdr4ARgoBWTyUNOlgAA5PAZkB/WAQD4SEArQuduzbw~1at3KZfwA2r98dYzERuMXSlBas2HjBjfPD7HWrp278q/V4hHw2EQHPeH91BaPewPq3u~Xfp8~/~xztx9BUQk9GMJ3SRK7PcDokwD7BTe5XhiXrl268u4Lo1AbG8SHqlWJ8uAUqSdsZaG43KFdB7/JCGzjMBBJncRQg0QNEgeQ29q~fTuFGmVYEmSxkK3Feuvtt1xfAfSCIgAAEABJREFUY~Hv4~u1qNvXXn3NNUAJXsvvv/1Ov/3~G08U8K9Z2OGH73~g73/4nh7/8Jh~ePwDvw9RhC~/~NJ2xhsJrnUb1rl5fvi7WrVo5boPeX~FQLa/KAGqV68edWjfQVcf~I0bN6h0ydI0eepk7YUQ5/vH7PyvxTxBYyXHHUasNYDszcdJAOPndiVEEL1Z42aGf8DUHiCEOaFYjMJWGLOGjRryx1HTh04KbItnTp/p8~fBSGoNILKZ2B5jGRlfAiiTQcwSv3eKlCl4Cx2MHm7feustCgZ4wHqHLalB2Q0k7GEQUdpz584dunXrFh~jqfaQQw33/DZtcEtwAPxNh48d5jHW5UuXU~o0zzzAHx~L1Ywio9ytezce40VyBWUwA/oP8JuMQswYW2JcEGEIVeC8P8o~B02YEVxLsZRYORMkWrYKI8vcVDyhigLVkVCA7cvX3z2riUNSBQOAwJRpU6hR40Zux2O4ztAhQ73~PHwQbn16iwsIwOChHjFYwQUFGDrI42fOkpnSp0/PW7i8yejbFSjUwBhi4cKApI~eOkdRoNKzdsNaN1EHZMoTJEigrs3jcd~//vzLtYXF71O9anVd/wcM6/FTx916lwH~njat2ujyBgE6aZavWu5pnvFEtvrFxuFMscoDRLyPogxfK/XjODn79elHK5av0PVzsM1Ba5NI/ygSEvBWlAlnaikm6AOWLVuWEr/7rG2sQ6cOlCBhAm6QPU1AwzYXSjP4oAcL/pYiRYrwWsBixYvRm2~~SU4HWXesUqVLuR779M6n3FicPHmSGyAj5il/8eUX/MLZoGEDbqgQ1ytXphz38nv27sm1G~HZI~mlVs0W8dBHjhrpZvzw3uMCCK9cRJDiypUrVLxIcT6IStP/DeHV3OzzUYcZQXtMoDeJWOMBsjcXAqVr2HJLxWEb1aB~A7p6RZ8sPbYii5ct5tnVooWLCrVQbdqyiRsYgAHfzZs0p85dOvNhOdrtkwI6IZo1aeaxhStQUHaDft2iRYtyowdvJTYCg4it4YkTJ/itaFJCDV7D9h3a85iruvskRYoU1KNXD6pXv56bRuGihYv4RdcfyBwjNqyAiyiMHgwspgdmSJchoO1~n759qFefXm5eKuMeWxXZY8ZIGDmAWGEAmfHLyG52s5VK/fiRw0d4kNpTmYgn0HI0fsJ414mMPuCqlatqFTq8ot7qQiEanqc6aI4TGWMwy5Qt4/Y8eIjTpk6jQMH2DPJPEASF4RMtvo4toMYT5SO7duziFygjQW3m2vXPQm2oQ4S8vy9wkT119pRLrgw7ARjONm3b8PtI0qmTLKLgPEPMWRPeQGvSB8wIHqBYQNiXwTDjBI8POuOp1I9PmTyFt6LpNX7g1s1bbhp8BQoWoAGDBuh~/hcPns2cxRVcMX4whvPnzecDiurVqefKPmPLUrli5YCNH5SPcYIjVjh3/ly~HZPGzzuZM2fmAgVbd2ylqzeuUsSICGH5Km8gE65Gj7c5Y9YMN63GqVOm8t9RQVPwzEEp1cEjB3X93pAHK1akmLa4H9ZwD/vctKNYQFgbwOg3cQ9FvakuUGoyeuRoEgUeHwynmq7duvJtpB481RPiJC5coDAN7D/QpSaDrF2TRk2odInSwgW7hQsXpmkzptHd~3dp2YplvFc4kFa52A4uFB06duDyVRc~ucC1CH0p2/hDm~X2NxMGGovw2hVw8V26ZKnrXMNuQTtGFVUBa9at4bNOUFyPrLFmixsDxJArlqvIQy0qsMWZg6l0bD1PYUxYboGj3zTUkbhdxVCX1ah~I0~DZ3SDEwpFx~jlVUBtWtFCRf2e1GiRwnMVMB5x6OChFCzwLurWr8tnfWAAtyQ0INSBsMmypcv4uANPySlfIGPctXtXHterUbUGT8Z4AmVQJ0~fdO0Q8P~gIB87DnR3AJTBQBJLYdCQQfxirAUXUMxt8Rerxnk9acokatyksfZb2ArXC9fkSNh5gBAzYDfLSGP80PqF7Jwe44erP/TalIyt5udTs6bN3LbOqINDZs3f1fbBffcyFU8/XwR4e~j3vXnnJhdbkMYvtOD9RVZ56fKlFHk1koc/YKz0gvhu/br1qWSxkrxW0RsYZq~ODU~fNp3Xp1av~axsBkXuAKEUhDnUxg/JEQUUaE~eMpn8gfO6R7ceNGTQEO23EELaxr7v/NIAD4SVAWRvEsp6UMvSUP04Tjy0BcEI~gMnDIpXodgLo6bO3Cn8~8~/MQqlcXXu3ae3z58NDxEdDgpJk~r/8Cjg90Es7~iJozxWhd5fifngItm9R3f6~JOPuQFCdYBerl275nW30KlLJze1aGx9J46fyEuklMdRQoNkDbbVKIpWK4Nj4LpaWRuF0BjToJc5s~dQg3oN3M5TBkQUDoWjEQwbA8jeHHR9QwTSzfhB5aRqpaq6kh0YGA7ZcqWfFoFkCE6qgfzUyTMnY8yUBb379vYbD4QXiNIbxPyUdjg9IJOLmNTFSxd5QkMdDJdYBy5IMEAHDh/gZU56Bzd5Au9p/wH9XfdR74eJgqgWqF792YUORe~oC9x3cB~/YCugeD5LlixuCZf~ffu7DbLSA1RycG5qPjMYtQcjGFZZtLAohI42flAFdasfgQqH0oiuBwz23rJ5i9vg8Y6dO9KRI0d44SyyghAcUIO4ojrADW8Axabesnyo/cI2XK8aMPplu3TtQi1btnT1zjoBeB6IjWL9/NPP3KPgfb7R6~nvT3nvL7LqSm/wK6~~4uoZxhbwjTffoLfefMutQNzOoMYTC5MAJ06YKNxLju00XielYHrG9BkuQVe1iCv0GPfs3~MqWEcVQfeu3SlR4kSuOlMA7Ui9M5~1YFRBpQqVuIepEtiAEUT7XAkWDgi~itwGOD4Jwt4MBEtwprkZP/Rfirj~CvC0Dh09xGXiFbDlQNuR2utCzASZZLSznTh9wq0f9tjRY/RBzQ8oGNAy1a5dO~rYqaMtDR~C6ui9xbp39x4vpYC8E0QLQjFfAwYRrzFEFrD9hKeTJm0aSpcuHWXMmFG3SoqZ4DUZNWJUjGytL1D2Mn7ieP53lSpRint/aF375HKUVBqyvxCUUMqxsJXG~FUAwV0lZIMuF1yIcQEKBhRyI9SiaZ~7xVZ5ZgQdLyfkaAMYHfOD8aukfnzCuAl8uHagoBf24OGDXstHUK4CwQSlWBZX3Y2bN7olQcaMGsOViUWB94POEHh9dmlJg04hPAJ4I/hQ37h~w9DOFCOAl4KWPsjCIzyBmJyI0GwoQWfIqJGjeAZZL9jGKrsI7EKGRQyLcQwEVhvWb0hPnjyh4yePuyXVUE~qHgMaDPAst23fxi84KqCzVYyd88H3YlqIYw0gM364BK5mq6768YEDBtL8ufMpWND1MWnypBiPwxA0btQ4xnS0/gP7U4~ePVz34SGiVxfGQi~o4xoydAg/4awCni48FgwKwt~KgL1TgdcIY4g5wYjNogtGLVpgNtgZ9O3Tl7fgiYD4ojbJgu014oPI~CIrrZ6/DGVoyOMbCS7GGO4Ez1sFTo4STi6RcbIBhJVrrX4MaXy9ggZ6wMxbtfIywEwQD3NZufeH0hnUemHbgolxmBWsB9QHjh03lnLmyklmg1gkasUwbe7QgUMe/7ZwAbE1zD5BCxjEJzC72ArQzjZyxMgYs0m8ARkrdX0eQi9KQb72Qv3555/zMptQeOgIxWzeslnbZYKRemXY~W/PITF~cKQBZMYPTZRulzgkF3BiGQniSsdOHONxEAXM0ChRtIRbrZUCOgWWLF3CxVRRvuAPBPfh8UHK3l8NoZEg0I4Zudu3baejR4~aqp1nJxDXgudUpVoVfuEyE4RRxo0Zx7s79BRUo~Zz1NhRNHb0WK4IDrShGuw6MLdG72iFQIgbNy4v5sf/reIIRYkoiM15tQGOM4DsTUYpfF/1Y~imQFdFKIDLv//Qfl5wqiCaXdYCY9eiZQsaPHSwW8FrKIHRwwcHZUEH9h8Qnkkc7iDsUK1aNapWoxoVKFDAtAsSYqod23UU9rwx6wO1oOpkXbCxb70gPrlrzy5tTHAHWzXZ6xb4sGMLcJQBZMYP~kFj1I/pUdUIFpS~jBnn9t9yIUo9c3S1QBV4/oL5pm13UdOFtqnYMvXNCGAM4ZU3atTIlEQK6v1mzZjFjZfeC9PAwQN5r68CtCkrlKugW5koWN5J9A43ghqRVtTcNGJG8F9yCI4xgOyNRTAOFsdVvD1r5iwaNmQYmcHylcvdmtPhUSEeiJiLHiCKiXYlaMOphTFDAUQXVq1YRWvWrAlJSUpsAvFZiJ3WqlXLbdhRKMD7hjEJEN3wB5I5w0cM5zFAhGPQi272nJQkSZLQrr27tB1N05gB7EYOwREGkBm/0hRV6OyqS0GCoW/vvmQWiAdqSw301hpCUn7e/Hn8NpTA04PhQ~ufxFiw5cRgIYQuQu29i5zbyG7DY920YRNZAfrPd~/brRXV7c6M4FRyALY3gMz4ZWU3KLhzVQOjngpzdM1y9xVw4kNmCGDrDX02f79Dy1YtafjI4SHz~tCuhA8MlvT2zAFDkKAbWKVqFY~94kaAedStmrfiM03sDj4XO3btUM8gxha4KTOCK8nm2NoAMuOShKLS7EmUxzDnFBXymmZt08B2CCenv3kgqJuaM38OlSlThkIBasmQ~Fm/br1MaFgEWtdatWrFt6GhGBqFrS0SfEZXN4QClIuhbEwFkiHoFjlENsa2BjB6hscRtrIqj6GtB7pomItgZ1BwO2/BPDc1X6OAog3aq4ycWSwJDsQGMdsFM0G8zXYJBhSmo~gZfed2xoMmIWoDCzMjaNviUlsawOguD6QtXeXtaPiuVrkaXbhwgewKtkPoCEEbm9FlFOhHRpnD8mXLdQspSMwFsTgMG8KcZ6O3xug8atm8JZ0/f57MAEmW1m1a8y4afPYunL9Aa9es9WuEV6xaQRUqVlA/hMxMTvZ5sKX1tqsBHMZu3KSSIRPvaQaCXUBZwLLlyyhvvrxkJFBVwVYXGe/YWrDsNNBhAhk1ddWAEaBgGoXQiD2HEsT0lq9YHmMEAEItEUMjaOGChV6fi6JsjBFAX7aK7WzVsGN5jO0MIDN~xdnNYVKVu0Ck0YNSbQyw/YBiL9qdrl~7HrAUkCiYtjZ77uwYcx~CBXWGgwcN5sPPJc6jYKGCNH3mdEqdOjUZyeFDh6ldm3ZBK714Au1ukZcjfSoQ~Su4Rmz08NHDWjGPCGYAh5HNsJUgKjN~6DlbT6rfCzp8/owfauwwSByTvDAIqF37dpTwnYRkBtjyrl6z2lDjhzhfzeo1ebG1NH7O5czpM1SkYBHeu2tkogoXebRoaoQJDAHCq2rjB68TveLq3x/Cv4hze~Phlw/5zGsNg9nnuyTZDNsYQPbioNcMhc6uzAHKOpo2burzedCIQ28iZmKoM3E/Pv6RQgn02DC7Qa0AEyzI~uHDgqJWDOqWOB/EzyBcUCBvAe3ktaBAvBGlJ9jtGOVtrGwAABAASURBVAmKm9Wg3AujWXPnyO028H3mrJk~Ez4Y~BQxLEL9EGzNGvY5T0k2wk4e4Ay2XKPWcOI0qN/AZ9AVYgKHjhxyU6dAzAyFwKKSQyLgjV~3YR1vlzIKaAsWyl~If1igJiMJLx49ekR1P6xLLZq14AktI0D2GTqUWsWiYNDOzVFUZSC8imFgiieIba6/eTQzp8~kHdt3qB~CztvGaGfHFtjCALIXBFNd2qof69m9J125fMXn8yA/r0zlgquOrXKG9zLwGSCnT5/mAgaYo3Hi1An69O6ntHjpYq2yrTBoBN~5ZyeVKFmCjAAn1IB~A6h6leq2L~~RBA8UeHChw1hNI8A5jvq7Lt26kChTpk3hg7~QtVZCOBBRVVcZoOBbUdvG1nbdmnWu7~lxADCDGxL~KvKwFdrmfQEsN4DM~KViN27CeSj18JfA4MkO1fSsJg2b8GSJIlOVJk0a7h1ijgcyUvHjx6eq1apyY6geJCMCZLEwiCZbtmxkBBAchWz5gvkLSBJ7wK4GMvZIZOgZ1qUHZJ1Hjx0t9Bxsd9HNMnX6VG4MARIr6vZOOBhqvcGTp57NMk6fPr2//4J7kBAQ1lQwdGWf~7JkAyw1gNH1fmvZcmUQbty4wbX9/FG/QX3X19C227fv2dwFNLBDwipjpowxnoer2bTp00gUqF4g5qLWBgyGEcNHUNnSZXWN6pSEJ5jtW6RQETp65CgZAer2ME9EL~rxmQkSPuvlhaiwMu4BYEiYUt715x/PwjN6h1Vh2FiXzjE81BXs82/5tCurPUCkd13uGGJfzZo04/E/f6i9MPVVFG8WJln5ak2CxJHIHFcYP6heaOuiAgEFreXKlqPpU6eTRIIsf~1atXl3D2SxgqV5i~a6jeC1q8/GHeTLl089/Y0G9B3g9vuMmzCOF/fv3LGTK07DS0Qbplon0xeQY8M4TxUwfsbJtweIZQaQWX80yboN3UXfI3p99aCOU2CWBra6Cxcv5DNz1cOMcDVLkTQFffjBh27P1yuHjlnBMH5GtLXhSl~8aPGQKvZKnAmKm2tUq2FIggRGUM8uByNgFdC50qlzJ9d9zIJZtnSZ6z5mq1SqXImLf~B7UEJCe54eZ0Whd6/e9PDhQ/VDZdnPs1Q6yxIDyP5obHlXqv9/BF99VZhrOXHiWZkI3jwkO9RZKWVWKuaEIA4BBRn1m6WnLgtGEqMGgzV~SNBgy4srvd37OSXWcfrUaT5u4dy5cxQsDRo14LE9X0DLEvF2BdTSqucKa8d5Bpv4wwwU1LZqGMfsQQGyCKs8QLwzrv0/xv8hWyT0AyZP5bNPPQFDhyDzyhXP1HhQKqN211Fg7QtU72/bsY1nfYMBBq9mtZpyyyvRBabyVa5QmStEBwuyuxio5ItBAwbR7Vu3XfdR3oV~Zhi75i3di5nRcBAsKKrWjIuFTtwsZgRDoyvmB9Nb4aJb3dyivhgijpGBoiCWhyFE6mQH1HTRpqP9eWvWreHTwABKEVCP5Q2InkLkEQO4gwFX2No1a8vyFklAILQDL05vnM0b2Fn179vf6/chaorqBn9zqPGZwWcnWLBj23dgH5/hrMISEVVTDSAzfrD2kMZxBeCCHTCEjgz04iJWB69OXa0OIEQ6YdIEruMHkGiBnqD6qqcGiY49e/dQkqRJKBjwuzRs0FD36EOJxBMY0LR67eqg9Qb9jY9AUnHZymVuiudqMFCrUYNGZBT4vKIkTeVV4oOSiRnBL8lEzDaAw0il8oKtL1qEjKqFUsCkNcj45MmTh1q3be3myaHAWh33UIMsGIqcg21eh1FH/NGIrJ5Egulra9ev5Z5aMGAM58QJE71~H85Cuw7tqHv37m7zT1BfO3L4SMM7lPr060O9~/RWP7SVGcAaZCKmGUBm/OD1wftzacMHOlnNH4hfbNi0Icbj6BTBm~kJ6J9h25s5c2YKBl//h0QSKPAAEcaBHH8wdOnUxW~TAbwyeGgJ3k5At2/f5m1woqDjasasGbyXGF1ZnsBWGF6gZvIeRmtuIZMwMwmCFK/L~CErGwrjB1Kmcu~3RlIEdUveDBPqmzD1LRjjh/IAVPZL4ycJBT///DPVqlGLK8wEAzo~/AkooMTs1s1bXNBA1Pjhs4SKjJNnTnLFmJlzZnqNYaI6onPHztqHZ7DPUmjH76kwxQCyP6gZuymu3EdZSudOnX0~58M6H1L5CuUpEFKmiDKAmBuCq12~PPl43ZI3Jk6eGFSKHydMqxateGW/RBIqULqFhOGBAwcoUOB1rVq9SncdrAiYenjwyEFek4sdFUDnVN/~3ifcQeF92ZJl6ofQrD~STCLkW2Bm/DAqCt3Qrugqmv999b~i7u7chXO8bQ3Z3N49e~uevwvQ96s3rtixc0caFjGMAgW9x00bNaWDBw~SRGIGMGKYOeNPjcUXjx4~ovfLvM/LboIFscO~/fryOkJPpTLw9EoUK8G9Sk8gZn/2wll1rP4ftrIzb/I6hRgzPEDk313GLzIy0m/zP9puFAWK4iWK04nTJ7jen/KYP/QaP3iYwRg/eJh1a9eVxk9iKjAo2HEEo3iOKgcI~QZLwYIF~XYXajTe6gRhsKGYjooNT0DCbvBAt6Yw1AT6LmA0iJAaQOb9wfC5KRv06tHL53MwYBnDntVwWSt2dbl46SIv7jQCZNTQNhcoyIhB3w1xEonEClA~FsycHDQHTJw0kQIBqtGoUdy~a7vH7PSaj9ZwVXMYa4BWOii1ewP5AHTCqCjP7EfIM8Kh9gCh~~WalowXRVunpwW9kHlz5aXlS2OWqkD9GS/6keNH3KSwRIGgKa5~ceIEFmvFm9qkUZOgA9ISSTAg8da~bfsYLWsiNG3eVFjYF1tvhKi8OSO9evbiyQ2oms~Z9SwpiPERvtSU8DzFYEYzLTqEFjJCFgOMFjtwRWtREJwnVx6hQS64QsHgZc2a1eP3oZ4MCXlRIAIJHbRAwEnXumVrOZdXYhuwQ1q/cX2MnZNeEMcuV6YcXb/uO~SGGN3kaZOpXLlyPo~7~PFFKv9~VAITwiTYIiuGDzJbEP/1xphxY6hV61bqh/qzWOBYChEh8QCj~/pmqh9De5roFCsIhpYuUZr3KyJOoKV7j~40ZKj/aXFqWrZqGbDxAxBXkMZPYidQ5lW/bv2AVYZefvllWvnRSp6M8AUSL56MH0ZQQOJNKZnJnSc3HxIPkLnu2K6j69jChQtT3Xp1vf4fGPupEQwZwOxJyCachWoL3JgtV4MuJLHnzZ1HgQCPC89Fxwg0xbQgiwv1Zz3Akxw~cjgFCsYBqgUWJBK7gNIySL4FOgsHLXAoXPbFwP4D3bqbkASEeDFGUMD49u39rNxlwKABro4qGEh1SAtyXd5AAnNExAj1QxhRN5BChOEGMNr7c0vpDOg/wGdbGPp0kSVSCzJqgfJLy~Yt~Zt8//591~PILDVr0Yz8AVd88bLFPGUfCGgC9zULVSKxGhiPOrXr8BbTQMDIiCbNmnj9PnQA5855ljj86f9~4nF9BXxGlCFI~Lypk4xDBg/hn2FUgFStXJV8gVbVG9dvqB9qw~zKexQCDI8BRhc9u6qO1fEATyCxcf7ied7qgzhhREQELV28lHyB50DyXokr4AqDq5AvMECpZq2aFAh44xEjkdPaJE4AsfPtO7f7HFvpDWxZUbPnTZgYP/PU2VOu4WL4rELoVAFVHKfPnXYNWYJXuHhR1MgffMbR0aKHipUq8u4sFctYLLAZGYyhHqAn7w9CoL5A1biidIEG7AkTJ9CBQwd8StYjlrhu7bPpVM8/51tKDLJCgRo/XLXqfFBHGj~JY0DsHLulQMQ44LktXb6UxwU9ga024uAK2H0hrqeAKo6~faK2wohNvvraMyOs1/iB3bt2awunG4bCCzR6C9yaLVdADtp8/gZ8e5LUxhXswOEDfLaBekq9mrRp07q~9tUlAi9RZFCMGmTHYPyMqJaXSMxk/779XJgjEDJlyuQzVn740GG3Pv5pM6e5jaHYtGETV50pWqhoUMKuY0aPUd9FlfUgMhjDtsDMOuMVwIgzl9IzZhycPOG/UBgKF5OnTPY4xQ3GZ/CgwfxFVYCB3L13t6vJGmUp6vkGavbu38uzUhKJRAzE6rzVuiJef~b8GdfuDbFBTTeHIUAtBmNto8EgIGgGBpbp8YCRBhDDTaYo9/3F/rQgmYFuj379~3l0vy~cv0CLFi7iHiNkvpUXHlO1cufM7XGLCvccW2qJRCLOgwcPqGC~gl4HHzVu0tgluY9qDXzejR745SEWuJYZwHpkEIYYQPbHwz3FjD3XpOQaVWsE1CaGHsUpU6dQ6TKldR3fsH5Dj5XwmFl6~uzpgLs9JBIJ0YxpM2h4hPftMFrh0A8MkCzEyEyj8eAFZmVG8BYZgFExQPTSuIwfBp8E2iMLlQr02GL~wJdfelfHxhUHCRZvbUBTp02Vxk8iCZLOXTvzPl5vdOvcjcvBIfHSvElzCgWa8jM4W93JIIL2AJkhws/AHL~8ymOYyLZn9x4KFsT4mjZrSl26dnEbSo7sECSyvCnNYjh6MEIHEonkGVeuXOEdWd5AFhifRTglgYIaRNQQevsZKJVTiS78zlZS5gX~SEFihAGswG52K/cRN8iTMw8ZCWR2SpUuxd3g69eu8yyUtxcKdUoXIy/yeiSJRGIMECrQCJcGDT7XaIvDQHbI4vuaOocW1rHj3VqCI5gBHEZBYoQBPMJuXHLKvoYOgcpVKvNtq8hEeRH6DehHPXv1JIlEYhzoz82VI5chUw7RcwwVmvbt2/NYvQJCZ5UrVvb4HDg2kVcj1aM74f3BC/ydgiCoGCAzfoh~uowfXiRfIo3oxUWR5SeXP~FCBkbzTqJ3~NVEIpEYCzo7evfuTcHw9ttv08DBA~nytctc4Fht/ED~AvkpS5YsHp~LAuylS5aqH4IlbEtBEmwSxE3sdN6ceT49O4yoBJDVKVCwABnNyFEjvVawSySS4MDnV2mBEwHPgfDqpSuXqFv3bj5nHENZ2hsL5i3gzQkqekVXoARMwAaQ/ccIslVS7qMOz5fUPa4gSE4oYFq9kaDYOdB2N4lE4h8kJUeNGaX7eAxJWrh4IY/JY8ur7hZRQM5AXUBdrXo1SpQ4kcefB7mtDevdxt0mZasoBUEwHiDGxLvm3a1ds9bnLI7GTRu7vLO7d~/Sgf2BT7byxKjR~t8YiUQSGJUqV6Js2bP5PAaagRs3b6RjJ45x9WiMyvQEBI2h/o4ukn37osrZkBhp06aN15~NXaYG7zr7OgjGADZT31HL5GjBC9CyZUvX/buf3~WKLkZRrHgxypsvL0kkktAzYOAAn98fNnwYH2bmia~/~tr1NfQClWqOubOf2Q9v3iK4ceMGfXzhY/VDtYIRTA3IALL/MCe7ccm1YM7H7Vu3vR5foWIFSposqes~ujyuXL/CNQDz5A2~ZMbfGyKRSIyj7PtlfXqBs2fNdrv/8MuH3NtDeVzZMmV54TS4CdAdAAAQAElEQVTAdhdCrOD4seMuG4KxtvUb1Pf68zXJEOxCA56UFqgH2M7HLxQDjcY/B8KkGH6~Z98eLn9Vr369gMRKpfcnkZhP/wH9vX4P4TBFHh9A0R2zexDvQ~~~oiSD/n80OSjMmf1sgBJ0AbyBSXgaaa1mFCDCBpB5fxgc0Ei5/~TnJ7R~3Xqvx6N625s7rAB1F8hxwyvEjA/0A~tFen8Sifm8X~59r14gKkGQsVXAfBB1HHDG9GfS~w0aNeAeH4DG548/RjV3wG7g//AEEq5qJWpGjuhdqTCBeIAfsuWanrJ27VqfYqHtOjxzFo8cPsILHWHBPZXLIC6I3sNPIj~hlatXUslSJckXRYsVld6fRGIRffv19fo9qECjdg~gjRXJEAXI3R86eIh/jV2fYiNgR5YsXsIl8EYOH~m11RXgOA3NKACEO0GYpYXwnuuvKVq4qFa51QUUnq9ev~qaNqVWbnnnnXeoSdMm1Lxlc/61N2bPnE1Dhwz1~L11G9bxFjmJRGINhQoU8jqIaeTokdS2XVStMmSyMDlOASM8t2yL0vBEYiRblihvEgLIT39/qqtTbMeuHep6YmRXUjJPU0i6XcgDZMYP8syu2r~rV696NX4gTeo0rnGWUHaBSq0CrDxUY7NnyU5tW7f1au29Tb5PkzaNNH4SicV06Og9VoeYnjLoPFfuXFz4WAFCydgRjhszjooVKeZ6HCE1vW2y69e7hd7QVqJPQ0~FkAeoHXiEwCayO75AXQ8KlDGfYOOGjT6PhSJ0q1atqG79ujwNfv7ceapUoZLHY2fOnulzvqhEIgk96MzIlT2XW9JDDWYJ1/qgFv96185d1LRxUzIKNFfc/uy2Or44j30tVBcoagChceWSec6fJz8vajYabJ0bNGjAZ314KphGT~HVG1e5cZVIJNaCnRw8OU9kzpyZjp44yr9GzR8Kn5ENNoqt27dS4SKuoUzC22DdW2D2y6M/xeViQv01FMYPQHFi/rz5XrtFOnbqKI2fRGITIFXlrYTt~vXrvMYP/PrLrx7n/gTD1i1b1XeFt8G6PUBmAOFaugp1xowaQ5MnTSazwQt98/ZNr9PiJOJgrvI/f//j9zj0W/uaNYsT/NKlSx6/B1Vhve~Zt0Fa6TOk58N4fAFJJT0xJAThjeC3336j~/fu81GtIiRPkdw11zoc6NalG61aucrj94oUKUJZsmbh31dyAkaBBCp2g6ptsND8YBEDeIRU0leh2v76A3E/xP/ChUEDBvFC0VAByaEr1654/f60qdN4yYEeoOJz~Nhhr0bIl3IwpvjpKVlCP/l7qT2Pf1XHkzzhqyJBC4rw0YkkCjKWGM518MBBun//vtCsWzW9~/SmPv36ULigzfKaybad26hQoULK3SdsJdC7Dda1BWbGD5WKrv8Bbq0Vxg80a96MJMaBAdR6wZD440ePk2X4UFyPjIzUbfzA7t36/26AbOakiZO4KOjUKVO5sQ/U~IUjyPJinrAVbN/qpiKNbYbubbDeGGBFtlybfJEPjZFkyJBBFj4bjFKmoJe///nb6/d8zYQIZl6E62f4sID//vMvCf0sgd8HBbqoYR07eqyrjzVYnnveqHlk9sFTy6sZ7NixQ/tQBdKJ3nfB7QfC/beCQF7gL774giSSYEB8y~hzPhyTeB98~AG99tprZDZfPfqK7ty~o37IOAMYPfXN1ZSHGA3q88wGWoK1P6xNorRu2ZpvVySSQEAG01eve6C88Ly9DSASSaJJTnR8qUWPzeTgQbcLVAZmt1LpeZ6edwGyVy51AkxkswJMiEd9oAioI4R2WK8evWjv/r1kR9DRgrGCvrh77y6/ymnBRSFPHt9yYm8neJskgeNL5RxAuCNVylQkCrLAdgZiBpMmTOKtbEorqx6QpFqxfAWZDXqL27V3q4GGF~h3Nq4eA2iL7W8gcveLFizitxc/vsi7UKy6OvmiRcsWfPliyKAhblJBCokTJ6atO7aSJDTAC/JWiwoppwWLFvB5tt4Uj53K999/T~PHj~exT0hb~Ts/1aC8CKUpaHU1E5ROoStFNROoBukwgHpigDXUdxQxAzN5Pc7rXqVxvIEXY/Xq1a77QwYP4TVbEoleIM3kraYQo1ch6Bluxg~MGjGK13SCpYuXkgh4PXBRMBsYa6XgOpqSbBvsd0KaTwPIfgB0qV0dzJcvXxYu~DSCypUr84EsImDKvHqG6bfffEszps0giUQvf//lPeNrhJK5HUG8fOWKla77kKDHDkqEGrVqkBUoElvRwPj5VUvx5wEWVB9z7MgxsgJfxa/egLiilunTpnNVGolED5gz7Y1rV69ROIJ4uRaN~KhfChYsyDUAzebYsRj2qaC/5/gzgCXVd06fOk1mg~1vmbJlhJ6DAe2Q2tECN3no4KEkkegBpSopU6b0~D3EZI1s6rcDWzZv8ejtQcJetI6zSpUqZDYohFcUpaMJ2gC6/YCTJ0~S2ZQoUUL0KVxDEPJbnti2dZt2qpRE4hVvyTckCsqXLU~bNmwypMjbahAzHzhgoMfvwaE4dfIUiVCydEmygjOnz6jv5mHvjU8b5/Wb0U90tV2g/c3oRmY9lCkj5v0BbyKqCnDzw~GklYQezLP2VrQMI9i2TVvKlzsfl2jXK~RpRxAeQpzcGxrVFb/AcXn~~efJbCDsoSIBW~l9He/LOuKJriKys2fOkhVgBJ8Ijx4~8vu7QsnailolifOAYou/wVsQRejTqw/lzpmbCyUY1S5nFpjUNnXyVJ/HiG6DUY6i0ukzDQ~ffZ/bYF8G0O2JGtfSFNKlTyc0IQ546Av0COS81FliicQbnbp04pp3/oBSTL8~/ahQ/kI8ceAtDGM3MHPH12AzgG2waAdY6dLCCvVBgxnlT58~VT9U0tfxvgxgSfWdE8dPkNkEsv3du0dfxwcv9hw3niQSf6C2bez4sVyOy9cAL4V79~5R546dqXCBwjzmbOdwC~Lh/kZVKGjKTPxSuqz5BhDiHppETsAeoEu6FZPdza7sBiVKiiVAMIZPxFCjzQntchKJHlCOde7jc1zLD9UJ/vjss8~oZfOWVDBfQS4GakeP0FPZizcOHxZrg4UcfoIECchszp07p76bLnqWuUc8GsDoBIhr6jHk760A9UQioG1J5CRDrGZg/4EkkegFfbEQMr12/RqNGjPKa5mMGlxkoShTr049LiZiF1avWs3j4XqBZyX6~~cvkJ/MRlOj6WbLtHjzAJEAcenaIANsNpkyZxIWPwikTQ9G01PNoETiC3iAbdq2obMXztKsObMoVapUfp8DIRGUziDpYDVoCx0~bDiJcuyoWDNE/vzmG0B0r2jI6e1YbwbQ7QmY5G42gVw5RGMUCr179iaJJBBQ6lGnbh06c/4MzZg1g5IlS~bzeGyLq1erzpMKVoJJbj/88AOJcvToUaHjrfAAb9~6rd0JBmcArfAARbe/2GYEGqdE0HruHL/CERKJV2AI69Wvxz3CiBERFD9~fK/HfvbpZzRzunVzbdAOOmfWHAoE0WRozlw5TRd/RdLp5s2b6ocCN4CwpCKzFoxC9MoRbJ3i2DFjLb8qS5wPphZ26NiBLkZe9Cngu3jxYsvUifr37R9wrSKMt4ggCkRMME3QbG5edzOAWb11hPg1gDB~ZqfxkTkSHRkYbJ0i5H9GDB9BEokRxIsXj~bMm0MdO3f0~P0nPz~hmzduktmgn3/P7j0UDKJtcVbM8dHEAZEF9tgREsMAMmOH4cKJlPtWbH~zZstKohjRqbJ86XJLvF1J~DJk6BCvJTOIB5oJauR69dRf9uINUWcD5TBm48FuedwGe/IAE6vvIKBoNhiiLAKCuUadTDIh4htfAqC~vqe3PEl0Sp2e/9tKoBydOFFij9/TKJeEnGVLlxnyedb02/pF9PNsBJ/e~VT7kMc3wZMBTKW~c~/~PTKbLFnEXrDIS5FkFKdPn~bV~xLPBDr6EjOF9fD1119TINi12~Lc2XNeL85JkyYls0B8e/TI0WQElyMv~22dU5M~fXrTL1Doz9acE6k8HefXAN6/d5/MRvSKcf2asdt0zOCAPFBsQPTE9HX86695747QGzfylWX0NZzHyL8jWNBjjosyBqg3bdzU63F585oXG8NMY6OKsGFYbt/W70kiMZQ~Q3oyE~wkHj58qH4olafjPOWn3Q402wAiZZ4xY0ah5xjdqYIXbuaMmXzug0Q/b771ptfvQSUl7XtpqXWb1l6PgeKILy/F7LYqbPWqVgrNfIuixYpSosSJyAwQ14Zcl5HA6ciaVX~sHrs6s~PrD~4/UNdlpvJ0jE8DiDQ9RAPM5L107/G4iQhGe4Bg2pRp1KhRI9NO0nDgrbfeooQJE9J3333n8fsD~g2gEREjKGOmjPTqK6~6Hv/zrz953ZY/dZ5MmTKRmYRyWz0sYhiZBRIfRvchizodZnuAAIrdKkmuVJ6O8WkArdj~pkguVv6CN9ZD60vQQFhh2NBhvJQhnDH6Qw7PBp6cN/C6fnLxExIFtWR6BAj0oufvDtU2eeiwoZQjZw4yA5S8hELKTtTpEC1rMwKN/YrP3vM32HvqVuzrMwZoxcyDFCnFXqg7t~~E7Eq9Yf2GgD6sTsLoD3m3Ht0oFPTt15eMxIqsMbpFho8czvUFzWLQgEEUCjSdFn6xYhA8EiEaUmkfcDOAzJAgiOPq4XGCAbx79y6Fkh7depBEP6j5gjiAkUQMj6DSZczXljOSChUr0JFjR6h9h/ZkFhgD68EIGALEX0W6SUR3dkbw5RcxJkAm1D6g3QK/rb5jhWqFqKscqjdYAXJBUPdFn6dVpE6TmgoXjikvnjhJYgqWUHjPEAfImTMnDRo4iCugBAq2vaNGjwpJJ0Eo43tI5CH4DkVzvG8VK1XkCSAzQex~wvgJFErw2UubVt/fhTGZ8IADrfMMBA/aADHqjrQGMJ76jhVD0EU9QDPilMOGDKNq1avRa6~9RlbQvEVzvkKBaMJJLwh6r9uwji5fvsxLQpCRw44C9YD//evZ~CR8JyGXlcJFMHOWzCFtodLzd0OQ47vH35ETQbIJ8dZQAg9LrwFEyCF58uRceMQsPKjdxPAYbGcA8SKJEGoPEOCFnDRxEg0eMpjCDdHsoKjnlD17dr5Cjejv5ZR5HYFw5coVLnYaakRDZMmSJzPVAHoQN3lD~4D2Mug28ODxD~YbwDfeeEPoeLPilLNnzuYyQhKJ3RGRuQ8GDzE2n7z99ttkNhonzq8BdAsS/vBYXDAxGFBDJoqm2jtkIOAbqoyaRGIUmImtGQoUMr766iuh41EnajY/Pnbrt/ZrAOP7eHLIeettsRcIg6ghK2QWO3fs5HJCEokdQfvm4EHmhWlEFaWtMIAaDzBGDFBrAN1igN4q~kPF22~Jucg/fG~uhwpQVW9mJksi0Qu6l779xrzpjaJqNr5aJUOF5nfUbwAhEGo2bycQNICPzTeAkBOCrFBsRUQFxEz~~DN2iFd4AyVr06ZOfhM5OgAAEABJREFUIzMRNYBWxAA1v~Mr2u9rDeDLyhdWyAu9~abYFcKKJA1Aw364yOeLdkRs37ad7Mi6NeuEjrerfmCgoObS7IuTaIhM9PNtBD///LP6bgwDqC2DcR1ghQFEoaQIgUy1MgLICo0bM47GjBtDTkf0fcbkvYRviSer7IZd9QMD4eMLH9OWzVvIbETL5EQrPIzAnwH06gFawT//isXWfvnlF7KKxYsWS/l8ieXAkJtV9uLp//71V/2hMl~T8kLFkyduSVK/BtCFFVsEbx0C3vjnb~uSESikNWK~gkQSDKtWruLtmlbx9OlT3cfGf8MCA~heJRLDwbOXByiYXf37n8BG~xkFZIb27tlLEokVQD9x5PCRZCVPf9dvAK1Igmg8wBh4NYBWeICi7UmBzjY1ksEDB/N6RInEbCZMmGBZHFxBxANE//Wrr75KZqKJAWLb7mbYQtMJHyCiHqCVW2AFyHHNmzOPJBIz~fzzz2n~3PlkNb8/FRNcMHsbHLAHaKT6rl5EkyB2aWifOGGi6aMDJLEbDO6yww7oj6di9Ze~BmeFAg9bdJ8eoKXVpH/~IVbH9MKLL5AdQCYM8kMSiRkcOXzENrFn0VCZ2dMWPdgIt0yrTwMoWpcXLKKFnBi3ZxcgPwQZIokklCBM1KdXH7ILL770otDxZhdrv/yS77yuTwP48svmJoVFkwkvvij24ocaq~qxJLEHjBcN9RgIEV56UcwJMdsAag0081h9eoDuTzbZwIhuge3kAQLIEG3asIkkklCA9svxY8eTnbC9B~juxMXYf/v0AM02MJgPK4LdPEAwePBg0~McktgBetDRhmknRG2E2Z8Nze8XIyOijRC6HfDSy~YaQNEtcJw4cchuQI4IskR9~tknTuML0ZkgaGjv3bc3n/5mF6AKDs9IRLE7VLNQQgXaLu2oQvT662JZXbOl5DQeoF8D6GaeX3zBXA/rp/8Tu7pZ0VuoB8gSNW3WlBIlTkR2R1QUoFefXtS6TWuyE0XYP3QZNKzfUPdznCaGgLZLO84xERE4EJXPMgLNLjGGAdReBt2qBs32sETVJexqABHngDyRExA1BFYoeuhBdJyCkwzgrp27eNul3YgXL55QGYwV8nUaG~Y3Bujmgr3xprknO~IbIlc5u34YAeSJIFMkkQQDwkID~g0gOyKq72dF255Ghj~GC~rTAFoyxETATbZCXUIElMWEk~6cxHxmz5pt2uAvUUQdECvG7Gpk~GOoGGsNoFvnsNkeIBBxk81urBYFMkWQK5JIAgFD5CeOn0h2RXSImQ08QDED~Nablk9x8kvq1KnJzkCuCLJFEokoaK8UUVsxm6RJkwodb0UMULNN/1r7fa0B/NbHk00BVz0RkiYTexPMBlc9yBZJJCKgrXLtmrVkZ5KnSC50/Ndff01mo/EA/RpAtzmYVoyx~~LBF0LHJ0uWjOwOZIsgXySR6MUJbZUpUqQQOh71mmYjGgN0S4JY4QGKvkiibrgVQLZo8ADzBlZLnM2G9Rt4W6XdSZ5czAN8cN98A6gJ44nFABMnjjFHOOR88YWYByjqhlvFvn376Pix4ySR~OL333~nYUOHkRNIlTqVyOH06aefkpmgDS5uvLjqh2IYFzcD~L///Q~FgveV~ylSirm4RiDqAaZ9Ly05hZ7de5reCiRxFlMnT~VDzu3Oa6~9RokS6e90Qnmb2UIIHmxDjHoiTw2R95QvEEB85ZVXyEzu37svdHzWrFnJKUDGaOGChSSReAK9zDNnzCQnkClzJqHjrdj~amKU8Dx8e4DR3FPfSZvWXA8Laf9vv/1W9/FodRG5ElnNmNFjuKyRRKJl6OChpntJgZIhQwah463QMNSUyH3Jdrgxtl9~DaAVMbZrV68JHZ8ho9ibYSW//vIrjRxh7ShDif04feo0bdu6jZyCqAG8esX82cWaEN49T8f4NYApU6Yks7l~7brQ8XaSZtLDsiXL6Pp1sb9REt7Ytd/XG6JOhxXnu8Z23fN0jF8DaEUi5No1MQ8wR84c5DT69u5LEglYvmw5b5t0Ejlz5RQ63oq/zxADaEWr2Y3rN4SOz50nNzkNyBvt2L6DJLEbtElC6dlJILkA/UW9QOXpq0dfkdmkTOVmAG96OsaTAUS65lflTsZMGclsbt26JSSLlSZNGoobNy45jUEDBkn5/FjO~HHjLREJCIY8efMIHW9F/A82QVPBcs/TcTEMIMuUwPK4fmNUe0P40EyggSYaM8hfID85DcgcQe5IEjtBe~SC~QvIaYjuuC5fvkxmkyVrFvVd2DSPv4S3wQiX1HdEa36M4NzZc0LH582Xl5zIlElThAUgJOEBdgBok3Qa~fLlEzreCjXrzFncEqN3mGP3m6fjdBlAK7KsogawcOHC5ETQ~hQxNIIksYsjh4/Q/n37yWmgA0Q06YgSH7PJksXNA7zk7ThvBvCmjx9mCqIGEFtgswe5G8X6deu5/JEkdoB2yD69nDE1UEvhIoXphRde0H08tvlWDEPSeIDBGUDNDzMFiCKIBIfxphQsVJCcihPkjyTGgLifFZ0RRlCseDGh48~eOUtmA6V4TQmMmAFk~2UIB7oCU1YYQHDyxEmh40XfHDsB~aN1a9eRJLxBG~TYMWPJqRQvUVzoeNGdnBFky55N~5CwBwgilS8w/Dhd~nRkNqKxg5IlS5KTQSzwt99~I0n4gjZItEM6kQQJEgiLj1gR/8ud2y1L/TjaofOILwPo9puLZn6M4NDBQ0LHZ8~R3ZJJdkYBEQhkhSXhya2bt3gbpFMpV76c0PGPHj6izz77jMxGUxHiM7juywAeUd/Jl998A4gAKiSC9IIhzRUqViAng7pAkb9Z4hx69XR2nLdK1SpCx~/du5esQBMKO~LrWF8GENFLVztG/vzWFBof2HdA6HinG0DIIaE~TBJebN~23ZJ6OKN4Pc7rVKJkCaHnHDxwkMwGjRuaXeARX8d7NYDMm/qdVO5j~gzpKU7cOGQ2Bw~KvYh4k1588UVyMjt37LQkdiIJDWh3HDzQ2TNhylcozyXm9YJSHytGQOQr4LZThQPn86rjywMER9R3ChY0v8zk2NFjQtXyKNQsVboUOZ1~ffqRJDxAWANtj06mevXqQsfjAm5FQq9AgQLqu1eYI~dzsLI/A~hmPa3ot8WLKOoN1fqgFjkd9EIvXbyUJM4G8z2cnthCFcj75d4Xeo5VXS4FCroZwCP~jhcygJofbhpbtmwROr5ylcr8TXM6KJmAXJLEuUQMi~Dtjk4GnyfRsNKmTZvIbBCi03StHfH3HJ8GkLmP99jNbeU~3EtsMc1m25ZtQtPUIIMjmrGyI9BRwwwRiTP5~MLHvM3R6YjuqE6fPk1ff/U1mY2HOuDz/p7jzwMEu5Uvnn/~eeFKcCNA9fzRI0eFnlO3Xl0KBzBFDuVAEucRDu2N8ePHp5KlSoo8hbZsEtuxGUWZsmXUdyOZA~c38KrHAO5x~0/KlCEr2LJZ7EVFLVCSpEnI6UAYVvYJOw~0NTpN5t4TtT~szR0fvWCntnHDRrKCipUqqu/u0fMcPQbwMFsu2WLRanCj2LZtm/DIwCZNm1A4gHKCfXv3kcQZIHGH2F840K5DO6HjTxw/wUM3ZgPJPo1MvzEGkLmRMH6uZAi8qvfSvUdmg/7JPbt1/U0uGjVuxLtDwgEUR0MpW2J/kPX99hv9s63tCsrJUqVKJfIUWvPRGrKCMu~77UxhgXWVjujxAIEttsHLlor1UWJgejgkQwDkk~bPnU8Se4M2xnAZc9CmbRuh45/8/MSy2cYam3Qk2nHzS0AGsOz7ZckKUBQtqqPWrHkzChcmTJhA33//PRmJqLpHzpxi4xDNAhc7ETDZLBTAUxcN1dgR6Olpkgp~WbFihSV/O0reihQton5I91ZRl7Qrs6aX/vvvP0yL42cNEgxvvPEGz86aDbzAYRHDdB~PrDXa~G7fuk1OB2GAUSNG0ZRpxhXWjhw1kpImS0r//uN7Ct//nvsfVatWjb~WdgShmZWrV1LkpUhdx1epZvzO4NSpU7yNMRzo1LmTcPjIqsJ9TfID7CKd6P4LmQGcym66Kve7delGq1auIrNBo/PVG1eFCjNRi9WhXQcKFw4dPUTZsmUjiX1gnw8qWrhoWFxoUfpy/dZ1od5f7M4~qPkBWcGqNauoXDlXcvYsM9y6e3b1boGBW3SzZq2aZAWPHz~m7Vu3Cz0HvytUIsIFWRZjP6DzFw7GD7Rq3UrI~IEli5eQFcBYq4wfEKqXEzGAkMe6o9wpWqwo3wZbwYzpM4SOx7yQzl07U7gA~fzNmzaTxB6gXRFti~EAdlYtW7cUes6DBw8s2/pXrVZVffc/tjaQALoNIHMr8cNdDX4ojrTKC0SBqei8kOYtmmvrhBzNsKHD6OnTpySxHsz4sKL2LRTUb1CfEiZMKPScWTNm8RCAFWhs0Dlmpz4lAUQ8QODmXtaoVYOsYvZM8VKDnr17UrgAufEZ08Q8YYnxoE0RU97CAWx7e/fpLfQcJEJXr1pNVgBDrVF/Fi5CFDWAbttgDCNP/G5isoJ9~/bRp3eEjD01bdaUkiRxfnucwtQpU7ncksQ6MN8X7YrhALo~RD/PixYusmwnUr1GdXWmGi7oRySIkAHUboNB3brWiQ7MmjlL6Hhc4fr0c~ZAak~g5mrI4CEksQZchEVFOuwKkgndunUTeg7OvwXzrPN~mzZvqr57jNknYW9A1AMEqH35z8svYSpr16wV9oAQ49AMTXY0mzZu4rJLEnNBW~Kg/uEzu6Vv/74UN15coeesWL6CfvjhB7KC7NmzU8aMGdUPLaUAEDaAzMpiTsgx5T7KSzRV2KaBk3DKZLGi4Oeee44iRoRHo7oCtmESc4FMmWhXkl1JkyYNtW7TWug58P4mT5pMVtG4SWP1XWjvr6MACMQDBEvJ~y9jKsuXLRf2AqFwqwmeOprLly9bUpQeW0E74rix4yhcGDZ8GIkC788qwQeEsurUq6N~aAVzzAIaQBKoAYTMraspFYIDceOKuc9GAS8QyQBRJk~dzOsDw4URESOkfL5JjB45mrclhgOFChfy1ErmE6u9PyhUa5Tp51KABGQAmbXFu~9yOV5~~WVLFZjRHyzqBULmR1TrzM4gFjNx4kSShJYrV65w7ydcmDBxAolipfcHNDtOtL5dogAJ1AMEi0iVDLFSfBRe4LSp00gU1DxZVcYTClCQeu/ePZKEjnAaVwpDkiFjBqHnoORFNO5uJOnSp9NOpwzY~wMBG0BtMiRT5kyWJUMA6pFEZ2fAjZ42Xdxw2pmB/QeSJDRs3bKVzp09R~HAO4neoYjh4slAtKFaWXvarr3brg0p6ICSHwrBeIDAzfp27NSRrALFqIMHDCZRSpcpzQsqwwVI54vOUZb4548//qChg4dSuDB/wXzhshcYPiu7j9DKWq9~PfVDKwNNfigEawDRePylcgdCqXBRrQKFqadOniJRxk8cT/HixaNwoVfPXnFtvTwAABAASURBVEJjRCX~gefz8KHfIWOOAH3xgezWrJ5x3KqNm0rN32yJBzA1BGUAmfXFLzFJdZ86dLRWd693r97CjdnQGBw5OjzUPABkmRYvWkwSY8CM22lTwiNUguTf8JHDSRQkf6yccYxZ35DpUrFRz9hLfwTrAQIMqnis3MEgIitVV/DhhzabKOgQsWrWSSgYN2acJYrd4cjQoUPDRnln4eKF3JiI0runmEiC0TRo2EArvyde~~aBoA1g9B7crSGwdVuxqnKjGR4xnL79VjxNP2P2DMs0Do0G8kyoV5MEB9oMN23YROFAx84dKUfOHCQKpO6tbLfEzhK/uwqUvpwhAzBkZiTbciZjN~gL4pXFUG3OniU7DxxbBbo9li5fSqJAaLRNK7FpWHYFbX/HThwTLnWQPKNU8VJhMeAco2yPHj8qrPT81aOvqGD~gnzWsVVA9HTxUreQTn1mAA2Zv2nEFhgWGokQ1zh4xNSs9gKhUBvIMHEILIZLVhiZ8b59~pIkMDDjNhyMH5g7f66w8QMdO3S01PiB/gP6q~/eIkHVZ18YYgCjQXOkK/uAqVKBxBqMBIObfv75ZxIFbXJp30tL4QCUs8NlUpmZ4EM/bMgwCgeQ4MuRQ3zrC6Wh48eOk5XA~9NUloyNTr4agmEGkP1Sn5CqKBGJEKu9wO~~~y6g2i2UxKxZt8ay/majQXE0umUk~pk0cZJlUk9GglBQ23ZtSZQff/zRFl0vffq6KR2h08HQPkQjPUAAgTSXdUZhtNVe4MoVK2n/vv0kCsoFEEMUnY1qR1C/NnuW~AiB2MqXX34Z0MgFu4FzePbcwP6O9m3bcyNoJdWqV6OMmdw0/0awz6OhBa6GGsDogSQukQR4gShetBq8md98I96~g6HqgdRM2ZHJEycH9BrERuAx//23YbssS0Cb56qPVmlVU3Qxb~48OnjgIFlNv/5uHqjh3h8w2gMEqCh2nT12iAWiJKRVi1YBzW5A72E4JEUQ04JklsQ3aCPctXMXORnsWpavXE7pM6QnUW7evEkRQ60XDMZnThP7G2i09wcMN4CevEAYQas5c/pMwBpms~bMoqzZspLTwQgBVPRLPIP2QbQROp2JkydSiZIlSBRcJJs1bmaLeLEm8xtpVNmLllB4gABeoKtpEEPJ303yLlkNuiNOnxYXCoDe4Zq1a8JirnCvHs7/gIcK6Eqik8jJIOERqDQdzo3PPvuMrAbttJoqjJCpUITEAEZ7gdOV~4hDDB9hj1hay2YtA~oSSZQ4EY~pwBg6mYsfX6SNGzaSxB2EScaOHktOplLlSgH3tKN91MpeXwXUEGtmE59n9mQrhYhQeYBgFFvfKXdq1KxBBQsVJKtBaUzTRk0DCnLnyZuHG8EXX3yRnAxGaVpd3Go3YPysznoGQ~nSpWnRkkUUCJcjL1O/vvYQekXSMU7cOMpdxPxCqrEXMgPIrPYTduNWxDNx0kTenmU1Fy5coOHDAvNIEVtBgPn5558npwI583BRNzGCWzdvOVo9p2ixorRi9YqAZtzA6Deo38AWWe~cuXJqR2ssZHbkPIWQkFoj9ssvZTdnlfvoSYUWmR2YM3sO7d2zlwIBuofoTbSDMQ~UmTNm8no3SZR~YiAVAnagQIEC9NHajwJqc8Pf3KRRE0sVntVMne4m8AIHKuSDl834BHdV3~k/sL9tkgltW7el69evUyAg3jJvwTxyKpjsNWTQEIrtoF8cFQJOpEiRIrRu47qAy8ygmmSXv71Zi2aUJUsW9UNDmAP1PYUYU9oc/vvvP6SwXb4tgvDt2thjIhuy0/sP7qdEiRJRIKDPtmXzlo5VYN62YxsfjRgbQblHkYJFHDngvHCRwrRuw7qAk3KYp92ze0~yAwkTJqRzH5~jOHFcsb~bbGUNRd2fFrP2cN0oaoAJ54PaH1Cp0qXIDkDup84HdejXXwOb84peyxWrVjg2Jojtn6iCdrgwb848Rxo/xKGDMX5Hjxy1VTkURlKojB/obIbxA6YYQPbHfM1u3F7xqdOmWt4hooBtcNPGTQOOA71f7n2eGHEiqHtbsSx85tzqBdUAEyc4b44yzrUNmzYEbPxwriPuZ5eLHv6eKlWrqB9axuzFATIJ06L40QkR1xjNJEmT0IBBA8gu4KoYjHZeufLlaOPmjbYx6iIgFvTLk18oNjFqxKiAvX6rgDhAMBfaRw8f0Ye1PrRNCdTrcV6nKdPcZgxjxkcPMhGz05hQRnB90tq0bUPZc2QnuwDp72BGH0I8YfPWzeo6JkfAi4DHOLsIWAS0A65auYqcRP2G9fk8j0BKXQCEMKpUqhJQE0CoGDpsqDb23ok5So/JREzXemKuN~KBLrOPk7F0idJkJ/oN6Ec9ewUeIL527RrVrFbTUYW1KOk5fe40pUmThsKd8u~X5x0xTqFNuzY0avQoCpTvv/~eKleoTJ9//jnZhQIFC9COXTvUD61lxq8emYwVhWyYrOzaCmfLlo369reXbDu6AmbNnEWBgnT~voP7HDWLA/HP/n37U7iDmS9OMn4TJk4IyvjhIly1clVbGT~0xmpKyOD1WTJP1xK1T~YFQqfnlnIfH75KFSpZOnnKE2PGjdHOIhUCQ6Q7tu9I27dtJ6ewes1qHpgORzCkK3fO3LwTxu4kfjcxrf5oNWXLno0CBeMgqlSsQjdu3CA7MXP2TG3HR2Pm/a0kC7CklYH9sZDc6K7cx/YLfYx2i53BI1qyeAkFyquvvso7RmBIA43dmE04y~dPnzrdEcYPdZmY5heM8cNM6OpVqtvO~CHjqzF~a60yfsCyXi72R6PvxdWLljRpUho3fhzZjT69~vB6sWCAF4l4BxRl7A7q4hYtDKyp3s4gAzptqv37nzEDA8Xpb775JgUKjB88P7tNtEuSJAnNmDlD/dBXbLUnC7F04AXbCkMk8BpbrncbXRXbtm4juzFy1Ehq2158uIwaxGPat2lPBw9aLzfuC5QnXLh4gRIkSEDhAmY9I/5nVyADtWzlMipYMDjFJAxygud369Ytsht79u3hikoqyjNHSHx2rYFY2s3P/nhcAdyCnyiQRo2g3Rg0cFDQg3JwVV~zfg0Nixhm686RX3/5lUaPHE3hAmLLdjZ~EDQ4fup40MYPxd1IeNjR~HXv0V1r/KZZbfyALUaeaXuFIyMjqWypsmRHunTrQoOHDKZgQSYSYgz37t0ju3L42GHKmtX5owDKlCxDly9fJjsCcZAePYOv/X3w4AHVqV2HPvvUekVnLZDrQn2sCsxlyMsM4J9kMXbRc0IcwNWUiSHO02bYM16DQHrjho2DrqbPnSc3v~p36tLJtrJa4VAWg4JnOxo/xMN2791tiPE7dfIUr6W1o/FD3BuJQA2N7WD8gC0~eezFQMVwbbZcVqVBwwbUuEljsiN7du~h8mXL09dffU3BgLY5VMPvO7BPOwPBFkAqaeuWkKmRhxy099lxEl7FShX5xS9vvrwULKtXraaa1Wvybh67AY1ClPJoEjrt2ec9kmyCbVwP9qKgOrW1~rFxE8YFVQoQSjA~sFSJUvTJxU8oWHLkzMHLHuAN2K1cBq2BqJ9zIhMnTuRJAbuQPHlyWrJsCe/njRcvHgUD5Nd69~pNXTt3ta2Y6/SZ07WtrvPY53wu2Qhb7b3Yi7Oa3bhqYTB7A1eQN954g~wIbzGqWJnWrV1HwYKrJeJBB48ctFXc7eHDhzRj~gxyGuh8CLZ8yShQD9qnXx/eaqhRPgmIx48fU/Wq1Xnvul1p2rwpl71TcYKtzmQzbJEEUcMSIjDKqIOprDx26tQpntq3M5D6h66ZUcycPpPGjR1HT58~JavBVv38x~d5d4JTaNSgUcAjD4ykZq2aPOtvVGUDEoT424INv4SSfPnz0a49bsPlv2ArD3NwviObYbvoO3uR4M83ZOuB8ljhwoVp7nxbec4xQMdIhXIVuFdoBEiOoBavXn3T~8NjACM8dGjIRrMazulTpy03ftj6oe5t/sL5hhm/LZu3UKXylWxt/FKnTs3bKVVgPnh1Oxo/YDsPUIF5gggewG2OqzwGAUsMN7czyHqtWLmCcuXORUaBiv6~vfrSuXPnyEo8FLLaDsTGihctbtmAc3jJgwYPojp16~BiTkYxoN8AWjB/AdkZFHNDBCRlypTqhy3r89WDbceasRcNtQsIIrgivL1696L6DeqTncGELQg7YAtrlOouYoI79~zkAfSMmTKSVfTtbS/VHk/AE7fC~GHQF2banrtwjve6GmX8UCdavEhx2xs/hEnWb1yvNX4RdjZ~wLYeoIJWPxBXeKT9sc2xO0WKFqF58~cZ2gMMo7pr5y6aOH6iJb2eyOzZ9SKEHti8ufKaWhLyzjvv8HBFs~bNeLLDSFYsX0GDBgyy/RB7GHtsezEuVsUS9ngLsjm2N4CAfeghnOAar/nk5ydUvlx5unP7Dtmd~PHj05x5c0IiMYWJdJjve~H8BTILfODPXzzPNd3sRr8~/UwTckiRIgV17NyRXwyMNnw4v9u1bcdHdjqBSVMmUZOmTdQPwTspwQyg7WWFnGIAsVXfw5bLikDiu8L7FRwz3BsnSMTwiJBIfkFVG33KKFo2Q8qqc9fONGSovWYK37p5i8f~Ql0Th2mGGOVQpmwZQ2N8CgcPHKTu3brzaYVOoFv3bjRw8ED1Q/BKCpsx09cIHGEAATOCqBw9zparshLSTejIcIr0/DuJ3uFiD6ESHMW8B9SGrV69mh5~~ZBCyYVPLmjjPZZSo1oNOnniJIUCeHjw9Fq3aU3vpXuPQgG27xjKtWnDJnIKqFCYMcutRhRGD8bP/luzaBxjAAEzgqgngBF0Da64cvkKVa1SlSuYOIXqNarzLhcEzkPF6dOnae1Ha2nr1q0hmfhWoWIFPg/ZDiAmirGmRoP2xJatWlL9~vVDKta7Yf0GLkSLAmengIJuiBir~thRsFqWGb/QXIVChKMMIGBGEMYPRtBVXIVmcFTGOwm0Qg0bPizk/c6o4du1YxetW7eOb6~MBAofUPqwmjw583A1FCNAjLNqtar8Ax7qvw0ZXmTWDx08RE7Cg7rL3xRV67eLHIbjDCBgRjALuznKlsuFgkBBMMPNrQIDlBBENqO~DnpxGzds5B5H5KXg~9Ex9OnEqRNkJTOmzeBzjYMB70H5CuW5SEHOXDkp1GAe8YTxE2j~3PmOGz~A12fr9q3qJBiMXyNm/NaSA3GkAQTMCOZjN3BpXIXSa9espU4dOpETqVW7Fg0fPtw02fwvvviCZ5Fx4YDqC8qLAiHYwVHBgK6b3Dly8~FTIkBwAnM3sI2vXLkyJU2WlMxi5YqVNHL4SFuJNOglU~ZMtH3ndl7ZEA28jQZONX7AsQYQMCNYkt3sZusV5TFkQlu1sOYDGSwoJu3StQt16NiBy9KbBaaHoeQCSQR4hsgq6wVCFSiLsUKwonPHzrTmozW6joW3Wrx4cb59K1asGMWNF5fMBOGH4cOG0/Xr18mJoLMJhc5BxFFzAAAQAElEQVQq4wfaMONn7wptPzjaAAJmBKuyG8ixuIzggQMHqGmjpvTnn7bQXBQG~mmdu3SmVm1aGV5jppdLn1zixhDN95cjL/NbbyBRMHb8WDIT/G5lS3tWDcfFI1vWbPxDi8b8YsWLWaYodObMGRoZMZLOnj1LTgVDzNeuX0uvv~52UR7AjN8YcjiON4CAGcFS7AbDd13vELZ1dT~sa/sqel8kTJiQuvXoRk2bNaWXX36ZrAaeIYwhWs0~vfMp3X9wn~7fu88TLafOnKJ06dORWUB4ArM~UJaSJnUaypwlM9~iQU3cDuKyuICMHDGSjh45Sk6mTJkyfFiT6vxDf2cfZvwmUhgQFgYQMCOYn6KM4DvKYzgJa9WsxSvrnQwa7Nu1a8fbrczcGusFNYcoh3g3ybtkBoj5PXr0iNKmtZ~K9vFjx2nO7Dm0f99~cjrQ89OoMCHhAXEDfXEHBxA2BhAwI4gqVdQUJFceu3H9Bn1Y~0MuUuB0YPxatGxBbdu1pUSJ7D9jODYBUdw5s~bYbhZvoEDQdOIkNycPsuC1mfHbQWFEWBlAwIwgjB~MoKtkH8avXp16YXNygtof1uZN~CjhkFgDCsw/~ugjmjVzVsg7b8wEqjbtO7jNK/8/tmox43eYwoywM4CAGUFsg5Edzq08hlhgsybN6PCh8HoPMV0Ofca1PqhlWcIktnH~3Hlavmw5rzgQLcGxMzh/li5fSqXLlFY/DPXVcsz46S8NcBBhaQABM4Ko1NzAVkXlMRRJDx44mObPm0/hBlq1PvzwQ2rWohllzpyZJMaCUiHUmcLw3bxxk8INxJnXrFuj3VFco6gOD/vN2zSIsDWAgBnB59kNrJ2bLhl01np272mYYKndwEkMj7DmBzX5JDJJYCC7DWn9TRs30YH9BxxbVuUPXDDXb1rP2wBVIH0N42e/eZsGEtYGUIEZumHsxm2oBbbCLZq3CIlQgJ3A7NkaNWtwg4iyGol/YPQ2b9pMu3ftdnQZlR7Q9wxFF02N33qKyvY6cx6qALHCAAJmBOEFzmbLVdAELcEGdRvQjRs3KNyBdh2k9VEUXKRYESpcqHBIFU6cAsIiUBQ6cfwEnThxgqvoOElZKFCef/55runYoVMH7bcgPtyDnS/huT3SEGsMIGBGsAS72cKWW1uASEtVOIHGdhhETN0rVKiQLWsMQwG6WqAgBKMHg~f0OlFRMLwIxc0FCxbUfqszM3wzKRYRqwwgYEYwBUW5~PnVjy9fupz69~sftnEef8AjyJEzB59jUqRIEf7hCAeDiDjv5cuXucFDrzNmySChEVvJly8fLVm~RFtHikxvPWb8nN22EgCxzgAC9qF4id2gytNtUj36S5s0bkKPHj4iCVGqVKkofYb0XEggQ4aohft2nAcCPvv0M7pz5w4PaUAiH~16t27dssVweTvQrn07GjFqhPZhGD0YP/sOGw4hsdIAKjBDWJvdLCaVpBa8gx7devAaL4lnEiRIQClTpaQkSZLwLHOy5Mm4scTjb739FiV4O4Hh3iOGgX//w/f0~IfHXPz0yy~~5JJeDx8~pAf3H/CvJZ5B8mvWnFl8nokKxPgwZHsQM36BaaGFAbHaAAJmBNHBv5GtbOrH169bT7169Ar7LGAoQW0ZjGH8N~JzrxFyXyi2ffU1tl55lT/29z9/0~~//c5fZxQV41ZZ337zLf3w~IdYkZQIFZg/g1GmuDipgPY~REx3Uywn1htAEF00PYutZurH4VW0aNaCiypIJE4CF5qIERHUvEVz7bcg4Q3jd58k0gCqYYawEbuZw5arPgRKyZMnTaZJEyYFrJoskZhJpkyZeEtbmrRp1A9jyzuJrX6xecurRRpADcwIQmMJEt9uQzqghdexXcdYUTMocSYvvfQS9ejVg6uKv/jii~pvQQqpCTN8zpi0biLSAHqAGUGcPaPY6kWq1wge4IzpM2ji~In0xx9hXyQvcRAYqjV7zmyt1wdg9GD8nK8HFwKkAfQBM4Tl2M1Kttx6yDDOsF2bdlyRWGJfoJSDZEvk5ciwbXlEth0dHYj1odtHQ3f22FSSeEUaQD8wI4j02Wi2MGnpf6rHadmSZRQRERH2/cQAw4QwVwOS~EbN4A0FaPdr274t733GlhAguzxl0hSaOmVqWAlglCxVkmbOmulpkiDmZrdkxu8OSXwiDaBO2AenGLtZxJbb4AvM2h06eCgvmwlXunTrQn369nHNhciUPhMfSekPZCJTp07Ny14wO0TPc9Tg/8uWPRv98ssvvKj577//9nk8ulg2bt7Iu1o8AYGDNq3akNNJkSIFFy2tXKWy9lt4gRG2WR5benmDRRpAAZgRhAWAqgxOMrcoM7bDkNi6du0ahQPde3TnHgaKnPGBU/jpp5/ovdTv~XwuDNfosaO5UKuaffv2UYe2HfjP8AUGHY0dN5YbNMzwBfDipk~dzjPynobfI~h/7uNzlCxZMn4f7wcGY9VvWJ/3viqUKl7KscrguKB07d6VOnXu5GlI1mq2ujLDJ3aVieVIAxgAzBCiaBqxldKax7nW4OiRox05~FrN/oP7uViClgvnL1DF8hV9Pnfe/Hl80Lsn0Jdb4f0K9Ndff3n8fpKkSejkqZNelWoQdujVs1eMx0uULEEbNm3gXyMkkSFdBt7XjULg1WtWu44bMmgIH1rkNCBpNnLUSE/bXYiVdpAZ3sB4jiTCQB6crTLsywZsfal6nHs9Zy~c5UNlnMyEcRNo/NjxNGL4CLet6~3bt30~D6Mx1cZv7py51L5te5fXlz17dqpTt47X5/fs1dNl/CBX1rpla67CrIDX9e23347xPHWnw7///esStYDii5o33rRmPnCgIKa5Y9cOWrBogdb4QcKmL1tZpPELHGkAg4CdeB~xmwwUtS129czFjx~fT9S6ev0qn~KmBOOdBLarE8ZPoLmz57oZl08//dTn89SS6ojbYQTBhvUb3GKkWbNl9fp89WzhFctW0JbNW3ho4dtvv3U9jhnAWhAnBChVgvetGEntzI7vvv2OnACUeZavXE6Hjx3mg8lVYP~/kK332Pk3PjaIloYSaQCDhJ2Av7E1nKIMIUpmXMFnXLHHTRhHFy9dpNZtWttiuLko2iHjd277TixiXq~CepuLfl9Pj2tBllkBPcSu56sM2d3P78Z43smTJ6lg/oKUNHFSyp8nvysEoZ2ad/bMWbIzqOdbtWYVHTh0gCpWihFqgHJLbna~tWbrW5IEjTSABsFOyC/Zasy~LExRJ6oLGEIkBS5GXuTjBp00vS1dOrekN5eb8sW5s~d41wyAdFbxEsUpW7ZsfIynwo7t3kfLLlm8xGUgMQi~Xv16NGrMKEqZMiV/DIOJsDXWgrgf5LC07YoY7q0ATUDld7Mb8PLWbVhHe/btoXLlymm/jTgfZvKWZCuSJIYhkyAhgiVESrKbMWzFkN1FTA1by0WLFtm~hhAxuX4D~vGvYVySJEriMQurBtJYiFtpA/ZQeBk7eqzfJAQUqhcvWxwj1odtcK0atbjWnx4w7OfgkYM8k4zfuWypsrYzgEjeIOOOjLcHIFgAAb9lzPD9TRLDkR5giGAn7BG2CrEvkRFwq41BTG3QkEEUeSWSG5c333yT7Io6JgcPy5/xQwKjY6eOFDde3BjfQ/vgkyf~5ecRI/QkuoqpZUePH/WaYVaD0p2NWza6ymiQ/bWT8atQsQI3zshcezB~X7HVia307BxaJI1f6JAGMMSwk3czu8lOURljt/1jvHjxuIcVeTWSSxdpZMptAWryFPxtf8G8BfP4bGIYsIsfX6SUyVLywmlIi8HQT5k2hTp27uj1~fUb1OdbXoQJHj9~TB/U/IDH9ZCUAShynjptqs/EEv4fzLhVkjcQt503dx5ZzXPPPceN94lTJ2jFqhU8I65BKWROy86bWWzFzvkMJiINoAmwE/nf6IxxJoryCI~pv48Pe4eOHejqjas0bcY03sNqFzJmzOj62p8BxJZXHb~CcAS2vdjyI3an0LhJY68/A4XLCjBcx44e4yUtUyc/a2nF6~WpRhFAdBXGT/Fcz587TwvnL~T/J~Tgt~7Yyl9nD32zIQMGGUYfhdqokcSIAQ3X2WrHVgr2e01i63eSmMILJDGNaB02eISbo4upu1OUZ~hKDzdo2IAvxLmWLV1G69au89s5ESpQlKzOXPvLACd6x92DVSvmqLe~SkLD4/~ZJInra/X/rR1k5G3G8cTJE90uIPny56Ptu7bHOA7ZbZTphBLE92B40bKmbMVVoFpgJ1vT2XmxnySWID1Ai4gupsasYvRuDWLLbRITvARkjq/dvEaz5872NMIw5IhmgCGSoM7CYui24mmVLFnS9bivLpmbN266vq5eozovBYEIQ7fu3dyO81aPqDagWvC73b51m/cEYzsaChDGwO~KjD/ie/gbNMYPV4LpFFXHV1UaP2uRWWCbEK1BWJOigt/FPB2D8g~UkOzcvpPOnj0bcmUTGJ/xE8bz2R4gdcrUfrPWqz5aReXKP9sGI/b3448/usW7Fi9aTH179/X4fNTBoRTEF4cPHaY6tT13k4wcPZLatmtL33zzDV2/dp1uXL/B~7PxNSbE~apBDJSkyZJSpUqVuKdXsFBBb2IMUNLF2AUIFcSuQcQ2RhpAGxK9PcbIzoZseZxBCS9q185dfB09cjQkH2wFxNXee~89XSICiAMuX7HcaxwTvcA1q9X0OZsXBmxoxFCtqjFn/779fJC9Ny8SxhpF16EOG8BDV4weuja8AHcY~~~ZzOgdJIntkAbQxjBDiMZVTLVB2jStt~MwNe3w4cN87d29l3s/VoLtZeOmjbknGOf1qL5eSFkdPHCQ5s~b71fWCsCrSpUyFdWuU5uSJk1KR44coUMHD7ltkc0EF4HCRQrzuB5KWNKkSePr8B/ZWsLWVGb45LxOGyMNoANghhDvE2aUVGerBltZfR2POBc3iGyriO4HbT~sRB9ooytVphSVKlWKb2399HSjdm8bWxgofVCWsDgDaQAdCDOISKN~SFHGEMXWPiP6UEQ5feo0nTp1iuvkSYPomUyZM/EuFBg7KGBrZul6AjEBGDwYvvNShNR5SAPocKIl~yENXI0tZB/i~DoemVAIDpw~fZoLA2A5XbswEODN5cqdi/fgIsOO5al7xQOo4YTB28wM3uckcTTSAIYRzBhij1aKooxhVbaS63ne/fv3KfJSJEVGRkbdsvV///d/FC7A2MG7Q7IiR46ohfs6ZcqQTdlLUUZvFzN6P5IkbJAGMIxhBhFxQ3iHRSlKlEGXiwMw~Q6GEOUjd~/e5UYScz3s7C2i/S5FyhS80BqzSNANohg9Qc5RlKLPHmbwDpEkbJEGMJbAjCHihCjGKxK9YBR1eYhq0NoG4/jg/gN~i4zzzz/9zD1GlJ7gVrmP~r9gwbY0frz4vBgaQrPx4sdzfZ0gYQJKnjw5N3gwfN66Q/wAV/c0Wyej1xlm9J6SJFYgDWAshhlFdKHkANBaeAAAANBJREFUYytz9EKvMpp/DRUsfPLzE3r6x1PeGvfH0z~ivma3f/z5Bz33v~d4iQna3l559RV65eVX~C3uh0A38Ub0uh59G8mMXXhMsZIEhDSAkhgww4iaQ8UgouAtdfRKR/YHGnqQjL7HFpIUKBy8Lg2dxBPSAEqEYMYRzbaKQUQ5DrzIxJr1CoWGh2x9Hb2~il6Y0s4NHjNyn5FEIoA0gBLDYUYS3f9IsaKXLdhzDD1~fzLjFrpeP0msRRpAiUQSa5F6gBKJJNYiDaBEIom1/D8AAAD//8WXuqgAAAAGSURBVAMAHm7VMwdy/aQAAAAASUVORK5CYII=".split("~").join("+");
+window.__LOGO_STD=LOGO_STD;
+Object.defineProperty(window,"__CLUBLOGO",{configurable:true,get(){return (window.__VEREIN&&window.__VEREIN.logo)||LOGO_STD}});
+const STD_TEAMS=[["a1","A1","U19",1],["b1","B1","U17",1],["b2","B2","U16",0],["c1","C1","U15",1],["c2","C2","U14",1],["d1","D1","U13",1],["d2","D2","U12",1],["e1","E1","U11",1],["e2","E2","U10",1],["f1","F1","U9",1],["f2","F2","U8",1],["g","G","U7",1],["minis","Minis","U6",1]];
+/* Rechte einer Person in einer Mannschaft (Liste), unter Berücksichtigung der Kaderfreigabe mit Ablaufzeit */
+function rightsIn(me,rolle,tid){
+  if(rolle==="admin"||rolle==="jugendleiter")return RECHTE_ALLE.slice();
+  const r=((me&&me.tr&&me.tr[tid])||[]).slice();
+  if(me&&me.kader&&(me.kader[tid]||0)>Date.now()){["kader","kaderbearb"].forEach((x)=>{if(r.indexOf(x)<0)r.push(x)})}
+  return kfApply(me,tid,r);
+}
+/* Einzelfreigaben der Kaderplanung (kfrei): kein / sehen / bearbeiten, mit Ablaufzeit */
+function kfApply(me,tid,r){
+  const k=me&&me.kf&&me.kf[tid];if(!k||(k.bis&&k.bis<=Date.now()))return r;
+  if(k.stufe==="kein")return r.filter((x)=>x!=="kader"&&x!=="kaderbearb");
+  if(k.stufe==="sehen")r=r.filter((x)=>x!=="kaderbearb");
+  if(r.indexOf("kader")<0)r.push("kader");
+  if(k.stufe==="bearbeiten"&&r.indexOf("kaderbearb")<0)r.push("kaderbearb");
+  return r;
+}
+window.__kfApply=kfApply;
+/* Betriebsart der bisherigen Mannschafts-App: voll (bearbeiten), lesen (nur ansehen), scout (nur Kader & Scouting) */
+function modeOf(rights){return rights.indexOf("bearbeiten")>=0?"voll":rights.indexOf("sehen")>=0?"lesen":(rights.indexOf("kader")>=0||rights.indexOf("kaderbearb")>=0)?"scout":null}
+const lowC=(s)=>String(s||"").trim().toLowerCase();
+/* Einladung per Link: angemeldete, noch nicht freigegebene Person schickt Name, Rolle(n) und Mannschaft(en) als Anfrage */
+async function showInvite(em,tk){
+  let inv=null,own=null;const FREI=!tk;
+  if(FREI)inv={rollen:ARTEN_STD.filter((a)=>a.id!=="platzwart").map((a)=>({id:a.id,name:a.name})),teams:[]};
+  else try{const s=await fs.doc("einladungen/"+tk).get();inv=s.exists?s.data():null}catch(e){}
+  try{const s=await fs.doc("anfragen/"+em).get();own=s.exists?s.data():null}catch(e){}
+  const done=(t,h,more)=>{const o=overlay('<div class="ms ok" style="font-size:15px">'+t+'</div><p class="sb">'+h+'</p>'+(more||"")+'<button id="u13so">Abmelden</button>');o.querySelector("#u13so").onclick=()=>signOutClean();return o};
+  if(!inv){
+    if(own&&own.status==="offen"){done("Deine Anfrage wartet auf Bestätigung.","Angemeldet als <b>"+E(em)+"</b>. Sobald die Jugendleitung dich freigegeben hat, kannst du die App ganz normal öffnen.");return}
+    showInfo("Dieser Einladungslink gilt nicht mehr.","Angemeldet als <b>"+E(em)+"</b>. Der Link ist abgelaufen oder wurde beendet. Bitte die Jugendleitung um einen neuen Link.");return}
+  return new Promise(()=>{
+    const form=(pre)=>{
+      pre=pre||{};const rs=(pre.rollen||[]),ts=(pre.teams||[]);
+      const o=overlay('<div class="ms" style="font-size:16px;font-weight:600;color:inherit">Willkommen im Verein</div><p class="sb">Angemeldet als <b>'+E(em)+'</b>. '+(FREI?'Du bist noch nicht freigegeben. Sag uns kurz, wer du bist und wofür du Zugang brauchst. Bist du Elternteil oder Spieler? Dann öffne bitte den Link, den du vom Trainer bekommen hast. ':'Bitte kurz ausfüllen. ')+'Die Jugendleitung bestätigt deine Angaben, danach hast du Zugriff.'+(own&&own.status==="offen"?" Du hast schon eine Anfrage gesendet, hier kannst du sie ändern.":"")+'</p>'
+        +'<div class="ivh">Dein Name (Pflicht)</div><input id="ivn" maxlength="60" placeholder="Vor- und Nachname" autocomplete="name" value="'+E(pre.name||(auth.currentUser&&auth.currentUser.displayName)||"")+'">'
+        +'<div class="ivh">Deine Rolle (mehrere möglich)</div>'+(inv.rollen||[]).filter((r)=>r.id!=="jugendleiter").concat([{id:"jugendleiter",name:"Jugendleiter"}]).map((r)=>'<label class="ivc"><input type="checkbox" data-r="'+E(r.id)+'"'+(rs.indexOf(r.id)>=0?" checked":"")+'>'+E(r.name)+'</label>').join("")
+        +'<label class="ivc"><input type="checkbox" id="ivs"'+(pre.sonst?" checked":"")+'>Sonstiges</label><input id="ivst" maxlength="80" placeholder="Welche Aufgabe genau?" value="'+E(pre.sonst||"")+'"'+(pre.sonst?"":" hidden")+'>'
+        +'<div class="ivh">Für welche Mannschaft(en)?</div>'+(FREI?'<input id="ivwo" maxlength="80" placeholder="Zum Beispiel U13 oder U19" value="'+E(pre.wo||"")+'">':"")+(inv.teams||[]).map((t)=>'<label class="ivc"><input type="checkbox" data-t="'+E(t.id)+'"'+(ts.indexOf(t.id)>=0?" checked":"")+'>'+E(t.name)+(t.ak?' <span class="sb" style="margin:0">'+E(t.ak)+'</span>':"")+'</label>').join("")
+        +'<div class="ms" id="ivm"></div><button class="pr" id="ivgo">Anfrage senden</button><button id="u13so">Abmelden</button>');
+      const m=o.querySelector("#ivm");
+      o.querySelector("#ivs").onchange=(e)=>{const i=o.querySelector("#ivst");i.hidden=!e.target.checked;if(!i.hidden)i.focus()};
+      o.querySelector("#u13so").onclick=()=>signOutClean();
+      o.querySelector("#ivgo").onclick=async()=>{
+        const name=o.querySelector("#ivn").value.trim(),rollen=[...o.querySelectorAll("[data-r]:checked")].map((x)=>x.dataset.r),teams=[...o.querySelectorAll("[data-t]:checked")].map((x)=>x.dataset.t),wo=FREI?o.querySelector("#ivwo").value.trim():"",sonst=o.querySelector("#ivs").checked?o.querySelector("#ivst").value.trim():"";
+        const er=(t)=>{m.className="ms er";m.textContent=t};
+        if(!name){er("Bitte deinen Namen eintragen.");return}
+        if(!rollen.length&&!sonst){er("Bitte mindestens eine Rolle wählen (oder bei „Sonstiges“ die Aufgabe nennen).");return}
+        if(FREI?!wo&&!rollen.every((r)=>r==="jugendleiter"):!teams.length&&!rollen.every((r)=>r==="jugendleiter")){er("Bitte die Mannschaft angeben, für die du Zugang brauchst.");return}
+        const b=o.querySelector("#ivgo");b.disabled=true;m.className="ms";m.textContent="";
+        try{
+          const dd={name,rollen,sonst,teams,at:new Date().toISOString(),status:"offen"};if(FREI)dd.wo=wo;else dd.s=tk;
+          await fs.doc("anfragen/"+em).set(dd);
+          own={name,rollen,sonst,teams,wo,status:"offen"};
+          const d=done("Danke, deine Anfrage ist angekommen.","Die Jugendleitung prüft sie und gibt dich frei. Danach öffnest du die App einfach ganz normal.",'<button id="ivre">Meine Angaben ändern</button>');
+          d.querySelector("#ivre").onclick=()=>form(own);
+        }catch(e){b.disabled=false;er("Das hat nicht geklappt. Bitte erneut versuchen. Falls es wieder nicht geht, ist der Link vielleicht abgelaufen.")}};
+    };
+    form(own&&own.status==="offen"?own:null);
+  });
+}
+function showInfo(title,html,btn){
+  const o=overlay('<div class="ms er" style="font-size:15px">'+E(title)+'</div><p class="sb">'+html+'</p><button id="u13so">'+(btn||"Abmelden")+'</button>');
+  o.querySelector("#u13so").onclick=()=>signOutClean();
+}
+function showClubSetup(email){
+  return new Promise((res)=>{
+    const o=overlay('<p class="sb" style="margin-top:0">Der Verein ist noch nicht eingerichtet. Du bist als Besitzer eingetragen und legst ihn jetzt an. Mannschaften kannst du später jederzeit ergänzen.</p><label class="sb">Name des Vereins<input id="vn" value="TuS Haltern am See"></label><label class="sb">Saison<input id="vs" value="2026/27"></label><div class="sb"><b>Mannschaften</b></div><div id="vt" style="margin:0 0 10px">'+STD_TEAMS.map((t)=>'<label style="display:flex;gap:8px;align-items:center;margin:2px 0"><input type="checkbox" data-t="'+t[0]+'" checked style="width:auto;margin:0"> '+E(t[1])+' ('+E(t[2])+')'+(t[3]?"":" – derzeit nicht besetzt")+'</label>').join("")+'</div><div class="ms" id="vm"></div><button class="pr" id="vgo">Verein anlegen</button><button class="ln" id="vso">Abmelden</button>'),m=o.querySelector("#vm");
+    o.querySelector("#vso").onclick=()=>signOutClean();
+    o.querySelector("#vgo").onclick=async()=>{
+      const teams=STD_TEAMS.filter((t)=>o.querySelector('[data-t="'+t[0]+'"]').checked).map((t)=>({id:t[0],name:t[1],ak:t[2],aktiv:!!t[3]}));
+      if(!teams.length){m.className="ms er";m.textContent="Bitte mindestens eine Mannschaft wählen.";return}
+      const v={name:o.querySelector("#vn").value.trim()||"Verein",saison:o.querySelector("#vs").value.trim()||"2026/27",teams,arten:ARTEN_STD,bereiche:[],settings:{ausgrauenTage:42,erinnerungTage:21,loeschMonate:24},erstellt:new Date().toISOString()};
+      try{
+        await fs.doc("verein/main").set(v);
+        await fs.doc("plaene/platz").set({plaetze:[],kabinen:["0","1","2","3","4"],extern:[{id:"erste",name:"1. Mannschaft"},{id:"ah",name:"Alte Herren"}],stdKabine:{},slots:[]});
+        res(v)}catch(e){m.className="ms er";m.textContent=errTxt(e)}};
+  });
+}
+function chooseTeam(V,me,rolle){
+  const act=(V.teams||[]);
+  const allowed=act.filter((t)=>rightsIn(me,rolle,t.id).length>0);
+  let want=TQ;
+  try{want=want||localStorage.getItem("u13team")||""}catch(e){}
+  const hit=allowed.find((t)=>t.id===want);
+  const mine=allowed.find((t)=>t.aktiv!==false&&rightsIn(me,rolle,t.id).indexOf("bearbeiten")>=0&&rolle==="team");
+  const first=mine||allowed.find((t)=>t.aktiv!==false)||allowed[0];
+  return{allowed,team:hit||first||null};
+}
+/* ---------- Konten für Spieler und Eltern ---------- */
+async function myLinks(em){try{const r=await fs.collection("kverkn").where("email","==",em).get();return r.docs.map((d)=>({id:d.id,...d.data()}))}catch(e){return []}}
+function kForm(em,title,text,fields,btn){
+  return new Promise((res)=>{
+    const o=overlay('<div class="ms" style="font-size:16px;font-weight:600;color:inherit">'+E(title)+'</div><p class="sb">Angemeldet als <b>'+E(em)+'</b>. '+text+'</p>'
+      +'<div class="ivh">Dein Vor- und Nachname</div><input id="kfn" maxlength="60" placeholder="Vor- und Nachname" autocomplete="name" value="'+E((auth.currentUser&&auth.currentUser.displayName)||"")+'">'
+      +(fields.kind?'<div class="ivh">Vor- und Nachname des Spielers</div><input id="kfk" maxlength="60" placeholder="Vor- und Nachname des Spielers">':"")
+      +'<div class="ivh">Ich bin</div><label class="ivc"><input type="radio" name="kfr" value="eltern" checked>Elternteil</label><label class="ivc"><input type="radio" name="kfr" value="spieler">der Spieler selbst</label>'
+      +'<div class="ms" id="kfm"></div><button class="pr" id="kfgo">'+E(btn)+'</button><button id="u13so">Abmelden</button>');
+    o.querySelector("#u13so").onclick=()=>signOutClean();
+    o.querySelector("#kfgo").onclick=()=>{const name=o.querySelector("#kfn").value.trim(),kind=fields.kind?o.querySelector("#kfk").value.trim():"",rolle=o.querySelector('[name="kfr"]:checked').value,m=o.querySelector("#kfm");
+      if(name.split(/\s+/).filter(Boolean).length<2){m.className="ms er";m.textContent="Bitte deinen Vor- und Nachnamen eintragen.";return}
+      if(fields.kind&&kind.split(/\s+/).filter(Boolean).length<2){m.className="ms er";m.textContent="Bitte Vor- und Nachnamen des Spielers eintragen.";return}
+      res({name,kind,rolle})};
+  });
+}
+async function kMsg(em,title,text){return new Promise(()=>{const o=overlay('<div class="ms ok" style="font-size:15px">'+E(title)+'</div><p class="sb">'+text+'</p><button id="u13so">Abmelden</button>');o.querySelector("#u13so").onclick=()=>signOutClean()})}
+async function claimSpieler(em,tk){
+  let e=null;try{const s=await fs.doc("spielereinl/"+tk).get();e=s.exists?s.data():null}catch(x){e=null}
+  if(!e||e.aktiv!==true||(e.bis&&e.bis<Date.now())){kClear("vsp");return"bad"}
+  const kid=e.tid+"~"+e.pid+"~"+mkeyOf(em);
+  try{const ex=await fs.doc("kverkn/"+kid).get();if(ex.exists){kClear("vsp");return"ok"}}catch(x){}
+  const f=await kForm(em,"Willkommen","Du verknüpfst jetzt dein Konto mit einem Spieler. Danach siehst du Profil, Terminplan und Liga.",{},"Verknüpfen");
+  const zr=fs.doc("kzaehl/"+e.tid+"~"+e.pid);let n=0;
+  try{const z=await zr.get();if(z.exists)n=+z.data().n||0}catch(x){}
+  if(n>=4)return"voll";
+  const b=fs.batch();b.set(fs.doc("kverkn/"+kid),{tid:e.tid,pid:e.pid,email:em,rolle:f.rolle,name:f.name,at:new Date().toISOString(),s:tk});
+  if(n)b.update(zr,{n:n+1});else b.set(zr,{n:1});
+  try{await b.commit();kClear("vsp");return"ok"}catch(x){return denied(x)?"voll":"fehler"}
+}
+async function anfrageTeam(em,tk){
+  let e=null;try{const s=await fs.doc("mteinl/"+tk).get();e=s.exists?s.data():null}catch(x){e=null}
+  if(!e||e.aktiv!==true||(e.bis&&e.bis<Date.now())){kClear("vmt");return"bad"}
+  let own=null;try{const s=await fs.doc("kanfr/"+e.tid+"~"+mkeyOf(em)).get();own=s.exists?s.data():null}catch(x){}
+  if(own){kClear("vmt");return"offen"}
+  const f=await kForm(em,"Willkommen","Gib kurz an, für welchen Spieler du Zugang möchtest. Der Trainer bestätigt deine Anfrage.",{kind:1},"Anfrage senden");
+  try{await fs.doc("kanfr/"+e.tid+"~"+mkeyOf(em)).set({tid:e.tid,email:em,name:f.name,kind:f.kind,rolle:f.rolle,at:new Date().toISOString(),s:tk,status:"offen"});kClear("vmt");return"gesendet"}catch(x){return"fehler"}
+}
+async function elternStart(em){
+  let links=await myLinks(em);const sp=kKey("vsp",SPKEY),mt=kKey("vmt",MTKEY);
+  if(sp){const r=await claimSpieler(em,sp);
+    if(r==="bad"&&!links.length)await kMsg(em,"Dieser Link gilt nicht mehr.","Der Link ist abgelaufen oder wurde erneuert. Bitte den Trainer um einen neuen Link.");
+    if(r==="voll")await kMsg(em,"Dieser Link ist schon vergeben.","Pro Spieler können sich höchstens 4 Personen über den Link verknüpfen. Bitte den Trainer, dich freizugeben.");
+    if(r==="fehler")await kMsg(em,"Das hat nicht geklappt.","Bitte öffne den Link noch einmal. Wenn es wieder nicht geht, frag den Trainer nach einem neuen Link.");
+    links=await myLinks(em)}
+  if(mt){const r=await anfrageTeam(em,mt);
+    if(r==="bad"&&!links.length)await kMsg(em,"Dieser Link gilt nicht mehr.","Der Link ist abgelaufen oder wurde beendet. Bitte den Trainer um einen neuen Link.");
+    if(r==="gesendet"||r==="offen")await kMsg(em,r==="gesendet"?"Danke, deine Anfrage ist angekommen.":"Deine Anfrage wartet noch auf Bestätigung.","Der Trainer prüft sie und schaltet dich frei. Danach öffnest du die App einfach wieder über den normalen Link.");
+    if(r==="fehler")await kMsg(em,"Das hat nicht geklappt.","Bitte öffne den Link noch einmal.")}
+  /* Ist das Konto verknüpft, wird der lange Einladungsteil aus der Adresszeile entfernt: Lesezeichen und Startbildschirm speichern dann die normale Adresse */
+  if(links.length&&(SPKEY||MTKEY)){try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}}
+  return links.length?{links}:null;
+}
+async function clubInit(u){
+  const em=lowC(u&&u.email);
+  let fixed=null,me=null,V=null,offline=false;
+  let owner=false,frei=false;
+  try{await fs.doc("ownercheck/x").get();fixed=true}catch(e){if(denied(e))fixed=false;else offline=true}
+  if(!offline){
+    try{await fs.doc("ownercheck/owner").get();owner=true}catch(e){if(!denied(e))offline=true}
+    try{const s=await fs.doc("ownercheck/frei").get();frei=!!s.exists}catch(e){if(!denied(e))offline=true}
+  }
+  if(!offline){
+    try{const s=await fs.doc("mitglieder/"+em).get();me=s.exists?s.data():null}catch(e){if(!denied(e))offline=true}
+    try{const s=await fs.doc("verein/main").get();V=s.exists?s.data():null}catch(e){if(!denied(e))offline=true}
+  }
+  let cache=null;try{cache=JSON.parse(localStorage.getItem("u13v:"+em)||"null")}catch(e){}
+  if(offline){
+    if(!cache){showInfo("Keine Verbindung","Die App wurde auf diesem Gerät noch nie online geöffnet. Bitte einmal mit Internet öffnen.","Neu laden");return null}
+    fixed=cache.fixed;me=cache.me;V=cache.V;owner=!!cache.owner;frei=!!cache.frei;
+  }
+  if(!fixed&&!me&&!offline&&!window.__DEMO){const ek=await elternStart(em);if(ek)return{eltern:ek}}
+  if(!V){
+    if(!fixed&&!me&&!offline&&!window.__DEMO){await showInvite(em,einKey());return null}
+    if(!fixed){showInfo(me?"Der Verein ist noch nicht eingerichtet.":"Dieses Konto ist nicht freigegeben.","Angemeldet als <b>"+E(em)+"</b>. "+(me?"Bitte den Besitzer der App fragen.":"Zugriff haben nur Personen, die der Verein freigegeben hat."));return null}
+    V=await showClubSetup(em);hideOverlay();
+  }
+  if(owner&&frei&&!fixed&&!me){
+    const o=overlay('<div class="ms er" style="font-size:15px">Du hast deine Besitzerrechte abgegeben</div><p class="sb">Angemeldet als <b>'+E(em)+'</b>. Zurzeit hast du keine Rolle im Verein. Du kannst die Besitzerrechte jederzeit zurücknehmen – du bist dann wieder Administrator.</p><button id="u13ow">Besitzerrechte zurücknehmen</button> <button id="u13so">Abmelden</button>');
+    o.querySelector("#u13so").onclick=()=>signOutClean();
+    o.querySelector("#u13ow").onclick=async()=>{try{await fs.doc("ownercheck/frei").delete();location.reload()}catch(e){o.querySelector("#u13ow").textContent="Hat nicht geklappt – erneut versuchen"}};
+    return null}
+  const rolle=fixed?"admin":(me&&me.rolle);
+  if((!rolle||ROLLEN_V.indexOf(rolle)<0)&&!offline&&!window.__DEMO){await showInvite(em,einKey());return null}
+  if(!rolle||ROLLEN_V.indexOf(rolle)<0){showInfo("Dieses Konto ist nicht freigegeben.","Angemeldet als <b>"+E(em)+"</b>. Zugriff haben nur Personen, die der Verein freigegeben hat.");return null}
+  einClear();
+  me=me||{email:em,rolle:rolle,zu:[],tr:{},g:[],kader:{}};
+  if(fixed&&me.rolle!=="admin")me={...me,rolle:"admin"};
+  if(!offline&&rolle==="team"&&!window.__DEMO){
+    try{const r=await fs.collection("kfrei").where("email","==",em).get();const kf={};r.docs.forEach((d)=>{const x=d.data();if(x&&x.tid)kf[x.tid]={stufe:x.stufe,ein:x.ein!==false,bis:x.bis||0}});me={...me,kf}}catch(e){}
+  }
+  if(!SHARED)try{localStorage.setItem("u13v:"+em,JSON.stringify({fixed:!!fixed,me,V,owner,frei}))}catch(e){}
+  /* Administratoren und Jugendleitung müssen sich mindestens alle 30 Tage neu anmelden (die Zugriffsregeln verlangen es ebenfalls) */
+  if((rolle==="admin"||rolle==="jugendleiter")&&!window.__DEMO){
+    const FRIST=30*864e5,check=async()=>{try{const r=await auth.currentUser.getIdTokenResult(),t=Date.parse(r.authTime);if(t&&Date.now()-t>FRIST){try{sessionStorage.setItem("u13expired","1")}catch(e){}await signOutClean()}}catch(e){}};
+    await check();setInterval(check,36e5);document.addEventListener("visibilitychange",()=>{if(!document.hidden)check()});
+  }
+  const ch=chooseTeam(V,me,rolle);
+  window.__VEREIN=V;window.__VROLLE=rolle;window.__VFIXED=!!fixed;window.__VOWNER=owner;window.__VFREI=frei;window.__VALLOWED=ch.allowed.map((t)=>t.id);
+  window.__VME={email:em,rolle,name:me.name||"",zu:me.zu||[],tr:me.tr||{},g:me.g||[],kader:me.kader||{},kf:me.kf||{},kat:me.kat||[],teams:ch.allowed.map((t)=>t.id)};
+  if(rolle==="platzwart"){window.__KABACCT=true;return{kabOnly:true}}
+  if(rolle==="team"&&!ch.team&&(me.zu||[]).some((z)=>z.art==="platzwart")){window.__KABACCT=true;window.__KABRO=(me.g||[]).indexOf("plan")<0;return{kabOnly:true}}
+  if(!ch.team){showInfo("Du bist noch keiner Mannschaft zugeordnet.","Angemeldet als <b>"+E(em)+"</b>. Bitte die Jugendleitung bitten, dich unter „Personen &amp; Rechte“ einer Mannschaft zuzuordnen.");return null}
+  const rights=rightsIn(me,rolle,ch.team.id);
+  window.__VRIGHTS=rights;window.__VMODE=modeOf(rights)||"lesen";window.__KRO=rights.indexOf("kader")>=0&&rights.indexOf("kaderbearb")<0&&rolle!=="admin"&&rolle!=="jugendleiter";
+  window.__TID=ch.team.id;window.__TEAM=ch.team;window.__WEB_BASE=window.__WEB_BASE0+"?t="+ch.team.id;
+  try{localStorage.setItem("u13team",ch.team.id)}catch(e){}
+  return{team:ch.team};
+}
+/* Platzwart-Link: anonyme Anmeldung, dann Eintrag „kabzugang/<uid>“ mit dem geheimen Schlüssel aus dem Link */
+async function kabStart(){
+  let u=await firstUser();
+  try{
+    if(!u){await auth.signInAnonymously();u=auth.currentUser}
+    await fs.doc("kabzugang/"+u.uid).set({s:KABKEY,at:new Date().toISOString()});
+    window.__kabFs=fs;window.__kabUid=u.uid;window.__kabOk=true;
+  }catch(e){window.__kabOk=false;window.__kabErr=(e&&e.code)||"fehler"}
+  window.__kabReady=true;document.dispatchEvent(new Event("u13kab"));
+}
 
 async function start(){
-  if(!cfgOk()){showSetup();return new Promise(()=>{})}
+  if(window.__DEMO&&document.readyState!=="complete")await new Promise((r)=>window.addEventListener("load",r));
+  if(!window.__DEMO&&!cfgOk()){showSetup();return new Promise(()=>{})}
   try{
-    for(const f of["firebase-app-compat.js","firebase-auth-compat.js","firebase-firestore-compat.js"])await loadScript(SDK+f);
+    if(!window.__DEMO)for(const f of["firebase-app-compat.js","firebase-auth-compat.js","firebase-firestore-compat.js"])await loadScript(SDK+f);
   }catch(e){overlay('<div class="ms er">Die Firebase-Bausteine konnten nicht geladen werden. Bitte die Internetverbindung prüfen und die Seite neu laden.</div>');return new Promise(()=>{})}
   fb=window.firebase;fb.initializeApp(CFG);auth=fb.auth();fs=fb.firestore();
   if(SHARED){try{await auth.setPersistence(fb.auth.Auth.Persistence.SESSION)}catch(e){}try{await fs.clearPersistence()}catch(e){}}
   else{try{await fs.enablePersistence({synchronizeTabs:true})}catch(e){}}
+  if(KABKEY){await kabStart();return new Promise(()=>{})}
   let u=await firstUser();
   if(!u){await showLogin();u=auth.currentUser}
   if(needsVerify(u)){try{await u.reload()}catch(e){}u=auth.currentUser;if(needsVerify(u)){await showVerify(u);u=auth.currentUser}}
-  /* Zugriffstest; bei leerer Datenbank ein Grundgerüst anlegen, damit die Sicherung eingespielt werden kann */
+  window.__webFs=fs;
+  const ci=await clubInit(u);
+  if(!ci)return new Promise(()=>{});
+  if(ci.eltern){hideOverlay();window.__ELTERN=true;window.__elternFs=fs;
+    const go=()=>{if(window.__eltern)window.__eltern.show({fs,links:ci.eltern.links,email:lowC(u.email),signOut:signOutClean,reload:async()=>{const l=await myLinks(lowC(u.email));return l}});else setTimeout(go,100)};go();return new Promise(()=>{})}
+  if(ci.kabOnly){hideOverlay();document.documentElement.classList.add("kabmode");window.__KAB=true;window.__kabFs=fs;window.__kabOk=true;window.__kabReady=true;document.dispatchEvent(new Event("u13kab"));addSignOut();return new Promise(()=>{})}
+  /* Zugriffstest; bei leerer Mannschaft ein Grundgerüst anlegen, damit die Sicherung eingespielt werden kann */
   try{
-    const c=await fs.doc("config/main").get();
-    if(!c.exists){await fs.doc("config/main").set({saison:"2026/27"})}
+    const c=await fs.doc(T("config/main")).get();
+    if(!c.exists&&(window.__VROLLE==="admin"||window.__VROLLE==="jugendleiter"||window.__VMODE==="voll"))await fs.doc(T("config/main")).set({saison:window.__VEREIN.saison||"2026/27",mannschaft:window.__TEAM.ak||"",zaehlendeAbwesenheiten:{e:true,u:true,v:false,t:false}});
   }catch(e){
-    if(e&&/permission|denied|insufficient/i.test(String(e.code)+" "+String(e.message))){
-      /* Kein Trainer: hat die Person ein Konto für Spieler/Eltern (verknüpft oder Anfrage offen), geht es zu ihrer Ansicht */
-      if(await kontoHas()){location.replace(location.pathname+location.search+"#konto");setTimeout(()=>location.reload(),50);return new Promise(()=>{})}
-      showDenied(u&&u.email);return new Promise(()=>{})}
+    if(denied(e)){showInfo("Kein Zugriff auf diese Mannschaft.","Angemeldet als <b>"+E(u&&u.email)+"</b>.");return new Promise(()=>{})}
     /* offline: weiter, die Daten kommen aus dem Gerätespeicher */
   }
-  hideOverlay();addSignOut();window.__webFs=fs;
+  hideOverlay();addSignOut();
   await afterLogin();
+  window.__CLUB=true;document.dispatchEvent(new Event("u13club"));
   return wrap();
 }
-/* ---------- Nach der Anmeldung: Rolle, Scouting-Schlüssel, Zugangsliste ---------- */
+/* ---------- Nach der Anmeldung: Rolle, Scouting-Schlüssel ---------- */
 let scoutKey="";
-const rndKey=()=>{const a=new Uint8Array(18);crypto.getRandomValues(a);return btoa(String.fromCharCode.apply(null,a)).replace(/\+/g,"-").replace(/\//g,"_").replace(/=/g,"")};
+const rndKey=()=>{const a=new Uint8Array(18);crypto.getRandomValues(a);return window.__TID+"-"+btoa(String.fromCharCode.apply(null,a)).replace(/\+/g,"-").replace(/\//g,"_").replace(/=/g,"")};
+const rndClub=()=>"club-"+rndKey().replace(/^[^-]*-/,"");
 const denied=(e)=>!!(e&&/permission|denied|insufficient/i.test(String(e.code)+" "+String(e.message)));
 async function afterLogin(){
-  let owner=null;
-  try{await fs.doc("ownercheck/x").get();owner=true}catch(e){if(denied(e))owner=false}
-  try{if(owner===null)owner=localStorage.getItem("u13role")==="owner";else if(!SHARED)localStorage.setItem("u13role",owner?"owner":"co")}catch(e){if(owner===null)owner=false}
+  const rolle=window.__VROLLE,rights=window.__VRIGHTS||[],owner=rolle==="admin"||rolle==="jugendleiter"||rights.indexOf("einstellungen")>=0;
   window.__webOwner=owner;
-  let role="voll";
-  if(!owner){
-    try{const em=((auth.currentUser&&auth.currentUser.email)||"").toLowerCase(),me=await fs.doc("trainer/"+em).get();role=(me.exists&&me.data()&&me.data().rolle)||"voll";if(!SHARED)try{localStorage.setItem("u13rolle",role)}catch(e){}}
-    catch(e){try{role=localStorage.getItem("u13rolle")||"lesen"}catch(x){role="lesen"}}
-  }
-  window.__ROLE=owner?"voll":role;window.__ACCT=(((auth.currentUser&&auth.currentUser.email)||"")+"").toLowerCase().replace(/[^a-z0-9@._-]/g,"_")||"main";
+  window.__ROLE=window.__VMODE;window.__ACCT=(((auth.currentUser&&auth.currentUser.email)||"")+"").toLowerCase().replace(/[^a-z0-9@._-]/g,"_")||"main";
   if(!owner)document.body.classList.add("co");
-  instCard();
-  if(window.__ROLE!=="scout")pushCard();
   if(window.__ROLE==="scout")document.body.classList.add("scoutonly");
-  if(window.__ROLE==="lesen"||window.__ROLE==="scout"){const t=document.querySelector(".top .note");if(t){const sp=document.createElement("span");sp.style.marginLeft="8px";sp.textContent=window.__ROLE==="lesen"?"· Nur Ansicht":"· Scouting-Zugang";t.appendChild(sp)}}
+  const lbl={lesen:"· Nur Ansicht",scout:"· Scouting-Zugang"}[window.__ROLE];
+  if(lbl){const t=document.querySelector(".top .note");if(t){const sp=document.createElement("span");sp.style.marginLeft="8px";sp.textContent=lbl;t.appendChild(sp)}}
   if(window.__ROLE==="scout"){window.__scoutLink=()=>"(nur für Trainer sichtbar)";return}
-  if(window.__ROLE==="lesen"){try{const r=await fs.doc("config/scout").get();scoutKey=(r.exists&&r.data()&&r.data().k)||""}catch(e){}window.__scoutLink=()=>scoutKey?window.__WEB_BASE+"#scout."+scoutKey:"(nicht verfügbar)";return}
-  try{const r=await fs.doc("config/scout").get();let k=r.exists&&r.data()&&r.data().k;if(!k){k=rndKey();await fs.doc("config/scout").set({k})}scoutKey=k}catch(e){}
-  window.__scoutLink=()=>scoutKey?window.__WEB_BASE+"#scout."+scoutKey:"";window.__scoutNew=true;
-  let last=null;
-  fs.doc("config/main").onSnapshot((d)=>{const aus=!!(d.exists&&d.data()&&d.data().kaderAus);if(aus===last)return;const first=last===null;last=aus;
-    const w=()=>fs.doc("pub/scout").set({aus}).catch(()=>{});
-    if(first)fs.doc("pub/scout").get().then((x)=>{if(!x.exists||!!(x.data()&&x.data().aus)!==aus)w()}).catch(()=>{});else w()},()=>{});
+  if(window.__ROLE==="lesen"){try{const r=await fs.doc(T("config/scout")).get();scoutKey=(r.exists&&r.data()&&r.data().k)||""}catch(e){}window.__scoutLink=()=>scoutKey?window.__WEB_BASE0+"#scout."+scoutKey:"(nicht verfügbar)";return}
+  /* Ein dauerhafter Scouting-Link für den ganzen Verein (verein/scout). Ihn legt automatisch die Leitung an; erneuern (Notfall) nur Leitung/Administrator. */
+  const isLeit=rolle==="admin"||rolle==="jugendleiter";
+  try{const r=await fs.doc("verein/scout").get();let k=r.exists&&r.data()&&r.data().k;if(!k&&isLeit){k=rndClub();await fs.doc("verein/scout").set({k})}
+    if(!k){const r2=await fs.doc(T("config/scout")).get();k=r2.exists&&r2.data()&&r2.data().k}
+    scoutKey=k||""}catch(e){}
+  window.__scoutLink=()=>scoutKey?window.__WEB_BASE0+"#scout."+scoutKey:"";window.__scoutNew=isLeit;window.__scoutClub=/^club-/.test(scoutKey||"");
+  let last=null;const tid=window.__TID;
+  fs.doc(T("config/main")).onSnapshot((d)=>{const aus=!!(d.exists&&d.data()&&d.data().kaderAus);if(aus===last)return;const first=last===null;last=aus;
+    const w=()=>fs.doc("pub/scout_"+tid).set({aus}).catch(()=>{});
+    if(first)fs.doc("pub/scout_"+tid).get().then((x)=>{if(!x.exists||!!(x.data()&&x.data().aus)!==aus)w()}).catch(()=>{});else w()},()=>{});
   document.addEventListener("click",async(ev)=>{const b=ev.target.closest&&ev.target.closest("[data-scn]");if(!b)return;
     if(!b.dataset.arm){b.dataset.arm="1";b.textContent="Wirklich neu erzeugen?";return}
-    const k=rndKey();try{await fs.doc("config/scout").set({k});scoutKey=k;const i=document.getElementById("sclink");if(i)i.value=window.__scoutLink();b.dataset.arm="";b.textContent="Neu erzeugen";document.dispatchEvent(new Event("u13scoutkey"))}catch(e){b.textContent="Hat nicht geklappt"}});
-  if(owner)cards();
+    const k=rndClub();try{await fs.doc("verein/scout").set({k});scoutKey=k;window.__scoutClub=true;const i=document.getElementById("sclink");if(i)i.value=window.__scoutLink();b.dataset.arm="";b.textContent="Neu erzeugen";document.dispatchEvent(new Event("u13scoutkey"))}catch(e){b.textContent="Hat nicht geklappt"}});
+  if(rolle==="admin")cards();
 }
-/* Hinweis „Als App installieren“ unter Einstellungen → Hinweise & Links (für alle Angemeldeten, auch eingeschränkte Ansicht) */
-function instCard(){
-  const put=()=>{
-    const pp=document.getElementById("etp-l");if(!pp){setTimeout(put,500);return}
-    if(!document.getElementById("u13inst")){
-      const c=document.createElement("div");c.className="card";c.id="u13inst";c.style.display="block";
-      const done=STANDALONE();
-      c.innerHTML='<h3>Als App installieren</h3>'+(done?'<p class="note" style="margin-top:0">Die App ist auf diesem Gerät schon installiert.</p>':'<p class="note" style="margin-top:0">Dann liegt die Teamzentrale wie eine normale App auf dem Startbildschirm, öffnet in einem eigenen Fenster und startet auch ohne Netz. Daten und Updates bleiben dieselben wie im Browser.</p><button class="btn" id="u13instb" style="display:none;margin:4px 0 8px">App jetzt installieren</button><ul style="margin:6px 0 6px 20px;padding:0"><li><b>iPhone/iPad:</b> in Safari unten auf <b>Teilen</b> (Quadrat mit Pfeil) → <b>Zum Home-Bildschirm</b>.</li><li><b>Android:</b> in Chrome oben rechts auf <b>⋮</b> → <b>App installieren</b> (oder „Zum Startbildschirm hinzufügen“).</li><li><b>Mac/PC:</b> in Chrome oder Edge rechts in der Adresszeile auf das Symbol <b>Installieren</b>. In Safari auf dem Mac: <b>Ablage</b> → <b>Zum Dock hinzufügen</b>.</li></ul><p class="note">Ohne Netz kannst du ansehen und ändern. Die Änderungen werden geschickt, sobald wieder Netz da ist. Anmelden und Spielerlinks brauchen Netz. Auf einem gemeinsam genutzten Gerät wird nichts gespeichert, dort geht es nur mit Netz.</p>');
-      const b=c.querySelector("#u13instb"),show=()=>{if(b&&instEv)b.style.display=""};show();window.addEventListener("u13inst",show);
-      if(b)b.onclick=async()=>{const ev=instEv;if(!ev)return;instEv=null;b.style.display="none";try{await ev.prompt()}catch(e){}};
-      pp.appendChild(c);
-    }
-  };put();
-}
-/* Hinweis „Als App speichern“ in der Link-Ansicht (nicht in der installierten App): zuerst oben mit Anleitung; ausgeblendet wandert er zugeklappt nach unten */
-const STANDALONE=()=>!!(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true;
-const VSTEP={ios:["iPhone/iPad","Unten auf <b>Teilen</b> tippen (Quadrat mit Pfeil nach oben).","Nach unten wischen und <b>Zum Home-Bildschirm</b> wählen.","Oben rechts auf <b>Hinzufügen</b> tippen."],
-  android:["Android","In Chrome oben rechts auf <b>⋮</b> tippen.","<b>App installieren</b> wählen (oder „Zum Startbildschirm hinzufügen“).","Mit <b>Installieren</b> bestätigen."],
-  pc:["Computer","In Chrome oder Edge rechts in der Adresszeile auf das Symbol <b>Installieren</b> klicken.","Mit <b>Installieren</b> bestätigen.","In Safari auf dem Mac stattdessen: <b>Ablage</b> → <b>Zum Dock hinzufügen</b>."]};
-function viewerInstall(){
-  if(STANDALONE())return;
-  const dev=IOS?"ios":/Android/i.test(navigator.userAgent)?"android":"pc",gone=()=>{try{return localStorage.getItem("u13vinstx")==="1"}catch(e){return false}};
-  /* Terminplan-Link (planOnly in links.js setzt data-plan): kein Spieler-Hinweis oben, keine Benachrichtigungen, kein Passwort */
-  const plan=()=>{const v=document.getElementById("vw2");return!!(v&&v.dataset.plan)};
-  const ol=(k)=>'<ol style="margin:6px 0 6px 20px;padding:0">'+VSTEP[k].slice(1).map((t)=>"<li>"+t+"</li>").join("")+(plan()?"":"<li>Die App auf dem Startbildschirm öffnen und oben auf <b>Einschalten</b> (Benachrichtigungen) tippen.</li>")+"</ol>";
-  /* Eltern: Rolle aus dem Konto (steht schon vor dem Aufbau der Ansicht fest), sonst wie bisher über die Benachrichtigungen */
-  const eltern=()=>{const K=window.__KONTO;if(K&&K.cur)return K.cur.rolle==="eltern";const c=window.__pushCtx&&window.__pushCtx();return!!c&&c.ro==="e"};
-  const body=()=>(plan()?'<p style="margin:4px 0 6px;font-size:14.5px">Wer mag, kann den Terminplan als App speichern. Dann öffnet er sich mit einem Tipp vom Startbildschirm.</p>'
-      :eltern()?'<p style="margin:4px 0 6px;font-size:14.5px">Für Eltern ist das freiwillig. Wer mag, kann die Seite als App speichern und dort die Benachrichtigungen einschalten, zum Beispiel für Antworten vom Trainer und neue Hinweise.</p>'
-      :'<p style="margin:4px 0 6px;font-size:14.5px"><b>Für Spieler: Bitte speichere diese Seite als App auf deinem Handy und schalte danach in der App die Benachrichtigungen ein.</b> Nur dann bekommst du Bescheid, wenn es einen neuen Clip, einen neuen Hinweis, eine Erinnerung an eine Aufgabe oder eine Antwort vom Trainer gibt, auch wenn die App geschlossen ist. Danke!</p><p class="note" style="margin:0 0 6px">Eltern brauchen die App nicht unbedingt, können sie aber natürlich auch speichern.</p>')+'<p class="note" style="margin:0 0 6px">Außerdem öffnest du die Seite dann mit einem Tipp vom Startbildschirm, auch ohne Netz (letzter Stand). Die App zeigt genau das, was du hier siehst.</p><button class="btn" data-vib style="display:none;margin:2px 0 8px">App jetzt installieren</button><b style="font-size:14px">So geht’s ('+VSTEP[dev][0]+'):</b>'+ol(dev)
-    +'<details style="margin:4px 0"><summary class="note" style="cursor:pointer">Anleitung für andere Geräte</summary>'+["ios","android","pc"].filter((k)=>k!==dev).map((k)=>'<b style="font-size:13px">'+VSTEP[k][0]+'</b>'+ol(k)).join("")+"</details>"
-    +(plan()?"":isKurz?'<p class="note" style="margin:4px 0 0">Beim ersten Öffnen der App einmal das Passwort eingeben und „Auf diesem Gerät angemeldet bleiben“ anhaken.</p>':"")+(isKonto?'<p class="note" style="margin:4px 0 0">In der App meldest du dich einmal mit deinem Konto an. Diese Anleitung findest du auch jederzeit unter <b>Einstellungen</b>.</p>':plan()?"":'<p class="note" style="margin:4px 0 0">Den Link bitte nicht weitergeben. Er gehört nur dir.</p>');
-  const wire=(c)=>{const b=c.querySelector("[data-vib]"),show=()=>{if(instEv)b.style.display=""};show();window.addEventListener("u13inst",show);
-    b.onclick=async()=>{const ev=instEv;if(!ev)return;instEv=null;b.style.display="none";try{await ev.prompt()}catch(e){}}};
-  const top=()=>{const c=document.createElement("div");c.id="u13vinst";c.className="card";c.style.cssText="margin:0 0 14px;border-color:var(--ac,#2563eb)";
-    c.innerHTML='<div style="display:flex;gap:8px;align-items:flex-start"><b style="flex:1;font-size:16px">📲 Spieler: Bitte als App speichern</b><button class="btn" data-vix style="font-size:12px;padding:3px 9px">Ausblenden ✕</button></div>'+body();
-    wire(c);c.querySelector("[data-vix]").onclick=()=>{try{localStorage.setItem("u13vinstx","1")}catch(e){}c.remove();put()};return c};
-  const low=()=>{const c=document.createElement("details");c.id="u13vinst";c.className="card";c.style.cssText="margin:14px 0 0";
-    c.innerHTML='<summary style="cursor:pointer;font-weight:600"><span style="display:inline-flex;gap:8px;align-items:center;width:calc(100% - 24px)"><span style="flex:1">📲 Als App auf dem Handy speichern'+(eltern()||plan()?" (freiwillig)":"")+'</span><button class="btn" data-vioff style="font-size:12px;padding:3px 9px;font-weight:400">Ausblenden ✕</button></span></summary>'+body();wire(c);
-    c.querySelector("[data-vioff]").onclick=(e)=>{e.preventDefault();e.stopPropagation();try{localStorage.setItem("u13vinstx","2")}catch(x){}c.remove()};return c};
-  const off=()=>{try{return localStorage.getItem("u13vinstx")==="2"}catch(e){return false}};   /* ganz ausgeblendet */
-  const bottom=(v,el)=>{const f=v.querySelector(":scope>.vf");if(f)v.insertBefore(el,f);else v.appendChild(el)};   /* „Stand“ bleibt ganz unten */
-  const put=()=>{const v=document.getElementById("vw2");if(!v||off())return;
-    const was=document.getElementById("u13vinst");if(was){if(was.tagName==="DETAILS"||!(eltern()||plan()))return;was.remove()}   /* Rolle erst später bekannt: oberen Hinweis wieder wegnehmen */
-    if(gone()||eltern()||plan()){bottom(v,low());return}
-    const hd=v.querySelector(".vh");if(!hd)return;   /* erst wenn die Ansicht da ist (nicht auf der Passwortseite) */
-    const kf=document.getElementById("kzf"),at=kf&&kf.parentNode===v?kf:hd;at.insertAdjacentElement("afterend",top())};
-  new MutationObserver(put).observe(document.documentElement,{childList:true,subtree:true});put();
-}
-if(isViewerHash)document.addEventListener("DOMContentLoaded",viewerInstall);
-/* ---------- Benachrichtigungen (Web-Push) ----------
-   Das Gerät meldet sich unter einem geheimen Pfad an (push/<64 Zeichen>), abgesichert mit dem Feedback-Schlüssel aus Link bzw. App.
-   Verschickt wird von einem Zeitplan bei GitHub alle paar Minuten (siehe push/LIESMICH.md). Die Nachrichten enthalten keine Namen.
-   Spielerlinks: nur in der installierten App (iPhone kann es nur dort). Trainer: Einstellungen → Hinweise & Links. */
-const VAPID="BA1CPAVyJeqOF8ANijTZ6ykGbY4n_gXJMExX4VKQslCF_ES6SJ_ZFJGpQWYDuhbTiSMT_fqGmb_xMy0g3gZFO04";
-const PUSH_OK=()=>"serviceWorker" in navigator&&"PushManager" in window&&"Notification" in window;
-const pls={get:(k)=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}}};
-const pushSid=()=>{let s=pls.get("u13push");if(!/^[0-9a-f]{64}$/.test(s||"")){const a=new Uint8Array(32);crypto.getRandomValues(a);s=Array.from(a,(x)=>x.toString(16).padStart(2,"0")).join("");pls.set("u13push",s)}return s};
-const pushPerm=()=>{try{return Notification.permission}catch(e){return"default"}};
-const u8=(s)=>Uint8Array.from(atob(s.replace(/-/g,"+").replace(/_/g,"/")+"===".slice((s.length+3)%4)),(c)=>c.charCodeAt(0));
-async function pushSub(ask){
-  if(ask&&pushPerm()!=="granted"&&await Notification.requestPermission()!=="granted")return null;
-  if(pushPerm()!=="granted")return null;
-  const reg=await navigator.serviceWorker.ready,old=await reg.pushManager.getSubscription();
-  return old||(ask?reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID)}):null);
-}
-/* Anmeldung speichern: Trainer über die Datenbank-Verbindung, Links ohne Anmeldung direkt */
-async function pushSave(sub,c){
-  const j=sub.toJSON?sub.toJSON():sub,ky=j.keys||{},sid=pushSid(),o={e:j.endpoint,p:ky.p256dh||"",a:ky.auth||"",k:c.k,pid:c.pid||"",ro:c.ro||"",r:c.r||"",at:Date.now()};
-  if(c.ro==="t"&&fs){await fs.doc("push/"+sid).set(o);return}
-  const f={};Object.keys(o).forEach((x)=>{f[x]=toFs(o[x])});
-  const r=await fetch(FSB()+"push/"+sid+"?key="+encodeURIComponent(CFG.apiKey),{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({fields:f})});
-  if(!r.ok)throw{code:"http-"+r.status};
-}
-/* c: Feedback-Schlüssel k, Spieler pid, Rolle ro (s Spieler, e Elternteil, t Trainer), Antwort-Pfad r */
-const pushApi={
-  on:()=>pls.get("u13pushon")==="1",
-  async enable(c){const s=await pushSub(true);if(!s)return pushPerm()==="denied"?"denied":"no";await pushSave(s,c);pls.set("u13pushon","1");return"ok"},
-  async disable(c){pls.set("u13pushon",null);pls.set("u13pushx","1");try{const reg=await navigator.serviceWorker.ready,s=await reg.pushManager.getSubscription();if(s)await s.unsubscribe()}catch(e){}
-    const sid=pushSid();try{if(c.ro==="t"&&fs)await fs.doc("push/"+sid).delete();else await fetch(FSB()+"push/"+sid+"?key="+encodeURIComponent(CFG.apiKey),{method:"DELETE"})}catch(e){}},
-  /* beim Öffnen: Anmeldung auffrischen (Rolle oder Adresse des Geräts können sich ändern) */
-  async sync(c){if(!pushApi.on())return;try{const s=await pushSub(false);if(s)await pushSave(s,c);else pls.set("u13pushon",null)}catch(e){}}
-};
-const pushMsg=(r)=>r==="denied"?"Benachrichtigungen wurden nicht erlaubt. Du kannst sie in den Einstellungen des Geräts erlauben.":"Das hat nicht geklappt. Bitte später noch einmal versuchen.";
-function viewerPush(){
-  const ctx=()=>window.__pushCtx&&window.__pushCtx();
-  let synced=false;
-  const put=()=>{
-    const v=document.getElementById("vw2"),c=ctx();if(!v||!c||!c.k||!STANDALONE()||!PUSH_OK())return;
-    const hd=v.querySelector(".vh");if(!hd)return;
-    if(!synced){synced=true;pushApi.sync(c).then(put)}
-    const x=pls.get("u13pushx")||"",later=/^s\d+$/.test(x)&&Date.now()-+x.slice(1)<7*864e5;   /* „Später“: Bitte erst nach 7 Tagen wieder oben */
-    const st=pushApi.on()?"an":pushPerm()==="denied"?"zu":x==="1"||later||c.ro==="e"?"aus":"frage",old=document.getElementById("u13push");
-    if(old&&old.dataset.st===st)return;if(old)old.remove();
-    const el=document.createElement("div");el.id="u13push";el.className="card";el.dataset.st=st;
-    if(st==="frage"){el.style.cssText="margin:0 0 14px;border-color:var(--ac,#2563eb)";
-      el.innerHTML='<b style="font-size:16px">🔔 Bitte Benachrichtigungen einschalten</b><p class="note" style="margin:4px 0 8px">Dann bekommst du Bescheid, wenn es einen neuen Clip, einen neuen Hinweis, eine Erinnerung an eine Aufgabe oder eine Antwort vom Trainer gibt, auch wenn die App geschlossen ist. In den Nachrichten stehen keine Namen.</p><div class="bar"><button class="btn" data-pon style="background:var(--ac,#2563eb);color:#fff;border-color:var(--ac,#2563eb);font-weight:600;min-height:44px">Einschalten</button><button class="btn" data-plater style="min-height:44px">Später</button></div><div class="note" style="margin-top:6px">Einschalten geht auch später jederzeit: ganz unten in der App.</div><div class="note warn" data-pm></div>';
-      const kf=document.getElementById("kzf");(kf&&kf.parentNode===v?kf:hd).insertAdjacentElement("afterend",el)}
-    else{el.style.cssText="margin:14px 0 0";
-      el.innerHTML=st==="zu"?'<div class="note">🔕 Benachrichtigungen sind auf diesem Gerät blockiert. Du kannst sie in den Einstellungen des Handys erlauben (iPhone: Einstellungen → Mitteilungen → diese App → Mitteilungen erlauben). Danach die App neu öffnen.</div>'
-        :'<div class="bar" style="align-items:center"><span style="flex:1">'+(st==="an"?"🔔 Benachrichtigungen sind an.":"🔕 Benachrichtigungen sind aus. Hier kannst du sie jederzeit einschalten.")+'</span><button class="btn" '+(st==="an"?"data-poff>Ausschalten":"data-pon>Einschalten")+'</button></div><div class="note warn" data-pm></div>';
-      {const f=v.querySelector(":scope>.vf");if(f)v.insertBefore(el,f);else v.appendChild(el)}}
-  };
-  document.addEventListener("click",async(e)=>{const t=e.target.closest&&e.target.closest("#u13push button");if(!t)return;const c=ctx();if(!c)return;
-    if(t.hasAttribute("data-plater")){pls.set("u13pushx","s"+Date.now());put();return}
-    t.disabled=true;
-    if(t.hasAttribute("data-poff")){await pushApi.disable(c);put();return}
-    let r;try{r=await pushApi.enable(c)}catch(x){r="fehler"}
-    if(r!=="ok"){const m=document.querySelector("#u13push [data-pm]");if(m)m.textContent=pushMsg(r);t.disabled=false}
-    put()});
-  new MutationObserver(put).observe(document.documentElement,{childList:true,subtree:true});put();
-}
-if(isViewerHash)document.addEventListener("DOMContentLoaded",viewerPush);
-/* Trainer: Karte unter Einstellungen → Hinweise & Links (neues Feedback) */
-function pushCard(){
-  const key=()=>(window.__vid&&window.__vid.fbKey)||"";
-  const put=()=>{
-    const pp=document.getElementById("etp-l");if(!pp){setTimeout(put,500);return}
-    let c=document.getElementById("u13pushc");
-    if(!c){c=document.createElement("div");c.className="card";c.id="u13pushc";c.style.display="block";const i=document.getElementById("u13inst");if(i&&i.parentNode===pp)i.insertAdjacentElement("afterend",c);else pp.appendChild(c)}
-    const st=!PUSH_OK()?"nein":IOS&&!STANDALONE()?"ios":!key()?"warte":pushApi.on()?"an":pushPerm()==="denied"?"zu":"aus";
-    if(c.dataset.st===st)return;c.dataset.st=st;
-    c.innerHTML='<h3>Benachrichtigungen</h3><p class="note" style="margin-top:0">Du bekommst eine Nachricht aufs Handy oder den Computer, wenn Spieler oder Eltern dir Feedback schicken, auch wenn die App geschlossen ist. Spieler und Eltern schalten es in ihrer Link-App selbst ein und bekommen dann Bescheid bei neuen Clips, Erinnerungen an Aufgaben und Antworten. In den Nachrichten stehen keine Namen. Sie kommen nach etwa 5 bis 15 Minuten.</p>'
-      +(st==="nein"?'<p class="note">Dieser Browser kann keine Benachrichtigungen empfangen.</p>'
-      :st==="ios"?'<p class="note"><b>Auf dem iPhone und iPad geht das nur in der App vom Home-Bildschirm.</b> Bitte zuerst als App installieren (siehe oben) und dort einschalten.</p>'
-      :st==="warte"?'<p class="note">Wird vorbereitet …</p>'
-      :st==="zu"?'<p class="note warn">Benachrichtigungen sind auf diesem Gerät blockiert. Bitte in den Einstellungen des Geräts für diese App erlauben.</p>'
-      :'<div class="bar" style="align-items:center"><span style="flex:1">'+(st==="an"?"🔔 Auf diesem Gerät eingeschaltet.":"🔕 Auf diesem Gerät aus.")+'</span><button class="btn" id="u13pushb">'+(st==="an"?"Ausschalten":"Einschalten")+'</button></div><div class="note warn" id="u13pushm"></div>');
-    const b=c.querySelector("#u13pushb");
-    if(b)b.onclick=async()=>{b.disabled=true;const cx={k:key(),ro:"t"};let r="ok";
-      if(st==="an")await pushApi.disable(cx);else{try{r=await pushApi.enable(cx)}catch(e){r="fehler"}}
-      if(r!=="ok"){c.querySelector("#u13pushm").textContent=pushMsg(r);b.disabled=false;return}
-      c.dataset.st="";put()};
-    if(st==="warte")setTimeout(put,1000);
-  };put();
-  const syn=()=>{if(!key()){setTimeout(syn,1500);return}pushApi.sync({k:key(),ro:"t"}).then(()=>{const c=document.getElementById("u13pushc");if(c)c.dataset.st="";put()})};if(PUSH_OK())syn();
-}
-let instEv=null;   /* Installations-Angebot des Browsers (Chrome/Edge/Android), siehe unten */
 function cards(){
   const put=()=>{
     const m=document.getElementById("etp-m"),sv=document.getElementById("etp-s");if(!m||!sv){setTimeout(put,500);return}
-    if(!document.getElementById("u13acc")){
-      const c=document.createElement("div");c.className="card";c.id="u13acc";
-      c.innerHTML='<h3>Zugang zur App</h3><p class="note" style="margin-top:0">Wer die App nach der Anmeldung (Google oder E-Mail) öffnen darf. Du und Mathis sind fest eingetragen. Weitere Personen trägst du hier ein. Sie müssen sich mit genau dieser E-Mail-Adresse anmelden und sehen die Mannschafts- und Sicherungs-Einstellungen nicht.</p><p class="note"><b>Voller Zugriff:</b> sehen und ändern wie ein Co-Trainer. <b>Nur lesen:</b> alles ansehen, nichts ändern. <b>Nur Scouting:</b> sieht und bearbeitet nur den Kader (Beobachtungen, Eingang, Spieler), nicht die Mannschaft.</p><div id="u13accl"></div><div class="bar" style="margin:8px 0 0"><input id="u13acce" type="email" placeholder="E-Mail-Adresse" autocomplete="off" style="flex:1;min-width:200px"><select id="u13accr" aria-label="Zugriff"><option value="voll">Voller Zugriff</option><option value="lesen">Nur lesen</option><option value="scout">Nur Scouting</option></select><button class="btn" id="u13acca">Hinzufügen</button></div><div class="note" id="u13accm"></div>';
-      m.appendChild(c);
-      const L=c.querySelector("#u13accl"),M=c.querySelector("#u13accm");
-      fs.collection("trainer").onSnapshot((q)=>{const rows=q.docs.map((d)=>({id:d.id,r:(d.data()&&d.data().rolle)||"voll"})).sort((a,b)=>a.id<b.id?-1:1);
-        L.innerHTML=rows.length?rows.map((x)=>'<div class="bar" style="margin:4px 0"><span style="flex:1;min-width:0;overflow-wrap:anywhere">'+E(x.id)+'</span><select data-acr="'+E(x.id)+'" aria-label="Zugriff"><option value="voll"'+(x.r==="voll"?" selected":"")+'>Voller Zugriff</option><option value="lesen"'+(x.r==="lesen"?" selected":"")+'>Nur lesen</option><option value="scout"'+(x.r==="scout"?" selected":"")+'>Nur Scouting</option></select><button class="btn" data-acd="'+E(x.id)+'">Entfernen</button></div>').join(""):'<div class="note">Noch keine weiteren Personen.</div>'},()=>{L.innerHTML='<div class="note">Liste konnte nicht geladen werden.</div>'});
-      c.addEventListener("change",async(ev)=>{const r=ev.target.closest&&ev.target.closest("[data-acr]");if(!r)return;
-        try{await fs.doc("trainer/"+r.dataset.acr).set({email:r.dataset.acr,rolle:r.value,am:new Date().toISOString()});M.className="note";M.textContent="Zugriff geändert. Gilt beim nächsten Öffnen der App durch die Person."}catch(e){M.className="note warn";M.textContent="Das konnte nicht gespeichert werden (nur der Besitzer darf das)."}});
-      c.addEventListener("click",async(ev)=>{
-        const d=ev.target.closest("[data-acd]");
-        if(d){if(!d.dataset.arm){d.dataset.arm="1";d.textContent="Wirklich entfernen?";return}try{await fs.doc("trainer/"+d.dataset.acd).delete();M.className="note";M.textContent="Entfernt. Die Person kommt ab sofort nicht mehr hinein."}catch(e){M.className="note warn";M.textContent="Das konnte nicht gespeichert werden (nur der Besitzer darf das)."}return}
-        if(ev.target.id==="u13acca"){const i=c.querySelector("#u13acce"),mail=i.value.trim().toLowerCase();
-          if(!/^[^\s@\/]+@[^\s@\/]+\.[^\s@\/]+$/.test(mail)){M.className="note warn";M.textContent="Bitte eine gültige E-Mail-Adresse eintragen.";return}
-          try{await fs.doc("trainer/"+mail).set({email:mail,rolle:c.querySelector("#u13accr").value,am:new Date().toISOString()});i.value="";M.className="note";M.textContent="Hinzugefügt. Die Person kann sich jetzt anmelden."}catch(e){M.className="note warn";M.textContent="Das konnte nicht gespeichert werden (nur der Besitzer darf das)."}}});
-    }
     if(!document.getElementById("u13upd")){
       const c=document.createElement("div");c.className="card";c.id="u13upd";
       c.innerHTML='<h3>Update der App einspielen (GitHub)</h3><p class="note" style="margin-top:0">Nur nötig, wenn Claude dir eine neue ZIP-Datei gibt. Löschen musst du nichts: Gleichnamige Dateien werden beim Hochladen ersetzt.</p><ol style="margin:6px 0 6px 20px;padding:0"><li>Neue ZIP-Datei auf dem Computer entpacken.</li><li>Auf github.com das Repository öffnen → <b>Add file</b> → <b>Upload files</b>.</li><li>Alle Dateien aus dem entpackten Ordner in das Fenster ziehen (den <b>Inhalt</b>, nicht den Ordner selbst; <b>index.html</b> muss ganz oben im Repository liegen, nicht in einem Unterordner).</li><li>Unten <b>Commit changes</b> klicken.</li><li>1–3 Minuten warten (Reiter <b>Actions</b>: grüner Haken). Dann die App neu laden, am iPad und Handy gegebenenfalls zweimal.</li><li>Nur wenn Claude es ausdrücklich sagt: <b>firestore.rules</b> in Firebase unter Firestore → Regeln einfügen und <b>Veröffentlichen</b>.</li></ol><p class="note" style="margin-bottom:0">Deine Daten bleiben bei einem Update unverändert.</p>';
@@ -396,18 +498,22 @@ async function publishSnap(snap){
   const keep=new Set(),put=async(id,b)=>{const parts=[];for(let i=0;i<b.length;i+=CH)parts.push(b.slice(i,i+CH));if(!parts.length)parts.push("");
     keep.add(id);await fs.doc("pub/"+id).set({b:parts[0],n:parts.length});
     for(let i=1;i<parts.length;i++){keep.add(id+"~"+i);await fs.doc("pub/"+id+"~"+i).set({b:parts[i]})}};
-  for(const pid of Object.keys(snap.p||{}))await put("p_"+pid,snap.p[pid]);
-  for(const k of Object.keys(snap.x||{}))await put("x_"+k,snap.x[k]);
-  /* Eigentraining-Dateien: ändern sich nie (neue Datei = neue ID), deshalb nur neue hochladen; Liste mit Teilezahl in linkmeta */
-  let ff0={};try{const m0=await fs.doc("linkmeta/main").get();ff0=(m0.exists&&m0.data().ff)||{}}catch(e){}
-  const ff={};for(const fid of Object.keys(snap.f||{})){if(ff0[fid]){ff[fid]=ff0[fid];keep.add("f_"+fid);for(let i=1;i<ff0[fid];i++)keep.add("f_"+fid+"~"+i);continue}
-    await put("f_"+fid,snap.f[fid]);ff[fid]=Math.max(1,Math.ceil(snap.f[fid].length/CH))}
-  if(snap.bg){let bg=clean(snap.bg);if(JSON.stringify(bg).length>900000)bg={L:bg.L||"",D:bg.D||"",i:""};keep.add("bg");await fs.doc("pub/bg").set(bg)}
-  keep.add("scout");
-  const all=await fs.collection("pub").get();
-  for(const d of all.docs){if(!keep.has(d.id)&&d.id.slice(0,2)!=="a_")await fs.doc("pub/"+d.id).delete()}
-  await fs.doc("linkmeta/main").set({u:snap.u,k:snap.k||{},xk:snap.xk||{},fp:snap.fp||"",fa:snap.fa||"",fs:snap.fs||"",dzs:snap.dzs||"",ff});
+  const tid=window.__TID,pre=(k)=>k+"_"+tid+"_";
+  for(const pid of Object.keys(snap.p||{}))await put(pre("p")+pid,snap.p[pid]);
+  for(const k of Object.keys(snap.x||{}))await put(pre("x")+k,snap.x[k]);
+  if(snap.bg){let bg=clean(snap.bg);if(JSON.stringify(bg).length>900000)bg={L:bg.L||"",D:bg.D||"",i:""};keep.add("bg_"+tid);await fs.doc("pub/bg_"+tid).set(bg)}
+  keep.add("scout_"+tid);
+  /* Alte Fächer aufräumen: die Liste vom letzten Mal steht in linkmeta (spart das Lesen der ganzen Sammlung aller Mannschaften) */
+  let prev=null;try{const m=await fs.doc(T("linkmeta/main")).get();prev=m.exists&&Array.isArray(m.data().ids)?m.data().ids:null}catch(e){}
+  if(!prev){const all=await fs.collection("pub").get();prev=all.docs.map((d)=>d.id).filter((id)=>id.indexOf(pre("p"))===0||id.indexOf(pre("x"))===0||id==="bg_"+tid)}
+  for(const id of prev)if(!keep.has(id))await fs.doc("pub/"+id).delete();
+  await fs.doc(T("linkmeta/main")).set({u:snap.u,k:snap.k||{},xk:snap.xk||{},fp:snap.fp||"",fa:snap.fa||"",fs:snap.fs||"",dzs:snap.dzs||"",ids:[...keep].filter((id)=>id!=="scout_"+tid)});
 }
+/* Konten: Stand fürs Kind veröffentlichen (kview/<mannschaft>~<spieler>, bei großen Daten in Teilen) */
+if(!isViewerHash&&!isScout)window.__kvPut=async function(tid,pid,m){
+  await (dbP||(dbP=start()));const b=m.b||"",parts=[];for(let i=0;i<b.length;i+=CH)parts.push(b.slice(i,i+CH));if(!parts.length)parts.push("");
+  const id=tid+"~"+pid;await fs.doc("kview/"+id).set({b:parts[0],n:parts.length,ev:m.ev||{},u:m.u||"",abm:!!m.abm,fp:m.fp||""});
+  for(let i=1;i<parts.length;i++)await fs.doc("kview/"+id+"~~"+i).set({b:parts[i]})};
 /* Kurzlinks (Trainer): Passwort-Paket veröffentlichen/entfernen; das geheime Zeichen liegt nur für Trainer lesbar in „aliasauth“ */
 if(!isViewerHash&&!isScout)window.__kurzTr={
   async put(aid,o,t){await (dbP||(dbP=start()));await fs.doc("aliasauth/"+aid).set({t});await fs.doc("pub/"+aid).set(o.v===2?{s:"",w:"",v:2,i:o.i,k:o.k}:{s:o.s,w:o.w,v:o.v|0})},
@@ -420,186 +526,26 @@ window.__webOwnerSnap=function(cb){
     if(docs==null||meta==null)return;
     const raw={};docs.forEach((d)=>{raw[d.id]=d.data()});
     const join=(id)=>{const m=raw[id];if(!m||typeof m.b!=="string")return null;let b=m.b;for(let i=1;i<(m.n||1);i++){const c=raw[id+"~"+i];if(!c)return null;b+=c.b}return b};
-    const s={u:meta.u||"",k:meta.k||{},xk:meta.xk||{},fp:meta.fp||"",fa:meta.fa||"",fs:meta.fs||"",dzs:meta.dzs||"",p:{},x:{},a:{}};
-    Object.keys(raw).forEach((id)=>{if(id.indexOf("~")>=0)return;if(id.slice(0,2)==="a_"){s.a[id]={s:raw[id].s,w:raw[id].w,v:raw[id].v|0};return}if(id.slice(0,2)==="p_"){const b=join(id);if(b)s.p[id.slice(2)]=b}else if(id.slice(0,2)==="x_"){const b=join(id);if(b)s.x[id.slice(2)]=b}});
+    const s={u:meta.u||"",k:meta.k||{},xk:meta.xk||{},fp:meta.fp||"",fa:meta.fa||"",fs:meta.fs||"",dzs:meta.dzs||"",p:{},x:{},a:{}},tp="_"+window.__TID+"_";
+    Object.keys(raw).forEach((id)=>{if(id.indexOf("~")>=0)return;if(id.slice(0,2)==="a_"){s.a[id]={s:raw[id].s,w:raw[id].w,v:raw[id].v|0};return}if(id.indexOf("p"+tp)===0){const b=join(id);if(b)s.p[id.slice(tp.length+1)]=b}else if(id.indexOf("x"+tp)===0){const b=join(id);if(b)s.x[id.slice(tp.length+1)]=b}});
     window.__webSnapReady=true;cb(s);
   };
   const later=()=>{clearTimeout(tm);tm=setTimeout(build,150)};
-  fs.collection("pub").onSnapshot((s)=>{docs=s.docs;later()},()=>{});
-  fs.doc("linkmeta/main").onSnapshot((s)=>{meta=s.exists?s.data():{};later()},()=>{});
+  /* Sparsam: nicht die ganze Sammlung „pub“ (alle Mannschaften) beobachten, sondern nur den eigenen Stand (linkmeta)
+     und nach jeder Veröffentlichung gezielt die eigenen Fächer lesen; Kurzlink-Fächer einzeln beobachten. */
+  const own={},al={},alU={};let tok=0;const tp="_"+window.__TID+"_";
+  const merge=()=>{docs=Object.keys(own).concat(Object.keys(al)).map((id)=>{const v=own[id]||al[id];return{id,data:()=>v}});later()};
+  const one=async(id)=>{try{const s=await fs.doc("pub/"+id).get();return s.exists?s.data():null}catch(e){return null}};
+  const fetchOwn=async(m)=>{const my=++tok,o={},bases=Object.keys(m.k||{}).map((k)=>"p"+tp+k).concat(Object.keys(m.xk||{}).map((k)=>"x"+tp+k));
+    await Promise.all(bases.map(async(id)=>{const d=await one(id);if(!d)return;o[id]=d;for(let i=1;i<(d.n||1);i++){const c=await one(id+"~"+i);if(c)o[id+"~"+i]=c}}));
+    if(my!==tok)return;Object.keys(own).forEach((k)=>delete own[k]);Object.assign(own,o);merge()};
+  const watchA=()=>{const want=new Set(((window.__kzAids&&window.__kzAids())||[]).filter(Boolean));
+    Object.keys(alU).forEach((id)=>{if(!want.has(id)){alU[id]();delete alU[id];delete al[id];merge()}});
+    want.forEach((id)=>{if(alU[id])return;alU[id]=fs.doc("pub/"+id).onSnapshot((s)=>{if(s.exists)al[id]=s.data();else delete al[id];merge()},()=>{})})};
+  watchA();setInterval(watchA,3000);
+  let lastU=null;
+  fs.doc(T("linkmeta/main")).onSnapshot((s)=>{meta=s.exists?s.data():{};const u=JSON.stringify([meta.u,meta.k,meta.xk]);if(u===lastU){later();return}lastU=u;fetchOwn(meta).catch(()=>{})},()=>{});
 };
-
-/* ---------- Konten für Spieler und Eltern ----------
-   Spielerlink (#sp/<Schlüssel>): Konto anlegen, ohne Genehmigung mit dem Spieler verknüpft (höchstens 4 Konten je Spieler).
-   Mannschaftslink (#mt/<Schlüssel>): Konto anlegen und Anfrage schicken, der Trainer ordnet zu und genehmigt.
-   Danach (#konto): Der Schlüssel zum verschlüsselten Spielerstand kommt aus „kkey/<spieler>“ (nur für verknüpfte Konten lesbar),
-   die Ansicht ist dieselbe wie beim Spielerlink. Rolle und Name stehen im Konto, „Wer bist du?“ entfällt. */
-const mkeyOf=(em)=>String(em||"").toLowerCase().replace(/[.]/g,"_").replace(/@/g,"_at_");
-const kEm=()=>(((auth&&auth.currentUser&&auth.currentUser.email)||"")+"").toLowerCase();
-const nm2=(s)=>String(s||"").trim().split(/\s+/).filter(Boolean).length>=2;
-const kls={get:(k)=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}}};
-async function myLinks(){try{const r=await fs.collection("kverkn").where("email","==",kEm()).get();return r.docs.map((d)=>({id:d.id,...d.data()}))}catch(e){return null}}
-async function myAnfrage(){try{const s=await fs.doc("kanfr/"+mkeyOf(kEm())).get();return s.exists?s.data():null}catch(e){return null}}
-/* Nach einer Trainer-Anmeldung ohne Trainer-Zugang: hat die Person ein Konto als Spieler/Elternteil? */
-async function kontoHas(){const l=await myLinks();if(l&&l.length)return true;return!!(await myAnfrage())}
-const kSo='<button class="ln" id="u13so" style="margin-top:6px">Abmelden</button>';
-function kMsg(title,text,bad){const o=overlay('<div class="ms '+(bad?"er":"ok")+'" style="font-size:16px;font-weight:600">'+E(title)+'</div><p class="sb" style="font-size:14px">'+text+'</p><div class="sb">Angemeldet als <b>'+E(kEm())+'</b></div>'+kSo+'<button class="ln" id="kdel" style="margin:6px 0 0 16px">Konto löschen</button><div class="ms" id="kdm"></div>');
-  o.querySelector("#u13so").onclick=()=>signOutClean();
-  const d=o.querySelector("#kdel");d.onclick=async()=>{if(!d.dataset.arm){d.dataset.arm="1";d.textContent="Wirklich löschen?";return}
-    try{const l=(await myLinks())||[];for(const x of l)await fs.doc("kverkn/"+x.id).delete();try{await fs.doc("kanfr/"+mkeyOf(kEm())).delete()}catch(x){}await auth.currentUser.delete();signOutClean()}
-    catch(x){const m=o.querySelector("#kdm");m.className="ms er";m.textContent="Bitte melde dich ab, wieder an und tippe dann noch einmal auf „Konto löschen“."}};
-  return new Promise(()=>{})}
-/* Warten auf die Freigabe: alle 15 Sekunden (und beim Zurückkehren auf die Seite) nachsehen; sobald der Spieler freigeschaltet ist, geht es automatisch weiter */
-let kWaitOn=false;
-function kWait(){if(kWaitOn)return;kWaitOn=true;
-  const chk=async()=>{try{const l=((await myLinks())||[]).filter((x)=>x.gesperrt!==true);if(!l.length)return;
-    const s=await fs.doc("kkey/"+l[0].pid).get();if(s.exists&&s.data()&&s.data().k)location.reload()}catch(e){}};
-  setInterval(chk,15000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)chk()})}
-/* Wer bist du? Erst Spieler oder Elternteil, danach nur die Namen, die noch fehlen.
-   o.sp = Name des Spielers (Spielerlink: Spieler müssen gar nichts eintippen), sonst Mannschaftslink. */
-function kForm(o){
-  return new Promise((res)=>{
-    const sp=o.sp||"",step=(r)=>{
-      const kid=!sp&&r==="eltern";
-      const ov=overlay('<div style="font-size:17px;font-weight:600;margin:0 0 4px">Wer bist du?</div><p class="sb" style="margin-bottom:12px">Angemeldet als&nbsp;<b>'+E(kEm())+'</b></p>'
-        +(r?'<div style="margin:0 0 2px;font-weight:600">'+(r==="spieler"?"Ich bin Spieler":"Ich bin Elternteil"+(sp?" von "+E(sp):""))+'</div><button class="ln" id="kfz" style="margin:0 0 12px">Auswahl ändern</button>'
-          +'<label class="sb" for="kfn" style="display:block;margin:0 0 4px">'+(r==="spieler"?"Dein Vor- und Nachname":"Dein Vor- und Nachname (Elternteil)")+'</label><input id="kfn" maxlength="60" autocomplete="name" placeholder="Vor- und Nachname">'
-          +(kid?'<label class="sb" for="kfk" style="display:block;margin:0 0 4px">Vor- und Nachname deines Kindes</label><input id="kfk" maxlength="60" placeholder="Vor- und Nachname des Kindes">':"")
-          +'<div class="ms" id="kfm"></div><button class="pr" id="kfgo">'+E(o.btn)+'</button>'
-        :'<button class="pr" data-kr="spieler">Ich bin '+(sp?E(sp):"Spieler")+'</button><button data-kr="eltern">Ich bin Elternteil'+(sp?" von "+E(sp):"")+'</button>')
-        +kSo);
-      ov.querySelector("#u13so").onclick=()=>signOutClean();
-      ov.querySelectorAll("[data-kr]").forEach((b)=>{b.onclick=()=>{const v=b.dataset.kr;if(v==="spieler"&&sp){res({rolle:"spieler",name:sp,kind:sp});return}step(v)}});
-      const z=ov.querySelector("#kfz");if(z)z.onclick=()=>step("");
-      const go=ov.querySelector("#kfgo");if(!go)return;const n=ov.querySelector("#kfn");n.focus();
-      go.onclick=()=>{const name=n.value.trim(),k=kid?ov.querySelector("#kfk").value.trim():"",m=ov.querySelector("#kfm");
-        if(!nm2(name)){m.className="ms er";m.textContent="Bitte Vor- und Nachnamen eintragen.";return}
-        if(kid&&!nm2(k)){m.className="ms er";m.textContent="Bitte Vor- und Nachnamen deines Kindes eintragen.";return}
-        res({rolle:r,name,kind:r==="spieler"?name:k})};
-    };step("");
-  });
-}
-async function kClaimSp(tok){
-  let e=null;try{const s=await fs.doc("spielereinl/"+tok).get();e=s.exists?s.data():null}catch(x){e=null}
-  if(!e||e.aktiv!==true)return"bad";
-  const kid=e.pid+"~"+mkeyOf(kEm());
-  try{const ex=await fs.doc("kverkn/"+kid).get();if(ex.exists)return"ok"}catch(x){}
-  const f=await kForm({sp:e.n||"",btn:"Weiter"});
-  const zr=fs.doc("kzaehl/"+e.pid);let n=0;
-  try{const z=await zr.get();if(z.exists)n=+z.data().n||0}catch(x){}
-  if(n>=4)return"voll";
-  const b=fs.batch();b.set(fs.doc("kverkn/"+kid),{pid:e.pid,email:kEm(),rolle:f.rolle,name:f.name.slice(0,60),pn:String(e.n||"").slice(0,80),at:new Date().toISOString(),s:tok});
-  if(n)b.update(zr,{n:n+1});else b.set(zr,{n:1});
-  try{await b.commit();kls.set("u13kpid",e.pid);return"ok"}catch(x){return denied(x)?"voll":"fehler"}
-}
-async function kAnfrage(tok){
-  let e=null;try{const s=await fs.doc("mteinl/"+tok).get();e=s.exists?s.data():null}catch(x){e=null}
-  if(!e||e.aktiv!==true)return"bad";
-  /* Schon freigeschaltet: direkt ins Menü, keine neue Anfrage (ein weiteres Kind geht über „Einstellungen“) */
-  if(((await myLinks())||[]).some((l)=>l.gesperrt!==true))return"drin";
-  if(await myAnfrage())return"offen";
-  const f=await kForm({btn:"Anfrage senden"});
-  try{await fs.doc("kanfr/"+mkeyOf(kEm())).set({email:kEm(),name:f.name.slice(0,60),kind:f.kind.slice(0,60),rolle:f.rolle,at:new Date().toISOString(),s:tok,status:"offen"});return"gesendet"}catch(x){return"fehler"}
-}
-async function kontoStart(){
-  OVSUB="Für Spieler und Eltern";
-  LINTRO='<p class="sb" style="font-size:14px;color:inherit;margin:0 0 12px">Melde dich an oder lege mit Google oder deiner E-Mail-Adresse ein Konto an. Das geht einmal, danach bleibst du auf diesem Gerät angemeldet.</p>';
-  if(!cfgOk()){showSetup();return}
-  /* Einladung merken: übersteht Anmeldung, Bestätigungs-E-Mail und Neuladen */
-  const tk=H.match(/^#(sp|mt)\/([A-Za-z0-9_-]{16,80})$/);if(tk)kls.set("u13ktok",tk[1]+"/"+tk[2]);
-  try{for(const f of["firebase-app-compat.js","firebase-auth-compat.js","firebase-firestore-compat.js"])await loadScript(SDK+f)}
-  catch(e){overlay('<div class="ms er">Die Verbindung konnte nicht aufgebaut werden. Bitte die Internetverbindung prüfen und die Seite neu laden.</div>');return}
-  fb=window.firebase;fb.initializeApp(CFG);auth=fb.auth();fs=fb.firestore();
-  if(SHARED){try{await auth.setPersistence(fb.auth.Auth.Persistence.SESSION)}catch(e){}}
-  let u=await firstUser();
-  if(!u){await showLogin();u=auth.currentUser}
-  if(needsVerify(u)){try{await u.reload()}catch(e){}u=auth.currentUser;if(needsVerify(u)){await showVerify(u);u=auth.currentUser}}
-  window.__webFs=fs;
-  const t=(kls.get("u13ktok")||"").split("/");
-  if(t[0]==="sp"&&t[1]){const r=await kClaimSp(t[1]);kls.set("u13ktok",null);
-    if(r==="bad")await kMsg("Dieser Link gilt nicht mehr.","Der Link wurde erneuert oder beendet. Bitte frag den Trainer nach dem aktuellen Link.",1);
-    if(r==="voll")await kMsg("Dieser Link ist schon vergeben.","Pro Spieler können sich höchstens 4 Konten über den Link anmelden. Bitte frag den Trainer, ob er dich freischaltet.",1);
-    if(r==="fehler")await kMsg("Das hat nicht geklappt.","Bitte öffne den Link noch einmal. Wenn es wieder nicht geht, frag den Trainer nach einem neuen Link.",1)}
-  if(t[0]==="mt"&&t[1]){const r=await kAnfrage(t[1]);kls.set("u13ktok",null);
-    if(r==="bad")await kMsg("Dieser Link gilt nicht mehr.","Der Link wurde erneuert oder beendet. Bitte frag den Trainer nach dem aktuellen Link.",1);
-    if(r==="fehler")await kMsg("Das hat nicht geklappt.","Bitte öffne den Link noch einmal.",1);
-    const l0=(await myLinks())||[];
-    if(!l0.length){kWait();await kMsg(r==="gesendet"?"Danke, deine Anfrage ist angekommen.":"Deine Anfrage wartet noch auf den Trainer.","Der Trainer prüft sie und schaltet dich frei. Sobald der Trainer dich freischaltet, geht es hier von allein weiter. Du kannst die Seite auch schließen und später wieder öffnen.");}}
-  if(location.hash!=="#konto")try{history.replaceState(null,"",location.pathname+location.search+"#konto")}catch(e){}
-  const all=await myLinks();
-  if(all===null)return kMsg("Keine Verbindung.","Bitte die Internetverbindung prüfen und die Seite neu laden.",1);
-  const act=all.filter((l)=>l.gesperrt!==true);
-  if(!act.length){
-    if(all.length)return kMsg("Dein Zugang ist gesperrt.","Bitte wende dich an den Trainer.",1);
-    if(await myAnfrage()){kWait();return kMsg("Deine Anfrage wartet noch auf den Trainer.","Der Trainer prüft sie und schaltet dich frei. Sobald der Trainer dich freischaltet, geht es hier von allein weiter. Du kannst die Seite auch schließen und später wieder öffnen.")}
-    return kMsg("Noch kein Spieler verknüpft.","Bitte öffne den Link, den du vom Trainer bekommen hast (Mannschaftslink oder Spielerlink).",1)}
-  const want=kls.get("u13kpid"),cur=act.find((l)=>l.pid===want)||act[0];kls.set("u13kpid",cur.pid);
-  let key="";try{const s=await fs.doc("kkey/"+cur.pid).get();key=(s.exists&&s.data()&&s.data().k)||""}catch(e){key=""}
-  if(!key){kWait();return kMsg("Gleich geht’s los.","Der Trainer hat die Ansicht für "+E(cur.pn||"deinen Spieler")+" noch nicht freigeschaltet. Sobald das passiert ist, geht es hier von allein weiter.")}
-  kls.set("u13wer."+cur.pid,JSON.stringify(cur.rolle==="spieler"?{r:"s"}:{r:"e",n:cur.name}));
-  window.__KONTO={email:kEm(),links:act,cur,render:kRender};
-  hideOverlay();
-  window.__showViewer(cur.pid,key);
-}
-window.__kontoStart=()=>{kontoStart().catch((e)=>{overlay('<div class="ms er">Das hat nicht geklappt. Bitte die Seite neu laden.</div>')})};
-/* Karte „App und Benachrichtigungen“ in den Einstellungen: im Browser die Anleitung zum Speichern als App, in der App der Schalter */
-function kNotif(){
-  const h='<div class="card" id="kstp" style="margin:0 0 12px"><h3 style="margin-top:0">App und Benachrichtigungen</h3>',was='<div class="note" style="margin:0 0 8px">Mit Benachrichtigungen bekommst du Bescheid bei einem neuen Clip, einem neuen Hinweis, einer Erinnerung an eine Aufgabe oder einer Antwort vom Trainer, auch wenn die App geschlossen ist. In den Nachrichten stehen keine Namen.</div>';
-  if(STANDALONE()){
-    if(!PUSH_OK())return h+'<div class="note">Die App ist auf diesem Gerät eingerichtet. Benachrichtigungen gehen auf diesem Gerät leider nicht.</div></div>';
-    if(pushPerm()==="denied")return h+'<div class="note" style="margin:0 0 6px">✅ Die App ist auf diesem Gerät eingerichtet.</div><div class="note">🔕 Benachrichtigungen sind auf diesem Gerät blockiert. Du kannst sie in den Einstellungen des Handys erlauben (iPhone: Einstellungen → Mitteilungen → diese App → Mitteilungen erlauben). Danach die App neu öffnen.</div></div>';
-    const on=pushApi.on();
-    return h+'<div class="note" style="margin:0 0 6px">✅ Die App ist auf diesem Gerät eingerichtet.</div>'+was+'<div class="bar" style="align-items:center;margin:0"><span style="flex:1">'+(on?"🔔 Benachrichtigungen sind an.":"🔕 Benachrichtigungen sind aus.")+'</span><button class="btn" data-ks="'+(on?"poff":"pon")+'"'+(on?"":' style="background:var(--ac,#2563eb);color:#fff;border-color:var(--ac,#2563eb);font-weight:600"')+'>'+(on?"Ausschalten":"Einschalten")+'</button></div></div>';
-  }
-  const dev=IOS?"ios":/Android/i.test(navigator.userAgent)?"android":"pc",ol=(k)=>'<ol style="margin:4px 0 6px 20px;padding:0">'+VSTEP[k].slice(1).map((t)=>"<li>"+t+"</li>").join("")+"</ol>";
-  return h+was+'<div style="font-weight:600;margin:6px 0 2px">1. Seite als App speichern</div>'+(instEv?'<button class="btn" data-ks="inst" style="margin:4px 0 6px">App jetzt installieren</button>':"")
-    +ol(dev)+'<details style="margin:0 0 6px"><summary class="note" style="cursor:pointer">Anleitung für andere Geräte</summary>'+["ios","android","pc"].filter((k)=>k!==dev).map((k)=>'<b style="font-size:13px">'+VSTEP[k][0]+'</b>'+ol(k)).join("")+'</details>'
-    +'<div style="font-weight:600;margin:6px 0 2px">2. Benachrichtigungen einschalten</div><div class="note">Die App auf dem Startbildschirm öffnen, einmal mit deinem Konto anmelden und hier unter <b>Einstellungen</b> auf <b>Einschalten</b> tippen. Auf dem iPhone geht das nur in der App, nicht im Browser.</div></div>';
-}
-/* Reiter „Einstellungen“ in der Konto-Ansicht */
-const KS={msg:"",bad:false,arm:"",anf:undefined,r:"",n:null};   /* r, n: gewählte Rolle und eingetippter Name, bis gespeichert */
-function kRender(el){
-  const K=window.__KONTO;if(!K||!el)return;const c=K.cur,rr=KS.r||c.rolle,sp=rr==="spieler";
-  if(KS.anf===undefined){KS.anf=null;myAnfrage().then((a)=>{KS.anf=a||false;kRender(el)})}
-  const radio=(v,t)=>'<label style="display:flex;gap:8px;align-items:center;margin:4px 0"><input type="radio" name="krl" value="'+v+'"'+(rr===v?" checked":"")+'>'+t+'</label>';
-  el.innerHTML='<div class="card" style="margin:0 0 12px"><h3 style="margin-top:0">Dein Konto</h3><div class="note">Angemeldet als <b>'+E(K.email)+'</b></div>'
-    +'<div style="margin:10px 0 4px;font-weight:600">Ich bin</div>'+radio("spieler",(c.pn?E(c.pn):"der Spieler")+" selbst")+radio("eltern","Elternteil"+(c.pn?" von "+E(c.pn):""))
-    +'<div id="kstn"'+(sp?" hidden":"")+'><label class="note" for="kstni">Dein Vor- und Nachname</label><input id="kstni" maxlength="60" autocomplete="name" value="'+E(KS.n!=null?KS.n:c.rolle==="spieler"?"":c.name)+'" style="width:100%;box-sizing:border-box;margin-top:2px"></div>'
-    +'<div class="bar" style="margin:10px 0 0"><button class="btn" data-ks="save">Speichern</button></div></div>'
-    +'<div class="card" style="margin:0 0 12px"><h3 style="margin-top:0">'+(K.links.length>1?"Deine Spieler":"Dein Spieler")+'</h3>'
-    +K.links.map((l)=>'<div class="vd-row"><div style="flex:1;min-width:0"><b>'+E(l.pn||"Spieler")+'</b><div class="note">'+(l.rolle==="spieler"?"als Spieler":"als Elternteil")+'</div></div>'+(l.pid===c.pid?'<span class="note">wird gerade angezeigt</span>':'<button class="btn" data-ks="go" data-pid="'+E(l.pid)+'">Anzeigen</button>')+'</div>').join("")
-    +'<div style="margin-top:10px"><b>Weiteres Kind (Geschwister)</b>'
-    +(KS.anf?'<div class="note" style="margin-top:4px">Deine Anfrage für <b>'+E(KS.anf.kind)+'</b> wartet auf den Trainer.</div>'
-      :KS.anf===null?'<div class="note">Wird geladen …</div>'
-      :'<div class="note" style="margin:2px 0 6px">Der Trainer bekommt eine Anfrage und schaltet das Kind frei.</div><input id="kstk" maxlength="60" placeholder="Vor- und Nachname des Kindes" style="width:100%;box-sizing:border-box"><div class="bar" style="margin:8px 0 0"><button class="btn" data-ks="kid">Anfrage senden</button></div>')
-    +'</div></div>'
-    +kNotif()
-    +'<div class="card" style="margin:0 0 12px"><h3 style="margin-top:0">Abmelden oder Konto löschen</h3><div class="bar" style="margin:0"><button class="btn" data-ks="out">Abmelden</button><button class="btn" data-ks="del" style="color:var(--r)">'+(KS.arm==="del"?"Wirklich löschen? Dann ist alles weg.":"Konto löschen")+'</button></div></div>'
-    +'<div class="note'+(KS.bad?" warn":"")+'" id="kstm" role="status">'+E(KS.msg)+'</div>';
-  el.querySelectorAll('[name="krl"]').forEach((r)=>{r.onchange=()=>{if(r.checked)KS.r=r.value;el.querySelector("#kstn").hidden=KS.r==="spieler"}});
-  el.querySelector("#kstni").oninput=(ev)=>{KS.n=ev.target.value};
-  el.onclick=async(ev)=>{const b=ev.target.closest&&ev.target.closest("[data-ks]");if(!b)return;const k=b.dataset.ks,say=(t,bad)=>{KS.msg=t;KS.bad=!!bad;kRender(el)};
-    if(k!=="del")KS.arm="";
-    if(k==="save"){const r=(el.querySelector('[name="krl"]:checked')||{}).value||c.rolle,n=r==="spieler"?(c.rolle==="spieler"?c.name:(c.pn||c.name)):el.querySelector("#kstni").value.trim();
-      if(r==="eltern"&&!nm2(n)){say("Bitte deinen Vor- und Nachnamen eintragen.",1);return}
-      try{await fs.doc("kverkn/"+c.id).update({name:n.slice(0,60),rolle:r});kls.set("u13wer."+c.pid,JSON.stringify(r==="spieler"?{r:"s"}:{r:"e",n}));KS.msg="";location.reload()}catch(x){say("Das hat nicht geklappt. Bitte später noch einmal versuchen.",1)}return}
-    if(k==="go"){kls.set("u13kpid",b.dataset.pid);location.reload();return}
-    if(k==="inst"){const e2=instEv;if(!e2)return;instEv=null;try{await e2.prompt()}catch(x){}kRender(el);return}
-    if(k==="pon"||k==="poff"){const pc=window.__pushCtx&&window.__pushCtx();if(!pc)return;b.disabled=true;
-      if(k==="poff"){await pushApi.disable(pc);say("Benachrichtigungen sind aus.");return}
-      let r;try{r=await pushApi.enable(pc)}catch(x){r="fehler"}
-      if(r==="ok")say("Benachrichtigungen sind an.");else say(pushMsg(r),1);return}
-    if(k==="kid"){const n=el.querySelector("#kstk").value.trim();if(!nm2(n)){say("Bitte Vor- und Nachnamen des Kindes eintragen.",1);return}
-      const a={email:K.email,name:String(c.rolle==="spieler"?c.pn||c.name:c.name).slice(0,60),kind:n.slice(0,60),rolle:"eltern",at:new Date().toISOString(),via:c.pid,status:"offen"};
-      try{await fs.doc("kanfr/"+mkeyOf(K.email)).set(a);KS.anf=a;say("Anfrage gesendet. Der Trainer schaltet das Kind frei.")}catch(x){say("Das hat nicht geklappt. Bitte später noch einmal versuchen.",1)}return}
-    if(k==="out"){signOutClean();return}
-    if(k==="del"){if(KS.arm!=="del"){KS.arm="del";kRender(el);return}KS.arm="";
-      try{const l=(await myLinks())||[];for(const x of l)await fs.doc("kverkn/"+x.id).delete();try{await fs.doc("kanfr/"+mkeyOf(K.email)).delete()}catch(x){}}catch(x){say("Das hat nicht geklappt. Bitte später noch einmal versuchen.",1);return}
-      try{await auth.currentUser.delete();signOutClean()}
-      catch(x){say("Deine Verbindungen zu den Spielern sind gelöscht. Um auch das Konto selbst zu löschen, melde dich bitte ab, wieder an und tippe noch einmal auf „Konto löschen“.",1)}
-      return}
-  };
-}
 
 /* ---------- Schnittstelle zur App ---------- */
 let dbP=null;
@@ -611,7 +557,5 @@ window.claude={use:async function(name){
 }};
 
 /* ---------- Offline-Start (Service Worker) und Installation ---------- */
-window.addEventListener("beforeinstallprompt",(e)=>{e.preventDefault();instEv=e;window.dispatchEvent(new Event("u13inst"))});
-window.addEventListener("appinstalled",()=>{instEv=null;const b=document.getElementById("u13instb");if(b)b.style.display="none"});
 if("serviceWorker" in navigator&&/^https:|^http:\/\/localhost/.test(location.protocol+"//"+location.hostname)){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})})}
 })();
