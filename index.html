@@ -2838,7 +2838,7 @@ let SNAP={};try{SNAP=JSON.parse(document.getElementById("snap").textContent||"{}
 const dt=(iso)=>{if(!iso)return"";const d=new Date(iso);return isNaN(d)?"":d.toLocaleDateString("de-DE")+" "+d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})};
 
 /* ---------- Ansicht für Spieler (ohne Anmeldung) ---------- */
-function shell(){const a=document.querySelector(".app");if(a)a.remove();const f=document.getElementById("fi");if(f)f.remove();let v=document.getElementById("vw2");if(!v){v=document.createElement("div");v.id="vw2";document.body.appendChild(v)}return v}
+function shell(){const a=document.querySelector(".app");if(a)a.remove();const f=document.getElementById("fi");if(f)f.remove();let v=document.getElementById("vw2");if(!v){v=document.createElement("div");v.id="vw2";document.body.appendChild(v)}delete v.dataset.plan;return v}
 function parseCode(s){const m=String(s||"").trim().match(/([A-Za-z0-9]+)\.([A-Za-z0-9_-]{16,})\s*$/);return m?{pid:m[1],key:m[2]}:null}
 function showAccess(msg){
   const v=shell();
@@ -2926,7 +2926,7 @@ function vPlan(root,T){
   draw();
 }
 function planOnly(d){
-  useBg();dzApply(d,SNAP.dz);const v=shell(),cur=document.documentElement.getAttribute("data-theme")||"";
+  useBg();dzApply(d,SNAP.dz);const v=shell(),cur=document.documentElement.getAttribute("data-theme")||"";v.dataset.plan="1";   /* web.js: kein „Als App speichern“-Hinweis für Spieler */
   v.innerHTML='<div class="vh">'+(d.l?'<img alt="" data-lg src="'+esc(d.l)+'">':"")+'<div><b style="font-size:22px;line-height:1.2">Terminplan '+esc(d.m||"U13")+'</b><div class="note" style="font-size:14px">TuS Haltern am See · Saison '+esc(d.s||"")+'</div></div><span style="flex:1"></span><select id="vth" aria-label="Darstellung"><option value="">Darstellung: Auto</option><option value="light">Hell</option><option value="dark">Dunkel</option></select></div>'+'<div id="vhn">'+hnHtml(hnItems(d.hn,"alle","","","e"),"team")+'</div><div id="vplan"></div><div class="vf">Stand: '+esc(dt(d.u))+'</div>';
   window.__hnRe=()=>{const hn=document.getElementById("vhn");if(hn)hn.innerHTML=hnHtml(hnItems(d.hn,"alle","","","e"),"team")};
   bgPick();vLogo(v,d.l);const s=document.getElementById("vth");s.value=cur;s.onchange=()=>{applyTheme(s.value);try{s.value?localStorage.setItem("u13theme",s.value):localStorage.removeItem("u13theme")}catch(e){}};

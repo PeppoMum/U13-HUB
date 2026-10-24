@@ -243,21 +243,26 @@ const VSTEP={ios:["iPhone/iPad","Unten auf <b>Teilen</b> tippen (Quadrat mit Pfe
 function viewerInstall(){
   if(STANDALONE())return;
   const dev=IOS?"ios":/Android/i.test(navigator.userAgent)?"android":"pc",gone=()=>{try{return localStorage.getItem("u13vinstx")==="1"}catch(e){return false}};
-  const ol=(k)=>'<ol style="margin:6px 0 6px 20px;padding:0">'+VSTEP[k].slice(1).map((t)=>"<li>"+t+"</li>").join("")+"<li>Die App auf dem Startbildschirm öffnen und oben auf <b>Einschalten</b> (Benachrichtigungen) tippen.</li></ol>";
-  const eltern=()=>{const c=window.__pushCtx&&window.__pushCtx();return!!c&&c.ro==="e"};
-  const body=()=>(eltern()?'<p style="margin:4px 0 6px;font-size:14.5px">Für Eltern ist das freiwillig. Wer mag, kann die Seite als App speichern und dort die Benachrichtigungen einschalten, zum Beispiel für Antworten vom Trainer und neue Hinweise.</p>'
+  /* Terminplan-Link (planOnly in links.js setzt data-plan): kein Spieler-Hinweis oben, keine Benachrichtigungen, kein Passwort */
+  const plan=()=>{const v=document.getElementById("vw2");return!!(v&&v.dataset.plan)};
+  const ol=(k)=>'<ol style="margin:6px 0 6px 20px;padding:0">'+VSTEP[k].slice(1).map((t)=>"<li>"+t+"</li>").join("")+(plan()?"":"<li>Die App auf dem Startbildschirm öffnen und oben auf <b>Einschalten</b> (Benachrichtigungen) tippen.</li>")+"</ol>";
+  /* Eltern: Rolle aus dem Konto (steht schon vor dem Aufbau der Ansicht fest), sonst wie bisher über die Benachrichtigungen */
+  const eltern=()=>{const K=window.__KONTO;if(K&&K.cur)return K.cur.rolle==="eltern";const c=window.__pushCtx&&window.__pushCtx();return!!c&&c.ro==="e"};
+  const body=()=>(plan()?'<p style="margin:4px 0 6px;font-size:14.5px">Wer mag, kann den Terminplan als App speichern. Dann öffnet er sich mit einem Tipp vom Startbildschirm.</p>'
+      :eltern()?'<p style="margin:4px 0 6px;font-size:14.5px">Für Eltern ist das freiwillig. Wer mag, kann die Seite als App speichern und dort die Benachrichtigungen einschalten, zum Beispiel für Antworten vom Trainer und neue Hinweise.</p>'
       :'<p style="margin:4px 0 6px;font-size:14.5px"><b>Für Spieler: Bitte speichere diese Seite als App auf deinem Handy und schalte danach in der App die Benachrichtigungen ein.</b> Nur dann bekommst du Bescheid, wenn es einen neuen Clip, einen neuen Hinweis, eine Erinnerung an eine Aufgabe oder eine Antwort vom Trainer gibt, auch wenn die App geschlossen ist. Danke!</p><p class="note" style="margin:0 0 6px">Eltern brauchen die App nicht unbedingt, können sie aber natürlich auch speichern.</p>')+'<p class="note" style="margin:0 0 6px">Außerdem öffnest du die Seite dann mit einem Tipp vom Startbildschirm, auch ohne Netz (letzter Stand). Die App zeigt genau das, was du hier siehst.</p><button class="btn" data-vib style="display:none;margin:2px 0 8px">App jetzt installieren</button><b style="font-size:14px">So geht’s ('+VSTEP[dev][0]+'):</b>'+ol(dev)
     +'<details style="margin:4px 0"><summary class="note" style="cursor:pointer">Anleitung für andere Geräte</summary>'+["ios","android","pc"].filter((k)=>k!==dev).map((k)=>'<b style="font-size:13px">'+VSTEP[k][0]+'</b>'+ol(k)).join("")+"</details>"
-    +(isKurz?'<p class="note" style="margin:4px 0 0">Beim ersten Öffnen der App einmal das Passwort eingeben und „Auf diesem Gerät angemeldet bleiben“ anhaken.</p>':"")+(isKonto?'<p class="note" style="margin:4px 0 0">In der App meldest du dich einmal mit deinem Konto an.</p>':'<p class="note" style="margin:4px 0 0">Den Link bitte nicht weitergeben. Er gehört nur dir.</p>');
+    +(plan()?"":isKurz?'<p class="note" style="margin:4px 0 0">Beim ersten Öffnen der App einmal das Passwort eingeben und „Auf diesem Gerät angemeldet bleiben“ anhaken.</p>':"")+(isKonto?'<p class="note" style="margin:4px 0 0">In der App meldest du dich einmal mit deinem Konto an.</p>':plan()?"":'<p class="note" style="margin:4px 0 0">Den Link bitte nicht weitergeben. Er gehört nur dir.</p>');
   const wire=(c)=>{const b=c.querySelector("[data-vib]"),show=()=>{if(instEv)b.style.display=""};show();window.addEventListener("u13inst",show);
     b.onclick=async()=>{const ev=instEv;if(!ev)return;instEv=null;b.style.display="none";try{await ev.prompt()}catch(e){}}};
   const top=()=>{const c=document.createElement("div");c.id="u13vinst";c.className="card";c.style.cssText="margin:0 0 14px;border-color:var(--ac,#2563eb)";
     c.innerHTML='<div style="display:flex;gap:8px;align-items:flex-start"><b style="flex:1;font-size:16px">📲 Spieler: Bitte als App speichern</b><button class="btn" data-vix style="font-size:12px;padding:3px 9px">Ausblenden ✕</button></div>'+body();
     wire(c);c.querySelector("[data-vix]").onclick=()=>{try{localStorage.setItem("u13vinstx","1")}catch(e){}c.remove();put()};return c};
   const low=()=>{const c=document.createElement("details");c.id="u13vinst";c.className="card";c.style.cssText="margin:14px 0 0";
-    c.innerHTML='<summary style="cursor:pointer;font-weight:600">📲 Als App auf dem Handy speichern'+(eltern()?" (freiwillig)":"")+'</summary>'+body();wire(c);return c};
-  const put=()=>{const v=document.getElementById("vw2");if(!v||document.getElementById("u13vinst"))return;
-    if(gone()||eltern()){v.appendChild(low());return}
+    c.innerHTML='<summary style="cursor:pointer;font-weight:600">📲 Als App auf dem Handy speichern'+(eltern()||plan()?" (freiwillig)":"")+'</summary>'+body();wire(c);return c};
+  const put=()=>{const v=document.getElementById("vw2");if(!v)return;
+    const was=document.getElementById("u13vinst");if(was){if(was.tagName==="DETAILS"||!(eltern()||plan()))return;was.remove()}   /* Rolle erst später bekannt: oberen Hinweis wieder wegnehmen */
+    if(gone()||eltern()||plan()){v.appendChild(low());return}
     const hd=v.querySelector(".vh");if(!hd)return;   /* erst wenn die Ansicht da ist (nicht auf der Passwortseite) */
     const kf=document.getElementById("kzf"),at=kf&&kf.parentNode===v?kf:hd;at.insertAdjacentElement("afterend",top())};
   new MutationObserver(put).observe(document.documentElement,{childList:true,subtree:true});put();
