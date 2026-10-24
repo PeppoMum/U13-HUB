@@ -252,17 +252,20 @@ function viewerInstall(){
       :eltern()?'<p style="margin:4px 0 6px;font-size:14.5px">Für Eltern ist das freiwillig. Wer mag, kann die Seite als App speichern und dort die Benachrichtigungen einschalten, zum Beispiel für Antworten vom Trainer und neue Hinweise.</p>'
       :'<p style="margin:4px 0 6px;font-size:14.5px"><b>Für Spieler: Bitte speichere diese Seite als App auf deinem Handy und schalte danach in der App die Benachrichtigungen ein.</b> Nur dann bekommst du Bescheid, wenn es einen neuen Clip, einen neuen Hinweis, eine Erinnerung an eine Aufgabe oder eine Antwort vom Trainer gibt, auch wenn die App geschlossen ist. Danke!</p><p class="note" style="margin:0 0 6px">Eltern brauchen die App nicht unbedingt, können sie aber natürlich auch speichern.</p>')+'<p class="note" style="margin:0 0 6px">Außerdem öffnest du die Seite dann mit einem Tipp vom Startbildschirm, auch ohne Netz (letzter Stand). Die App zeigt genau das, was du hier siehst.</p><button class="btn" data-vib style="display:none;margin:2px 0 8px">App jetzt installieren</button><b style="font-size:14px">So geht’s ('+VSTEP[dev][0]+'):</b>'+ol(dev)
     +'<details style="margin:4px 0"><summary class="note" style="cursor:pointer">Anleitung für andere Geräte</summary>'+["ios","android","pc"].filter((k)=>k!==dev).map((k)=>'<b style="font-size:13px">'+VSTEP[k][0]+'</b>'+ol(k)).join("")+"</details>"
-    +(plan()?"":isKurz?'<p class="note" style="margin:4px 0 0">Beim ersten Öffnen der App einmal das Passwort eingeben und „Auf diesem Gerät angemeldet bleiben“ anhaken.</p>':"")+(isKonto?'<p class="note" style="margin:4px 0 0">In der App meldest du dich einmal mit deinem Konto an.</p>':plan()?"":'<p class="note" style="margin:4px 0 0">Den Link bitte nicht weitergeben. Er gehört nur dir.</p>');
+    +(plan()?"":isKurz?'<p class="note" style="margin:4px 0 0">Beim ersten Öffnen der App einmal das Passwort eingeben und „Auf diesem Gerät angemeldet bleiben“ anhaken.</p>':"")+(isKonto?'<p class="note" style="margin:4px 0 0">In der App meldest du dich einmal mit deinem Konto an. Diese Anleitung findest du auch jederzeit unter <b>Einstellungen</b>.</p>':plan()?"":'<p class="note" style="margin:4px 0 0">Den Link bitte nicht weitergeben. Er gehört nur dir.</p>');
   const wire=(c)=>{const b=c.querySelector("[data-vib]"),show=()=>{if(instEv)b.style.display=""};show();window.addEventListener("u13inst",show);
     b.onclick=async()=>{const ev=instEv;if(!ev)return;instEv=null;b.style.display="none";try{await ev.prompt()}catch(e){}}};
   const top=()=>{const c=document.createElement("div");c.id="u13vinst";c.className="card";c.style.cssText="margin:0 0 14px;border-color:var(--ac,#2563eb)";
     c.innerHTML='<div style="display:flex;gap:8px;align-items:flex-start"><b style="flex:1;font-size:16px">📲 Spieler: Bitte als App speichern</b><button class="btn" data-vix style="font-size:12px;padding:3px 9px">Ausblenden ✕</button></div>'+body();
     wire(c);c.querySelector("[data-vix]").onclick=()=>{try{localStorage.setItem("u13vinstx","1")}catch(e){}c.remove();put()};return c};
   const low=()=>{const c=document.createElement("details");c.id="u13vinst";c.className="card";c.style.cssText="margin:14px 0 0";
-    c.innerHTML='<summary style="cursor:pointer;font-weight:600">📲 Als App auf dem Handy speichern'+(eltern()||plan()?" (freiwillig)":"")+'</summary>'+body();wire(c);return c};
-  const put=()=>{const v=document.getElementById("vw2");if(!v)return;
+    c.innerHTML='<summary style="cursor:pointer;font-weight:600"><span style="display:inline-flex;gap:8px;align-items:center;width:calc(100% - 24px)"><span style="flex:1">📲 Als App auf dem Handy speichern'+(eltern()||plan()?" (freiwillig)":"")+'</span><button class="btn" data-vioff style="font-size:12px;padding:3px 9px;font-weight:400">Ausblenden ✕</button></span></summary>'+body();wire(c);
+    c.querySelector("[data-vioff]").onclick=(e)=>{e.preventDefault();e.stopPropagation();try{localStorage.setItem("u13vinstx","2")}catch(x){}c.remove()};return c};
+  const off=()=>{try{return localStorage.getItem("u13vinstx")==="2"}catch(e){return false}};   /* ganz ausgeblendet */
+  const bottom=(v,el)=>{const f=v.querySelector(":scope>.vf");if(f)v.insertBefore(el,f);else v.appendChild(el)};   /* „Stand“ bleibt ganz unten */
+  const put=()=>{const v=document.getElementById("vw2");if(!v||off())return;
     const was=document.getElementById("u13vinst");if(was){if(was.tagName==="DETAILS"||!(eltern()||plan()))return;was.remove()}   /* Rolle erst später bekannt: oberen Hinweis wieder wegnehmen */
-    if(gone()||eltern()||plan()){v.appendChild(low());return}
+    if(gone()||eltern()||plan()){bottom(v,low());return}
     const hd=v.querySelector(".vh");if(!hd)return;   /* erst wenn die Ansicht da ist (nicht auf der Passwortseite) */
     const kf=document.getElementById("kzf"),at=kf&&kf.parentNode===v?kf:hd;at.insertAdjacentElement("afterend",top())};
   new MutationObserver(put).observe(document.documentElement,{childList:true,subtree:true});put();
@@ -319,7 +322,7 @@ function viewerPush(){
     else{el.style.cssText="margin:14px 0 0";
       el.innerHTML=st==="zu"?'<div class="note">🔕 Benachrichtigungen sind auf diesem Gerät blockiert. Du kannst sie in den Einstellungen des Handys erlauben (iPhone: Einstellungen → Mitteilungen → diese App → Mitteilungen erlauben). Danach die App neu öffnen.</div>'
         :'<div class="bar" style="align-items:center"><span style="flex:1">'+(st==="an"?"🔔 Benachrichtigungen sind an.":"🔕 Benachrichtigungen sind aus. Hier kannst du sie jederzeit einschalten.")+'</span><button class="btn" '+(st==="an"?"data-poff>Ausschalten":"data-pon>Einschalten")+'</button></div><div class="note warn" data-pm></div>';
-      v.appendChild(el)}
+      {const f=v.querySelector(":scope>.vf");if(f)v.insertBefore(el,f);else v.appendChild(el)}}
   };
   document.addEventListener("click",async(e)=>{const t=e.target.closest&&e.target.closest("#u13push button");if(!t)return;const c=ctx();if(!c)return;
     if(t.hasAttribute("data-plater")){pls.set("u13pushx","s"+Date.now());put();return}
@@ -446,6 +449,12 @@ function kMsg(title,text,bad){const o=overlay('<div class="ms '+(bad?"er":"ok")+
     try{const l=(await myLinks())||[];for(const x of l)await fs.doc("kverkn/"+x.id).delete();try{await fs.doc("kanfr/"+mkeyOf(kEm())).delete()}catch(x){}await auth.currentUser.delete();signOutClean()}
     catch(x){const m=o.querySelector("#kdm");m.className="ms er";m.textContent="Bitte melde dich ab, wieder an und tippe dann noch einmal auf „Konto löschen“."}};
   return new Promise(()=>{})}
+/* Warten auf die Freigabe: alle 15 Sekunden (und beim Zurückkehren auf die Seite) nachsehen; sobald der Spieler freigeschaltet ist, geht es automatisch weiter */
+let kWaitOn=false;
+function kWait(){if(kWaitOn)return;kWaitOn=true;
+  const chk=async()=>{try{const l=((await myLinks())||[]).filter((x)=>x.gesperrt!==true);if(!l.length)return;
+    const s=await fs.doc("kkey/"+l[0].pid).get();if(s.exists&&s.data()&&s.data().k)location.reload()}catch(e){}};
+  setInterval(chk,15000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)chk()})}
 /* Wer bist du? Erst Spieler oder Elternteil, danach nur die Namen, die noch fehlen.
    o.sp = Name des Spielers (Spielerlink: Spieler müssen gar nichts eintippen), sonst Mannschaftslink. */
 function kForm(o){
@@ -515,18 +524,18 @@ async function kontoStart(){
     if(r==="bad")await kMsg("Dieser Link gilt nicht mehr.","Der Link wurde erneuert oder beendet. Bitte frag den Trainer nach dem aktuellen Link.",1);
     if(r==="fehler")await kMsg("Das hat nicht geklappt.","Bitte öffne den Link noch einmal.",1);
     const l0=(await myLinks())||[];
-    if(!l0.length){await kMsg(r==="gesendet"?"Danke, deine Anfrage ist angekommen.":"Deine Anfrage wartet noch auf den Trainer.","Der Trainer prüft sie und schaltet dich frei. Danach öffnest du einfach wieder denselben Link oder die App und bist direkt drin.");}}
+    if(!l0.length){kWait();await kMsg(r==="gesendet"?"Danke, deine Anfrage ist angekommen.":"Deine Anfrage wartet noch auf den Trainer.","Der Trainer prüft sie und schaltet dich frei. Sobald der Trainer dich freischaltet, geht es hier von allein weiter. Du kannst die Seite auch schließen und später wieder öffnen.");}}
   if(location.hash!=="#konto")try{history.replaceState(null,"",location.pathname+location.search+"#konto")}catch(e){}
   const all=await myLinks();
   if(all===null)return kMsg("Keine Verbindung.","Bitte die Internetverbindung prüfen und die Seite neu laden.",1);
   const act=all.filter((l)=>l.gesperrt!==true);
   if(!act.length){
     if(all.length)return kMsg("Dein Zugang ist gesperrt.","Bitte wende dich an den Trainer.",1);
-    if(await myAnfrage())return kMsg("Deine Anfrage wartet noch auf den Trainer.","Der Trainer prüft sie und schaltet dich frei. Danach öffnest du diese Seite einfach wieder.");
+    if(await myAnfrage()){kWait();return kMsg("Deine Anfrage wartet noch auf den Trainer.","Der Trainer prüft sie und schaltet dich frei. Sobald der Trainer dich freischaltet, geht es hier von allein weiter. Du kannst die Seite auch schließen und später wieder öffnen.")}
     return kMsg("Noch kein Spieler verknüpft.","Bitte öffne den Link, den du vom Trainer bekommen hast (Mannschaftslink oder Spielerlink).",1)}
   const want=kls.get("u13kpid"),cur=act.find((l)=>l.pid===want)||act[0];kls.set("u13kpid",cur.pid);
   let key="";try{const s=await fs.doc("kkey/"+cur.pid).get();key=(s.exists&&s.data()&&s.data().k)||""}catch(e){key=""}
-  if(!key)return kMsg("Gleich geht’s los.","Der Trainer hat die Ansicht für "+E(cur.pn||"deinen Spieler")+" noch nicht freigeschaltet. Bitte öffne die Seite später noch einmal.");
+  if(!key){kWait();return kMsg("Gleich geht’s los.","Der Trainer hat die Ansicht für "+E(cur.pn||"deinen Spieler")+" noch nicht freigeschaltet. Sobald das passiert ist, geht es hier von allein weiter.")}
   kls.set("u13wer."+cur.pid,JSON.stringify(cur.rolle==="spieler"?{r:"s"}:{r:"e",n:cur.name}));
   window.__KONTO={email:kEm(),links:act,cur,render:kRender};
   hideOverlay();
