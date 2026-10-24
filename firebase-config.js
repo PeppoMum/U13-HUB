@@ -1,9 +1,6 @@
-/* Firebase-Zugangswerte des Projekts "Vereinsloesung HUB". Keine Geheimnisse – geschützt wird über die Sicherheitsregeln und die Anmeldung. */
 window.U13_FIREBASE = {
-  apiKey: "AIzaSyBZtSq76RH1vl15TDDRq-_4RBrWPrZgme4",
-  authDomain: "vereinsloesung-hub.firebaseapp.com",
-  projectId: "vereinsloesung-hub",
-  storageBucket: "vereinsloesung-hub.firebasestorage.app",
-  messagingSenderId: "663756824327",
-  appId: "1:663756824327:web:7e181af86a5e49105defa2"
+  apiKey: "AIzaSyBGGt7fIEd9gEnkbzGao3OvDXEF3pZWbbE",
+  authDomain: "trainerzentrale-u13.firebaseapp.com",
+  projectId: "trainerzentrale-u13",
+  appId: "1:983519138709:web:f96f2c64f5915ea04c9c9c"
 };
