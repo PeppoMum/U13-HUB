@@ -13,13 +13,13 @@ const IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="M
 /* Vorschau für Trainer (?vorschau=s|e, in der Trainer-App eingebettet): Spieler- bzw. Elternansicht ohne Konto.
    Eigener Speicher nur für dieses Fenster: nichts wird auf dem Gerät gemerkt, Eingaben gehen nicht an den Server (siehe __vidNet unten). */
 const VS=((location.search.match(/[?&]vorschau=([se])(?:&|$)/)||[])[1])||"";
-window.__VORSCHAU=VS;
+window.__VORSCHAU=VS;window.__TRAINERDEV=(()=>{try{return!VS&&!!localStorage.getItem("u13role")}catch(e){return false}})();
 if(VS){const M=new Map();try{const t=localStorage.getItem("u13theme");if(t)M.set("u13theme",t)}catch(e){}
   const pm=location.hash.match(/^#([A-Za-z0-9]+)\./);if(pm)M.set("u13wer."+pm[1],JSON.stringify(VS==="s"?{r:"s"}:{r:"e",n:"Elternteil"}));
   const mem={getItem:(k)=>M.has(String(k))?M.get(String(k)):null,setItem:(k,v)=>{M.set(String(k),String(v))},removeItem:(k)=>{M.delete(String(k))},clear:()=>M.clear(),key:(i)=>[...M.keys()][i]||null,get length(){return M.size}};
   try{Object.defineProperty(window,"localStorage",{configurable:true,get:()=>mem})}catch(e){}}
 /* Trainer-Gerät (hier hat sich schon ein Trainer angemeldet): Die App startet immer in der Trainer-Ansicht, nie in einem gemerkten Link */
-const TRAINER=(()=>{try{return!VS&&!!localStorage.getItem("u13role")}catch(e){return false}})();
+const TRAINER=window.__TRAINERDEV;
 /* Start der installierten Link-App („./?link“ ohne Link): den auf diesem Gerät gespeicherten Link wieder einsetzen */
 if(/[?&]link\b/.test(location.search)&&!location.hash){try{const s=localStorage.getItem("u13link");
   if(TRAINER)history.replaceState(null,"",location.pathname);
