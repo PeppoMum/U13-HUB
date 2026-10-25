@@ -10,8 +10,20 @@ const XIDS=["plan","demo","demosp"];
 window.__WEB=true;
 window.__WEB_BASE=location.origin+location.pathname.replace(/index\.html$/,"");
 const IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+/* Vorschau für Trainer (?vorschau=s|e, in der Trainer-App eingebettet): Spieler- bzw. Elternansicht ohne Konto.
+   Eigener Speicher nur für dieses Fenster: nichts wird auf dem Gerät gemerkt, Eingaben gehen nicht an den Server (siehe __vidNet unten). */
+const VS=((location.search.match(/[?&]vorschau=([se])(?:&|$)/)||[])[1])||"";
+window.__VORSCHAU=VS;
+if(VS){const M=new Map();try{const t=localStorage.getItem("u13theme");if(t)M.set("u13theme",t)}catch(e){}
+  const pm=location.hash.match(/^#([A-Za-z0-9]+)\./);if(pm)M.set("u13wer."+pm[1],JSON.stringify(VS==="s"?{r:"s"}:{r:"e",n:"Elternteil"}));
+  const mem={getItem:(k)=>M.has(String(k))?M.get(String(k)):null,setItem:(k,v)=>{M.set(String(k),String(v))},removeItem:(k)=>{M.delete(String(k))},clear:()=>M.clear(),key:(i)=>[...M.keys()][i]||null,get length(){return M.size}};
+  try{Object.defineProperty(window,"localStorage",{configurable:true,get:()=>mem})}catch(e){}}
+/* Trainer-Gerät (hier hat sich schon ein Trainer angemeldet): Die App startet immer in der Trainer-Ansicht, nie in einem gemerkten Link */
+const TRAINER=(()=>{try{return!VS&&!!localStorage.getItem("u13role")}catch(e){return false}})();
 /* Start der installierten Link-App („./?link“ ohne Link): den auf diesem Gerät gespeicherten Link wieder einsetzen */
-if(/[?&]link\b/.test(location.search)&&!location.hash){try{const s=localStorage.getItem("u13link");if(s&&/^#/.test(s))history.replaceState(null,"",location.pathname+location.search+s)}catch(e){}}
+if(/[?&]link\b/.test(location.search)&&!location.hash){try{const s=localStorage.getItem("u13link");
+  if(TRAINER)history.replaceState(null,"",location.pathname);
+  else if(s&&/^#/.test(s))history.replaceState(null,"",location.pathname+location.search+s)}catch(e){}}
 const H=location.hash;
 const isScout=/^#scout\.[A-Za-z0-9_-]{16,}$/.test(H);
 window.__SCOUTKEY=isScout?H.slice(7):"";
@@ -22,8 +34,17 @@ const isViewerHash=(/^#[A-Za-z0-9]+\.[A-Za-z0-9_-]{16,}$/.test(H)&&!/^#co[A-Za-z
 /* Spieler-, Eltern- und externe Links als eigene App. Rechte ändern sich nicht: Die App zeigt dasselbe wie der Link im Browser.
    Android/Computer: eigene App-Datei (manifest-link) mit Startadresse „./?link“; beim Start wird der zuletzt geöffnete Link auf diesem Gerät wieder eingesetzt (siehe oben).
    iPhone/iPad: ohne App-Datei, dann speichert das iPhone genau die geöffnete Adresse samt Link. */
-if(isViewerHash)try{localStorage.setItem("u13link",isKonto?"#konto":H)}catch(e){}
-{const mf=isViewerHash?(IOS?"":"manifest-link.webmanifest"):"manifest.webmanifest";   /* App-Datei steht deshalb nicht fest in index.html */
+/* Gemerkter Link: der persönliche (Konto oder Spielerlink) geht vor. Wer zwischendurch den Teamlink oder eine Demo öffnet, landet beim nächsten Start trotzdem wieder in seiner eigenen Ansicht. */
+const lRank=(h)=>/^#(konto|sp\/|mt\/)/.test(h)?3:new RegExp("^#("+XIDS.join("|")+")\\.").test(h)?1:h?2:0;
+if(isViewerHash&&!VS)try{const neu=isKonto?"#konto":H;if(lRank(neu)>=lRank(localStorage.getItem("u13link")||""))localStorage.setItem("u13link",neu)}catch(e){}
+/* Trainer-Gerät in einer Link-Ansicht: Leiste oben mit dem Weg zurück zur Trainer-Ansicht */
+if(isViewerHash&&TRAINER)document.addEventListener("DOMContentLoaded",()=>{if(document.getElementById("u13tback"))return;const d=document.createElement("div");d.id="u13tback";
+  d.style.cssText="position:sticky;top:0;z-index:70;display:flex;gap:10px;align-items:center;justify-content:space-between;padding:8px 14px;padding-top:calc(8px + env(safe-area-inset-top,0px));background:#004AAD;color:#fff;font-size:14px";
+  d.innerHTML='<span>Du siehst gerade einen Link wie Spieler und Eltern.</span><button type="button" style="flex:none;border:0;border-radius:99px;padding:6px 14px;background:#fff;color:#004AAD;font:inherit;font-weight:600;cursor:pointer">Zur Trainer-Ansicht</button>';
+  d.querySelector("button").onclick=()=>{location.replace(location.pathname)};document.body.insertAdjacentElement("afterbegin",d)});
+if(VS)document.addEventListener("DOMContentLoaded",()=>{const st=document.createElement("style");st.textContent="#u13vinst,#u13push,#u13tback{display:none!important}";document.head.appendChild(st);
+  if(window.top===window){const d=document.createElement("div");d.style.cssText="padding:8px 14px;background:var(--ys,#fff7e0);color:var(--tx,#111);font-size:14px;text-align:center";d.textContent="Vorschau für Trainer · Eingaben werden nicht gespeichert";document.body.insertAdjacentElement("afterbegin",d)}});
+{const mf=VS?"":isViewerHash?(IOS?"":"manifest-link.webmanifest"):"manifest.webmanifest";   /* App-Datei steht deshalb nicht fest in index.html */
   if(mf){const l=document.createElement("link");l.rel="manifest";l.href=mf;document.head.appendChild(l)}}
 const cfgOk=()=>!!(CFG.apiKey&&CFG.projectId&&CFG.authDomain&&!/DEIN|EINTRAGEN|XXXX/i.test(CFG.apiKey+CFG.projectId));
 const E=(s)=>String(s==null?"":s).replace(/[&<>"]/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -84,6 +105,12 @@ window.__vidNet={
     const r=await fetch(FSB()+P(coll)+"?documentId="+encodeURIComponent(id)+"&"+K(),{method:"POST",headers:hd,body:JSON.stringify({fields:f})});if(!r.ok)fail(r)},
   async update(path,obj){const ks=Object.keys(obj),f={};ks.forEach((k)=>{f[k]=toFs(obj[k])});
     const r=await fetch(FSB()+P(path)+"?"+ks.map((k)=>"updateMask.fieldPaths="+encodeURIComponent(k)).join("&")+"&currentDocument.exists=true&"+K(),{method:"PATCH",headers:hd,body:JSON.stringify({fields:f})});if(!r.ok)fail(r)}};}
+/* Vorschau: Lesen wie gewohnt, Eingaben bleiben nur in diesem Fenster */
+if(VS){const real=window.__vidNet,S={};window.__vidNet={
+  async list(p){const a=await real.list(p),loc=S[p]||[];return a.filter((x)=>!loc.some((y)=>y.id===x.id)).concat(loc.map((x)=>({...x})))},
+  async create(c,id,o){const L=S[c]=(S[c]||[]).filter((x)=>x.id!==id);L.push({...o,id,at:new Date().toISOString(),server:true})},
+  async update(p,o){const q=p.split("/"),id=q.pop(),c=q.join("/"),L=S[c]=S[c]||[],x=L.find((y)=>y.id===id);if(x)Object.assign(x,o)}};
+  window.__kurzNet={get:async()=>null,setPw:async()=>{}}}
 window.__webFile=(fid)=>/^[0-9a-f]{24}$/.test(fid)?restBlob("f_"+fid):Promise.resolve(null);   /* Eigentraining: verschlüsselte Datei */
 window.__webSnap=async function(pid){
   if(!cfgOk())throw new Error("config");
@@ -256,10 +283,10 @@ function viewerInstall(){
   const wire=(c)=>{const b=c.querySelector("[data-vib]"),show=()=>{if(instEv)b.style.display=""};show();window.addEventListener("u13inst",show);
     b.onclick=async()=>{const ev=instEv;if(!ev)return;instEv=null;b.style.display="none";try{await ev.prompt()}catch(e){}}};
   const top=()=>{const c=document.createElement("div");c.id="u13vinst";c.className="card";c.style.cssText="margin:0 0 14px;border-color:var(--ac,#2563eb)";
-    c.innerHTML='<div style="display:flex;gap:8px;align-items:flex-start"><b style="flex:1;font-size:16px">📲 Spieler: Bitte als App speichern</b><button class="btn" data-vix style="font-size:12px;padding:3px 9px">Ausblenden ✕</button></div>'+body();
+    c.innerHTML='<div style="display:flex;gap:8px;align-items:flex-start"><b style="flex:1;font-size:16px">📲 Spieler: Bitte als App speichern</b><button type="button" class="xcl" data-vix style="position:static;flex:none;margin:-5px -6px 0 0" aria-label="Ausblenden" title="Ausblenden">✕</button></div>'+body();
     wire(c);c.querySelector("[data-vix]").onclick=()=>{try{localStorage.setItem("u13vinstx","1")}catch(e){}c.remove();put()};return c};
   const low=()=>{const c=document.createElement("details");c.id="u13vinst";c.className="card";c.style.cssText="margin:14px 0 0";
-    c.innerHTML='<summary style="cursor:pointer;font-weight:600"><span style="display:inline-flex;gap:8px;align-items:center;width:calc(100% - 24px)"><span style="flex:1">📲 Als App auf dem Handy speichern'+(eltern()||plan()?" (freiwillig)":"")+'</span><button class="btn" data-vioff style="font-size:12px;padding:3px 9px;font-weight:400">Ausblenden ✕</button></span></summary>'+body();wire(c);
+    c.innerHTML='<summary style="cursor:pointer;font-weight:600"><span style="display:inline-flex;gap:8px;align-items:center;width:calc(100% - 24px)"><span style="flex:1">📲 Als App auf dem Handy speichern'+(eltern()||plan()?" (freiwillig)":"")+'</span><button type="button" class="xcl" data-vioff style="position:static;flex:none;margin:-5px 0" aria-label="Ausblenden" title="Ausblenden">✕</button></span></summary>'+body();wire(c);
     c.querySelector("[data-vioff]").onclick=(e)=>{e.preventDefault();e.stopPropagation();try{localStorage.setItem("u13vinstx","2")}catch(x){}c.remove()};return c};
   const off=()=>{try{return localStorage.getItem("u13vinstx")==="2"}catch(e){return false}};   /* ganz ausgeblendet */
   const bottom=(v,el)=>{const f=v.querySelector(":scope>.vf");if(f)v.insertBefore(el,f);else v.appendChild(el)};   /* „Stand“ bleibt ganz unten */
@@ -270,7 +297,7 @@ function viewerInstall(){
     const kf=document.getElementById("kzf"),at=kf&&kf.parentNode===v?kf:hd;at.insertAdjacentElement("afterend",top())};
   new MutationObserver(put).observe(document.documentElement,{childList:true,subtree:true});put();
 }
-if(isViewerHash)document.addEventListener("DOMContentLoaded",viewerInstall);
+if(isViewerHash&&!VS)document.addEventListener("DOMContentLoaded",viewerInstall);
 /* ---------- Benachrichtigungen (Web-Push) ----------
    Das Gerät meldet sich unter einem geheimen Pfad an (push/<64 Zeichen>), abgesichert mit dem Feedback-Schlüssel aus Link bzw. App.
    Verschickt wird von einem Zeitplan bei GitHub alle paar Minuten (siehe push/LIESMICH.md). Die Nachrichten enthalten keine Namen.
