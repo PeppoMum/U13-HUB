@@ -6544,6 +6544,8 @@ function vnPrompt(){
 "- Bestehende Einträge (Liste unten oder aus meiner Export-Datei) erkennst du an ihrer id. Sage ich etwas zu einem bestehenden Eintrag, gib ihn mit genau dieser id und einer aktion zurück:",
 "  \"behalten\" = bleibt 1:1 wie er ist; \"aendern\" = neuer text und/oder sichtbar (z. B. sprachlich anpassen); \"ausblenden\" = im Spielerprofil unsichtbar, bleibt aber gespeichert; \"einblenden\" = wieder sichtbar; \"loeschen\" = ganz entfernen.",
 "- Neue Einträge bekommen aktion \"neu\" und keine id. Erfinde nie eine id. Bestehende Einträge, zu denen ich nichts sage, lässt du weg.",
+"- Nur sprachlich anpassen (gleiche Aussage, andere Worte): \"aendern\". Inhaltlich neues Ziel (altes erreicht oder ersetzt): altes \"ausblenden\" und neues mit \"neu\" anlegen. Bist du unsicher, frag nach.",
+"- Bei \"aendern\" kein datum angeben: die App setzt das heutige Datum.",
 "",
 ...(Z.length?["Bestehende Entwicklungsziele (id | Spieler | Datum | sichtbar | Text):",...Z.map((n)=>"- "+n.id+" | "+who(n.pid)+" | "+(n.datum||"")+" | "+(n.aus?"ausgeblendet":n.sichtbar&&n.pid&&n.pid!=="team"?"sichtbar":"nicht sichtbar")+" | "+rtPlain(n.text||"").replace(/\s*\n\s*/g," / ")),""]:[]),
 "Antworte NUR mit gültigem JSON (am liebsten als Datei, sonst in einem Codeblock), ohne Erklärung davor oder danach, genau so:",
