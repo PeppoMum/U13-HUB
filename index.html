@@ -1072,7 +1072,7 @@ $("#fi").onchange=async(e)=>{const f=e.target.files[0];e.target.value="";if(!f||
   if(picMode==="logo"){const u=await shrink(f,400,false,"image/png");if(u){cfgSave({logo:u});D.config={...(D.config||{}),logo:u};renderLogo()}}
   else if(picMode==="foto"){const p=D.spieler.find((x)=>x.id===PID);if(!p)return;const u=await shrink(f,240,true,"image/jpeg");if(u){const d={...p,foto:u};save("players",p.id,d)}}};
 /* ---------- Notizen ---------- */
-const NCAT=["Allgemein","Technik","Taktik","Athletik","Sonstiges"];let nEdit=null,nArm=null,nView="alle";const nOpen=new Map();
+const NCAT=["Allgemein","Technik","Taktik","Athletik","Sonstiges"];let nEdit=null,nArm=null,nView="alle";const nOpen=new Map();let nOpenZ="";
 const who=(pid)=>{if(!pid||pid==="team")return"Team (übergeordnet)";const p=D.spieler.find((x)=>x.id===pid);return p?p.vorname+" "+p.name:"(Spieler entfernt)"};
 const dlong=(iso)=>iso?iso.slice(8)+"."+iso.slice(5,7)+"."+iso.slice(0,4):"";
 function fillSel(sel,opts,keep){const sig=JSON.stringify(opts);if(sel.dataset.sig===sig)return;const v=sel.value;sel.innerHTML=opts.map((o)=>'<option value="'+esc(o[0])+'">'+esc(o[1])+"</option>").join("");sel.dataset.sig=sig;if(opts.some((o)=>o[0]===v))sel.value=v}
@@ -1095,10 +1095,11 @@ function renderNotes(){
   const LO=nView==="notiz"||(nView==="alle"&&(f.k||f.v||f.a))?[]:NA.filter((n)=>isO(n)&&pidOk(n)&&(!f.an||n.anlass===f.an)&&(!f.st||(f.st==="zus")===!!n.zus)&&(!from||(n.datum||"")>=from));
   const G=new Map();LN.concat(LO).forEach((n)=>{const k=n.datum||"";if(!G.has(k))G.set(k,{k,N:[],O:[]});G.get(k)[isO(n)?"O":"N"].push(n)});
   const items=[...G.values()].sort((a,b)=>b.k.localeCompare(a.k));
+  if(f.z!==nOpenZ){nOpen.clear();nOpenZ=f.z}
   items.forEach((g)=>{g.N.sort((a,b)=>String(b.id).localeCompare(String(a.id)));g.O.sort((a,b)=>(a.anlass||"Allgemein").localeCompare(b.anlass||"Allgemein")||String(a.id).localeCompare(String(b.id)))});
   const NN=NA.filter((n)=>!isO(n)).length,NO=NA.filter(isO).length;
   $("#nsub").textContent=D.ready?NN+" Notizen · "+NO+" Beobachtungen"+(LN.length+LO.length!==NA.length?" · "+(LN.length+LO.length)+" nach Filter/Ansicht":""):"";
-  $("#nl").innerHTML=items.length?items.map((g)=>'<details class="og" data-ok="'+esc(g.k)+'"'+((nOpen.has(g.k)?nOpen.get(g.k):g.N.length+g.O.length<=3)?" open":"")+"><summary><b>"+esc(g.k?dlong(g.k):"Ohne Datum")+"</b>"+(g.N.length?" · "+g.N.length+(g.N.length===1?" Notiz":" Notizen"):"")+(g.O.length?" · "+g.O.length+(g.O.length===1?" Beobachtung":" Beobachtungen"):"")+"</summary>"+g.N.map((n)=>noteHtml(n,true,true,true)).join("")+g.O.map((n)=>obsHtml(n,true)).join("")+"</details>").join(""):'<div class="empty">'+(NA.length?"Nichts für diesen Filter.":"Noch keine Notizen.")+"</div>";
+  $("#nl").innerHTML=items.length?items.map((g)=>'<details class="og" data-ok="'+esc(g.k)+'"'+((nOpen.has(g.k)?nOpen.get(g.k):!!f.z)?" open":"")+"><summary><b>"+esc(g.k?dlong(g.k):"Ohne Datum")+"</b>"+(g.N.length?" · "+g.N.length+(g.N.length===1?" Notiz":" Notizen"):"")+(g.O.length?" · "+g.O.length+(g.O.length===1?" Beobachtung":" Beobachtungen"):"")+"</summary>"+g.N.map((n)=>noteHtml(n,true,true,true)).join("")+g.O.map((n)=>obsHtml(n,true)).join("")+"</details>").join(""):'<div class="empty">'+(NA.length?"Nichts für diesen Filter.":"Noch keine Notizen.")+"</div>";
 }
 function renderPNotes(pid){
   const A=D.notizen.filter((n)=>n.pid===pid&&n.art!=="beobachtung"&&(n.sichtbar||!window.__PUB)).sort((a,b)=>(b.datum||"").localeCompare(a.datum||"")),L=A.filter((n)=>!n.aus),X=window.__PUB?[]:A.filter((n)=>n.aus),Z=L.filter((n)=>n.art==="ziel"),N=L.filter((n)=>n.art!=="ziel"),pa=!window.__PUB;
