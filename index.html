@@ -6482,7 +6482,8 @@ function vnParse(txt){
       if(r.akt==="ausblenden"&&old.aus){r.akt="behalten";w.push("Ist schon ausgeblendet")}
       if(r.akt==="einblenden"&&!old.aus){r.akt="behalten";w.push("Ist schon sichtbar")}
       if(r.akt==="aendern"&&vnSame(r,old)){r.akt="behalten";w.push("Keine Änderung erkannt")}
-      if(r.akt==="behalten")r.inc=false}
+      if(r.akt==="behalten")r.inc=false;
+      if(r.akt==="aendern"&&r.datum===old.datum)r.datum=t}
     else{const nt=vnNorm(text);if(m.pid&&N.some((n)=>(n.pid||"team")===m.pid&&n.datum===d&&vnNorm(n.text)===nt)){r.inc=false;r.w.push("Schon vorhanden – nicht erneut speichern")}}
     rows.push(r)});
   if(!rows.length)return{err:"Die Datei enthält keine Notizen mit Text."};
@@ -6598,7 +6599,7 @@ document.addEventListener("change",(e)=>{
   if(t.id==="vnme"){vnSet({me:t.value});return}
   const row=t.closest&&t.closest("#vnrows [data-i]");if(row&&t.dataset.f){const r=vnRows[+row.dataset.i],f=t.dataset.f;
     if(f==="inc"||f==="sicht"||f==="markz")r[f]=t.checked;else r[f]=t.value;
-    if(f==="akt"){r.inc=r.akt!=="behalten";if(r.akt!=="aendern"){const o=(D.notizen||[]).find((n)=>n.id===r.oid);if(o&&r.akt==="behalten")r.text=o.text||""}document.getElementById("vnrows").innerHTML=vnRowsHtml();vnCount();return}
+    if(f==="akt"){r.inc=r.akt!=="behalten";if(r.akt!=="aendern"){const o=(D.notizen||[]).find((n)=>n.id===r.oid);if(o&&r.akt==="behalten")r.text=o.text||""}{const o=(D.notizen||[]).find((n)=>n.id===r.oid);if(o)r.datum=r.akt==="aendern"?today():o.datum||r.datum}document.getElementById("vnrows").innerHTML=vnRowsHtml();vnCount();return}
     if(f==="art"){if(r.art==="beobachtung")r.sicht=false;document.getElementById("vnrows").innerHTML=vnRowsHtml();return}
     if(f==="pid"){const sb=row.querySelector('[data-f="sicht"]');if(sb){sb.disabled=t.value==="team";if(t.value==="team"){sb.checked=false;r.sicht=false}}const w=row.querySelector("[data-w]");if(w&&t.value)w.remove()}
     vnCount()}});
