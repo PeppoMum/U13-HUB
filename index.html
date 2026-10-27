@@ -1142,10 +1142,10 @@ function sub(coll,key,map){
   if(!db){setSt("Keine Verbindung: bitte anmelden und die Seite neu laden","err");window.__noDb=true;typeof showAccess==="function"&&showAccess();return}
   try{const c0=await db.doc("config/main").get();if(!c0||c0.exists===false)throw new Error("noaccess")}catch(e){db=null;window.__noDb=true;setSt("Kein Zugriff","err");typeof showAccess==="function"&&showAccess("Kein Zugriff. Diese App ist nur für das Trainerteam.");return}
   window.__dbUp=true;qRestore();if(window.__SCOUT){typeof scoutMode==="function"&&scoutMode(db);return}window.__ROLE!=="scout"&&window.__ROLE!=="lesen"&&typeof initLinks==="function"&&initLinks();typeof initKader==="function"&&initKader(db);if(window.__ROLE==="scout"){D.ready=true;go("k")}
-  sub("players","spieler",(a,b)=>a.slot-b.slot);sub("games","spiele",(a,b)=>a.nr-b.nr);sub("trainings","trainings",(a,b)=>a.datum.localeCompare(b.datum));sub("events","events");sub("dienste","dienste");sub("todos","todos");sub("tipps","tipps");window.__ROLE!=="scout"&&db.collection("notes").onSnapshot((x)=>{D.notizen=x.docs.map((d)=>({id:d.id,...d.data()}));renderNotes();renderProfile();typeof renderStart==="function"&&renderStart()},()=>{});
+  sub("players","spieler",(a,b)=>a.slot-b.slot);sub("games","spiele",(a,b)=>a.nr-b.nr);sub("trainings","trainings",(a,b)=>a.datum.localeCompare(b.datum));sub("events","events");sub("dienste","dienste");sub("todos","todos");sub("tipps","tipps");window.__ROLE!=="scout"&&db.collection("notes").onSnapshot((x)=>{D.notizen=x.docs.map((d)=>({id:d.id,...d.data()}));D.notizenGot=true;renderNotes();renderProfile();typeof renderStart==="function"&&renderStart()},()=>{D.notizenGot=true});
   try{db.doc("config/sicherung").onSnapshot((s)=>{D.sicherung=s&&s.exists?s.data():null;D.sicherungGot=true;typeof bkwRender==="function"&&bkwRender()},()=>{D.sicherungGot=true})}catch(e){}
   try{db.doc("prefs/"+(window.__ACCT||"main")).onSnapshot((s)=>{window.__dzPrefs&&window.__dzPrefs(s.exists?s.data():null)},()=>{})}catch(e){}
-  db.doc("config/main").onSnapshot((s)=>{D.config=s.exists?s.data():null;U13.setGrenzen(D.config&&D.config.farbgrenzen);lgFill();window.__dzSync&&window.__dzSync();renderSaison();renderLogo();renderTrain();typeof renderSettings==="function"&&renderSettings();renderGames();typeof renderQ==="function"&&renderQ();typeof renderLinks==="function"&&renderLinks();typeof renderPlan==="function"&&renderPlan();typeof renderKader==="function"&&renderKader();if(D.ready&&$("#st").className.indexOf("busy")<0&&!window.__renderErr)setSt("Synchron","ok")},()=>{});
+  db.doc("config/main").onSnapshot((s)=>{D.config=s.exists?s.data():null;D.configGot=true;U13.setGrenzen(D.config&&D.config.farbgrenzen);lgFill();window.__dzSync&&window.__dzSync();renderSaison();renderLogo();renderTrain();typeof renderSettings==="function"&&renderSettings();renderGames();typeof renderQ==="function"&&renderQ();typeof renderLinks==="function"&&renderLinks();typeof renderPlan==="function"&&renderPlan();typeof renderKader==="function"&&renderKader();if(D.ready&&$("#st").className.indexOf("busy")<0&&!window.__renderErr)setSt("Synchron","ok")},()=>{D.configGot=true});
 })();
 </script>
 <script>/* ---------- A4-Export (ohne Fremdbibliotheken: SVG -> Bild -> PNG / JPG / PDF) ---------- */
@@ -2176,9 +2176,9 @@ V.pkg=(pid)=>({vc:V.clipsFor(pid),vg:V.games(),fk:V.fbKey,ds:V.dienste(pid)});
 
 function startTrainer(){
   if(V.started||!db||window.__VIEWER||window.__SCOUT||window.__ROLE==="scout")return;V.started=true;addCss();
-  db.collection("clips").onSnapshot((s)=>{V.clips=s.docs.map((d)=>({id:d.id,...d.data()})).sort((a,b)=>(a.at||"")<(b.at||"")?1:-1);watchKom();render();typeof renderLinks==="function"&&renderLinks()},()=>{});
+  db.collection("clips").onSnapshot((s)=>{V.clips=s.docs.map((d)=>({id:d.id,...d.data()})).sort((a,b)=>(a.at||"")<(b.at||"")?1:-1);V.clipsGot=true;watchKom();render();typeof renderLinks==="function"&&renderLinks()},()=>{V.clipsGot=true});
   db.collection("fbin").onSnapshot((s)=>{V.fb=s.docs.map((d)=>({id:d.id,...d.data()})).sort((a,b)=>(a.at||"")<(b.at||"")?1:-1);badge();render();window.__et&&window.__et.fbChanged()},()=>{});
-  (async()=>{try{const r=await db.doc("config/feedback").get();let k=r&&r.exists!==false&&r.data&&r.data()&&r.data().k;if(!k&&canW()&&window.__ROLE==="voll"){k=b64u(crypto.getRandomValues(new Uint8Array(18)));await db.doc("config/feedback").set({k})}V.fbKey=k||"";typeof renderLinks==="function"&&renderLinks()}catch(e){}})();
+  (async()=>{try{const r=await db.doc("config/feedback").get();let k=r&&r.exists!==false&&r.data&&r.data()&&r.data().k;if(!k&&canW()&&window.__ROLE==="voll"){k=b64u(crypto.getRandomValues(new Uint8Array(18)));await db.doc("config/feedback").set({k})}V.fbKey=k||"";V.fbGot=true;typeof renderLinks==="function"&&renderLinks()}catch(e){V.fbGot=true}})();
 }
 V.start=startTrainer;
 /* Kommentare aller sichtbaren Clips mitlesen (für „x von y haben kommentiert“ und die Ansicht) */
@@ -2916,8 +2916,8 @@ function profCard(){
 /* --- Start (Trainer) --- */
 function startTrainer(){
   if(ET.started||typeof db==="undefined"||!db||window.__VIEWER||window.__SCOUT||window.__ROLE==="scout")return;ET.started=true;css();seg();
-  db.collection("etplan").onSnapshot((s)=>{ET.plans=s.docs.map((d)=>({id:d.id,...d.data()}));ET.refresh()},()=>{});
-  db.collection("etzu").onSnapshot((s)=>{ET.zu=s.docs.map((d)=>({id:d.id,...d.data()}));ET.refresh()},()=>{});
+  db.collection("etplan").onSnapshot((s)=>{ET.plans=s.docs.map((d)=>({id:d.id,...d.data()}));ET.gotP=true;ET.refresh()},()=>{ET.gotP=true});
+  db.collection("etzu").onSnapshot((s)=>{ET.zu=s.docs.map((d)=>({id:d.id,...d.data()}));ET.gotZ=true;ET.refresh()},()=>{ET.gotZ=true});
   if(typeof renderStart==="function"){const o=renderStart;renderStart=function(){const r=o.apply(this,arguments);try{startRows()}catch(e){}return r}}
   if(typeof renderProfile==="function"){const o=renderProfile;renderProfile=function(){const r=o.apply(this,arguments);try{profCard()}catch(e){}return r}}
   ET.refresh();
@@ -3458,6 +3458,11 @@ async function hnAuth(){if(!window.__WEB||typeof db==="undefined"||!db)return;
   const frei=async(c,s,h)=>{if(hnAuthOk.has(c+s))return;try{await db.doc(c+"/"+s).set({h});hnAuthOk.add(c+s)}catch(e){}};
   for(const n of((D.config&&D.config.hinweise)||[])){if(!n)continue;const c=n.art==="c",r=hnAntw(n);if(!c&&!r)continue;if(r&&n.rp==="a")await frei("antwauth",n.rs,n.id);
     for(const p of hnEmpf(n)){const l=L[p.id];if(!l||!l.aktiv||!l.key)continue;if(c)await frei("aufgauth",await hnSig(n.id,p.id,l.key),n.id);if(r&&n.rp==="t")await frei("antwauth",await hnAntPfad(n,p.id,l.key),n.id)}}}
+/* Erst veröffentlichen, wenn alles geladen ist (Einstellungen mit Hinweisen und Saison, Notizen, Clips, Nachricht-Schlüssel, FUSSBALL.DE-Tabelle,
+   Eigentraining). Sonst fehlt das in allen Links, bis zum nächsten Veröffentlichen (Fehler 27.10.: App-Start veröffentlichte zu früh). */
+const lkReady=()=>{const V=window.__vid,F=window.__FD,E=window.__et;
+  return!!(D.ready&&D.configGot&&D.notizenGot&&(!V||(V.clipsGot&&V.fbGot))&&(!F||!window.__webFs||F.loaded)&&(!E||(E.gotP&&E.gotZ)))};
+window.__lkReady=lkReady;
 async function buildSnap(){
   const LI=ligaSnap(),TP=planSnap(),HN=((D.config&&D.config.hinweise)||[]).filter(Boolean),out={v:1,u:new Date().toISOString(),p:{},k:{}},logo=lgR(),sa=(D.config&&D.config.saison)||"",ETF={};
   for(const p of active()){const l=L[p.id];if(!l||!l.aktiv||!l.key)continue;const et=window.__et?window.__et.pkg(p.id,TP.days,ETF):[];out.p[p.id]=await seal(l.key,{...(window.__vid?window.__vid.pkg(p.id):{}),h:profExt()?profileHtml(p.id):"",l:logo,s:sa,m:mann(),u:out.u,t:TP,n:p.vorname,f:p.foto||"",hn:await hnFor(HN,p.id,l.key),...(D.config&&D.config.aufgQuote?{aq:1}:{}),li:LI,dz:"kobalt",...(et.length?{et}:{})});out.k[p.id]=await sha8(l.key)}
@@ -3465,7 +3470,7 @@ async function buildSnap(){
   for(const id of Object.keys(ETF)){try{(out.f=out.f||{})[id]=await window.__et.blob(ETF[id])}catch(e){}}
   out.bg=await bgSnap();out.dzs=dzSig();out.x={};out.xk={};
   for(const k of XK){const l=L["x"+k];if(!l||!l.aktiv||!l.key)continue;out.x[k]=await seal(l.key,k==="demosp"?{...demoPlayer(),k,u:out.u,l:logo,s:sa,m:mann(),dz:"kobalt"}:k==="plan"?{k,u:out.u,t:TP,l:logo,s:sa,m:mann(),hn:HN.filter((n)=>n.fuer!=="s"&&!Array.isArray(n.an)).map((n)=>{const x={...n};delete x.rp;delete x.rs;delete x.rk;return x}),dz:"kobalt"}:{k,u:out.u,db:extData(k),dz:"kobalt"});out.xk[k]=await sha8(l.key)}
-  {const f=await fingerprintParts();out.fp=f.a+f.s;out.fa=f.a;out.fs=f.s}return out;
+  {const f=await fingerprintParts();out.fp=f.a+f.s;out.fa=f.a;out.fs=f.s}if(lkReady())out.ok=1;return out;
 }
 function composeHtml(snap){
   const src=document.getElementById("src").textContent.split(LT).join("<");
@@ -3650,8 +3655,8 @@ async function lkHealth(){
   if(off&&!window.__WEB)W.push(off+" Link(s) sind noch online, obwohl sie abgeschaltet oder der Spieler nicht mehr aktiv ist – beim nächsten Aktualisieren werden sie entfernt.");
   const fpp=await fingerprintParts();if(my!==lkTok)return;
   if(window.__WEB){/* Web-Version: automatisch veröffentlichen (Link-Änderungen sofort, neue Daten alle 6 Stunden) */
-    const now=Date.now(),changed=!SNAP.fa||SNAP.fa!==fpp.a||SNAP.fs!==fpp.s,daily=pubIds.length>0&&changed&&now-(Date.parse(SNAP.u||"")||0)>=216e5,dzChg=pubIds.length>0&&SNAP.dzs!==dzSig(),struct=nOn.length>0||xMiss>0||off>0||dzChg;
-    if((struct||daily)&&!lkBusy&&now>lkQuiet&&window.__lkPublish&&window.__ROLE!=="lesen"){lkQuiet=now+9e4;window.__lkPublish(true)}
+    const now=Date.now(),changed=!SNAP.fa||SNAP.fa!==fpp.a||SNAP.fs!==fpp.s,daily=pubIds.length>0&&changed&&now-(Date.parse(SNAP.u||"")||0)>=216e5,dzChg=pubIds.length>0&&SNAP.dzs!==dzSig(),halb=pubIds.length>0&&changed&&!SNAP.ok,struct=nOn.length>0||xMiss>0||off>0||dzChg||halb;
+    if((struct||daily)&&!lkBusy&&now>lkQuiet&&window.__lkPublish&&window.__ROLE!=="lesen"){if(lkReady()){lkQuiet=now+9e4;window.__lkPublish(true)}else setTimeout(lkHealth,3000)}
     for(let i=E.length-1;i>=0;i--)if(/noch nicht online/.test(E[i]))E.splice(i,1);W.length=0}
   /* Warnung nur, wenn Eltern etwas Veraltetes sehen, das wichtig ist: Termine, Hinweise, Kontakte, Notizen sofort;
      eingetragene Anwesenheit/Minuten erst, wenn der Stand in den Links mehrere Tage alt ist. */
@@ -3748,6 +3753,8 @@ if(T("lkt")){
   const lkPublish=async(auto)=>{
     if(lkBusy)return;lkBusy=true;
     const m=T("lkm"),b=T("lku");m.className="note";b.disabled=true;
+    for(let i=0;i<100&&!lkReady();i++){if(i===5)m.textContent="Daten werden noch geladen …";await new Promise((r)=>setTimeout(r,200))}
+    if(auto&&!lkReady()){lkBusy=false;b.disabled=false;m.textContent="";lkQuiet=Date.now()+3e4;return}
     try{
       m.textContent="Verschlüsselte Profile werden erstellt …";
       let art=null;try{art=await window.claude.use("artifact")}catch(x){art=null}
