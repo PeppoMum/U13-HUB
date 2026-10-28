@@ -16,11 +16,22 @@ const TX = {
   antwort: { t: "Antwort vom Trainer", b: "Der Trainer hat auf deine Nachricht geantwortet.", u: "./?link" },
   fb: { t: "Neues Feedback", b: "Ein Spieler oder Elternteil hat dir geschrieben.", u: "./" },
   hinweis: { t: "Neuer Hinweis vom Trainer", b: "Schau in die App.", u: "./?link" },
+  notiz: { t: "Neue Notiz vom Trainer", b: "Schau in dein Profil in der App.", u: "./?link" },
+  termin: { t: "Termin geändert", b: "Ein Termin wurde abgesagt oder verlegt. Schau in den Terminplan.", u: "./?link" },
+  afrist: { t: "Erinnerung: Aufgabe", b: "Bitte denk an deine Aufgabe in der App.", u: "./?link" },
+  aantw: { t: "Antwort auf eine Aufgabe", b: "Ein Spieler oder Elternteil hat auf eine Aufgabe geantwortet.", u: "./" },
+  skom: { t: "Neuer Clip-Kommentar", b: "Ein Spieler hat einen Clip kommentiert.", u: "./" },
+  kanfr: { t: "Neue Konto-Anfrage", b: "Bitte in der App freigeben oder ablehnen.", u: "./" },
 };
+/* Was ein Gerät abgewählt hat (Feld x, durch Komma getrennt): die Antwort auf einen Clip-Kommentar zählt zu „antwort“ */
+const GRP = { kom: "antwort" };
 
 /* Wer bekommt den Eintrag? s = Anmeldung eines Geräts (ro: s Spieler, e Elternteil, t Trainer, leer = noch nicht gewählt) */
 export function passt(q, s) {
-  if (q.art === "fb") return s.ro === "t";
+  if (typeof s.x === "string" && s.x.split(",").includes(GRP[q.art] || q.art)) return false;
+  if (q.art === "fb" || q.art === "aantw" || q.art === "skom" || q.art === "kanfr") return s.ro === "t";
+  if (q.art === "termin") return s.ro !== "t";
+  if (q.art === "notiz" || q.art === "afrist") return s.ro !== "t" && !!s.pid && Array.isArray(q.an) && q.an.includes(s.pid);
   if (q.art === "hinweis") return s.ro !== "t" && (!Array.isArray(q.an) || (!!s.pid && q.an.includes(s.pid)));   /* Hinweis an einzelne Spieler: nur deren Geräte */
   if (q.art === "antwort") return !!q.r && s.r === q.r && s.ro !== "t";
   if (q.art === "clip" || q.art === "frist" || q.art === "kom") return s.ro !== "t" && s.ro !== "e" && !!s.pid && (q.an === "alle" || (Array.isArray(q.an) && q.an.includes(s.pid)));
@@ -28,7 +39,7 @@ export function passt(q, s) {
 }
 export function nachricht(q, id) {
   const x = TX[q.art];
-  const b = q.art === "frist" && typeof q.tx === "string" && q.tx.length < 200 ? q.tx : x.b;
+  const b = (q.art === "frist" || q.art === "afrist") && typeof q.tx === "string" && q.tx.length < 200 ? q.tx : x.b;
   return { t: x.t, b, u: x.u, g: q.art + "-" + id };
 }
 
@@ -48,6 +59,10 @@ export async function run({ fetch, webpush, env, now = Date.now(), log = console
   const H = { Authorization: "Bearer " + (await login.json()).idToken, "Content-Type": "application/json", ...ref };
   const call = async (url, o = {}) => { const r = await fetch(url, { headers: H, ...o }); if (!r.ok && r.status !== 404) throw new Error("Datenbank " + r.status); return r; };
 
+  /* Aufgabe mit Abhaken: schon erledigt? (geheimer Pfad aufg/<s>/m/x, nur für diesen Spieler) */
+  const abgehakt = async (sg) => { if (typeof sg !== "string" || !/^[0-9a-f]{64}$/.test(sg)) return false;
+    const r = await fetch(base + "/aufg/" + sg + "/m/x", { headers: H }); if (!r.ok) return false; const d = obj(await r.json()); return d.d === true; };
+
   /* fällige Einträge */
   const qr = await call(base + ":runQuery", { method: "POST", body: JSON.stringify({ structuredQuery: { from: [{ collectionId: "pushq" }],
     where: { fieldFilter: { field: { fieldPath: "t" }, op: "LESS_THAN_OR_EQUAL", value: { integerValue: String(now) } } }, limit: 200 } }) });
@@ -63,6 +78,7 @@ export async function run({ fetch, webpush, env, now = Date.now(), log = console
   const weg = new Set(); let ok = 0, fehl = 0, alt = 0;
   for (const q of due) {
     if (now - q.t > ALT || !TX[q.art]) alt++;
+    else if (q.art === "afrist" && await abgehakt(q.s)) { }
     else {
       const msg = JSON.stringify(nachricht(q, q.id)), seen = new Set();
       for (const s of subs) {
