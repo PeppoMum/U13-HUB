@@ -6694,10 +6694,11 @@ function bwOpen(tid,mode){
   let o=document.getElementById("bwov");if(!o){o=document.createElement("div");o.id="bwov";o.className="bwov";o.setAttribute("role","dialog");o.setAttribute("aria-label","Training bewerten");document.body.appendChild(o)}
   document.body.style.overflow="hidden";bwRenderOv()}
 function bwClose(){const o=document.getElementById("bwov");if(o)o.remove();document.body.style.overflow="";bwS.tag=null;clearTimeout(bwTm);bwRender()}
-/* Startseite: Kachel am Trainingstag und bis zu drei Tage danach, falls noch nicht bewertet. */
+/* Startseite: Kachel ab 30 Minuten vor Trainingsbeginn (ohne Uhrzeit ganzer Tag) und bis zu drei Tage danach, falls noch nicht bewertet. */
+function bwDue(t){if(t.datum!==today())return true;const e=(D.events||[]).find((x)=>x.typ==="Training"&&(x.trainId===t.id||x.datum===t.datum)),m=/^(\d{1,2}):(\d{2})/.exec((e&&e.beginn)||"");if(!m)return true;const n=new Date();return n.getHours()*60+n.getMinutes()>=+m[1]*60+ +m[2]-30}
 function bwTile(){
   const h=document.getElementById("bwt");if(!h)return;if(!bwCan()||!D.ready){h.innerHTML="";return}
-  const t0=today(),from=addD(t0,-3),L=(D.trainings||[]).filter((t)=>t.datum>=from&&t.datum<=t0).sort((a,b)=>b.datum.localeCompare(a.datum));
+  const t0=today(),from=addD(t0,-3),L=(D.trainings||[]).filter((t)=>t.datum>=from&&t.datum<=t0&&bwDue(t)).sort((a,b)=>b.datum.localeCompare(a.datum));
   const t=L.find((x)=>x.datum===t0)||L.find((x)=>!bwRated(x.id));
   if(!t||(t.datum<t0&&bwRated(t.id))||((vnP().bwHide||{})[t.id])){h.innerHTML="";return}
   const s=bwSum(t),past=t.datum<t0,sub=(past?bwWd(t.datum)+" "+bwD(t.datum):"Heute")+(bwTimes(t)?" · "+bwTimes(t):"")+" · "+s.rows.length+" Spieler da"+(s.u!==null?" · "+bwSg(s.tp)+" / "+bwSg(-s.tm)+" · "+BWU[s.u]:"");
@@ -6752,6 +6753,7 @@ document.addEventListener("click",(e)=>{
 });
 document.addEventListener("keydown",(e)=>{if(e.key==="Escape"&&document.getElementById("bwov"))bwClose();if((e.key==="Enter"||e.key===" ")&&e.target&&e.target.dataset&&e.target.dataset.bwsel!==undefined){e.preventDefault();e.target.click()}});
 document.addEventListener("change",(e)=>{if(e.target&&(e.target.id==="bwwin"||e.target.id==="bwtags"))bwSaveSettings()});
+setInterval(()=>{try{bwTile()}catch(e){}},60000);
 window.bwDebug={sum:bwSum,stats:bwStats,taps:bwTaps,open:bwOpen,close:bwClose,tap:bwTap,state:bwS,setView:bwSetView,tile:bwTile,render:bwRender,cfg:bwCfg,tagCount:bwTagCount};
 </script><script>/* ===== Spiel beobachten: Live-Raster mit Plus/Minus je Rückennummer, danach Nachbereitung mit einem Bogen je Spieler =====
    Zwei Betriebsarten, ein Code:
