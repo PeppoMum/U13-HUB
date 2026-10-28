@@ -115,6 +115,7 @@ body.bgimg main>section>.kpis{background:none}body.bgimg .hl{display:none}body.b
 body.co #etb,body.co #etp-m,body.co #etp-g,body.co #etp-s{display:none!important}body.co #etp-l,body.co #etp-p{display:block!important}body.co #etp-l>.card:not(#ktc),body.co #etp-p>.card:not(#u13inst):not(#u13pushc){display:none}#mhn[aria-expanded="true"]{background:var(--acs);border-color:var(--ac)}#lkh.hnro>.bar,#lkh.hnro>#hnpw,#lkh.hnro .rm{display:none!important}
 body.scoutonly nav button:not([data-s="k"]){display:none!important}body.scoutonly #lkw,body.scoutonly #bkw,body.scoutonly #ccw{display:none!important}
 body.kaus nav button[data-s="k"],body.kaus #hn [data-go="k"],body.kaus #k{display:none!important}
+body.bwaus #abseg,body.bwaus #a_w,body.bwaus #bwt,body.bwaus [data-bwopen]{display:none!important}
 #htd .kpi.htile{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center;gap:2px 24px;padding:14px 20px}#htd .kpi.htile>*{grid-column:1;min-width:0}#htd .kpi.htile>b{font-size:26px;line-height:1.15;margin:2px 0}#htd .kpi.htile>.hbtn{grid-column:2;grid-row:1/span 3;display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-self:center}@media(max-width:760px){#htd .kpi.htile{grid-template-columns:minmax(0,1fr)!important}#htd .kpi.htile>.hbtn{grid-column:1;grid-row:auto;justify-content:flex-start;margin-top:8px}#htd .kpi.htile>.hbtn .btn{flex:1 1 140px}}
 html{scroll-padding-top:calc(var(--vnh,0px) + var(--demoh,0px) + 70px)}
 @media(max-width:760px){main section>p.sub,main .sub.note{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer}main section>p.sub.open,main .sub.note.open{display:block}details.mfold{flex:1 1 100%;margin:0}details.mfold .xgrp{display:contents!important}details.mfold .xgrp>span.note{flex:1 1 100%;min-width:0!important;margin:0}details.mfold>summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border:1px solid var(--ln);border-radius:99px;background:var(--card);color:var(--tx);font-size:14px}details.mfold>summary::-webkit-details-marker{display:none}details.mfold>summary::after{content:"▾";font-size:12px;color:var(--mu)}details.mfold[open]>summary::after{content:"▴"}details.mfold>.bar{margin:10px 0 0}html body .card.mfc{background:none!important;border:0!important;box-shadow:none!important;padding:0!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}.card.mfc>h3{display:none}details.mfold[open]{padding:12px;border:1px solid var(--ln);border-radius:16px;background:var(--card)}details.mfold[open]>summary{margin:0 0 4px}details.mfold>.bar,.mfc .mfin>.bar{margin:10px 0 0}.mfc .mfin>.bar:first-child{margin-top:6px}details.mfold .bar>span.note,details.mfold .bar>p.note{flex:1 1 100%;min-width:0!important;margin:0}.wnav{display:flex;gap:6px;align-items:center;flex:1 1 100%;min-width:0}.wnav select{flex:1 1 auto;min-width:0;width:auto}.wnav .btn{flex:none}}
@@ -342,7 +343,7 @@ html[data-design] body details.mfold[open]>summary::after{content:"";transform:r
 <div class="card"><h3>Saison</h3><label class="note">Saison (z. B. 2026/27)<br><input id="esa" style="width:120px" autocomplete="off"></label> <label class="note" style="margin-left:12px">Mannschaft (z. B. U13)<br><input id="emn" style="width:90px" autocomplete="off"></label><p class="note" id="emsg" style="margin:8px 0 0">Die Saison bestimmt die zwölf Monate im Bereich Training (Juli bis Juni).</p></div>
 <div class="card" id="lkco" style="margin-top:12px"><h3>Trainer-Links (Co-Trainer)</h3><p class="note" style="margin-top:0">Für Trainer und Verantwortliche aus den Stammdaten (außer dem Besitzer). Sie sehen und bearbeiten alles, aber nicht die Einstellungen. <b>Wichtig:</b> Bearbeiten geht nur mit Claude-Konto, und die Person muss unter „Teilen“ der Seite als Mitwirkende eingeladen sein; der Link allein reicht nicht. Ein ausgeschalteter Link sperrt den Zugang über die App sofort (ohne „Aktualisieren“).</p><div class="tw"><table id="lkct"></table></div></div>
 <div class="card" id="kadsw" style="margin-bottom:12px"><h3>Kader-Modul</h3><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="kadon" checked> Kader (Kaderplanung &amp; Scouting) einblenden</label><p class="note" style="margin:6px 0 0">Ausgeblendet ist der Kader für alle weg (auch Co-Trainer, Kalender, Scouting-Link). Die Daten bleiben erhalten.</p></div>
-<div class="card" id="bwcard" style="margin-bottom:12px"><h3>Training bewerten</h3><p class="note" style="margin:0 0 8px">Plus und Minus pro Spieler im Training. Die Einstellungen gelten für alle Trainer. Die Bewertung ist nur für das Trainerteam sichtbar, nie in Profil, Links oder Exporten.</p><div class="bar" style="margin:0"><label>Doppeltipps: zwei Trainer geben dasselbe Vorzeichen innerhalb von <select autocomplete="off" id="bwwin"><option value="0">Aus (jeder Tipp zählt)</option><option value="5">5 Minuten</option><option value="10">10 Minuten</option><option value="15">15 Minuten</option><option value="20">20 Minuten</option></select> – dann zählt es einmal</label></div><label class="note" style="display:block;margin-top:8px">Schlagwörter (mit Komma getrennt, höchstens 8)<br><input id="bwtags" style="width:100%;max-width:520px" autocomplete="off"></label></div>
+<div class="card" id="bwcard" style="margin-bottom:12px"><h3>Training bewerten</h3><label style="display:flex;gap:8px;align-items:center;margin:0 0 8px"><input type="checkbox" id="bwon" checked> Training bewerten einblenden</label><div id="bwopts"><p class="note" style="margin:0 0 8px">Plus und Minus pro Spieler im Training. Die Einstellungen gelten für alle Trainer. Die Bewertung ist nur für das Trainerteam sichtbar, nie in Profil, Links oder Exporten.</p><div class="bar" style="margin:0"><label>Doppeltipps: zwei Trainer geben dasselbe Vorzeichen innerhalb von <select autocomplete="off" id="bwwin"><option value="0">Aus (jeder Tipp zählt)</option><option value="5">5 Minuten</option><option value="10">10 Minuten</option><option value="15">15 Minuten</option><option value="20">20 Minuten</option></select> – dann zählt es einmal</label></div><label class="note" style="display:block;margin-top:8px">Schlagwörter (mit Komma getrennt, höchstens 8)<br><input id="bwtags" style="width:100%;max-width:520px" autocomplete="off"></label></div></div>
 <div class="card" style="margin-top:12px"><h3>Hintergrund</h3><p class="note" style="margin-top:0">Gilt auf diesem Gerät; für Spieler- und externe Links wird der Hintergrund bei der nächsten Aktualisierung der Links mitgegeben. Farbe für Hell und Dunkel getrennt wählbar, oder ein eigenes Bild.</p><div style="margin:8px 0 2px"><b style="font-size:12px">Hell</b></div><div class="bgsw" id="bgL"></div><div style="margin:8px 0 2px"><b style="font-size:12px">Dunkel</b></div><div class="bgsw" id="bgD"></div><div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><select autocomplete="off" id="bgsel" hidden aria-label="Bild verwenden"><option value="">Standard-Hintergrund</option><option value="on">Bild verwenden</option></select><button class="btn" id="bgimg" type="button">Eigenes Bild wählen</button><button class="btn" id="bgimgx" type="button" hidden>Bild entfernen</button></div><input type="file" id="bgf" accept="image/*" hidden></div>
 </div>
 <div class="etp" id="etp-g" hidden>
@@ -3390,7 +3391,7 @@ if(!document.getElementById("lkcss")){const st=document.createElement("style");s
     +E("td .note")+"{max-width:none!important}"+E("input:not([type=checkbox])")+"{width:100%!important;min-width:0!important;box-sizing:border-box}"+E("input[type=checkbox]")+"{width:22px;height:22px;margin:0}"
     +E("td:has(>.btn)")+"{display:flex;flex-wrap:wrap;gap:6px}"+E(".btn")+"{min-height:40px}"+E("select")+"{width:100%;max-width:100%}"+E("[data-kid] [data-kzadd]")+"{margin-top:6px}"
     +".tw:has(>#lkt),.tw:has(>#lkct),.tw:has(>#lkxt){overflow-x:visible}}";document.head.appendChild(st)}
-const FP_INT=["trainerToDos","trainerToDosM","kaderAus","linkBasis","sicherung","bw"];
+const FP_INT=["trainerToDos","trainerToDosM","kaderAus","linkBasis","sicherung","bw","bwAus"];
 /* Zwei Stände: A = was Eltern sofort im Plan bzw. im Profil lesen (Termine, Dienste, Hinweise, Kontakte, sichtbare Notizen, Spielerdaten),
    S = Auswertung (eingetragene Anwesenheit, Kader und Minuten bereits erreichter Termine). Änderungen an S sind weniger dringend. */
 const fingerprintParts=async()=>{
@@ -6648,6 +6649,7 @@ setTimeout(()=>{try{vnRender()}catch(e){}},1500);
    { tid, datum, vk, taps: { spielerId: [[Zeit(ms), +1/-1, Schlagwort]] }, amp: { spielerId: [g|y|r|n, Zeit] } } */
 const BWTAGS=["Einsatz","Technik","Zweikampf","Spielintelligenz","Verhalten"],BWU={1:"gut",0:"neutral","-1":"nicht gut"},BWAMP=[["g","grün"],["y","gelb"],["r","rot"],["n","keine Einschätzung"]];
 const bwCfg=()=>{const c=(D.config&&D.config.bw)||{},w=c.win;return{win:w===0||w==="0"?0:(+w>0?+w:10),tags:Array.isArray(c.tags)&&c.tags.length?c.tags:BWTAGS}};
+const bwOn=()=>!(D.config&&D.config.bwAus);
 const bwCan=()=>!(window.__RO||window.__VIEWER||window.__ROLE==="lesen"||window.__ROLE==="scout");
 const bwKey=()=>String(window.__ACCT||"main");
 const bwSgn=(x)=>x>0?1:x<0?-1:0;
@@ -6723,14 +6725,14 @@ function bwRenderOv(){
   const o=document.getElementById("bwov");if(!o)return;if(!bwTr(bwS.tid)){bwClose();return}
   const l=o.querySelector(".bwl"),y=l?l.scrollTop:0;o.innerHTML=bwOverlayHtml();const l2=o.querySelector(".bwl");if(l2)l2.scrollTop=y;if(bwCan()===false)o.classList.add("bwro")}
 function bwOpen(tid,mode){
-  const t=bwTr(tid);if(!t)return;bwS.tid=tid;bwS.tag=null;bwS.mode=mode||(t.datum===today()?"live":"post");
+  const t=bwTr(tid);if(!t||!bwOn())return;bwS.tid=tid;bwS.tag=null;bwS.mode=mode||(t.datum===today()?"live":"post");
   let o=document.getElementById("bwov");if(!o){o=document.createElement("div");o.id="bwov";o.className="bwov";o.setAttribute("role","dialog");o.setAttribute("aria-label","Training bewerten");document.body.appendChild(o)}
   document.body.style.overflow="hidden";bwRenderOv()}
 function bwClose(){const o=document.getElementById("bwov");if(o)o.remove();document.body.style.overflow="";bwS.tag=null;clearTimeout(bwTm);bwRender()}
 /* Startseite: Kachel ab 30 Minuten vor Trainingsbeginn (ohne Uhrzeit ganzer Tag) und bis zu drei Tage danach, falls noch nicht bewertet. */
 function bwDue(t){if(t.datum!==today())return true;const e=(D.events||[]).find((x)=>x.typ==="Training"&&(x.trainId===t.id||x.datum===t.datum)),m=/^(\d{1,2}):(\d{2})/.exec((e&&e.beginn)||"");if(!m)return true;const n=new Date();return n.getHours()*60+n.getMinutes()>=+m[1]*60+ +m[2]-30}
 function bwTile(){
-  const h=document.getElementById("bwt");if(!h)return;if(!bwCan()||!D.ready){h.innerHTML="";return}
+  const h=document.getElementById("bwt");if(!h)return;if(!bwCan()||!D.ready||!bwOn()){h.innerHTML="";return}
   const t0=today(),from=addD(t0,-3),L=(D.trainings||[]).filter((t)=>t.datum>=from&&t.datum<=t0&&bwDue(t)).sort((a,b)=>b.datum.localeCompare(a.datum));
   const t=L.find((x)=>x.datum===t0)||L.find((x)=>!bwRated(x.id));
   if(!t||(t.datum<t0&&bwRated(t.id))||((vnP().bwHide||{})[t.id])){h.innerHTML="";return}
@@ -6758,13 +6760,16 @@ function bwStatHtml(){
   const can=bwCan();
   h+='<div class="card tw" style="padding:0"><table><tr><th style="text-align:left">Training</th><th>Urteil</th><th>Plus / Minus</th>'+(can?"<th></th>":"")+"</tr>"+S.sums.slice().reverse().map((s)=>'<tr><td style="text-align:left">'+bwWd(s.t.datum).slice(0,2)+" "+bwD(s.t.datum)+"</td><td>"+bwChip(s.u)+"</td><td>"+(s.n?bwPM(s.tp,s.tm):"–")+"</td>"+(can?'<td><button type="button" class="btn" data-bwopen="'+s.t.id+'">'+(s.u===null?"bewerten":"öffnen")+"</button></td>":"")+"</tr>").join("")+"</table></div>";
   return h}
-function bwSetView(v){bwS.view=v;const b=document.getElementById("a_b"),w=document.getElementById("a_w"),sg=document.getElementById("abseg");if(!b||!w)return;b.hidden=v!=="b";w.hidden=v!=="w";if(sg)[...sg.children].forEach((x)=>x.classList.toggle("on",x.dataset.bwv===v));if(v==="w")w.innerHTML=bwStatHtml()}
+function bwSetView(v){if(!bwOn())v="b";bwS.view=v;const b=document.getElementById("a_b"),w=document.getElementById("a_w"),sg=document.getElementById("abseg");if(!b||!w)return;b.hidden=v!=="b";w.hidden=v!=="w";if(sg)[...sg.children].forEach((x)=>x.classList.toggle("on",x.dataset.bwv===v));if(v==="w")w.innerHTML=bwStatHtml()}
 /* Einstellungen (gelten für alle Trainer) */
 function bwSettings(){
+  const on=document.getElementById("bwon"),op=document.getElementById("bwopts");if(on){if(document.activeElement!==on)on.checked=bwOn();on.disabled=!bwCan()}if(op)op.hidden=!bwOn();
   const w=document.getElementById("bwwin"),t=document.getElementById("bwtags");if(!w||!t)return;const c=bwCfg(),ro=!bwCan();
   if(document.activeElement!==w)w.value=String(c.win);if(document.activeElement!==t)t.value=c.tags.join(", ");w.disabled=t.disabled=ro}
 function bwSaveSettings(){if(!bwCan())return;const w=document.getElementById("bwwin"),t=document.getElementById("bwtags"),tags=t.value.split(/[,;\n]/).map((x)=>x.trim()).filter(Boolean).filter((x,i,a)=>a.indexOf(x)===i).slice(0,8);cfgSave({bw:{win:+w.value,tags:tags.length?tags:BWTAGS}})}
 function bwRender(){
+  document.body.classList.toggle("bwaus",!bwOn());
+  if(!bwOn()){if(document.getElementById("bwov"))bwClose();if(bwS.view!=="b")try{bwSetView("b")}catch(e){}}
   try{bwTile()}catch(e){}
   try{bwRenderOv()}catch(e){}
   try{if(bwS.view==="w")bwSetView("w")}catch(e){}
@@ -6785,7 +6790,7 @@ document.addEventListener("click",(e)=>{
   if(d.bw!==undefined){const r=t.closest("[data-bwp]");if(!r)return;if(d.bw==="u")bwUndo(r.dataset.bwp);else bwTap(r.dataset.bwp,d.bw==="p"?1:-1)}
 });
 document.addEventListener("keydown",(e)=>{if(e.key==="Escape"&&document.getElementById("bwov"))bwClose();if((e.key==="Enter"||e.key===" ")&&e.target&&e.target.dataset&&e.target.dataset.bwsel!==undefined){e.preventDefault();e.target.click()}});
-document.addEventListener("change",(e)=>{if(e.target&&(e.target.id==="bwwin"||e.target.id==="bwtags"))bwSaveSettings()});
+document.addEventListener("change",(e)=>{if(e.target&&e.target.id==="bwon"){if(!bwCan())return;const v=!e.target.checked;D.config={...(D.config||{}),bwAus:v};cfgSave({bwAus:v});bwRender();return}if(e.target&&(e.target.id==="bwwin"||e.target.id==="bwtags"))bwSaveSettings()});
 setInterval(()=>{try{bwTile()}catch(e){}},60000);
 window.bwDebug={sum:bwSum,stats:bwStats,taps:bwTaps,open:bwOpen,close:bwClose,tap:bwTap,state:bwS,setView:bwSetView,tile:bwTile,render:bwRender,cfg:bwCfg,tagCount:bwTagCount};
 </script><script>/* ===== Spiel beobachten: Live-Raster mit Plus/Minus je Rückennummer, danach Nachbereitung mit einem Bogen je Spieler =====
