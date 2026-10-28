@@ -40,7 +40,8 @@ export function passt(q, s) {
 export function nachricht(q, id) {
   const x = TX[q.art];
   const b = (q.art === "frist" || q.art === "afrist") && typeof q.tx === "string" && q.tx.length < 200 ? q.tx : x.b;
-  return { t: x.t, b, u: x.u, g: q.art + "-" + id };
+  const t = q.art === "hinweis" && q.a ? "Neue Aufgabe für dich" : x.t;   /* Aufgabe (mit Antwort oder Abhaken) statt Hinweis */
+  return { t, b, u: x.u, g: q.art + "-" + id };
 }
 
 const val = (v) => v == null ? null : "stringValue" in v ? v.stringValue : "integerValue" in v ? +v.integerValue : "doubleValue" in v ? v.doubleValue
