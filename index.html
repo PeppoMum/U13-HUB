@@ -237,6 +237,16 @@ nav button .em{display:inline-flex;justify-content:center;align-items:center}
 @media(min-width:761px){nav button.mobx{display:none!important}nav button.tabmore{flex:none;margin-left:auto;font-weight:600}.mobsheet{position:fixed;z-index:400;background:var(--card);border:1px solid var(--ln);border-radius:14px;padding:6px;display:grid;gap:2px;min-width:230px;max-height:75vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.35);backdrop-filter:blur(30px) saturate(1.8);-webkit-backdrop-filter:blur(30px) saturate(1.8)}.mobsheet[hidden]{display:none}.mobsheet button{display:flex;align-items:center;gap:12px;min-height:44px;border:0;background:none;color:var(--tx);font:inherit;font-size:15px;border-radius:9px;padding:8px 14px;cursor:pointer;text-align:left}.mobsheet button:hover{background:var(--acs)}.mobsheet button svg{width:19px;height:19px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}}
 /* Datum/Uhrzeit als Textfeld am Computer (datum.js) */
 input.dsf-d{width:9.5em}input.dsf-t{width:5.5em}input.dsbad{border-color:var(--r,#c62828)!important;outline-color:var(--r,#c62828)}
+/* Monatskalender am Datumsfeld (datum.js) */
+input.dsf-d{width:calc(9.5em + 24px)}input.dsf-d:not([readonly]):not(:disabled){padding-right:32px!important;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238B93A1' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3.5' y='5' width='17' height='15' rx='3'/%3E%3Cpath d='M3.5 10h17M8 3v4M16 3v4'/%3E%3C/svg%3E")!important;background-repeat:no-repeat!important;background-position:right 9px center!important;background-size:17px 17px!important}
+.dpk{position:fixed;z-index:5000;width:286px;box-sizing:border-box;padding:10px;background:var(--card,#fff);color:var(--tx,#1c1f24);border:1px solid var(--ln,#e5e7eb);border-radius:14px;box-shadow:0 12px 34px rgba(0,0,0,.25);font-size:14px;line-height:1.2;-webkit-user-select:none;user-select:none}
+.dpk .dpk-h{display:flex;align-items:center;justify-content:space-between;margin:0 2px 6px 4px}.dpk .dpk-h b{font-size:15px;font-weight:600}
+.dpk .dpk-h button{width:30px;height:30px;min-height:0;border:0;border-radius:8px;background:none;color:var(--ac);font-size:20px;line-height:1;padding:0;cursor:pointer}.dpk .dpk-h button:hover{background:var(--acs)}
+.dpk .dpk-g{display:grid;grid-template-columns:24px repeat(7,1fr);gap:2px;text-align:center;font-variant-numeric:tabular-nums}
+.dpk .dpk-g>i{font-style:normal;font-size:11px;font-weight:600;color:var(--mu);padding:2px 0 4px}.dpk .dpk-g>em{font-style:normal;font-size:10.5px;color:var(--mu);display:flex;align-items:center;justify-content:center}
+.dpk .dpk-d{position:relative;height:32px;min-height:0;border:0;border-radius:99px;background:none;color:inherit;font:inherit;font-size:14px;padding:0;cursor:pointer}.dpk .dpk-d:hover{background:var(--grs,#e6e8ec)}
+.dpk .dpk-d.out{opacity:.4}.dpk .dpk-d.tod{box-shadow:inset 0 0 0 1.5px var(--ac);color:var(--ac);font-weight:600}.dpk .dpk-d.sel{background:var(--ac);color:var(--onac,#fff);font-weight:600;box-shadow:none}.dpk .dpk-d:disabled{opacity:.2;cursor:default}
+.dpk .dpk-p{position:absolute;left:0;right:0;bottom:2px;display:flex;justify-content:center;gap:2px}.dpk .dpk-p b{width:4px;height:4px;border-radius:50%;background:var(--ac)}.dpk .dpk-p b.s{background:var(--o,#e07b1a)}.dpk .dpk-d.sel .dpk-p b{background:var(--onac,#fff)}
 
 /* ---------- Einheitliche Bedienelemente (2026-10-26) ----------
    Knöpfe, Auswahllisten, Eingabefelder, Umschalter und Pfeile haben dieselbe Höhe, Ecke und Schrift.
@@ -654,6 +664,7 @@ html[data-design] body #gpl select{background-position:right 4px center;padding-
    nach zwei Ziffern springt es automatisch weiter ("1800" wird "18:00").
    Für den übrigen Code bleibt .value wie bei den Browser-Feldern (JJJJ-MM-TT bzw. HH:MM),
    input/change kommen erst, wenn ein vollständiger, gültiger Wert dasteht.
+   Datumsfelder haben rechts ein Kalender-Zeichen für den Monatskalender (siehe unten).
    Auf Handy und Tablet bleibt der Kalender des Geräts. */
 (function(){
 if(!window.matchMedia||!matchMedia("(hover:hover) and (pointer:fine)").matches)return;
@@ -685,10 +696,44 @@ function commit(el){const k=el._ds,p=parse(k,NV.get.call(el));el.classList.remov
   if(p===null){NV.set.call(el,fmt(k,el._dv));return}if(p!==el._dv){el._dv=p;NV.set.call(el,fmt(k,p));fire(el)}else NV.set.call(el,fmt(k,p))}
 window.addEventListener("input",(e)=>{const el=e.target;if(!el||!el._ds||e._ds)return;e.stopImmediatePropagation();
   const k=el._ds,raw=NV.get.call(el),n=autoFmt(raw,k==="d"?".":":",k==="d"?[2,2,4]:[2,2],k==="d"?[3,1,9]:[2,5],/^delete/.test(e.inputType||""));if(n!==raw)NV.set.call(el,n);
-  const p=parse(k,n),full=n.length===FULL[k];el.classList.toggle("dsbad",full&&p===null);if(full&&p&&p!==el._dv){el._dv=p;fire(el)}},true);
+  const p=parse(k,n),full=n.length===FULL[k];el.classList.toggle("dsbad",full&&p===null);if(full&&p&&p!==el._dv){el._dv=p;fire(el)}pkFollow(el,n)},true);
 window.addEventListener("change",(e)=>{const el=e.target;if(el&&el._ds&&!e._ds)e.stopImmediatePropagation()},true);
-window.addEventListener("focusout",(e)=>{const el=e.target;if(el&&el._ds)commit(el)},true);
-window.addEventListener("keydown",(e)=>{const el=e.target;if(el&&el._ds&&e.key==="Enter")commit(el)},true);
+window.addEventListener("focusout",(e)=>{const el=e.target;if(el&&el._ds){commit(el);if(PK&&PK.el===el)pkClose()}},true);
+window.addEventListener("keydown",(e)=>{const el=e.target;if(PK&&e.key==="Escape"){e.preventDefault();e.stopImmediatePropagation();pkClose();return}if(el&&el._ds&&e.key==="Enter"){commit(el);pkClose()}},true);
+/* Monatskalender (nur Datumsfelder): Klick auf das Kalender-Zeichen rechts im Feld klappt den Monat auf, Klick auf einen Tag trägt ihn ein.
+   Tippen geht weiter wie oben. Links die Kalenderwoche, Punkte an Tagen mit eingetragenem Training (blau) bzw. Spiel (orange). */
+const MON=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"],ICW=30;
+let PK=null;
+const iso=(d)=>d.getFullYear()+"-"+P2(d.getMonth()+1)+"-"+P2(d.getDate());
+function kw(d){const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())),n=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-n);return Math.ceil(((t-Date.UTC(t.getUTCFullYear(),0,1))/864e5+1)/7)}
+function marks(){const m={},add=(d,k)=>{if(d)(m[d]=m[d]||{})[k]=1};
+  try{if(typeof D==="undefined"||!D)return m;const game=(t)=>typeof isGameTyp==="function"?isGameTyp(t):/Spiel|Turnier/.test(t||"");
+    (D.trainings||[]).forEach((t)=>add(t.datum,"t"));(D.spiele||[]).forEach((g)=>add(g.datum,"s"));
+    (D.events||[]).forEach((e)=>{if(e.typ==="Training")add(e.datum,"t");else if(e.spielId||game(e.typ))add(e.datum,"s")})}catch(e){}return m}
+const pkable=(el)=>el&&el._ds==="d"&&!el.disabled&&!el.readOnly;
+const onIcon=(el,e)=>pkable(el)&&e.clientX>el.getBoundingClientRect().right-ICW;
+function pkPlace(){if(!PK)return;const r=PK.el.getBoundingClientRect(),b=PK.box,h=b.offsetHeight,w=b.offsetWidth;let top=r.bottom+6;if(top+h>innerHeight-8&&r.top-6-h>8)top=r.top-6-h;
+  b.style.top=top+"px";b.style.left=Math.max(8,Math.min(r.left,innerWidth-w-8))+"px"}
+function pkDraw(){if(!PK)return;const y=PK.view.getFullYear(),m=PK.view.getMonth(),off=(new Date(y,m,1).getDay()+6)%7,mk=marks(),sel=PK.el._dv,tod=iso(new Date()),mn=PK.el.getAttribute("min")||"",mx=PK.el.getAttribute("max")||"";
+  let h='<div class="dpk-h"><b>'+MON[m]+" "+y+'</b><span><button type="button" data-n="-1" aria-label="Monat zurück">‹</button><button type="button" data-n="1" aria-label="Monat vor">›</button></span></div><div class="dpk-g"><i>KW</i>'+["Mo","Di","Mi","Do","Fr","Sa","So"].map((w)=>"<i>"+w+"</i>").join("");
+  for(let i=0;i<42;i++){const d=new Date(y,m,1-off+i),v=iso(d),x=mk[v]||{};if(i%7===0){if(i&&d.getMonth()!==m)break;h+="<em>"+kw(d)+"</em>"}
+    h+='<button type="button" class="dpk-d'+(d.getMonth()!==m?" out":"")+(v===tod?" tod":"")+(v===sel?" sel":"")+'" data-d="'+v+'"'+((mn&&v<mn)||(mx&&v>mx)?" disabled":"")+">"+d.getDate()+
+      (x.t||x.s?'<span class="dpk-p">'+(x.t?"<b></b>":"")+(x.s?'<b class="s"></b>':"")+"</span>":"")+"</button>"}
+  PK.box.innerHTML=h+"</div>";pkPlace()}
+function pkClose(){if(PK){PK.box.remove();PK=null}}
+function pkOpen(el){pkClose();const v=el._dv,d=v?new Date(+v.slice(0,4),+v.slice(5,7)-1,1):new Date(),box=document.createElement("div");box.className="dpk";
+  PK={el,box,view:new Date(d.getFullYear(),d.getMonth(),1)};document.body.appendChild(box);
+  box.addEventListener("click",(e)=>{const b=e.target.closest("button");if(!b||!PK)return;
+    if(b.dataset.n){PK.view=new Date(PK.view.getFullYear(),PK.view.getMonth()+ +b.dataset.n,1);pkDraw();return}
+    const t=PK.el,v=b.dataset.d;pkClose();t.classList.remove("dsbad");if(v!==t._dv){t.value=v;fire(t)}else t.value=v});
+  pkDraw()}
+/* Beim Tippen zeigt ein offener Kalender den getippten Monat */
+function pkFollow(el,n){if(!PK||PK.el!==el)return;const m=/^\d{2}\.(\d{2})(?:\.(\d{4}))?/.exec(n);if(m&&+m[1]>=1&&+m[1]<=12)PK.view=new Date(m[2]?+m[2]:PK.view.getFullYear(),+m[1]-1,1);pkDraw()}
+window.addEventListener("mousedown",(e)=>{const el=e.target;if(PK&&PK.box.contains(el)){e.preventDefault();return}
+  if(onIcon(el,e)){e.preventDefault();if(PK&&PK.el===el){pkClose();return}el.focus();pkOpen(el)}},true);
+window.addEventListener("mousemove",(e)=>{const el=e.target;if(el&&el._ds==="d")el.style.cursor=onIcon(el,e)?"pointer":""},true);
+window.addEventListener("scroll",(e)=>{if(PK&&!PK.box.contains(e.target))pkPlace()},true);
+window.addEventListener("resize",pkClose);
 const go=()=>{scan(document.body);new MutationObserver((ms)=>{for(const m of ms)m.addedNodes.forEach((n)=>{if(n.nodeType===1)scan(n)})}).observe(document.body,{childList:true,subtree:true})};
 document.body?go():document.addEventListener("DOMContentLoaded",go);
 })();
@@ -962,7 +1007,7 @@ $("#tg").addEventListener("click",(e)=>{
   const cur=(t.spieler||{})[b.dataset.p]||"",nxt=ORDER[(ORDER.indexOf(cur)+1)%ORDER.length],sp={...(t.spieler||{})};
   if(nxt)sp[b.dataset.p]=nxt;else delete sp[b.dataset.p];
   /* sofort lokal übernehmen und nur diese Tabelle neu zeichnen (Scrollstand bleibt); das Speichern läuft im Hintergrund */
-  qApply("trainings",t.id,{id:t.id,datum:t.datum,spieler:sp},true);renderTrain();
+  qApply("trainings",t.id,{id:t.id,datum:t.datum,spieler:sp},true);renderTrain();typeof renderStart==="function"&&renderStart();
   save("trainings",t.id,{id:t.id,datum:t.datum,spieler:sp});
 });
 let VIEW="all";
