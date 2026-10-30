@@ -1919,9 +1919,10 @@ async function hnAntLoeschen(n){if(!window.__WEB||typeof db==="undefined"||!db)r
   if(n.rp==="t")for(const p of hnEmpf(n)){const l=L[p.id];if(l&&l.key)P.push(await hnAntPfad(n,p.id,l.key))}
   for(const s of P){try{const r=await db.collection("antw").doc(s).collection("m").get();for(const d of r.docs)await db.collection("antw").doc(s).collection("m").doc(d.id).delete()}catch(e){}await db.doc("antwauth/"+s).delete().catch(()=>{})}}
 /* Aufgaben-Übersicht (nur Trainer): Beteiligung → „Aufgaben“ und Karte „Aufgaben“ im Spielerprofil. Gezählt werden Aufgaben mit Abhaken
-   (Frist = Ende von „Sichtbar bis“, Zeitpunkt = erstes Abhaken) und Clips mit Aufgabe (Frist = „Kommentieren bis“, Zeitpunkt = erster eigener
+   (Frist = Ende von „Sichtbar bis“, Zeitpunkt = erstes Abhaken oder erste eigene Antwort) und Clips mit Aufgabe (Frist = „Kommentieren bis“, Zeitpunkt = erster eigener
    Kommentar), je Spieler mit aktivem Link. Status: p pünktlich, v verspätet, n nicht gemacht (Frist vorbei), x nicht gemacht (vom Trainer gesetzt),
-   o läuft noch, e musste nicht (entschuldigt, zählt gar nicht mit). „Nicht gemacht“ (1) und „Musste nicht“ ("e") setzt und nimmt nur der Trainer zurück
+   o läuft noch, e musste nicht (entschuldigt, zählt gar nicht mit), g vom Trainer als gemacht markiert (zählt wie pünktlich, z. B. gemacht, aber nicht abgehakt).
+   „Nicht gemacht“ (1), „Musste nicht“ ("e") und „Gemacht“ ("g") setzt und nimmt nur der Trainer zurück
    (config.aufgNein, steht nicht im Link: der Spieler sieht weiter „erledigt“). */
 const AUF={c:{},w:"a",z:"s",sel:""};
 const aufIso=(v)=>v&&typeof v.toDate==="function"?v.toDate().toISOString():v&&v.seconds!=null?new Date(v.seconds*1000).toISOString():typeof v==="string"?v:"";
@@ -1929,27 +1930,33 @@ const aufTag=(ms)=>{const d=new Date(ms),p=(x)=>String(x).padStart(2,"0");return
 const aufNein=()=>(D.config&&D.config.aufgNein)||{};
 function aufDa(){return hnList().some((n)=>n&&n.art==="c"&&n.text)||((window.__vid&&window.__vid.clips)||[]).some((c)=>c&&c.aufgabe)}
 function aufListe(){const td=hnHeute(),L=window.__links||{},A=typeof active==="function"?active():[],mit=(p)=>!!(L[p.id]&&L[p.id].aktiv&&L[p.id].key),o=[];
-  for(const n of hnList())if(n&&n.art==="c"&&n.text&&!(n.von&&td<n.von))o.push({k:"h",id:n.id,f:n.bis?Date.parse(n.bis+"T23:59:59"):NaN,ab:n.von||(/^h[0-9a-z]+$/.test(n.id)?aufTag(parseInt(n.id.slice(1),36)):""),an:hnEmpf(n).filter(mit),t:hnFmt(n.text.split("\n")[0])});
+  for(const n of hnList())if(n&&n.art==="c"&&n.text&&!(n.von&&td<n.von))o.push({k:"h",id:n.id,f:n.bis?Date.parse(n.bis+"T23:59:59"):NaN,ab:n.von||(/^h[0-9a-z]+$/.test(n.id)?aufTag(parseInt(n.id.slice(1),36)):""),an:hnEmpf(n).filter(mit),t:hnFmt(n.text.split("\n")[0]),n});
   for(const c of(window.__vid&&window.__vid.clips)||[])if(c&&c.aufgabe&&c.s&&c.ck)o.push({k:"v",id:c.id,f:c.frist?Date.parse(c.frist.length<=10?c.frist+"T23:59":c.frist):NaN,ab:(c.at||"").slice(0,10),an:(c.an==="alle"||!Array.isArray(c.an)?A:A.filter((p)=>c.an.includes(p.id))).filter(mit),t:"Clip: "+esc(c.titel||c.aufgabe)});
   return o.filter((a)=>a.an.length)}
-function aufSt(a,at,nein){if(nein)return{s:nein==="e"?"e":"x",at};if(at)return{s:isNaN(a.f)||at==="?"||Date.parse(at)<=a.f?"p":"v",at};return{s:!isNaN(a.f)&&Date.now()>a.f?"n":"o",at:null}}
+function aufSt(a,at,nein){if(nein)return{s:nein==="e"?"e":nein==="g"?"g":"x",at};if(at)return{s:isNaN(a.f)||at==="?"||Date.parse(at)<=a.f?"p":"v",at};return{s:!isNaN(a.f)&&Date.now()>a.f?"n":"o",at:null}}
+/* Antworten auf eine Aufgabe mit Abhaken zählen auch als erledigt (viele vergessen das Abhaken): Zeitpunkte je Spieler aus antw/<pfad>/m */
+async function aufAntw(s,rk,frisch){const z=Date.now(),c=AUF.c["a"+s];if(c&&!frisch&&z-c.z<12e4)return c.L;let L=[];
+  try{const r=await db.collection("antw").doc(s).collection("m").get();for(const d of r.docs){const x=d.data()||{};try{L.push({at:aufIso(x.at)||"?",p:(await window.__lk.unseal(rk,x.b)).p})}catch(e){}}}catch(e){}
+  AUF.c["a"+s]={L,z};return L}
 /* Abhaken wird nur bei Bedarf gelesen und 2 Minuten gemerkt (schont die Datenbank, die Übersicht wird bei jeder Änderung neu gezeichnet);
    beim Öffnen der Übersicht und im Profil frisch gelesen. Clip-Kommentare liest videos.js ohnehin mit. */
 async function aufStand(T,pid,frisch){const L=window.__links||{},V=window.__vid,N=aufNein(),R={},z=Date.now();
   await Promise.all(T.flatMap((a)=>a.an.filter((p)=>!pid||p.id===pid).map(async(p)=>{let at=null;
-    if(a.k==="h"){const s=await hnSig(a.id,p.id,L[p.id].key),c=AUF.c[s];if(c&&!frisch&&z-c.z<12e4)at=c.at;else{try{const r=await db.doc("aufg/"+s+"/m/x").get(),d=r&&r.exists&&r.data();if(d&&d.d)at=aufIso(d.at)||"?"}catch(e){}AUF.c[s]={at,z}}}
+    if(a.k==="h"){const s=await hnSig(a.id,p.id,L[p.id].key),c=AUF.c[s];if(c&&!frisch&&z-c.z<12e4)at=c.at;else{try{const r=await db.doc("aufg/"+s+"/m/x").get(),d=r&&r.exists&&r.data();if(d&&d.d)at=aufIso(d.at)||"?"}catch(e){}AUF.c[s]={at,z}}
+      if(a.n.rp&&a.n.rk&&window.__lk){const an=(await aufAntw(await hnAntPfad(a.n,p.id,L[p.id].key),a.n.rk,frisch)).filter((x)=>x.p===p.id).map((x)=>x.at).sort()[0];if(an&&(!at||at==="?"||an<at))at=an}}
     else at=((V&&V.kom&&V.kom[a.id])||[]).filter((k)=>!k.tr&&k.p===p.id&&!k.r).map((k)=>k.at||"?").sort()[0]||null;
     const k=a.k+":"+a.id+":"+p.id;R[k]=aufSt(a,at,N[k])})));
   return R}
-function aufZahl(T,R,pid){const z={a:0,p:0,v:0,n:0,o:0,e:0};for(const a of T){const s=R[a.k+":"+a.id+":"+pid];if(!s)continue;if(s.s==="e"){z.e++;continue}z.a++;z[s.s==="x"?"n":s.s]++}
+function aufZahl(T,R,pid){const z={a:0,p:0,v:0,n:0,o:0,e:0};for(const a of T){const s=R[a.k+":"+a.id+":"+pid];if(!s)continue;if(s.s==="e"){z.e++;continue}z.a++;z[s.s==="x"?"n":s.s==="g"?"p":s.s]++}
   const f=z.p+z.v+z.n;z.q=f?(z.p+z.v)/f:null;z.qp=f?z.p/f:null;return z}
 const aufD=(ms)=>{const d=new Date(ms);return String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+"."};
-function aufItems(T,R,pid){const can=hnCan(),P={p:["ok","✓ pünktlich"],v:["busy",""],n:["err","✗ nicht gemacht"],x:["err","✗ nicht gemacht (von dir)"],e:["","– musste nicht"],o:["","○ läuft"]};
+function aufItems(T,R,pid){const can=hnCan(),P={p:["ok","✓ pünktlich"],v:["busy",""],n:["err","✗ nicht gemacht"],x:["err","✗ nicht gemacht (von dir)"],e:["","– musste nicht"],g:["ok","✓ gemacht (von dir)"],o:["","○ läuft"]};
   return T.filter((a)=>R[a.k+":"+a.id+":"+pid]).sort((a,b)=>(b.f||Infinity)-(a.f||Infinity)).map((a)=>{const k=a.k+":"+a.id+":"+pid,s=R[k],q=P[s.s];
     const pill=s.s==="v"?"⏱ "+(()=>{const t=Math.ceil((Date.parse(s.at)-a.f)/864e5);return t>1?t+" Tage zu spät":"1 Tag zu spät"})():q[1];
     const dt=s.at&&s.at!=="?"?"am "+aufD(Date.parse(s.at)):isNaN(a.f)?"ohne Frist":"Frist "+aufD(a.f);
+    const kn=(v,l)=>'<button type="button" class="btn" style="flex:none" data-aufn="'+esc(k)+'" data-aufv="'+v+'">'+l+"</button>";
     return'<div class="row aufit" style="gap:8px;flex-wrap:wrap;padding:6px 0;border-top:1px solid var(--ln)"><span class="pill '+q[0]+'" style="flex:none">'+pill+'</span><span style="flex:1 1 140px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+a.t+'</span><span class="note" style="flex:none">'+dt+"</span>"
-      +(!can?"":s.s==="x"||s.s==="e"?'<button type="button" class="btn" style="flex:none" data-aufn="'+esc(k)+'" data-aufv="">Zurücknehmen</button>':(s.s!=="n"?'<button type="button" class="btn" style="flex:none" data-aufn="'+esc(k)+'" data-aufv="1">Nicht gemacht</button>':"")+'<button type="button" class="btn" style="flex:none" data-aufn="'+esc(k)+'" data-aufv="e">Musste nicht</button>')+"</div>"}).join("")}
+      +(!can?"":"xeg".includes(s.s)?kn("","Zurücknehmen"):(s.s==="n"||s.s==="o"?kn("g","Gemacht"):"")+(s.s!=="n"?kn("1","Nicht gemacht"):"")+kn("e","Musste nicht"))+"</div>"}).join("")}
 /* Beteiligung → Aufgaben: Kennzahlen, Auswahl (Welche, Zeitraum), Tabelle je Spieler; Antippen zeigt seine Aufgaben */
 let aufRT=0;
 async function aufRender(frisch){const el=document.getElementById("a_t");if(!el||el.hidden)return;
@@ -1974,7 +1981,7 @@ async function hnProfil(){const old=document.getElementById("phnc");if(old)old.r
   (pn.closest(".card")||pn).insertAdjacentElement("beforebegin",c)}
 document.addEventListener("click",(e)=>{const b=e.target.closest&&e.target.closest("[data-aufw],[data-aufz],[data-aufsel],[data-aufn]");if(!b)return;const d=b.dataset;
   if(d.aufw)AUF.w=d.aufw;else if(d.aufz)AUF.z=d.aufz;else if(d.aufsel)AUF.sel=AUF.sel===d.aufsel?"":d.aufsel;
-  else{if(!hnCan())return;const N={...aufNein()};if(d.aufv)N[d.aufn]=d.aufv==="e"?"e":1;else delete N[d.aufn];D.config={...(D.config||{}),aufgNein:N};cfgSave({aufgNein:N});if(b.closest("#phnc"))hnProfil()}
+  else{if(!hnCan())return;const N={...aufNein()};if(d.aufv)N[d.aufn]=d.aufv==="e"||d.aufv==="g"?d.aufv:1;else delete N[d.aufn];D.config={...(D.config||{}),aufgNein:N};cfgSave({aufgNein:N});if(b.closest("#phnc"))hnProfil()}
   aufRender()});
 if(typeof renderProfile==="function"){const o=renderProfile;renderProfile=function(){const r=o.apply(this,arguments);try{hnProfil()}catch(e){}return r}}
 $("#mhn").addEventListener("click",()=>{hnOpen($("#lkh").hidden);if(!$("#lkh").hidden)renderHints()});
@@ -3312,11 +3319,14 @@ function hnAll(el,d,pid){if(!el)return;
   if(net&&pid!=="team")L.filter((n)=>hnAuf(n)&&n.rp&&n.rs&&n.rk&&!(n.rs in hnAn)).forEach((n)=>{hnAn[n.rs]=null;hnAnLoad(n).then(re)})}
 async function hnAnLoad(n){const net=window.__vidNet;if(!net)return;try{const L=await net.list("antw/"+n.rs+"/m"),o=[];for(const x of L){try{o.push({at:x.at,...await window.__lk.unseal(n.rk,x.b)})}catch(e){}}hnAn[n.rs]=o.sort((a,b)=>String(a.at).localeCompare(String(b.at)))}catch(e){}}
 window.__hnCtx=null;
+/* Wer auf eine Aufgabe mit Abhaken antwortet, hat sie gemacht: wird dabei automatisch abgehakt (Fehler egal, der Trainer zählt die Antwort ohnehin) */
+async function hnAntHak(n){const net=window.__vidNet;if(n.art!=="c"||!n.s||!net||hnSt[n.s]===true)return;
+  try{const p="aufg/"+n.s+"/m",r=await net.list(p);if(r.length)await net.update(p+"/x",{d:true});else await net.create(p,"x",{d:true},true);hnSt[n.s]=true}catch(e){}}
 document.addEventListener("click",async(e)=>{const t=e.target.closest&&e.target.closest("[data-hnx],[data-hnu],[data-hnopen],[data-hnok],[data-hnas]");if(!t)return;
   if(t.dataset.hnx!=null||t.dataset.hnu!=null){const o=hnX.get(t.dataset.hnp);if(t.dataset.hnx!=null)o[t.dataset.hnx]=t.dataset.hnv;else delete o[t.dataset.hnu];hnX.set(t.dataset.hnp,o);if(t.dataset.hnx!=null){const h=t.closest(".hn");if(h)h.remove()}if(window.__hnRe)window.__hnRe();return}
   if(t.dataset.hnopen!=null){if(e.target.closest("a"))return;const u=document.getElementById("vueb");if(u&&u.hidden&&u.contains(document.getElementById("vha"))&&window.__vshow)window.__vshow("u");const a=document.querySelector("#vha details");if(a){a.open=true;const z=t.dataset.hnopen&&a.querySelector('[data-hnid="'+t.dataset.hnopen+'"]');(z||a).scrollIntoView({behavior:"smooth",block:z?"center":"start"});if(z){z.classList.remove("hnhi");void z.offsetWidth;z.classList.add("hnhi");setTimeout(()=>z.classList.remove("hnhi"),1800)}}return}
   if(t.dataset.hnas!=null){const C=window.__hnCtx,net=window.__vidNet,ta=document.querySelector('[data-hnat="'+t.dataset.hnas+'"]'),n=C&&(C.d.hn||[]).find((x)=>x.rs===t.dataset.hnas),tx=ta?ta.value.trim():"";if(!C||!n||!net||!tx||t.disabled)return;t.disabled=true;
-    try{const w=hnWer(C.pid,C.d);await net.create("antw/"+n.rs+"/m","a"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),{b:await seal(n.rk,{p:C.pid,n:w.n,ro:w.ro,t:tx})},true);if(C.d.fk&&C.d.fk!=="demo")net.create("pushq","q"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),{art:"aantw",k:C.d.fk,t:Date.now()}).catch(()=>{});ta.value="";await hnAnLoad(n)}catch(x){t.disabled=false;window.__toast&&window.__toast("Das hat nicht geklappt. Bitte später noch einmal versuchen.",true);return}
+    try{const w=hnWer(C.pid,C.d);await net.create("antw/"+n.rs+"/m","a"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),{b:await seal(n.rk,{p:C.pid,n:w.n,ro:w.ro,t:tx})},true);if(C.d.fk&&C.d.fk!=="demo")net.create("pushq","q"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),{art:"aantw",k:C.d.fk,t:Date.now()}).catch(()=>{});ta.value="";await hnAnLoad(n);hnAntHak(n)}catch(x){t.disabled=false;window.__toast&&window.__toast("Das hat nicht geklappt. Bitte später noch einmal versuchen.",true);return}
     if(window.__hnRe)window.__hnRe();return}
   const s=t.dataset.hnok,net=window.__vidNet;if(!s||!net||t.disabled)return;t.disabled=true;
   try{const p="aufg/"+s+"/m",r=await net.list(p),neu=!(r[0]&&r[0].d);if(r.length)await net.update(p+"/x",{d:neu});else await net.create(p,"x",{d:true},true);hnSt[s]=neu}catch(x){t.disabled=false;const m=t.parentNode.querySelector(".note");if(m)m.textContent="Das hat nicht geklappt. Bitte später noch einmal versuchen.";return}
