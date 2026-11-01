@@ -14,17 +14,19 @@ const TX = {
   frist: { t: "Erinnerung: Clip-Aufgabe", b: "Bitte kommentiere den Clip bald. Falls du das schon gemacht hast: Danke!", u: "./?link" },
   kom: { t: "Antwort vom Trainer", b: "Der Trainer hat auf deinen Kommentar zum Clip geantwortet.", u: "./?link" },
   antwort: { t: "Antwort vom Trainer", b: "Der Trainer hat auf deine Nachricht geantwortet.", u: "./?link" },
+  aufant: { t: "Antwort vom Trainer", b: "Der Trainer hat auf deine Antwort zu einer Aufgabe geantwortet.", u: "./?link" },
   fb: { t: "Neues Feedback", b: "Ein Spieler oder Elternteil hat dir geschrieben.", u: "./" },
   hinweis: { t: "Neuer Hinweis vom Trainer", b: "Schau in die App.", u: "./?link" },
   notiz: { t: "Neue Notiz vom Trainer", b: "Schau in dein Profil in der App.", u: "./?link" },
   termin: { t: "Termin geändert", b: "Ein Termin wurde abgesagt oder verlegt. Schau in den Terminplan.", u: "./?link" },
   afrist: { t: "Erinnerung: Aufgabe", b: "Bitte denk an deine Aufgabe in der App.", u: "./?link" },
+  dienst: { t: "Dein Dienst diese Woche", b: "Schau in die App.", u: "./?link" },
   aantw: { t: "Antwort auf eine Aufgabe", b: "Ein Spieler hat auf eine Aufgabe geantwortet.", u: "./" },
   skom: { t: "Neuer Clip-Kommentar", b: "Ein Spieler hat einen Clip kommentiert.", u: "./" },
   kanfr: { t: "Neue Konto-Anfrage", b: "Bitte in der App freigeben oder ablehnen.", u: "./" },
 };
 /* Was ein Gerät abgewählt hat (Feld x, durch Komma getrennt): die Antwort auf einen Clip-Kommentar zählt zu „antwort“ */
-const GRP = { kom: "antwort" };
+const GRP = { kom: "antwort", aufant: "antwort" };
 
 /* Wer bekommt den Eintrag? s = Anmeldung eines Geräts (ro: s Spieler, e Elternteil, t Trainer, leer = noch nicht gewählt) */
 export function passt(q, s) {
@@ -33,14 +35,17 @@ export function passt(q, s) {
   if (q.art === "termin") return s.ro !== "t";
   if (q.art === "notiz" || q.art === "afrist") return s.ro !== "t" && !(q.art === "afrist" && s.ro === "e") && !!s.pid && Array.isArray(q.an) && q.an.includes(s.pid);
   if (q.art === "hinweis") return s.ro !== "t" && !(q.a && s.ro === "e") && (!Array.isArray(q.an) || (!!s.pid && q.an.includes(s.pid)));   /* Hinweis an einzelne Spieler: nur deren Geräte */
+  /* Dienst der Woche: fuer "s" an Spieler (und Geräte ohne gewählte Rolle), "e" nur an Eltern – jeweils nur Geräte des eingeteilten Spielers */
+  if (q.art === "dienst") return s.ro !== "t" && !!s.pid && Array.isArray(q.an) && q.an.includes(s.pid) && (q.fuer === "e" ? s.ro === "e" : s.ro !== "e");
   if (q.art === "antwort") return !!q.r && s.r === q.r && s.ro !== "t";
-  if (q.art === "clip" || q.art === "frist" || q.art === "kom") return s.ro !== "t" && s.ro !== "e" && !!s.pid && (q.an === "alle" || (Array.isArray(q.an) && q.an.includes(s.pid)));
+  if (q.art === "clip" || q.art === "frist" || q.art === "kom" || q.art === "aufant") return s.ro !== "t" && s.ro !== "e" && !!s.pid && (q.an === "alle" || (Array.isArray(q.an) && q.an.includes(s.pid)));
   return false;
 }
 export function nachricht(q, id) {
   const x = TX[q.art];
-  const b = (q.art === "frist" || q.art === "afrist") && typeof q.tx === "string" && q.tx.length < 200 ? q.tx : x.b;
-  const t = q.art === "hinweis" && q.a ? "Neue Aufgabe für dich" : x.t;   /* Aufgabe (mit Antwort oder Abhaken) statt Hinweis */
+  const b = (q.art === "frist" || q.art === "afrist" || q.art === "dienst") && typeof q.tx === "string" && q.tx.length < 200 ? q.tx : x.b;
+  const viele = q.n > 1, t = q.art === "hinweis" && q.a ? "Neue Aufgabe für dich"
+    : q.art === "dienst" ? (q.fuer === "e" ? (viele ? "Dienste für dein Kind diese Woche" : "Dienst für dein Kind diese Woche") : (viele ? "Deine Dienste diese Woche" : x.t)) : x.t;   /* Aufgabe (mit Antwort oder Abhaken) statt Hinweis */
   /* Trainer: Antippen öffnet direkt die Aufgabe bzw. den Clip im Eingang (h = Aufgabe/Clip), Nachrichten den Reiter Nachrichten */
   const h = typeof q.h === "string" && /^[\w-]{1,40}$/.test(q.h) ? q.h : "";
   const u = h && q.art === "aantw" ? "./?e=a." + h : h && q.art === "skom" ? "./?e=c." + h : q.art === "fb" ? "./?e=n" : x.u;

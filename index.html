@@ -1851,11 +1851,11 @@ async function hnFrist(n){const Q=window.__pushQ,L=window.__links||{};if(!Q||!wi
   for(const p of an)Q.add("a_"+n.id+"_"+p.id,{art:"afrist",an:[p.id],s:await hnSig(n.id,p.id,L[p.id].key),t,tx:"Deine Aufgabe läuft am "+n.bis.slice(8)+"."+n.bis.slice(5,7)+". ab. Bitte denk daran, sie abzuhaken."})}
 window.__hnFristAlle=()=>hnList().filter((n)=>n.art==="c").forEach(hnFrist);
 /* Einstellungen → Spieler & Eltern: welche Benachrichtigungen an Spieler und Eltern gehen (nur Web-Version, Voreinstellung in videos.js) */
-var PZL={hinweis:"Neue Hinweise und Aufgaben",notiz:"Neue Notizen im Profil",termin:"Abgesagte oder verlegte Termine",afrist:"Erinnerung an Aufgaben mit Abhaken",clip:"Neue Clips",frist:"Erinnerung an Clips",antwort:"Antworten vom Trainer"};
+var PZL={hinweis:"Neue Hinweise und Aufgaben",notiz:"Neue Notizen im Profil",termin:"Abgesagte oder verlegte Termine",afrist:"Erinnerung an Aufgaben mit Abhaken",dienst:"Erinnerung an Dienste (montags 10 Uhr)",clip:"Neue Clips",frist:"Erinnerung an Clips",antwort:"Antworten vom Trainer"};
 function renderPz(){const c=$("#pzc");if(!c)return;const an=!!(window.__WEB&&window.__pushOn);c.style.display=an?"":"none";if(!an)return;
   $("#pzl").innerHTML=Object.keys(PZL).map((k)=>'<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-pz="'+k+'"'+(window.__pushOn(k)?" checked":"")+(hnCan()?"":" disabled")+"> "+PZL[k]+"</label>").join("")}
 $("#pzl").addEventListener("change",(e)=>{const i=e.target.closest("[data-pz]");if(!i)return;const P={};Object.keys(PZL).forEach((k)=>{P[k]=window.__pushOn(k)});P[i.dataset.pz]=i.checked;
-  cfgSave({push:P});if(D.config)D.config.push=P;if(i.dataset.pz==="afrist"&&window.__hnFristAlle)window.__hnFristAlle()});
+  cfgSave({push:P});if(D.config)D.config.push=P;if(i.dataset.pz==="afrist"&&window.__hnFristAlle)window.__hnFristAlle();if(i.dataset.pz==="dienst"&&window.__vid&&window.__vid.dienstSync)window.__vid.dienstSync()});
 function hnD(s){return s?s.slice(8)+"."+s.slice(5,7)+"."+s.slice(0,4):""}
 /* Hinweise liegen unter Termine → „Hinweise“ (auf- und zuklappbar). Bearbeiten nur, wer schreiben darf. */
 function hnCan(){return!document.body.classList.contains("ro")&&window.__ROLE!=="lesen"&&window.__ROLE!=="scout"}
@@ -1874,13 +1874,76 @@ function renderHints(){
   const eh=document.getElementById("ehn");if(eh)hnEingang(eh);
   hnShow();hnStatus();hnAntworten();
 }
-/* Eingang → Aufgaben: laufende Aufgaben und alle abgelaufenen Hinweise, mit Erledigt und Antworten */
-let hnEArm=null,hnEOpen=false;
-function hnEingang(el){if(!el)return;const A=hnList(),auf=A.filter((n)=>(n.art==="a"||n.art==="c")&&!hnAb(n)),ab=A.filter(hnAb).sort((a,b)=>b.bis.localeCompare(a.bis)),ro=!hnCan();
-  const kn=(n)=>ro?"":'<button class="rm" data-hnre="'+n.id+'" title="Wieder aktivieren">↺</button><button class="rm'+(hnEArm===n.id?" arm":"")+'" data-hnex="'+n.id+'">'+(hnEArm===n.id?"Wirklich entfernen?":"✕")+"</button>";
-  const op=hnOffen(el);el.innerHTML=(auf.length?auf.map((n)=>hnItem(n,"")).join(""):'<div class="card"><div class="note">Keine laufende Aufgabe.</div></div>')
-    +(ab.length?'<details class="hnab" style="margin:12px 0 0"'+(hnEOpen?" open":"")+'><summary class="note" style="cursor:pointer">Abgelaufen ('+ab.length+")"+hnNeuPill(ab.reduce((s,n)=>s+(window.__hnNeu[n.id]||0),0))+"</summary>"+ab.map((n)=>hnItem(n,kn(n))).join("")+"</details>":"");
-  op();hnStatus();hnAntworten();hnGoNow(el)}
+/* Eingang → Aufgaben (aufgebaut wie Videos): links eine Liste ohne Aufklappen (laufende Aufgaben, darunter alle abgelaufenen Hinweise),
+   rechts die gewählte Aufgabe in drei Karten: Aufgabe, Erledigt (offenen Namen antippen = gemacht, nochmal = offen), Antworten (Sprechblasen,
+   neueste oben; der Trainer kann auf jede Antwort antworten). Am Handy erst die Liste, die gewählte Aufgabe dann über die ganze Breite mit „Zurück“. */
+let hnEArm=null,hnEOpen=false,hnSel=null,hnRep=null;const hnEC={},hnESeen={};
+document.head.insertAdjacentHTML("beforeend",'<style id="hnecss">#hnew .hnt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;font-weight:600}'
+  +'#hnew .hnchips{display:flex;gap:6px;flex-wrap:wrap}#hnew .hnchip{font:inherit;font-size:14px;line-height:1.4;padding:4px 11px;border-radius:99px;border:0;background:var(--os);color:var(--o)}#hnew .hnchip.ok{background:var(--gs);color:var(--g)}'
+  +'#hnew button.hnchip{cursor:pointer}#hnew .vd-bub{font-size:14px}#hnew .hnback{display:none;margin:0 0 10px}#hnew .card h3{margin:0 0 10px}#hned>.card{margin:0 0 10px}'
+  +'@media (max-width:760px){#hnew.hnsel>.vd-l{display:none}#hnew:not(.hnsel)>.vd-r{display:none}#hnew .hnback{display:block}}</style>');
+const hnETag=(n)=>hnAb(n)?"abgelaufen am "+hnD(n.bis):n.bis?"läuft bis "+hnD(n.bis):"läuft";
+const hnEPlain=(t)=>String(t||"").replace(/\[([^\[\]\n]+)\]\([^)\s]+\)/g,"$1").replace(/\*\*|__|\*/g,"").split("\n").map((x)=>x.trim()).filter(Boolean).join(" ");
+const hnEZahl=(A)=>{const k=(A||[]).filter((x)=>!x.tr).length;return k===1?"1 Antwort":k+" Antworten"};
+function hnEListe(){const A=hnList().filter((n)=>n&&n.text),auf=A.filter((n)=>(n.art==="a"||n.art==="c")&&!hnAb(n)),ab=A.filter(hnAb).sort((a,b)=>b.bis.localeCompare(a.bis));return auf.concat(ab)}
+function hnEMeta(n){const c=hnEC[n.id]||{};return esc(hnETag(n))+(c.e?" · "+esc(c.e)+" erledigt":"")+(c.a&&hnAntw(n)?" · "+hnEZahl(c.a):"")+hnNeuPill(window.__hnNeu[n.id]||0)}
+function hnETile(n){const on=hnSel===n.id,neu=(window.__hnNeu[n.id]||0)>0;
+  return'<button type="button" class="card" data-hnsel="'+esc(n.id)+'" style="display:block;width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer;margin:0 0 8px;'+(on?"border-color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac)":neu?"border-color:var(--o)":"")+'"><div class="hnt">'+esc(hnEPlain(n.text))+'</div><div class="note" data-hnmeta style="margin-top:4px">'+hnEMeta(n)+"</div></button>"}
+function hnEInfo(n){return[n.art==="c"?"Aufgabe mit Abhaken":n.art==="a"?"Aufgabe":"Hinweis",hnAntw(n)?(n.rp==="t"?"Antworten nur an Trainer":"Antworten für alle sichtbar"):"",Array.isArray(n.an)?"An: "+hnNamen(n.an):"",
+  n.wo==="plan"?"Nur Terminpläne":"Gesamter Link",n.von||n.bis?"sichtbar "+(n.von?"ab "+hnD(n.von):"")+(n.von&&n.bis?" ":"")+(n.bis?"bis "+hnD(n.bis):""):"bis zum Entfernen sichtbar"].filter(Boolean).join(" · ")}
+function hnEDetail(n){if(!n)return'<div class="card"><div class="note">Wähle links eine Aufgabe.</div></div>';const ro=!hnCan(),c=hnEC[n.id]||{};
+  return'<div class="hnback"><button class="btn" type="button" data-hnback><i class="chv l"></i> Zurück</button></div>'
+    +'<div class="card" data-hnc="'+esc(n.id)+'"><h3>'+(n.art==="a"||n.art==="c"?"Aufgabe":"Hinweis")+'</h3><div style="white-space:pre-wrap;overflow-wrap:anywhere">'+rtHtml(n.text)+'</div><div class="note" style="margin-top:8px">'+esc(hnEInfo(n))+"</div>"
+    +(ro||!hnAb(n)?"":'<div class="bar" style="margin:12px 0 0"><button class="btn" type="button" data-hnre="'+esc(n.id)+'">Wieder aktivieren</button><button class="btn'+(hnEArm===n.id?" arm":"")+'" type="button" data-hnex="'+esc(n.id)+'">'+(hnEArm===n.id?"Wirklich entfernen?":"Entfernen")+"</button></div>")+"</div>"
+    +(n.art==="c"?'<div class="card" id="hnerl"><h3>Erledigt'+(c.e?" "+esc(c.e):"")+'</h3><div class="hnchips">'+(c.nm!=null?c.nm||'<span class="note">Niemand</span>':'<span class="note">'+(window.__WEB&&typeof db!=="undefined"&&db?"Wird geladen …":"Abhaken gibt es nur in der Web-Version")+"</span>")+"</div></div>":"")
+    +(hnAntw(n)?'<div class="card" id="hnant"><h3>Antworten'+(c.a?" ("+c.a.filter((x)=>!x.tr).length+")":"")+"</h3>"+hnEAnt(n,c.a)+"</div>":"")}
+function hnBub(x,tr,neu){const zt=x.at?new Date(x.at).toLocaleString("de-DE",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"";
+  return'<div class="vd-k'+(tr?" tr":"")+'"><div class="vd-av" aria-hidden="true">'+esc(String(x.n||"?").trim().charAt(0).toUpperCase())+'</div><div class="vd-bub"'+(neu?' style="border-color:var(--o)"':"")+'><div style="font-weight:600;white-space:normal">'+esc(x.n||"?")+(tr?'<span class="vd-trb">Trainer</span>':"")
+    +' <span style="font-weight:400;color:var(--mu);font-size:12px">· '+esc(zt)+"</span>"+(neu?' <span class="pill hnneu" style="background:var(--o);color:#fff;padding:0 7px">neu</span>':"")+'</div><div style="white-space:pre-wrap;overflow-wrap:anywhere">'+esc(x.t||"")+"</div></div></div>"}
+function hnEAnt(n,A){if(!window.__WEB||typeof db==="undefined"||!db||!window.__lk)return'<div class="note">Antworten gibt es nur in der Web-Version.</div>';if(!A)return'<div class="note">Wird geladen …</div>';
+  const P=A.filter((x)=>!x.tr);if(!P.length)return'<div class="note">Noch keine Antwort.</div>';const sn=hnESeen[n.id]||"9",ro=!hnCan();
+  return'<div style="display:flex;flex-direction:column;gap:12px">'+P.slice().reverse().map((x)=>'<div data-hnaid="'+esc(x.id)+'">'+hnBub(x,false,x.at>sn)
+    +A.filter((y)=>y.tr&&y.an===x.id).map((y)=>'<div class="vd-rep" style="margin-top:6px">'+hnBub(y,true,false)+"</div>").join("")
+    +(ro?"":hnRep===x.id?'<div class="vd-rep" style="margin-top:6px"><textarea class="vd-ta" data-hnrt rows="2" maxlength="2000" placeholder="Antwort an '+esc(x.n||"")+'" aria-label="Antwort" style="width:100%;box-sizing:border-box"></textarea><div class="bar" style="margin:6px 0 0"><button class="btn" type="button" data-hnrs="'+esc(x.id)+'" style="background:var(--ac);color:#fff;border-color:var(--ac)">Senden</button><button class="btn" type="button" data-hnrx>Abbrechen</button></div></div>'
+      :'<div class="vd-act vd-rep"><button type="button" data-hnr="'+esc(x.id)+'">Antworten</button></div>')+"</div>").join("")+"</div>"}
+function hnEingang(el){if(!el)return;const L=hnEListe();if(hnSel&&!L.some((n)=>n.id===hnSel))hnSel=null;
+  const ta=el.querySelector("[data-hnrt]"),tv=ta?ta.value:"";
+  el.innerHTML='<div class="vd-wrap'+(hnSel?" hnsel":"")+'" id="hnew"><div class="vd-l">'+(L.length?L.map(hnETile).join(""):'<div class="card"><div class="note">Noch keine Aufgabe.</div></div>')+'</div><div class="vd-r" id="hned">'+hnEDetail(L.find((n)=>n.id===hnSel))+"</div></div>";
+  const t2=el.querySelector("[data-hnrt]");if(t2&&tv)t2.value=tv;
+  hnEZaehlen();if(hnSel)hnELaden(hnSel);hnGoNow(el)}
+/* Nur die rechte Seite neu zeichnen (z. B. nach dem Laden), ein angefangener Antworttext bleibt stehen */
+function hnEDraw(){const d=document.getElementById("hned");if(!d)return;const ta=d.querySelector("[data-hnrt]"),tv=ta?ta.value:"",fo=ta&&document.activeElement===ta;
+  d.innerHTML=hnEDetail(hnEListe().find((n)=>n.id===hnSel));const t2=d.querySelector("[data-hnrt]");if(t2){if(tv)t2.value=tv;if(fo)t2.focus()}
+  const b=document.querySelector('#hnew [data-hnsel="'+CSS.escape(hnSel||"")+'"] [data-hnmeta]'),n=hnEListe().find((x)=>x.id===hnSel);if(b&&n)b.innerHTML=hnEMeta(n)}
+/* Erledigt und Antworten einer Aufgabe lesen (gleiche Zählung wie Beteiligung → Aufgaben) */
+async function hnEErl(n,frisch){const a=aufListe().find((x)=>x.k==="h"&&x.id===n.id);if(!a)return{e:"0 von 0",nm:""};const R=await aufStand([a],"",frisch),N=aufNein(),can=hnCan(),ja=[],nein=[];let weg=0;
+  for(const p of a.an){const k="h:"+n.id+":"+p.id,s=(R[k]||{}).s||"o",nm=esc(p.vorname+" "+(p.name||"").charAt(0)+".");if(s==="e"){weg++;continue}
+    const fertig="pvgy".includes(s),tipp=can&&(!fertig||N[k]==="g"||N[k]==="v"),tx=nm+(fertig?" ✓":" fehlt noch");
+    (fertig?ja:nein).push(tipp?'<button type="button" class="hnchip'+(fertig?" ok":"")+'" data-hnnm="'+esc(k)+'">'+tx+"</button>":'<span class="hnchip'+(fertig?" ok":"")+'">'+tx+"</span>")}
+  return{e:ja.length+" von "+(a.an.length-weg),nm:ja.concat(nein).join("")}}
+let hnELT=0;
+async function hnELaden(id,frisch){const n=hnEListe().find((x)=>x.id===id);if(!n||!window.__WEB||typeof db==="undefined"||!db)return;const t=++hnELT,c=hnEC[id]=hnEC[id]||{};
+  /* gewählt = gesehen; neue Antworten bleiben markiert, solange die Aufgabe offen ist */
+  const V=window.__vid;if(!(id in hnESeen))hnESeen[id]=V&&V.since?V.since("a",id):"9";
+  if(n.art==="c")Object.assign(c,await hnEErl(n,frisch!==false));if(hnAntw(n)&&window.__lk)c.a=await hnAntLesen(n);if(t!==hnELT||hnSel!==id)return;
+  if(window.__hnNeu[id]){window.__hnNeu[id]=0;if(V&&V.seen)V.seen("a",id)}else if(V&&V.seen&&hnAntw(n))V.seen("a",id);hnEDraw()}
+let hnEZT=0;
+async function hnEZaehlen(){if(!window.__WEB||typeof db==="undefined"||!db)return;const t=++hnEZT;
+  for(const n of hnEListe()){if(n.id===hnSel||(n.art!=="c"&&!hnAntw(n)))continue;const c=hnEC[n.id]=hnEC[n.id]||{};
+    if(n.art==="c")c.e=(await hnEErl(n,false)).e;if(hnAntw(n)&&window.__lk)c.a=await hnAntLesen(n);if(t!==hnEZT)return;
+    const b=document.querySelector('#hnew [data-hnsel="'+CSS.escape(n.id)+'"] [data-hnmeta]');if(b)b.innerHTML=hnEMeta(n)}}
+/* Antwort des Trainers auf eine Antwort: im selben Pfad wie die Antwort (bei „nur an Trainer“ sieht sie nur dieser Spieler), Benachrichtigung an den Spieler */
+async function hnESenden(id,b){const n=hnEListe().find((x)=>x.id===hnSel),x=n&&(hnEC[n.id].a||[]).find((y)=>y.id===id),ta=document.querySelector("#hned [data-hnrt]"),t=ta?ta.value.trim():"";if(!n||!x||!t||!x.s)return;
+  b.disabled=true;const V=window.__vid,von=V&&V.myName?V.myName():"Trainer",nid="t"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  try{await db.collection("antw").doc(x.s).collection("m").doc(nid).set({b:await window.__lk.seal(n.rk,{tr:1,n:von,t,an:x.id}),at:new Date()});
+    if(x.p&&window.__pushQ)window.__pushQ.add("q"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),{art:"aufant",an:[x.p]});
+    ta.value="";hnRep=null;await hnELaden(n.id,false)}catch(e){b.disabled=false;window.__toast&&window.__toast("Das konnte nicht gesendet werden.",true)}}
+document.addEventListener("click",(e)=>{const t=e.target.closest&&e.target.closest("#hnew [data-hnsel],#hnew [data-hnback],#hnew [data-hnr],#hnew [data-hnrx],#hnew [data-hnrs]");if(!t)return;
+  if(t.dataset.hnsel!=null){hnSel=t.dataset.hnsel;hnRep=null;hnEArm=null;hnEingang(document.getElementById("ehn"));if(matchMedia("(max-width:760px)").matches)window.scrollTo(0,0);return}
+  if(t.dataset.hnback!=null){hnSel=null;hnRep=null;hnEingang(document.getElementById("ehn"));return}
+  if(t.dataset.hnr!=null){hnRep=t.dataset.hnr;hnEDraw();const a=document.querySelector("#hned [data-hnrt]");if(a)a.focus();return}
+  if(t.dataset.hnrx!=null){hnRep=null;hnEDraw();return}
+  if(t.dataset.hnrs!=null)hnESenden(t.dataset.hnrs,t)});
 /* Beim Neuzeichnen bleiben aufgeklappte „erledigt“- und Antworten-Kästen offen (z. B. nach dem Antippen eines Namens) */
 function hnOffen(el){const k=(d)=>(d.dataset.hnst?"s":"r")+(d.dataset.hnst||d.dataset.hnrp),S=new Set([...el.querySelectorAll("details[open][data-hnst],details[open][data-hnrp]")].map(k));
   return()=>{if(S.size)el.querySelectorAll("details[data-hnst],details[data-hnrp]").forEach((d)=>{if(S.has(k(d)))d.open=true})}}
@@ -1891,7 +1954,7 @@ window.__hnNeu={};let hnNeuZ=0,hnNeuV=0;
 const hnNeuPill=(k)=>k?' <span class="pill hnneu" style="background:var(--o);color:#fff;padding:0 7px">'+k+" neu</span>":"";
 async function hnNeuLaden(){const V=window.__vid;if(!V||!V.gs||!window.__WEB||typeof db==="undefined"||!db||!window.__lk)return;
   if(!window.__links){if(++hnNeuV<40)setTimeout(hnNeuLaden,1500);return}hnNeuZ=Date.now();const g=aufTag(Date.now()-14*864e5),N={};
-  for(const n of hnList().filter((x)=>x&&x.text&&hnAntw(x)&&(!x.bis||x.bis>=g))){const sn=V.since("a",n.id);N[n.id]=(await hnAntLesen(n)).filter((x)=>x.at>sn).length}
+  for(const n of hnList().filter((x)=>x&&x.text&&hnAntw(x)&&(!x.bis||x.bis>=g))){const sn=V.since("a",n.id);N[n.id]=(await hnAntLesen(n)).filter((x)=>!x.tr&&x.at>sn).length}
   window.__hnNeu=N;V.badge()}
 window.__hnNeuLaden=hnNeuLaden;
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&Date.now()-hnNeuZ>6e4)hnNeuLaden()});
@@ -1900,13 +1963,13 @@ document.addEventListener("toggle",(e)=>{const d=e.target;if(!d.open||!d.matches
   window.__hnNeu[id]=0;if(s)s.remove();if(V&&V.seen)V.seen("a",id)},true);
 /* Benachrichtigung angetippt: diese Aufgabe im Eingang aufklappen (auch abgelaufene) */
 let hnGoId=null;
-window.__hnGo=(id)=>{hnGoId=id;const n=hnList().find((x)=>x.id===id);if(n&&hnAb(n))hnEOpen=true};
-function hnGoNow(el){if(!hnGoId)return;const c=el.querySelector('[data-hnc="'+CSS.escape(hnGoId)+'"]');hnGoId=null;if(!c)return;c.querySelectorAll("details").forEach((d)=>{d.open=true});setTimeout(()=>c.scrollIntoView({block:"center"}),80)}
+window.__hnGo=(id)=>{hnGoId=id;if(hnEListe().some((x)=>x.id===id)){hnSel=id;hnRep=null}};
+function hnGoNow(el){if(!hnGoId)return;const c=el.querySelector('#hned [data-hnc="'+CSS.escape(hnGoId)+'"]');hnGoId=null;if(!c)return;setTimeout(()=>c.scrollIntoView({block:"start"}),80)}
 document.addEventListener("click",(e)=>{const t=e.target.closest&&e.target.closest("[data-hnein],[data-hnre],[data-hnex]");if(!t)return;
   if(t.dataset.hnein!=null){hnEOpen=true;window.__fbTab&&window.__fbTab("a");const b=document.querySelector('nav button[data-s="fb"]');if(b)b.click();return}
   const id=t.dataset.hnre||t.dataset.hnex,n=hnList().find((x)=>x.id===id);if(!n||!hnCan())return;
   if(t.dataset.hnre){cfgSave({hinweise:hnList().map((x)=>x.id===id?{...x,bis:null}:x)});hnPush(id,false,{...n,bis:null})}
-  else if(hnEArm!==id){hnEArm=id}else{hnEArm=null;cfgSave({hinweise:hnList().filter((x)=>x.id!==id)});hnPush(id,null);if(n.rk)hnAntLoeschen(n)}
+  else if(hnEArm!==id){hnEArm=id}else{hnEArm=null;if(hnSel===id)hnSel=null;cfgSave({hinweise:hnList().filter((x)=>x.id!==id)});hnPush(id,null);if(n.rk)hnAntLoeschen(n)}
   setTimeout(()=>{hnEingang(document.getElementById("ehn"));renderHints()},0)});
 document.addEventListener("toggle",(e)=>{if(!e.target.closest||!e.target.closest("#ehn"))return;if(e.target.matches("details.hnab"))hnEOpen=e.target.open;if(e.target.open)hnStatus()},true);
 function hnNamen(ids){const A=typeof active==="function"?active():[];return ids.map((i)=>{const p=A.find((x)=>x.id===i);return p?p.vorname:null}).filter(Boolean).join(", ")||"(niemand)"}
@@ -1924,7 +1987,7 @@ async function hnStatus(){const B=[...document.querySelectorAll("#hnl [data-hnst
     el.querySelector("summary").textContent=ja.length+" von "+((a?a.an.length:0)-weg)+" erledigt";
     el.querySelector("div").innerHTML='<div><b>Erledigt:</b> '+(ja.join(", ")||"–")+'</div><div><b>Offen:</b> '+(nein.join(", ")||"–")+"</div>"}}
 document.addEventListener("click",(e)=>{const b=e.target.closest&&e.target.closest("[data-hnnm]");if(!b||!hnCan())return;const k=b.dataset.hnnm,N={...aufNein()};
-  if(N[k]==="g"||N[k]==="v")delete N[k];else N[k]="g";D.config={...(D.config||{}),aufgNein:N};cfgSave({aufgNein:N});hnStatus()});
+  if(N[k]==="g"||N[k]==="v")delete N[k];else N[k]="g";D.config={...(D.config||{}),aufgNein:N};cfgSave({aufgNein:N});hnStatus();if(b.closest("#hnew")&&hnSel)hnELaden(hnSel,false)});
 function hnAnSet(alle,sel){document.querySelectorAll("#hnan button").forEach((x)=>x.classList.toggle("on",(x.dataset.hnan==="alle")===alle));const g=$("#hnps");g.hidden=alle;
   g.innerHTML=(typeof active==="function"?active():[]).map((p)=>'<label><input type="checkbox" value="'+esc(p.id)+'"'+((sel||[]).includes(p.id)?" checked":"")+">"+esc(p.vorname+" "+(p.name||""))+"</label>").join("")}
 function hnArtShow(){const h=$("#hnart").value==="h";$("#hnah").hidden=h;$("#hnrpw").style.display=h?"none":"";$("#hnr").parentElement.style.display=h?"":"none"}   /* Aufgaben sind immer nur für Spieler */
@@ -1985,15 +2048,15 @@ function hnRnd64(n){return btoa(String.fromCharCode(...crypto.getRandomValues(ne
 /* Antworten auf Aufgaben lesen (Trainer, nur Web-Version): gemeinsamer Pfad oder je Empfänger ein eigener */
 async function hnAntLesen(n){const L=window.__links||{},P=[],o=[];
   if(n.rp==="a")P.push(n.rs);else for(const p of hnEmpf(n)){const l=L[p.id];if(l&&l.aktiv&&l.key)P.push(await hnAntPfad(n,p.id,l.key))}
-  for(const s of P){try{const r=await db.collection("antw").doc(s).collection("m").get();for(const d of r.docs){const x=d.data()||{};try{const at=x.at&&x.at.toDate?x.at.toDate().toISOString():x.at&&x.at.seconds!=null?new Date(x.at.seconds*1000).toISOString():String(x.at||"");o.push({at,s,id:d.id,...await window.__lk.unseal(n.rk,x.b)})}catch(e){}}}catch(e){}}
+  for(const s of P){try{const r=await db.collection("antw").doc(s).collection("m").get();for(const d of r.docs){const x=d.data()||{};try{const at=x.at instanceof Date?x.at.toISOString():x.at&&x.at.toDate?x.at.toDate().toISOString():x.at&&x.at.seconds!=null?new Date(x.at.seconds*1000).toISOString():String(x.at||"");o.push({at,s,id:d.id,...await window.__lk.unseal(n.rk,x.b)})}catch(e){}}}catch(e){}}
   return o.sort((a,b)=>a.at.localeCompare(b.at))}
 let hnAnT=0;
 async function hnAntworten(){const B=[...document.querySelectorAll("#hnl [data-hnrp],#ehn [data-hnrp]")].filter((x)=>x.offsetParent);if(!B.length)return;const t=++hnAnT;
   for(const el of B){const n=hnList().find((x)=>x.id===el.dataset.hnrp);if(!n)continue;
     if(!window.__WEB||typeof db==="undefined"||!db||!window.__lk){el.querySelector("summary").textContent="Antworten gibt es nur in der Web-Version";continue}
-    const A=await hnAntLesen(n);if(t!==hnAnT||!el.isConnected)return;const V=window.__vid,sn=V&&V.since?V.since("a",n.id):"9",nu=el.open?0:A.filter((x)=>x.at>sn).length;window.__hnNeu[n.id]=nu;
-    el.querySelector("summary").innerHTML="<i class=sy data-sy=sprech></i> "+(A.length===1?"1 Antwort":A.length+" Antworten")+hnNeuPill(nu);
-    el.querySelector("div").innerHTML=A.length?A.map((x)=>'<div style="padding:5px 0;border-top:1px solid var(--ln)'+(x.at>sn?";border-left:3px solid var(--o);padding-left:8px":"")+'"><b style="color:var(--tx)">'+esc(x.n||"?")+"</b> · "+esc(x.at?new Date(x.at).toLocaleString("de-DE",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"")+'<div style="white-space:pre-wrap;overflow-wrap:anywhere;color:var(--tx)">'+esc(x.t||"")+"</div></div>").join(""):"Noch keine Antwort."}
+    const A=await hnAntLesen(n);if(t!==hnAnT||!el.isConnected)return;const V=window.__vid,sn=V&&V.since?V.since("a",n.id):"9",nu=el.open?0:A.filter((x)=>!x.tr&&x.at>sn).length;window.__hnNeu[n.id]=nu;
+    el.querySelector("summary").innerHTML="<i class=sy data-sy=sprech></i> "+hnEZahl(A)+hnNeuPill(nu);
+    el.querySelector("div").innerHTML=A.length?A.map((x)=>'<div style="padding:5px 0;border-top:1px solid var(--ln)'+(x.at>sn?";border-left:3px solid var(--o);padding-left:8px":"")+'"><b style="color:var(--tx)">'+esc(x.n||"?")+(x.tr?" (Trainer)":"")+"</b> · "+esc(x.at?new Date(x.at).toLocaleString("de-DE",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"")+'<div style="white-space:pre-wrap;overflow-wrap:anywhere;color:var(--tx)">'+esc(x.t||"")+"</div></div>").join(""):"Noch keine Antwort."}
   window.__vid&&window.__vid.badge&&window.__vid.badge()}
 /* Hinweis entfernt: Antworten und Freischaltung mit löschen (Fehler egal, die Daten sind ohne Link ohnehin nicht erreichbar) */
 async function hnAntLoeschen(n){if(!window.__WEB||typeof db==="undefined"||!db)return;const L=window.__links||{},P=n.rp==="a"&&n.rs?[n.rs]:[];
@@ -2510,7 +2573,7 @@ V.sig=()=>JSON.stringify([V.clips.filter(sichtbar).map((c)=>[c.id,c.titel,c.url,
 const DS_EIG=["Leibchen","Obst & Gemüse"];
 V.dienste=(pid)=>{const t=today(),nm=(x)=>{try{return typeof dienstText==="function"?dienstText(x):""}catch(e){return""}};
   const L=(D.dienste||[]).filter((x)=>x&&x.datum&&(x.bis||x.datum)>=t&&(x.art==="Materialdienst"||(DS_EIG.includes(x.art)&&(x.spieler||[]).includes(pid))))
-    .map((x)=>({a:x.art,d:x.datum,b:x.bis||null,l:x.label||"",x:x.art==="Materialdienst"?nm(x):"",sp:x.spielText||""}));
+    .map((x)=>({a:x.art,d:x.datum,b:x.bis||null,l:x.label||"",x:x.art==="Materialdienst"?nm(x):"",sp:x.spielText||"",...(x.art==="Materialdienst"&&(x.spieler||[]).includes(pid)?{m:1}:{})}));   /* m: selbst beim Materialdienst eingeteilt (Dienst-Hinweis oben) */
   return L.length?L:null};
 V.pkg=(pid)=>({vc:V.clipsFor(pid),vg:V.games(),fk:V.fbKey,ds:V.dienste(pid),pz:Object.keys(PUSH_STD).filter(pushOn).join(",")});
 
@@ -2536,6 +2599,7 @@ function gsSave(){ls.set("u13gs."+(window.__ACCT||""),V.gs);if(canW())db.doc(gsD
 async function gsLoad(){let g=null;try{const r=await db.doc(gsDoc()).get();g=r&&r.exists!==false&&r.data&&r.data()}catch(e){}
   if(!g||!g.s)g=ls.get("u13gs."+(window.__ACCT||""),null);const neu=!g||!g.s;V.gs={s:neu?new Date().toISOString():g.s,a:(g&&g.a)||{},c:(g&&g.c)||{}};if(neu)gsSave();
   badge();window.__hnNeuLaden&&window.__hnNeuLaden()}
+V.myName=()=>myName();
 V.since=(k,id)=>V.gs?V.gs[k][id]||V.gs.s:"9";
 V.seen=(k,id)=>{if(!V.gs)return;V.gs[k][id]=new Date().toISOString();gsSave();badge()};
 const kNeu=(c)=>V.gs?(V.kom[c.id]||[]).filter((k)=>!k.tr&&k.at>V.since("c",c.id)).length:0;
@@ -2623,11 +2687,12 @@ function clipRow(c){
 function clipsHtml(){
   const ro=!canW(),akt=V.clips.filter(sichtbar),alt=V.clips.filter((c)=>!sichtbar(c));
   if(V.sel&&!V.clips.some((c)=>c.id===V.sel))V.sel=null;
-  const left=(ro?"":(V.edit?formHtml():'<div class="bar" style="margin:0 0 12px"><button class="btn" id="vdnew" style="background:var(--ac);color:#fff;border-color:var(--ac)">＋ Neuer Clip</button></div>'))
+  const top=ro||V.edit?"":'<div class="bar" style="margin:0 0 12px"><button class="btn" id="vdnew" style="background:var(--ac);color:#fff;border-color:var(--ac)">＋ Neuer Clip</button></div>';
+  const left=(ro?"":(V.edit?formHtml():""))
     +(akt.length?akt.map(clipRow).join(""):'<div class="card"><div class="note">Noch keine Clips. Füge einen Veo-Link hinzu, damit die Spieler ihn in ihrem Link sehen.</div></div>')
     +(alt.length?'<details style="margin:10px 0 0"><summary class="note" style="cursor:pointer">Abgelaufen ('+alt.length+")</summary>"+alt.map(clipRow).join("")+"</details>":"")
     +(window.__WEB?"":'<p class="note">Kommentare und Nachrichten funktionieren nur in der Web-Version der App.</p>');
-  return'<div class="vd-wrap"><div class="vd-l">'+left+'</div><div class="vd-r">'+detailHtml()+"</div></div>"}
+  return top+'<div class="vd-wrap"><div class="vd-l">'+left+'</div><div class="vd-r">'+detailHtml()+"</div></div>"}
 function detailHtml(){
   const c=V.clips.find((x)=>x.id===V.sel);if(!c)return'<div class="card"><div class="note">Wähle links einen Clip, um die Kommentare zu sehen und zu antworten.</div></div>';
   const R=recips(c),K=V.kom[c.id]||[],done=new Set(K.filter((k)=>!k.tr&&!k.r).map((k)=>k.p)),ro=!canW(),armed=V.armed==="d"+c.id;
@@ -2651,9 +2716,9 @@ const msg=(t,bad)=>{const m=document.getElementById(fsec()&&!fsec().hidden?"fbm"
 /* Benachrichtigungen vormerken (verschickt ein Zeitplan bei GitHub, Texte ohne Namen, siehe push/LIESMICH.md). Nur Web-Version. */
 /* Was an Spieler und Eltern geht, stellt der Trainer unter Einstellungen → Spieler & Eltern ein (Termin-Änderungen und Aufgaben-Erinnerung anfangs aus).
    Die Antwort auf einen Clip-Kommentar zählt zu „Antworten vom Trainer“. */
-const PUSH_STD={hinweis:true,notiz:true,termin:false,afrist:false,clip:true,frist:true,antwort:true};
+const PUSH_STD={hinweis:true,notiz:true,termin:false,afrist:false,dienst:true,clip:true,frist:true,antwort:true};
 const pushOn=(k)=>{const c=(D.config&&D.config.push)||{};return k in c?!!c[k]:!!PUSH_STD[k]};window.__pushOn=pushOn;window.__PUSH_STD=PUSH_STD;
-const pushQ=(id,o)=>{const g=o.art==="kom"?"antwort":o.art;if(g in PUSH_STD&&!pushOn(g))return;if(window.__WEB&&db)db.doc("pushq/"+id).set({t:Date.now(),...o}).catch(()=>{})};
+const pushQ=(id,o)=>{const g=o.art==="kom"||o.art==="aufant"?"antwort":o.art;if(g in PUSH_STD&&!pushOn(g))return;if(window.__WEB&&db)db.doc("pushq/"+id).set({t:Date.now(),...o}).catch(()=>{})};
 const pushQdel=(id)=>{if(window.__WEB&&db)db.doc("pushq/"+id).delete().catch(()=>{})};
 window.__pushQ={add:pushQ,del:pushQdel};
 /* Neue Notiz im Profil, die der Spieler sehen darf (oder eine Notiz wird sichtbar): eine Nachricht je Spieler, Links gleich aktualisieren */
@@ -2665,6 +2730,29 @@ V.terminPush=()=>{if(!window.__WEB)return;pushQ("termin",{art:"termin"});pubSoon
 function fristQ(c){const f=fristTs(c.frist);let t=f-864e5;if(t<Date.now()+36e5)t=f-108e5;
   if(!c.frist||isNaN(f)||t<Date.now()){pushQdel("f_"+c.id);return}
   pushQ("f_"+c.id,{art:"frist",an:c.an,t,tx:"Bitte kommentiere den Clip bis "+dShort(c.frist)+", "+dTime(c.frist)+". Falls du das schon gemacht hast: Danke!"})}
+/* Dienst-Erinnerung montags 10 Uhr: je Spieler und Woche mit Dienst ein Eintrag für den Spieler (alle seine Dienste der Woche Mo–So)
+   und einer für die Eltern (nur Leibchen und Obst & Gemüse, nie Materialdienst). Ohne Dienst kein Eintrag. Text ohne Namen.
+   Einträge „d_<Spieler>_<JJMMTT>_s|e“; abgeschaltete, geänderte und weggefallene werden ersetzt bzw. gelöscht, vergangene Montage nicht angelegt. */
+const DS_TAG=["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"];
+const dsAdd=(s,n)=>{const x=new Date(s+"T12:00");x.setDate(x.getDate()+n);return isoDay(x)},dsMon=(s)=>dsAdd(s,-((new Date(s+"T12:00").getDay()+6)%7));
+V.dienstPlan=(now)=>{now=now||Date.now();const W={},ak=new Set((typeof active==="function"?active():D.spieler||[]).map((p)=>p.id));
+  for(const x of D.dienste||[]){if(!x||!x.datum||!["Materialdienst","Leibchen","Obst & Gemüse"].includes(x.art))continue;
+    const M=[];if(x.art==="Materialdienst"){for(let m=dsMon(x.datum);m<=(x.bis||x.datum)&&M.length<6;m=dsAdd(m,7))M.push(m)}else M.push(dsMon(x.datum));
+    for(const m of M)for(const pid of x.spieler||[]){if(!ak.has(pid))continue;const k=pid+"|"+m;(W[k]=W[k]||[]).push(x)}}
+  const out={},liste=(L)=>{const a=L.map((x)=>x.art==="Materialdienst"?"Materialdienst":(x.art==="Leibchen"?"Leibchendienst":"Obst & Gemüse")+" am "+DS_TAG[new Date(x.datum+"T12:00").getDay()]);
+    return(a.length>1?a.slice(0,-1).join(", ")+" und "+a[a.length-1]:a[0])+". Schau in die App."};
+  for(const k of Object.keys(W)){const[pid,m]=k.split("|"),t=Date.parse(m+"T10:00");if(t<now)continue;
+    const L=W[k].sort((a,b)=>(a.art==="Materialdienst"?0:1)-(b.art==="Materialdienst"?0:1)||a.datum.localeCompare(b.datum)),E=L.filter((x)=>x.art!=="Materialdienst"),id="d_"+pid+"_"+m.slice(2).replace(/-/g,"");
+    out[id+"_s"]={art:"dienst",an:[pid],fuer:"s",n:L.length,t,tx:liste(L)};if(E.length)out[id+"_e"]={art:"dienst",an:[pid],fuer:"e",n:E.length,t,tx:liste(E)}}
+  return out};
+let dsBusy=false;
+V.dienstSync=async()=>{if(!window.__WEB||!db||window.__ROLE!=="voll"||dsBusy)return;dsBusy=true;
+  try{const soll=pushOn("dienst")?V.dienstPlan():{},s=await db.collection("pushq").where("art","==","dienst").get(),ist={};s.docs.forEach((d)=>{ist[d.id]=d.data()});
+    const gleich=(a,b)=>!!a&&!!b&&["fuer","n","t","tx"].every((k)=>a[k]===b[k])&&JSON.stringify(a.an)===JSON.stringify(b.an);
+    for(const id of Object.keys(ist))if(!soll[id])await db.doc("pushq/"+id).delete();
+    for(const id of Object.keys(soll))if(!gleich(ist[id],soll[id]))await db.doc("pushq/"+id).set(soll[id])}
+  catch(e){}finally{dsBusy=false}};
+window.__dsSync=()=>{clearTimeout(V.dsT);V.dsT=setTimeout(()=>{V.dienstSync()},1200);pubSoon()};
 let pubT=null;const pubSoon=()=>{clearTimeout(pubT);pubT=setTimeout(()=>{if(window.__WEB&&window.__lkPublish&&window.__ROLE==="voll")window.__lkPublish(true)},1500)};
 async function saveClip(){
   const u=$("#vdu").value.trim(),t=$("#vdt").value.trim(),a=$("#vda").value.trim(),alle=$("#vdan .on").dataset.an==="alle",sel=[...document.querySelectorAll("#vdps input:checked")].map((i)=>i.value);
@@ -3401,6 +3489,23 @@ const hnEnde=(n)=>{if(n.art!=="c"||!n.bis)return n.bis;const d=new Date(+n.bis.s
 const hnUeber=(n)=>{if(n.art!=="c"||!n.bis||hnSt[n.s]===true)return false;const d=new Date(),p=(x)=>String(x).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())>n.bis};
 const hnKopf=(n)=>hnAuf(n)?'<span class="hnk">'+(n.art==="c"?"<i class=sy data-sy=ok></i> Aufgabe zum Abhaken":"<i class=sy data-sy=bogen></i> Aufgabe")+(n.bis?" · "+(hnUeber(n)?'<span class="hnue">überfällig</span> · war ':"")+hnFrist(n.bis):"")+"</span>":"";
 const hnHtml=(items,pid)=>items.filter((n)=>!hnAus(n,pid)).map((n)=>'<div class="hn '+(HNC[n.farbe]||"hb")+(pid?" hnd":"")+'"'+(pid&&pid!=="team"?' data-hnopen="'+esc(hnId(n))+'"':"")+">"+hnKopf(n)+rtHtml(n.text)+(pid?'<button type="button" class="hnx" data-hnx="'+esc(hnId(n))+'" data-hnp="'+esc(pid)+'" data-hnv="'+hnVer(n)+'" aria-label="Hinweis ausblenden" title="Ausblenden">✕</button>':"")+"</div>").join("");
+/* Dienst-Hinweis oben im Spielerlink: ab Montag 10 Uhr EIN gelber Kasten mit den Diensten dieser Woche (Mo–So), die noch kommen.
+   Spieler: Materialdienst (nur wenn selbst eingeteilt, Feld m), Leibchen, Obst & Gemüse. Eltern: nur Leibchen und Obst & Gemüse.
+   Zählt nicht unter „Hinweise“, ✕ blendet ihn für diese Woche aus (ändert sich ein Dienst, kommt er wieder). Antippen springt zu „Deine Woche“. */
+const dsI=(d)=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const dsT=(s)=>{const d=new Date(s+"T12:00");return["So","Mo","Di","Mi","Do","Fr","Sa"][d.getDay()]+", "+d.getDate()+"."+(d.getMonth()+1)+"."};
+function dsWoche(ds,rolle,now){now=now||new Date();const k=(now.getDay()+6)%7;if(k===0&&now.getHours()<10)return null;
+  const m=new Date(now.getFullYear(),now.getMonth(),now.getDate()-k,12),mon=dsI(m),sun=dsI(new Date(m.getFullYear(),m.getMonth(),m.getDate()+6)),td=dsI(now);
+  const L=(ds||[]).filter((x)=>x&&x.d&&(x.a==="Materialdienst"?rolle!=="e"&&!!x.m&&x.d<=sun&&(x.b||x.d)>=td:(x.a==="Leibchen"||x.a==="Obst & Gemüse")&&x.d>=td&&x.d>=mon&&x.d<=sun))
+    .sort((a,b)=>(a.a==="Materialdienst"?0:1)-(b.a==="Materialdienst"?0:1)||a.d.localeCompare(b.d));
+  return L.length?{mon,L}:null}
+function dsHinwHtml(d,pid,rolle){const W=pid&&pid!=="team"?dsWoche(d.ds,rolle):null;if(!W)return"";const n=W.L.length,anz=n===1?"einen Dienst":n+" Dienste";
+  const text=(rolle==="e"?"Diese Woche hat "+(d.n||"dein Kind")+" "+anz+":":"Diese Woche hast du "+anz+":")+"\n"
+    +W.L.map((x)=>"**"+(x.a==="Materialdienst"?"Materialdienst":x.a==="Leibchen"?"Leibchendienst":"Obst & Gemüse")+"** · "+(x.a==="Materialdienst"&&x.b?dsT(x.d)+" – "+dsT(x.b):dsT(x.d))+(x.a==="Obst & Gemüse"&&x.sp?" zum Spiel":"")).join("\n");
+  const o={id:"ds"+W.mon,text,farbe:"gelb"};if(hnAus(o,pid))return"";
+  return'<div class="hn hy hnd vdsh" data-dsopen="1">'+rtHtml(text)+'<button type="button" class="hnx" data-hnx="'+esc(hnId(o))+'" data-hnp="'+esc(pid)+'" data-hnv="'+hnVer(o)+'" aria-label="Hinweis ausblenden" title="Ausblenden">✕</button></div>'}
+document.addEventListener("click",(e)=>{const t=e.target.closest&&e.target.closest("[data-dsopen]");if(!t||e.target.closest("[data-hnx],a"))return;
+  const u=document.getElementById("vueb");if(u&&u.hidden&&window.__vshow)window.__vshow("u");const w=document.querySelector(".vu-woche");if(w)w.scrollIntoView({behavior:"smooth",block:"center"})});
 /* „Hinweise & Aufgaben“ im Spielerlink: alle gültigen (auch ausgeblendete), offene Aufgaben oben. Abhaken bei „Aufgabe mit Abhaken“ unter dem
    geheimen Pfad aus dem Link (aufg/<s>/m/x), auch durch ein Elternteil. Ohne Web-Version (kein Netz) ist der Knopf ausgegraut. */
 const hnSt={},hnAn={};
@@ -3408,9 +3513,11 @@ const hnSt={},hnAn={};
    Pfad n.rs steht nur in den Links der Empfänger, der Inhalt ist mit n.rk verschlüsselt. */
 const hnWer=(pid,d)=>{const r=(()=>{try{return JSON.parse(localStorage.getItem("u13wer."+pid)||"null")}catch(e){return null}})();return r&&r.r==="e"?{n:(r.n||"Elternteil")+" (Elternteil von "+(d.n||"")+")",ro:"e"}:{n:d.n||"",ro:r&&r.r==="s"?"s":""}};
 const hnZeit=(s)=>{const x=new Date(s);return isNaN(x)?"":String(x.getDate()).padStart(2,"0")+"."+String(x.getMonth()+1).padStart(2,"0")+". "+String(x.getHours()).padStart(2,"0")+":"+String(x.getMinutes()).padStart(2,"0")};
+/* Eine Antwort; Antworten des Trainers stehen eingerückt unter der Antwort, auf die sie sich beziehen (grün „Trainer“) */
+const hnAnZeile=(x)=>'<div class="hnr"'+(x.tr?' style="margin-left:18px;padding-left:10px;border-left:3px solid var(--g)"':"")+'><b>'+esc(x.n||"")+'</b>'+(x.tr?' <span style="font-size:11px;font-weight:700;color:var(--g)">Trainer</span>':"")+' <span class="note">'+esc(hnZeit(x.at))+'</span><div style="white-space:pre-wrap;overflow-wrap:anywhere">'+esc(x.t||"")+"</div></div>";
 function hnAntHtml(n,net){const A=hnAn[n.rs];
   return'<div class="hnant">'+(n.rp==="t"?'<div class="note"><i class=sy data-sy=schloss></i> Deine Antwort lesen nur die Trainer.</div>':"")
-    +(A&&A.length?A.map((x)=>'<div class="hnr"><b>'+esc(x.n||"")+'</b> <span class="note">'+esc(hnZeit(x.at))+'</span><div style="white-space:pre-wrap;overflow-wrap:anywhere">'+esc(x.t||"")+"</div></div>").join(""):"")
+    +(A&&A.length?A.filter((x)=>!x.tr).map((x)=>hnAnZeile(x)+A.filter((y)=>y.tr&&y.an===x.id).map(hnAnZeile).join("")).join("")+A.filter((y)=>y.tr&&!A.some((x)=>!x.tr&&x.id===y.an)).map(hnAnZeile).join(""):"")
     +(net?'<textarea rows="2" maxlength="2000" data-hnat="'+esc(n.rs)+'" placeholder="Deine Antwort" aria-label="Antwort"></textarea><div class="hnok"><button type="button" data-hnas="'+esc(n.rs)+'">Antworten</button></div>':'<div class="note">Antworten geht nur in der Web-Version.</div>')+"</div>"}
 function hnAll(el,d,pid){if(!el)return;
   const td=(()=>{const x=new Date(),p=(n)=>String(n).padStart(2,"0");return x.getFullYear()+"-"+p(x.getMonth()+1)+"-"+p(x.getDate())})(),net=window.__vidNet;
@@ -3431,7 +3538,7 @@ function hnAll(el,d,pid){if(!el)return;
   const re=()=>hnAll(el,d,pid);
   if(net)L.concat(Q).filter((n)=>n.art==="c"&&n.s&&!(n.s in hnSt)).forEach((n)=>{hnSt[n.s]=null;net.list("aufg/"+n.s+"/m").then((r)=>{hnSt[n.s]=!!(r[0]&&r[0].d);re()}).catch(()=>{})});
   if(net&&pid!=="team")L.filter((n)=>hnAuf(n)&&n.rp&&n.rs&&n.rk&&!(n.rs in hnAn)).forEach((n)=>{hnAn[n.rs]=null;hnAnLoad(n).then(re)})}
-async function hnAnLoad(n){const net=window.__vidNet;if(!net)return;try{const L=await net.list("antw/"+n.rs+"/m"),o=[];for(const x of L){try{o.push({at:x.at,...await window.__lk.unseal(n.rk,x.b)})}catch(e){}}hnAn[n.rs]=o.sort((a,b)=>String(a.at).localeCompare(String(b.at)))}catch(e){}}
+async function hnAnLoad(n){const net=window.__vidNet;if(!net)return;try{const L=await net.list("antw/"+n.rs+"/m"),o=[];for(const x of L){try{o.push({at:x.at,id:x.id,...await window.__lk.unseal(n.rk,x.b)})}catch(e){}}hnAn[n.rs]=o.sort((a,b)=>String(a.at).localeCompare(String(b.at)))}catch(e){}}
 window.__hnCtx=null;
 /* Wer auf eine Aufgabe mit Abhaken antwortet, hat sie gemacht: wird dabei automatisch abgehakt (Fehler egal, der Trainer zählt die Antwort ohnehin) */
 async function hnAntHak(n){const net=window.__vidNet;if(n.art!=="c"||!n.s||!net||hnSt[n.s]===true)return;
@@ -3557,8 +3664,8 @@ function viewPlayer(d,pid){
     return'<button type="button" class="btn" id="vkw" aria-haspopup="true" aria-expanded="false" title="Wechseln zwischen Spieler und Elternteil">'+(s&&d.f?'<img alt="" src="'+esc(d.f)+'">':'<span class="vkwa'+(s?"":" e")+'">'+esc((s?vn(d.n):eN).charAt(0).toUpperCase())+'</span>')+esc(s?vn(d.n):eN)+'<i class="chv"></i></button>'};
   const kwNeu=()=>{if(!KO||KO.cur.zw)return"";try{if(localStorage.getItem("u13kzwh"))return""}catch(e){return""}
     return'<div class="hn hb hnd" id="vkzh"><span class="hnk">Neu</span>Spieler und Elternteil können jetzt dasselbe Konto nutzen. <button type="button" data-kzh="go" style="border:0;background:none;padding:0;font:inherit;font-weight:600;color:var(--ac);text-decoration:underline;cursor:pointer">Unter Einstellungen hinzufügen</button><button type="button" class="hnx" data-kzh="x" aria-label="Hinweis ausblenden" title="Ausblenden">✕</button></div>'};
-  v.innerHTML='<div class="vh">'+(d.f?'<img alt="" class="vfoto" style="border-radius:50%;object-fit:cover" src="'+esc(d.f)+'">':d.l?'<img alt="" data-lg src="'+esc(d.l)+'">':"")+'<div style="min-width:0"><b style="font-size:22px;line-height:1.2">'+(eN?"Hey "+esc(eN)+"!":d.n?"Hey "+esc(d.n)+"!":"Hey!")+'</b></div><span style="flex:1"></span>'+kwBtn()+'</div>'+kwNeu()+(demo?'<div class="card" id="demohint" style="margin:0 0 14px;border-color:var(--y);background:var(--ys)"><b>Demo-Spielerlink</b><div class="note" style="color:inherit;margin-top:2px">So sieht ein Spielerlink aus. Spieler, Termine, Videos und Nachrichten sind erfunden und haben nichts mit echten Personen zu tun. Was du hier schreibst, wird nicht gesendet.</div></div>':"")+'<div id="vhn">'+hnHtml(hnItems(d.hn,"alle","","",hnRolle(pid)),pid)+'</div><div id="vha"></div>'+(multi?'<div class="seg" id="vtab" style="margin-bottom:14px">'+tabsBar()+'</div>':"")+(hasU?'<div id="vueb"></div>':"")+'<div id="vprof"'+(hasU?" hidden":"")+'>'+(d.h||(multi?"":'<div class="card"><div class="note">Ein Spielerprofil ist für diesen Link nicht freigegeben.</div></div>'))+'</div>'+(d.t?'<div id="vplan" hidden></div>':"")+(d.li?'<div id="vliga" hidden></div>':"")+(hasU?'<div id="vvid" hidden></div><div id="vfb" hidden></div>':"")+(KT?'<div id="vkonto" hidden></div>':"")+'<div class="vf">Stand: '+esc(dt(d.u))+(demo?" · Demo mit erfundenen Daten":KT?"":" · Persönlicher Link, bitte nicht weitergeben.")+'<span id="vwer"></span></div>';
-  window.__hnCtx={d,pid};window.__hnRe=()=>{const hn=document.getElementById("vhn");if(hn)hn.innerHTML=hnHtml(hnItems(d.hn,"alle","","",hnRolle(pid)),pid);hnAll(document.getElementById("vha"),d,pid)};window.__hnRe();
+  v.innerHTML='<div class="vh">'+(d.f?'<img alt="" class="vfoto" style="border-radius:50%;object-fit:cover" src="'+esc(d.f)+'">':d.l?'<img alt="" data-lg src="'+esc(d.l)+'">':"")+'<div style="min-width:0"><b style="font-size:22px;line-height:1.2">'+(eN?"Hey "+esc(eN)+"!":d.n?"Hey "+esc(d.n)+"!":"Hey!")+'</b></div><span style="flex:1"></span>'+kwBtn()+'</div>'+kwNeu()+(demo?'<div class="card" id="demohint" style="margin:0 0 14px;border-color:var(--y);background:var(--ys)"><b>Demo-Spielerlink</b><div class="note" style="color:inherit;margin-top:2px">So sieht ein Spielerlink aus. Spieler, Termine, Videos und Nachrichten sind erfunden und haben nichts mit echten Personen zu tun. Was du hier schreibst, wird nicht gesendet.</div></div>':"")+'<div id="vhn">'+dsHinwHtml(d,pid,hnRolle(pid))+hnHtml(hnItems(d.hn,"alle","","",hnRolle(pid)),pid)+'</div><div id="vha"></div>'+(multi?'<div class="seg" id="vtab" style="margin-bottom:14px">'+tabsBar()+'</div>':"")+(hasU?'<div id="vueb"></div>':"")+'<div id="vprof"'+(hasU?" hidden":"")+'>'+(d.h||(multi?"":'<div class="card"><div class="note">Ein Spielerprofil ist für diesen Link nicht freigegeben.</div></div>'))+'</div>'+(d.t?'<div id="vplan" hidden></div>':"")+(d.li?'<div id="vliga" hidden></div>':"")+(hasU?'<div id="vvid" hidden></div><div id="vfb" hidden></div>':"")+(KT?'<div id="vkonto" hidden></div>':"")+'<div class="vf">Stand: '+esc(dt(d.u))+(demo?" · Demo mit erfundenen Daten":KT?"":" · Persönlicher Link, bitte nicht weitergeben.")+'<span id="vwer"></span></div>';
+  window.__hnCtx={d,pid};window.__hnRe=()=>{const hn=document.getElementById("vhn");if(hn)hn.innerHTML=dsHinwHtml(d,pid,hnRolle(pid))+hnHtml(hnItems(d.hn,"alle","","",hnRolle(pid)),pid);hnAll(document.getElementById("vha"),d,pid)};window.__hnRe();
   bgPick();if(d.f){const av=v.querySelector("#vprof #av");if(av)av.remove()}else vLogo(v,d.l);
   {const kb=document.getElementById("vkw");if(kb)kb.onclick=()=>KO.pick(kb);
    const kz=document.getElementById("vkzh");if(kz)kz.onclick=(e)=>{const b=e.target.closest("[data-kzh]");if(!b)return;try{localStorage.setItem("u13kzwh","1")}catch(x){}kz.remove();if(b.dataset.kzh==="go"&&window.__vshow)window.__vshow("k")}}
@@ -3840,7 +3947,7 @@ const bgPick=()=>{const b=SNAP.bg,t=document.querySelector("#vw2 .vh");if(!b||!b
   const e=document.createElement("select");e.id="vbg";e.setAttribute("aria-label","Hintergrund");e.innerHTML='<option value="">Hintergrund: Standard</option><option value="bild">Hintergrund: Bild</option>';e.value=v;
   e.onchange=()=>{try{e.value?localStorage.setItem("u13vbg",e.value):localStorage.removeItem("u13vbg")}catch(x){}useBg()};t.appendChild(e)};
 /* LKV: Aufbau der Links. Erhöhen, wenn neuer Inhalt in die Links kommt – dann werden alle sofort neu veröffentlicht (2 = Spielerfoto im Kopf, 3 = Dienste in der Übersicht, 4 = Liga: Tabelle von FUSSBALL.DE, kein Ergebnis bei nicht gewerteten Spielen, 5 = anklickbare Adressen in Hinweisen, 6 = Hinweise nur für Spieler oder nur für Eltern, 7 = Aufgaben und Empfänger in Hinweisen, 8 = neue Übersicht: Treffen/Beginn/Ende/Gegner im Terminplan, 9 = Antworten auf Aufgaben, Schrift in Hinweisen, Erledigt-Anzeige, 10 = Aufgaben nur für Spieler (nicht im Teamlink)) */
-const LKV=10;
+const LKV=11;
 const dzSig=()=>JSON.stringify(Object.keys(L).sort().filter((k)=>L[k].aktiv&&L[k].key).map((k)=>[k]))+"|"+LKV;
 /* Hinweise für einen Spielerlink: nur die an die ganze Mannschaft oder an ihn; bei „Aufgabe mit Abhaken“ sein geheimer Pfad (s). Empfängerliste bleibt draußen.
    Antworten nur an die Trainer: eigener Pfad je Spieler (rs); für alle sichtbar: der gemeinsame Pfad der Aufgabe. */
@@ -4156,7 +4263,7 @@ if(T("lkt")){
       if(!art)throw{code:"not_granted"};
       const snap=await buildSnap(),html=window.__WEB?snap:composeHtml(snap);await hnAuth();
       m.textContent="Wird veröffentlicht … ("+Object.keys(snap.p).length+" Links aktiv"+(window.__WEB?"":", "+Math.round(html.length/1024)+" KB")+")";
-      await art.publish(html);lkErr="";try{setSt("Links aktualisiert","ok")}catch(x){}lkQuiet=Date.now()+9e4;setTimeout(lkHealth,1500);
+      await art.publish(html);lkErr="";if(window.__vid&&window.__vid.dienstSync)window.__vid.dienstSync();try{setSt("Links aktualisiert","ok")}catch(x){}lkQuiet=Date.now()+9e4;setTimeout(lkHealth,1500);
       m.textContent=window.__WEB?(auto?"Automatisch aktualisiert ("+new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})+" Uhr).":"Veröffentlicht. Die Links zeigen jetzt den aktuellen Stand."):"Veröffentlicht. Die Seite lädt gleich neu.";
     }catch(e){
       const c=e&&e.code,map={conflict:"Zwischenzeitlich wurde eine neuere Version veröffentlicht. Die Seite lädt neu – bitte danach erneut aktualisieren.",not_writer:"Nur der Eigentümer der Seite kann veröffentlichen.",not_granted:"Veröffentlichen ist in dieser Ansicht nicht freigegeben.",not_declared:"Veröffentlichen ist für diese Seite nicht freigegeben.",capability_disabled:"Veröffentlichen ist für diese Seite nicht möglich (evtl. wegen der öffentlichen Freigabe).",capability_removed:"Veröffentlichen ist in dieser Ansicht nicht verfügbar.",too_large:"Die Seite ist zu groß (Fotos verkleinern?).",rate_limited:"Zu oft veröffentlicht – bitte kurz warten.",invalid_content:"Die Seite wurde vom System nicht als gültig angenommen."};
@@ -4556,14 +4663,14 @@ $("#m").addEventListener("click",(e)=>{
     const known=!!DTYP[d.art];$("#dn_art").value=known?d.art:"Sonstiger Dienst";dnShow();if(!known)$("#dn_txt").value=d.art;
     if(d.datum)$("#dn_von").value=d.datum;if(d.bis)$("#dn_bis").value=d.bis;if(d.label){$("#dn_lab").value=d.label;if(d.art==="Trikots")$("#dn_txt").value=d.label}if(d.ref&&[...$("#dn_spiel").options].some((o)=>o.value===d.ref))$("#dn_spiel").value=d.ref;
     $("#pn_d").scrollIntoView({behavior:"smooth",block:"center"});return}
-  const dd=e.target.closest("[data-dd]");if(dd){if(dArm===dd.dataset.dd){save("dienste",dArm,null);dArm=null}else dArm=dd.dataset.dd;renderDienste();return}
+  const dd=e.target.closest("[data-dd]");if(dd){if(dArm===dd.dataset.dd){save("dienste",dArm,null);dArm=null;window.__dsSync&&window.__dsSync()}else dArm=dd.dataset.dd;renderDienste();return}
   if(e.target.id==="dn_add"){
     const a=$("#dn_art").value,m=DTYP[a].m,msg=$("#dn_m"),id=dEdit||"d"+Date.now().toString(36);let art=a,von=$("#dn_von").value,bis=$("#dn_bis").value,label=$("#dn_lab").value.trim(),spielText="",ref=null;
     if(a==="Sonstiger Dienst"){art=$("#dn_txt").value.trim();if(!art){msg.textContent="Bitte eine Bezeichnung für den Dienst eingeben.";return}}
     if(m==="spiel"){const ev=dGames().find((x)=>x.id===$("#dn_spiel").value);if(!ev){msg.textContent="Bitte ein Spiel auswählen (Spiele unter „Termine“ oder „Spiele“ anlegen).";return}von=ev.datum;bis="";ref=ev.id;spielText="Spiel: "+matchup(ev)+(ev.ha?" ("+ev.ha+")":"")}
     if(!von){msg.textContent="Bitte ein Datum angeben.";return}
     if(a==="Trikots"){label=$("#dn_txt").value.trim();if(!label){msg.textContent="Bitte eintragen, welche Trikots getragen werden.";return}}else if(!dSel.length){msg.textContent=dSingle(a)?"Bitte einen Spieler auswählen.":"Bitte mindestens einen Spieler auswählen.";return}
-    save("dienste",id,{id,art,datum:von,bis:m==="gruppe"&&bis&&bis>von?bis:null,label:a==="Materialdienst"||a==="Trikots"?label:"",spielText,ref,spieler:a==="Trikots"?[]:dSel.slice()});dSel=[];const was=dEdit;dEdit=null;renderDienste();$("#dn_m").textContent=was?"Änderung gespeichert.":"Gespeichert.";
+    save("dienste",id,{id,art,datum:von,bis:m==="gruppe"&&bis&&bis>von?bis:null,label:a==="Materialdienst"||a==="Trikots"?label:"",spielText,ref,spieler:a==="Trikots"?[]:dSel.slice()});window.__dsSync&&window.__dsSync();dSel=[];const was=dEdit;dEdit=null;renderDienste();$("#dn_m").textContent=was?"Änderung gespeichert.":"Gespeichert.";
   }
 });
 

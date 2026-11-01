@@ -186,7 +186,7 @@ function firstUser(){return new Promise((res)=>{const un=auth.onAuthStateChanged
 /* ---------- Datenbank-Hülle: gleiche Aufrufe wie in der Artifact-Umgebung ---------- */
 const noWrite=()=>window.__ROLE==="lesen"?Promise.reject({code:"permission-denied"}):null;
 function docW(ref){return{get:()=>ref.get(),set:(d)=>noWrite()||ref.set(clean(d)),update:(d)=>noWrite()||ref.update(clean(d)),delete:()=>noWrite()||ref.delete(),onSnapshot:(a,b)=>ref.onSnapshot(a,b),collection:(n)=>colW(ref.collection(n))}}
-function colW(ref){return{get:()=>ref.get(),onSnapshot:(a,b)=>ref.onSnapshot(a,b),doc:(id)=>docW(ref.doc(id))}}
+function colW(ref){return{get:()=>ref.get(),onSnapshot:(a,b)=>ref.onSnapshot(a,b),doc:(id)=>docW(ref.doc(id)),where:(f,o,v)=>({get:()=>ref.where(f,o,v).get()})}}
 const wrap=()=>({collection:(n)=>colW(fs.collection(n)),doc:(p)=>docW(fs.doc(p))});
 
 async function start(){
@@ -333,7 +333,7 @@ const pushApi={
 };
 /* Wofür dieses Gerät Bescheid bekommt: abgewählte Arten stehen im Feld x der Anmeldung (durch Komma getrennt, siehe push/senden.mjs).
    Spieler/Eltern sehen nur, was der Trainer für die Mannschaft eingeschaltet hat (pz im Link), Clips nur Spieler. */
-const PW={hinweis:"Neue Hinweise und Aufgaben",notiz:"Neue Notizen im Profil",termin:"Abgesagte oder verlegte Termine",afrist:"Erinnerung an Aufgaben",clip:"Neue Clips",frist:"Erinnerung an Clips",antwort:"Antworten vom Trainer",
+const PW={hinweis:"Neue Hinweise und Aufgaben",notiz:"Neue Notizen im Profil",termin:"Abgesagte oder verlegte Termine",afrist:"Erinnerung an Aufgaben",dienst:"Erinnerung an Dienste (montags)",clip:"Neue Clips",frist:"Erinnerung an Clips",antwort:"Antworten vom Trainer",
   fb:"Nachrichten von Spielern und Eltern",aantw:"Antworten auf Aufgaben",skom:"Clip-Kommentare von Spielern",kanfr:"Neue Konto-Anfragen"};
 const pwAus=()=>(pls.get("u13pushw")||"").split(",").filter((k)=>k in PW);
 function pwHtml(c){const A=pwAus(),L=c.ro==="t"?["fb","aantw","skom","kanfr"]:String(c.pz!=null?c.pz:"hinweis,notiz,clip,frist,antwort").split(",").filter((k)=>k in PW&&!(c.ro==="e"&&(k==="clip"||k==="frist")));
