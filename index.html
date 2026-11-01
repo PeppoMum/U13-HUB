@@ -1930,7 +1930,7 @@ let hnRange=null,hnLkA=null;
     if(e.key==="Enter"&&!e.isComposing){e.preventDefault();rtEnter(ed)}});
   ed.addEventListener("paste",(e)=>{const t=(e.clipboardData||window.clipboardData).getData("text/plain");e.preventDefault();document.execCommand("insertText",false,t)});
   ed.addEventListener("drop",(e)=>e.preventDefault());
-  ed.addEventListener("input",()=>{if(!ed.textContent&&!ed.querySelector("a"))ed.innerHTML=""});
+  ed.addEventListener("input",()=>{if(!ed.textContent&&!ed.querySelector("a"))ed.innerHTML="";else rtArrow(ed)});
   ed.addEventListener("click",(e)=>{if(e.target.closest("a"))e.preventDefault()});
   document.addEventListener("selectionchange",()=>{if(!ed.isConnected)return;const g=getSelection();if(g&&g.rangeCount&&ed.contains(g.getRangeAt(0).commonAncestorContainer))hnRange=g.getRangeAt(0).cloneRange();hnFxState()});
   document.querySelectorAll("[data-hnfx]").forEach((b)=>{b.addEventListener("mousedown",(e)=>e.preventDefault());b.addEventListener("click",()=>hnFx(b.dataset.hnfx))});
@@ -2106,6 +2106,11 @@ function rtEnter(ed){const L=rtLine(ed);
   if(L&&/^•\s*$/.test(L.vor)&&L.first.node&&/^•/.test(L.first.node.data.slice(L.first.off))){rtDel(L.first.node,L.first.off,2);return}
   if(!document.execCommand("insertLineBreak"))document.execCommand("insertHTML",false,"<br>");
   if(L&&/^•[ \u00a0]/.test(L.vor))document.execCommand("insertText",false,"•\u00a0")}
+/* „-->“ wird beim Tippen zum langen Pfeil „⟶“, „<--“ zu „⟵“ (⌘Z / Strg+Z holt die Zeichen zurück) */
+function rtArrow(ed){const g=getSelection();if(!g||!g.rangeCount)return;const r=g.getRangeAt(0),n=r.startContainer;if(!r.collapsed||n.nodeType!==3||!ed.contains(n))return;
+  const k=r.startOffset,t=n.data.slice(Math.max(0,k-3),k),p=t==="-->"?"⟶":t==="<--"?"⟵":"";if(!p)return;
+  const r2=document.createRange();r2.setStart(n,k-3);r2.setEnd(n,k);g.removeAllRanges();g.addRange(r2);
+  if(!document.execCommand("insertText",false,p)){n.replaceData(k-3,3,p);const r3=document.createRange();r3.setStart(n,k-2);r3.collapse(true);g.removeAllRanges();g.addRange(r3)}}
 const rtEds=new Map();
 function rtWire(ed,o){o=o||{};if(rtEds.has(ed))return;const st={range:null,a:null};rtEds.set(ed,st);
   ed.classList.add("hned","rted");ed.contentEditable="true";ed.setAttribute("role","textbox");ed.setAttribute("aria-multiline","true");
@@ -2140,7 +2145,7 @@ function rtWire(ed,o){o=o||{};if(rtEds.has(ed))return;const st={range:null,a:nul
     if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();rtEnter(ed)}else if(e.key==="Enter"&&e.shiftKey&&!e.isComposing){e.preventDefault();if(!document.execCommand("insertLineBreak"))document.execCommand("insertHTML",false,"<br>")}});
   ed.addEventListener("paste",(e)=>{const t=(e.clipboardData||window.clipboardData).getData("text/plain");e.preventDefault();document.execCommand("insertText",false,t)});
   ed.addEventListener("drop",(e)=>e.preventDefault());
-  ed.addEventListener("input",()=>{if(!ed.textContent&&!ed.querySelector("a")){ed.innerHTML="";return}const L=rtLine(ed);if(L&&/^[-*][ \u00a0]$/.test(L.vor)&&L.first.node&&/^[-*][ \u00a0]/.test(L.first.node.data.slice(L.first.off))){L.first.node.replaceData(L.first.off,1,"•")}});
+  ed.addEventListener("input",()=>{if(!ed.textContent&&!ed.querySelector("a")){ed.innerHTML="";return}rtArrow(ed);const L=rtLine(ed);if(L&&/^[-*][ \u00a0]$/.test(L.vor)&&L.first.node&&/^[-*][ \u00a0]/.test(L.first.node.data.slice(L.first.off))){L.first.node.replaceData(L.first.off,1,"•")}});
   ed.addEventListener("click",(e)=>{if(e.target.closest("a"))e.preventDefault()});
   document.addEventListener("selectionchange",()=>{if(!ed.isConnected)return;const g=getSelection();if(g&&g.rangeCount&&ed.contains(g.getRangeAt(0).commonAncestorContainer))st.range=g.getRangeAt(0).cloneRange();state()});
   return ed}
