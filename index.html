@@ -902,7 +902,7 @@ function hnMark(s){const T=[],re=/\\[*_\\]|\*\*|__|\*/g,K={"**":"b","*":"i","__"
 /* Hinweise mit einzelnen Empfängern (n.an = Liste von Spieler-IDs, sonst ganze Mannschaft) */
 function hnEmpf(n){const A=typeof active==="function"?active():[];return Array.isArray(n.an)?A.filter((p)=>n.an.includes(p.id)):A}
 /* Aufgabe mit Abhaken: geheimer Pfad je Aufgabe und Spieler, abgeleitet aus dessen Link-Schlüssel (kennen nur der Link und die Trainer) */
-async function hnSig(hid,pid,key){const h=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("aufg|"+hid+"|"+pid+"|"+key));return[...new Uint8Array(h)].map((x)=>x.toString(16).padStart(2,"0")).join("")}
+async function hnSig(hid,pid,key){const ak=(window.__links||{})[pid];if(ak&&ak.ak)key=ak.ak;/* fester Aufgaben-Schlüssel: bleibt bei neuem Link gleich */const h=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("aufg|"+hid+"|"+pid+"|"+key));return[...new Uint8Array(h)].map((x)=>x.toString(16).padStart(2,"0")).join("")}
 /* Antworten auf Aufgaben: rp "t" = nur an die Trainer (Pfad je Spieler), "a" = für alle mit der Aufgabe sichtbar (gemeinsamer Pfad rs); rk = Schlüssel */
 function hnAntw(n){return!!n&&(n.art==="a"||n.art==="c")&&(n.rp==="t"||(n.rp==="a"&&!!n.rs))&&!!n.rk}
 async function hnAntPfad(n,pid,key){return n.rp==="t"?hnSig("r"+n.id,pid,key):n.rs}
@@ -3874,20 +3874,22 @@ function composeHtml(snap){
 }
 window.__lkSaveLink=(pid,o)=>saveLink(pid,o);window.__lkNewKey=newKey;
 window.__lk={setSnap:(s)=>{SNAP=s},getSnap:()=>SNAP,seal,unseal,composeHtml,buildSnap,parseCode,extData,fingerprint,fingerprintParts};
+/* ak = erster Link-Schlüssel; bleibt bei neuem Schlüssel erhalten, damit erledigte Aufgaben und Antworten weiter zählen */
+const akOf=(pid,k)=>{const c=L[pid]||{},a=c.ak||(c.key&&k&&k!==c.key?c.key:"");return a?{ak:a}:{}};
 const saveLink=(pid,o)=>{
   const c=L[pid]||{};
   if(c.alias&&c.key&&o.key&&o.key!==c.key&&window.__kurzTr)return kzSet(pid,c.alias,o.key,o.aktiv,c.open);
-  const d={id:pid,key:o.key,aktiv:!!o.aktiv};["alias","pw","t","open","dz"].forEach((k)=>{const v=k in o?o[k]:c[k];if(v)d[k]=v});
+  const d={id:pid,key:o.key,aktiv:!!o.aktiv};["alias","pw","t","open","dz"].forEach((k)=>{const v=k in o?o[k]:c[k];if(v)d[k]=v});Object.assign(d,akOf(pid,o.key));
   return save("links",pid,d)};
 /* ---------- Kurzlinks (Trainer) ---------- */
 const kzVid=(pid)=>XOPEN.includes(pid)?pid.slice(1):pid,kzA={};
 async function kzPre(){await Promise.all(Object.keys(L).filter((k)=>L[k].alias&&!kzA[L[k].alias]).map(async(k)=>{kzA[L[k].alias]=await kzId(L[k].alias)}))}
 async function kzSet(pid,alias,key,aktiv,open,pw0){
   const Tr=window.__kurzTr,aid=await kzId(alias),t=newKey();
-  if(open&&XOPEN.includes(pid)){await Tr.put(aid,{s:"",w:"",v:2,i:kzVid(pid),k:key},t);await save("links",pid,{id:pid,key,aktiv:!!aktiv,alias,open:true,t});return}
+  if(open&&XOPEN.includes(pid)){await Tr.put(aid,{s:"",w:"",v:2,i:kzVid(pid),k:key},t);await save("links",pid,{id:pid,key,aktiv:!!aktiv,alias,open:true,t,...akOf(pid,key)});return}
   const pw=pw0||kzPw(),n=await kzWrap(pw,{i:kzVid(pid),k:key,t});
   await Tr.put(aid,{s:n.s,w:n.w,v:0},t);
-  await save("links",pid,{id:pid,key,aktiv:!!aktiv,alias,pw,t});
+  await save("links",pid,{id:pid,key,aktiv:!!aktiv,alias,pw,t,...akOf(pid,key)});
 }
 async function kzCreate(pid,raw,open){
   const alias=String(raw||"").trim().toLowerCase(),l=L[pid]||{};
@@ -3898,7 +3900,7 @@ async function kzCreate(pid,raw,open){
   try{await kzSet(pid,alias,l.key,l.aktiv,open,undefined)}catch(e){return"Das hat nicht geklappt"+(e&&e.code?" ("+e.code+")":"")+"."}
   return"";
 }
-async function kzRemove(pid){const l=L[pid]||{};if(!l.alias)return;await window.__kurzTr.del(await kzId(l.alias));await save("links",pid,{id:pid,key:l.key,aktiv:!!l.aktiv})}
+async function kzRemove(pid){const l=L[pid]||{};if(!l.alias)return;await window.__kurzTr.del(await kzId(l.alias));await save("links",pid,{id:pid,key:l.key,aktiv:!!l.aktiv,...akOf(pid,l.key)})}
 
 /* ---------- Standard-Passwort und automatische Kurzlinks ----------
    Standard-Passwort: ein Passwort für alle Spielerlinks der Mannschaft (Trainer ändern es hier; jeder Link kann ein eigenes bekommen, Familien können es selbst ändern).
@@ -6074,7 +6076,7 @@ window.bkObj=function(){
   const o={app:"U13 Trainer-Cockpit",version:2,erstellt:new Date().toISOString(),config:D.config,players:D.spieler,games:D.spiele,trainings:D.trainings,notes:D.notizen,events:D.events||[],dienste:D.dienste||[],todos:D.todos||[],tipps:D.tipps||[]};
   if(window.__STready)o.spieltag=Object.values(window.__ST||{}).map((x)=>({...x}));
   if(window.__et&&window.__et.started){o.etplan=window.__et.plans.map((x)=>({...x}));o.etzu=window.__et.zu.map((x)=>({...x}))}   /* Eigentraining (ohne die Dateien selbst) */
-  const L=window.__links||{};o.links=Object.keys(L).map((k)=>({id:k,key:L[k].key,aktiv:!!L[k].aktiv}));
+  const L=window.__links||{};o.links=Object.keys(L).map((k)=>({id:k,key:L[k].key,aktiv:!!L[k].aktiv,...(L[k].ak?{ak:L[k].ak}:{})}));
   try{const KK=window.__kader&&window.__kader.KD;if(KK)o.kader={plans:KK.plans,personen:KK.pers,beobachtungen:KK.obs,eingang:KK.inbox}}catch(e){}
   return o;
 };
@@ -6132,7 +6134,7 @@ async function prune(){
 window.bkApply=async function(o){
   const jobs=[],sets=[["players","spieler","players"],["games","spiele","games"],["trainings","trainings","trainings"],["notes","notizen","notes"],["events","events","events"],["dienste","dienste","dienste"],["todos","todos","todos"]].concat(Array.isArray(o.tipps)?[["tipps","tipps","tipps"]]:[]);
   sets.forEach(([coll,key,ok])=>{const inn=(o[ok]||[]),ids=new Set(inn.map((x)=>x.id));(D[key]||[]).forEach((x)=>{if(!ids.has(x.id))jobs.push(save(coll,x.id,null))});inn.forEach((x)=>{const {id,...rest}=x;jobs.push(save(coll,id,{id,...rest}))})});
-  if(Array.isArray(o.links)){const L=window.__links||{},ids=new Set(o.links.map((x)=>x.id));Object.keys(L).forEach((k)=>{if(!ids.has(k))jobs.push(save("links",k,null))});o.links.forEach((x)=>jobs.push(save("links",x.id,{id:x.id,key:x.key,aktiv:!!x.aktiv})))}
+  if(Array.isArray(o.links)){const L=window.__links||{},ids=new Set(o.links.map((x)=>x.id));Object.keys(L).forEach((k)=>{if(!ids.has(k))jobs.push(save("links",k,null))});o.links.forEach((x)=>jobs.push(save("links",x.id,{id:x.id,key:x.key,aktiv:!!x.aktiv,...(x.ak?{ak:x.ak}:{})})))}
   if(o.kader&&window.__kader){const KK=window.__kader.KD;[["kplan","plans","plans"],["kperson","pers","personen"],["kobs","obs","beobachtungen"],["kinbox","inbox","eingang"]].forEach(([coll,key,ok])=>{if(!Array.isArray(o.kader[ok]))return;const inn=o.kader[ok],ids=new Set(inn.map((x)=>x.id));(KK[key]||[]).forEach((x)=>{if(!ids.has(x.id))jobs.push(save(coll,x.id,null))});inn.forEach((x)=>jobs.push(save(coll,x.id,x)))})}
   if(Array.isArray(o.spieltag)&&window.__STready){const ST=window.__ST||{},ids=new Set(o.spieltag.map((x)=>x.id));Object.keys(ST).forEach((k)=>{if(!ids.has(k))jobs.push(save("spieltag",k,null))});o.spieltag.forEach((x)=>{const {id,...rest}=x;jobs.push(save("spieltag",id,rest))})}
   if(window.__et&&window.__et.started)[["etplan","plans"],["etzu","zu"]].forEach(([coll,key])=>{if(!Array.isArray(o[coll]))return;const inn=o[coll],ids=new Set(inn.map((x)=>x.id));window.__et[key].forEach((x)=>{if(!ids.has(x.id))jobs.push(save(coll,x.id,null))});inn.forEach((x)=>{const {id,...rest}=x;jobs.push(save(coll,id,rest))})});
