@@ -274,7 +274,7 @@ function viewerInstall(){
   const plan=()=>{const v=document.getElementById("vw2");return!!(v&&v.dataset.plan)};
   const ol=(k)=>'<ol style="margin:6px 0 6px 20px;padding:0">'+VSTEP[k].slice(1).map((t)=>"<li>"+t+"</li>").join("")+(plan()?"":"<li>Die App auf dem Startbildschirm öffnen und oben auf <b>Einschalten</b> (Benachrichtigungen) tippen.</li>")+"</ol>";
   /* Eltern: Rolle aus dem Konto (steht schon vor dem Aufbau der Ansicht fest), sonst wie bisher über die Benachrichtigungen */
-  const eltern=()=>{const K=window.__KONTO;if(K&&K.cur)return K.cur.rolle==="eltern";const c=window.__pushCtx&&window.__pushCtx();return!!c&&c.ro==="e"};
+  const eltern=()=>{const K=window.__KONTO;if(K&&K.cur)return K.wer?K.wer==="e":K.cur.rolle==="eltern";const c=window.__pushCtx&&window.__pushCtx();return!!c&&c.ro==="e"};
   const body=()=>(plan()?'<p style="margin:4px 0 6px;font-size:14.5px">Wer mag, kann den Terminplan als App speichern. Dann öffnet er sich mit einem Tipp vom Startbildschirm.</p>'
       :eltern()?'<p style="margin:4px 0 6px;font-size:14.5px">Für Eltern ist das freiwillig. Wer mag, kann die Seite als App speichern und dort die Benachrichtigungen einschalten, zum Beispiel für Antworten vom Trainer und neue Hinweise.</p>'
       :'<p style="margin:4px 0 6px;font-size:14.5px"><b>Für Spieler: Bitte speichere diese Seite als App auf deinem Handy und schalte danach in der App die Benachrichtigungen ein.</b> Nur dann bekommst du Bescheid, wenn es einen neuen Clip, einen neuen Hinweis, eine Erinnerung an eine Aufgabe oder eine Antwort vom Trainer gibt, auch wenn die App geschlossen ist. Danke!</p><p class="note" style="margin:0 0 6px">Eltern brauchen die App nicht unbedingt, können sie aber natürlich auch speichern.</p>')+'<p class="note" style="margin:0 0 6px">Außerdem öffnest du die Seite dann mit einem Tipp vom Startbildschirm, auch ohne Netz (letzter Stand). Die App zeigt genau das, was du hier siehst.</p><button class="btn" data-vib style="display:none;margin:2px 0 8px">App jetzt installieren</button><b style="font-size:14px">So geht’s ('+VSTEP[dev][0]+'):</b>'+ol(dev)
@@ -498,13 +498,13 @@ function kWait(){if(kWaitOn)return;kWaitOn=true;
 function kForm(o){
   return new Promise((res)=>{
     const sp=o.sp||"",step=(r)=>{
-      const kid=!sp&&r==="eltern";
+      const kid=!sp&&(r==="eltern"||r==="beide");
       const ov=overlay('<div style="font-size:17px;font-weight:600;margin:0 0 4px">Wer bist du?</div><p class="sb" style="margin-bottom:12px">Angemeldet als&nbsp;<b>'+E(kEm())+'</b></p>'
-        +(r?'<div style="margin:0 0 2px;font-weight:600">'+(r==="spieler"?"Ich bin Spieler":"Ich bin Elternteil"+(sp?" von "+E(sp):""))+'</div><button class="ln" id="kfz" style="margin:0 0 12px">Auswahl ändern</button>'
+        +(r?'<div style="margin:0 0 2px;font-weight:600">'+(r==="spieler"?"Ich bin Spieler":r==="beide"?"Beides: "+(sp?E(sp):"Spieler")+" und ich als Elternteil":"Ich bin Elternteil"+(sp?" von "+E(sp):""))+'</div><button class="ln" id="kfz" style="margin:0 0 12px">Auswahl ändern</button>'
           +'<label class="sb" for="kfn" style="display:block;margin:0 0 4px">'+(r==="spieler"?"Dein Vor- und Nachname":"Dein Vor- und Nachname (Elternteil)")+'</label><input id="kfn" maxlength="60" autocomplete="name" placeholder="Vor- und Nachname">'
           +(kid?'<label class="sb" for="kfk" style="display:block;margin:0 0 4px">Vor- und Nachname deines Kindes</label><input id="kfk" maxlength="60" placeholder="Vor- und Nachname des Kindes">':"")
           +'<div class="ms" id="kfm"></div><button class="pr" id="kfgo">'+E(o.btn)+'</button>'
-        :'<button class="pr" data-kr="spieler">Ich bin '+(sp?E(sp):"Spieler")+'</button><button data-kr="eltern">Ich bin Elternteil'+(sp?" von "+E(sp):"")+'</button>')
+        :'<button class="pr" data-kr="spieler">Ich bin '+(sp?E(sp):"Spieler")+'</button><button data-kr="eltern">Ich bin Elternteil'+(sp?" von "+E(sp):"")+'</button><button data-kr="beide">Beides: '+(sp?E(sp):"Spieler")+' und ich als Elternteil</button>')
         +kSo);
       ov.querySelector("#u13so").onclick=()=>signOutClean();
       ov.querySelectorAll("[data-kr]").forEach((b)=>{b.onclick=()=>{const v=b.dataset.kr;if(v==="spieler"&&sp){res({rolle:"spieler",name:sp,kind:sp});return}step(v)}});
@@ -513,6 +513,9 @@ function kForm(o){
       go.onclick=()=>{const name=n.value.trim(),k=kid?ov.querySelector("#kfk").value.trim():"",m=ov.querySelector("#kfm");
         if(!nm2(name)){m.className="ms er";m.textContent="Bitte Vor- und Nachnamen eintragen.";return}
         if(kid&&!nm2(k)){m.className="ms er";m.textContent="Bitte Vor- und Nachnamen deines Kindes eintragen.";return}
+        /* „Beides“: Spieler und Elternteil im selben Konto. Spielerlink: Konto des Spielers mit dem Elternteil als zweiter Person (zw);
+           Mannschaftslink: Anfrage als Elternteil, nach der Freigabe kommt der Spieler als zweite Person dazu (u13kzw, siehe kontoStart) */
+        if(r==="beide"){res(sp?{rolle:"spieler",name:sp,kind:sp,zw:name}:{rolle:"eltern",name,kind:k,zw:"1"});return}
         res({rolle:r,name,kind:r==="spieler"?name:k})};
     };step("");
   });
@@ -526,9 +529,9 @@ async function kClaimSp(tok){
   const zr=fs.doc("kzaehl/"+e.pid);let n=0;
   try{const z=await zr.get();if(z.exists)n=+z.data().n||0}catch(x){}
   if(n>=4)return"voll";
-  const b=fs.batch();b.set(fs.doc("kverkn/"+kid),{pid:e.pid,email:kEm(),rolle:f.rolle,name:f.name.slice(0,60),pn:String(e.n||"").slice(0,80),at:new Date().toISOString(),s:tok});
+  const b=fs.batch();b.set(fs.doc("kverkn/"+kid),{pid:e.pid,email:kEm(),rolle:f.rolle,name:f.name.slice(0,60),pn:String(e.n||"").slice(0,80),at:new Date().toISOString(),s:tok,...(f.zw?{zw:f.zw.slice(0,60)}:{})});
   if(n)b.update(zr,{n:n+1});else b.set(zr,{n:1});
-  try{await b.commit();kls.set("u13kpid",e.pid);return"ok"}catch(x){return denied(x)?"voll":"fehler"}
+  try{await b.commit();kls.set("u13kpid",e.pid);kls.set("u13kzwh","1");return"ok"}catch(x){return denied(x)?"voll":"fehler"}
 }
 async function kAnfrage(tok){
   let e=null;try{const s=await fs.doc("mteinl/"+tok).get();e=s.exists?s.data():null}catch(x){e=null}
@@ -537,7 +540,23 @@ async function kAnfrage(tok){
   if(((await myLinks())||[]).some((l)=>l.gesperrt!==true))return"drin";
   if(await myAnfrage())return"offen";
   const f=await kForm({btn:"Anfrage senden"});
-  try{await fs.doc("kanfr/"+mkeyOf(kEm())).set({email:kEm(),name:f.name.slice(0,60),kind:f.kind.slice(0,60),rolle:f.rolle,at:new Date().toISOString(),s:tok,status:"offen"});kanfrPush();return"gesendet"}catch(x){return"fehler"}
+  try{await fs.doc("kanfr/"+mkeyOf(kEm())).set({email:kEm(),name:f.name.slice(0,60),kind:f.kind.slice(0,60),rolle:f.rolle,at:new Date().toISOString(),s:tok,status:"offen"});kanfrPush();kls.set("u13kzwh","1");if(f.zw)kls.set("u13kzw","1");return"gesendet"}catch(x){return"fehler"}
+}
+/* Zwei Personen im Konto (Feld zw): Name des Elternteils, wer gerade schaut, Auswahl beim ersten Öffnen und Wechsel oben rechts */
+const kEltern=(c)=>c.rolle==="eltern"?c.name:c.zw;
+const kVn=(n)=>String(n||"").trim().split(/\s+/)[0];
+function kWho(c){return new Promise((res)=>{
+  const ov=overlay('<div style="font-size:17px;font-weight:600;margin:0 0 12px">Wer schaut gerade?</div><button class="pr" data-kw="s">'+E(c.pn||"Spieler")+'</button><button data-kw="e">'+E(kEltern(c))+' (Elternteil)</button>'+kSo);
+  ov.querySelector("#u13so").onclick=()=>signOutClean();
+  ov.querySelectorAll("[data-kw]").forEach((b)=>{b.onclick=()=>res(b.dataset.kw)})})}
+function kPick(btn){
+  const K=window.__KONTO,c=K.cur;let m=document.getElementById("vkwm");if(m){m.remove();return}
+  const r=btn.getBoundingClientRect(),row=(w,n,sub)=>'<button type="button" data-kwp="'+w+'" class="vkwr'+(K.wer===w?" on":"")+'"><span class="vkwa'+(w==="e"?" e":"")+'">'+E(kVn(n).charAt(0).toUpperCase())+'</span><span style="flex:1;min-width:0;text-align:left"><b>'+E(n)+'</b><span class="note" style="display:block;margin:0">'+sub+'</span></span>'+(K.wer===w?'<i class="sy" data-sy="ok"></i>':"")+'</button>';
+  m=document.createElement("div");m.id="vkwm";m.className="card";m.style.top=Math.round(r.bottom+8)+"px";m.style.left=Math.max(8,Math.round(r.right-260))+"px";
+  m.innerHTML=row("s",c.pn||"Spieler","Spieler")+row("e",kEltern(c),"Elternteil von "+E(kVn(c.pn)));
+  document.body.appendChild(m);btn.setAttribute("aria-expanded","true");
+  m.onclick=(e)=>{const b=e.target.closest("[data-kwp]");if(!b)return;if(b.dataset.kwp!==K.wer){kls.set("u13kwer."+c.pid,b.dataset.kwp);location.reload()}else{m.remove();btn.setAttribute("aria-expanded","false")}};
+  setTimeout(()=>document.addEventListener("click",function f(e){if(m.contains(e.target)||btn.contains(e.target))return;m.remove();btn.setAttribute("aria-expanded","false");document.removeEventListener("click",f)}),0);
 }
 async function kontoStart(){
   OVSUB="Für Spieler und Eltern";
@@ -574,8 +593,13 @@ async function kontoStart(){
   const want=kls.get("u13kpid"),cur=act.find((l)=>l.pid===want)||act[0];kls.set("u13kpid",cur.pid);
   let key="";try{const s=await fs.doc("kkey/"+cur.pid).get();key=(s.exists&&s.data()&&s.data().k)||""}catch(e){key=""}
   if(!key){kWait();return kMsg("Gleich geht’s los.","Der Trainer hat die Ansicht für "+E(cur.pn||"deinen Spieler")+" noch nicht freigeschaltet. Sobald das passiert ist, geht es hier von allein weiter.")}
-  kls.set("u13wer."+cur.pid,JSON.stringify(cur.rolle==="spieler"?{r:"s"}:{r:"e",n:cur.name}));
-  window.__KONTO={email:kEm(),links:act,cur,render:kRender};
+  /* Mannschaftslink mit „Beides“: nach der Freigabe kommt der Spieler als zweite Person ins Konto */
+  if(kls.get("u13kzw")){if(cur.rolle==="eltern"&&!cur.zw&&cur.pn){try{await fs.doc("kverkn/"+cur.id).update({zw:String(cur.pn).slice(0,60)});cur.zw=String(cur.pn).slice(0,60)}catch(e){}}kls.set("u13kzw",null)}
+  /* Spieler und Elternteil im selben Konto: dieses Gerät merkt sich, wer gerade schaut (Wechsel oben rechts in der Ansicht) */
+  let wr=cur.rolle==="spieler"?"s":"e";
+  if(cur.zw){wr=kls.get("u13kwer."+cur.pid);if(wr!=="s"&&wr!=="e"){wr=await kWho(cur);kls.set("u13kwer."+cur.pid,wr)}}
+  kls.set("u13wer."+cur.pid,JSON.stringify(wr==="s"?{r:"s"}:{r:"e",n:kEltern(cur)}));
+  window.__KONTO={email:kEm(),links:act,cur,render:kRender,wer:wr,pick:kPick};
   hideOverlay();
   window.__showViewer(cur.pid,key);
 }
@@ -595,17 +619,26 @@ function kNotif(){
     +'<div style="font-weight:600;margin:6px 0 2px">2. Benachrichtigungen einschalten</div><div class="note">Die App auf dem Startbildschirm öffnen, einmal mit deinem Konto anmelden und hier unter <b>Einstellungen</b> auf <b>Einschalten</b> tippen. Auf dem iPhone geht das nur in der App, nicht im Browser.</div></div>';
 }
 /* Reiter „Einstellungen“ in der Konto-Ansicht */
-const KS={msg:"",bad:false,arm:"",anf:undefined,r:"",n:null};   /* r, n: gewählte Rolle und eingetippter Name, bis gespeichert */
+const KS={msg:"",bad:false,arm:"",anf:undefined,r:"",n:null,ed:false,zw:false};   /* r, n: gewählte Rolle und eingetippter Name, bis gespeichert; ed: „Ändern“ offen; zw: Feld „Elternteil hinzufügen“ offen */
 function kRender(el){
   const K=window.__KONTO;if(!K||!el)return;const c=K.cur,rr=KS.r||c.rolle,sp=rr==="spieler";
   if(KS.anf===undefined){KS.anf=null;myAnfrage().then((a)=>{KS.anf=a||false;kRender(el)})}
   const radio=(v,t)=>'<label style="display:flex;gap:8px;align-items:center;margin:4px 0"><input type="radio" name="krl" value="'+v+'"'+(rr===v?" checked":"")+'>'+t+'</label>';
+  /* Wer nutzt das Konto: eine Person (wie bisher, „Ändern“ öffnet Spieler/Elternteil und Name) oder Spieler und Elternteil zusammen (zw) */
+  const pr=(w,n,sub,btn)=>'<div class="vd-row" style="gap:10px;align-items:center"><span class="vkwa'+(w==="e"?" e":"")+'">'+E(kVn(n).charAt(0).toUpperCase())+'</span><div style="flex:1;min-width:0"><b>'+E(n)+'</b><div class="note">'+sub+'</div></div>'+btn+'</div>';
+  const pSp=pr("s",c.pn||"Spieler","Spieler",""),pEl=(btn)=>pr("e",kEltern(c),"Elternteil"+(c.pn?" von "+E(kVn(c.pn)):""),btn);
   el.innerHTML='<div class="card" style="margin:0 0 12px"><h3 style="margin-top:0">Dein Konto</h3><div class="note">Angemeldet als <b>'+E(K.email)+'</b></div>'
-    +'<div style="margin:10px 0 4px;font-weight:600">Ich bin</div>'+radio("spieler",(c.pn?E(c.pn):"der Spieler")+" selbst")+radio("eltern","Elternteil"+(c.pn?" von "+E(c.pn):""))
-    +'<div id="kstn"'+(sp?" hidden":"")+'><label class="note" for="kstni">Dein Vor- und Nachname</label><input id="kstni" maxlength="60" autocomplete="name" value="'+E(KS.n!=null?KS.n:c.rolle==="spieler"?"":c.name)+'" style="width:100%;box-sizing:border-box;margin-top:2px"></div>'
-    +'<div class="bar" style="margin:10px 0 0"><button class="btn" data-ks="save">Speichern</button></div></div>'
+    +'<div style="margin:10px 0 4px;font-weight:600">Wer nutzt dieses Konto?</div>'
+    +(c.zw?(c.rolle==="spieler"?pSp+pEl('<button class="btn" data-ks="zwrm">'+(KS.arm==="zwrm"?"Wirklich entfernen?":"Entfernen")+'</button>'):pEl("")+pr("s",c.pn||"Spieler","Spieler",'<button class="btn" data-ks="zwrm">'+(KS.arm==="zwrm"?"Wirklich entfernen?":"Entfernen")+'</button>'))
+      :(c.rolle==="spieler"?pr("s",c.pn||"Spieler","Spieler",KS.ed?"":'<button class="btn" data-ks="ed">Ändern</button>'):pEl(KS.ed?"":'<button class="btn" data-ks="ed">Ändern</button>'))
+       +(KS.ed?'<div style="margin:10px 0 4px;font-weight:600">Ich bin</div>'+radio("spieler",(c.pn?E(c.pn):"der Spieler")+" selbst")+radio("eltern","Elternteil"+(c.pn?" von "+E(c.pn):""))
+         +'<div id="kstn"'+(sp?" hidden":"")+'><label class="note" for="kstni">Dein Vor- und Nachname</label><input id="kstni" maxlength="60" autocomplete="name" value="'+E(KS.n!=null?KS.n:c.rolle==="spieler"?"":c.name)+'" style="width:100%;box-sizing:border-box;margin-top:2px"></div>'
+         +'<div class="bar" style="margin:10px 0 0"><button class="btn" data-ks="save">Speichern</button><button class="btn" data-ks="edx">Abbrechen</button></div>'
+        :KS.zw?'<div style="margin-top:10px"><b>Elternteil hinzufügen</b><label class="note" for="kstz" style="display:block;margin:6px 0 2px">Vor- und Nachname des Elternteils</label><input id="kstz" maxlength="60" autocomplete="name" style="width:100%;box-sizing:border-box"><div class="bar" style="margin:8px 0 0"><button class="btn" data-ks="zwok" style="background:var(--ac);color:#fff;border-color:var(--ac);font-weight:600">Hinzufügen</button><button class="btn" data-ks="zwx">Abbrechen</button></div></div>'
+        :'<div class="bar" style="margin:10px 0 0"><button class="btn" data-ks="zw">'+(c.rolle==="spieler"?"+ Elternteil hinzufügen":"+ "+E(kVn(c.pn)||"Spieler")+" als Spieler hinzufügen")+'</button></div>'))
+    +'</div>'
     +'<div class="card" style="margin:0 0 12px"><h3 style="margin-top:0">'+(K.links.length>1?"Deine Spieler":"Dein Spieler")+'</h3>'
-    +K.links.map((l)=>'<div class="vd-row"><div style="flex:1;min-width:0"><b>'+E(l.pn||"Spieler")+'</b><div class="note">'+(l.rolle==="spieler"?"als Spieler":"als Elternteil")+'</div></div>'+(l.pid===c.pid?'<span class="note">wird gerade angezeigt</span>':'<button class="btn" data-ks="go" data-pid="'+E(l.pid)+'">Anzeigen</button>')+'</div>').join("")
+    +K.links.map((l)=>'<div class="vd-row"><div style="flex:1;min-width:0"><b>'+E(l.pn||"Spieler")+'</b><div class="note">'+(l.zw?"als Spieler und Elternteil":l.rolle==="spieler"?"als Spieler":"als Elternteil")+'</div></div>'+(l.pid===c.pid?'<span class="note">wird gerade angezeigt</span>':'<button class="btn" data-ks="go" data-pid="'+E(l.pid)+'">Anzeigen</button>')+'</div>').join("")
     +'<div style="margin-top:10px"><b>Weiteres Kind (Geschwister)</b>'
     +(KS.anf?'<div class="note" style="margin-top:4px">Deine Anfrage für <b>'+E(KS.anf.kind)+'</b> wartet auf den Trainer.</div>'
       :KS.anf===null?'<div class="note">Wird geladen …</div>'
@@ -615,9 +648,18 @@ function kRender(el){
     +'<div class="card" style="margin:0 0 12px"><h3 style="margin-top:0">Abmelden oder Konto löschen</h3><div class="bar" style="margin:0"><button class="btn" data-ks="out">Abmelden</button><button class="btn" data-ks="del" style="color:var(--r)">'+(KS.arm==="del"?"Wirklich löschen? Dann ist alles weg.":"Konto löschen")+'</button></div></div>'
     +'<div class="note'+(KS.bad?" warn":"")+'" id="kstm" role="status">'+E(KS.msg)+'</div>';
   el.querySelectorAll('[name="krl"]').forEach((r)=>{r.onchange=()=>{if(r.checked)KS.r=r.value;el.querySelector("#kstn").hidden=KS.r==="spieler"}});
-  el.querySelector("#kstni").oninput=(ev)=>{KS.n=ev.target.value};
+  const ni=el.querySelector("#kstni");if(ni)ni.oninput=(ev)=>{KS.n=ev.target.value};
   el.onclick=async(ev)=>{const b=ev.target.closest&&ev.target.closest("[data-ks]");if(!b)return;const k=b.dataset.ks,say=(t,bad)=>{KS.msg=t;KS.bad=!!bad;kRender(el)};
-    if(k!=="del")KS.arm="";
+    if(k!=="del"&&k!=="zwrm")KS.arm="";
+    if(k==="ed"||k==="edx"){KS.ed=k==="ed";KS.r="";KS.n=null;KS.msg="";kRender(el);return}
+    /* Zweite Person: Elternteil (Name nötig) bzw. der Spieler selbst (Name ist bekannt); dieses Gerät bleibt bei der Person, die gerade schaut */
+    if(k==="zw"){if(c.rolle==="spieler"){KS.zw=true;KS.msg="";kRender(el);const i=el.querySelector("#kstz");if(i)i.focus();return}
+      try{await fs.doc("kverkn/"+c.id).update({zw:String(c.pn||"Spieler").slice(0,60)});kls.set("u13kwer."+c.pid,"e");location.reload()}catch(x){say("Das hat nicht geklappt. Bitte später noch einmal versuchen.",1)}return}
+    if(k==="zwx"){KS.zw=false;KS.msg="";kRender(el);return}
+    if(k==="zwok"){const n=el.querySelector("#kstz").value.trim();if(!nm2(n)){say("Bitte Vor- und Nachnamen des Elternteils eintragen.",1);return}
+      try{await fs.doc("kverkn/"+c.id).update({zw:n.slice(0,60)});kls.set("u13kwer."+c.pid,"s");location.reload()}catch(x){say("Das hat nicht geklappt. Bitte später noch einmal versuchen.",1)}return}
+    if(k==="zwrm"){if(KS.arm!=="zwrm"){KS.arm="zwrm";kRender(el);return}KS.arm="";
+      try{await fs.doc("kverkn/"+c.id).update({zw:""});kls.set("u13kwer."+c.pid,null);location.reload()}catch(x){say("Das hat nicht geklappt. Bitte später noch einmal versuchen.",1)}return}
     if(k==="save"){const r=(el.querySelector('[name="krl"]:checked')||{}).value||c.rolle,n=r==="spieler"?(c.rolle==="spieler"?c.name:(c.pn||c.name)):el.querySelector("#kstni").value.trim();
       if(r==="eltern"&&!nm2(n)){say("Bitte deinen Vor- und Nachnamen eintragen.",1);return}
       try{await fs.doc("kverkn/"+c.id).update({name:n.slice(0,60),rolle:r});kls.set("u13wer."+c.pid,JSON.stringify(r==="spieler"?{r:"s"}:{r:"e",n}));KS.msg="";location.reload()}catch(x){say("Das hat nicht geklappt. Bitte später noch einmal versuchen.",1)}return}

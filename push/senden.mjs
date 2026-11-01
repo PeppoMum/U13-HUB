@@ -19,7 +19,7 @@ const TX = {
   notiz: { t: "Neue Notiz vom Trainer", b: "Schau in dein Profil in der App.", u: "./?link" },
   termin: { t: "Termin geändert", b: "Ein Termin wurde abgesagt oder verlegt. Schau in den Terminplan.", u: "./?link" },
   afrist: { t: "Erinnerung: Aufgabe", b: "Bitte denk an deine Aufgabe in der App.", u: "./?link" },
-  aantw: { t: "Antwort auf eine Aufgabe", b: "Ein Spieler oder Elternteil hat auf eine Aufgabe geantwortet.", u: "./" },
+  aantw: { t: "Antwort auf eine Aufgabe", b: "Ein Spieler hat auf eine Aufgabe geantwortet.", u: "./" },
   skom: { t: "Neuer Clip-Kommentar", b: "Ein Spieler hat einen Clip kommentiert.", u: "./" },
   kanfr: { t: "Neue Konto-Anfrage", b: "Bitte in der App freigeben oder ablehnen.", u: "./" },
 };
@@ -31,8 +31,8 @@ export function passt(q, s) {
   if (typeof s.x === "string" && s.x.split(",").includes(GRP[q.art] || q.art)) return false;
   if (q.art === "fb" || q.art === "aantw" || q.art === "skom" || q.art === "kanfr") return s.ro === "t";
   if (q.art === "termin") return s.ro !== "t";
-  if (q.art === "notiz" || q.art === "afrist") return s.ro !== "t" && !!s.pid && Array.isArray(q.an) && q.an.includes(s.pid);
-  if (q.art === "hinweis") return s.ro !== "t" && (!Array.isArray(q.an) || (!!s.pid && q.an.includes(s.pid)));   /* Hinweis an einzelne Spieler: nur deren Geräte */
+  if (q.art === "notiz" || q.art === "afrist") return s.ro !== "t" && !(q.art === "afrist" && s.ro === "e") && !!s.pid && Array.isArray(q.an) && q.an.includes(s.pid);
+  if (q.art === "hinweis") return s.ro !== "t" && !(q.a && s.ro === "e") && (!Array.isArray(q.an) || (!!s.pid && q.an.includes(s.pid)));   /* Hinweis an einzelne Spieler: nur deren Geräte */
   if (q.art === "antwort") return !!q.r && s.r === q.r && s.ro !== "t";
   if (q.art === "clip" || q.art === "frist" || q.art === "kom") return s.ro !== "t" && s.ro !== "e" && !!s.pid && (q.an === "alle" || (Array.isArray(q.an) && q.an.includes(s.pid)));
   return false;
@@ -41,7 +41,10 @@ export function nachricht(q, id) {
   const x = TX[q.art];
   const b = (q.art === "frist" || q.art === "afrist") && typeof q.tx === "string" && q.tx.length < 200 ? q.tx : x.b;
   const t = q.art === "hinweis" && q.a ? "Neue Aufgabe für dich" : x.t;   /* Aufgabe (mit Antwort oder Abhaken) statt Hinweis */
-  return { t, b, u: x.u, g: q.art + "-" + id };
+  /* Trainer: Antippen öffnet direkt die Aufgabe bzw. den Clip im Eingang (h = Aufgabe/Clip), Nachrichten den Reiter Nachrichten */
+  const h = typeof q.h === "string" && /^[\w-]{1,40}$/.test(q.h) ? q.h : "";
+  const u = h && q.art === "aantw" ? "./?e=a." + h : h && q.art === "skom" ? "./?e=c." + h : q.art === "fb" ? "./?e=n" : x.u;
+  return { t, b, u, g: q.art + "-" + id };
 }
 
 const val = (v) => v == null ? null : "stringValue" in v ? v.stringValue : "integerValue" in v ? +v.integerValue : "doubleValue" in v ? v.doubleValue
