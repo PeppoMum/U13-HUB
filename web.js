@@ -10,6 +10,7 @@ const XIDS=["plan","demo","demosp"];
 window.__WEB=true;
 window.__WEB_BASE=location.origin+location.pathname.replace(/index\.html$/,"");
 const IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+if(IOS){const vp=document.querySelector('meta[name="viewport"]');if(vp&&!/maximum-scale/.test(vp.content))vp.content+=",maximum-scale=1"}   /* iPhone/iPad: kein Heranzoomen beim Tippen in Eingabefelder (z. B. Schwerpunkte); Zoomen mit zwei Fingern geht weiter */
 /* Vorschau für Trainer (?vorschau=s|e, in der Trainer-App eingebettet): Spieler- bzw. Elternansicht ohne Konto.
    Eigener Speicher nur für dieses Fenster: nichts wird auf dem Gerät gemerkt, Eingaben gehen nicht an den Server (siehe __vidNet unten). */
 const VS=((location.search.match(/[?&]vorschau=([se])(?:&|$)/)||[])[1])||"";
