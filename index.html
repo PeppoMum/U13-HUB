@@ -379,6 +379,8 @@ html[data-design] body #gpl select{background-position:right 4px center;padding-
 
 /* iPhone: untere Leiste am Handy ohne eigenes Wischen, sonst malt iOS Knöpfe nach Fenstern/Zurückkehren manchmal nicht */
 @media(max-width:760px){html.mobnav nav{overflow:visible!important;-webkit-overflow-scrolling:auto!important}}
+/* iPhone: Leiste als eine feste, stabile Ebene (Knöpfe wurden sonst teils nicht gemalt) */
+@media(max-width:760px){html.mobnav .app>nav{-webkit-transform:translateZ(0);transform:translateZ(0);-webkit-backface-visibility:hidden;backface-visibility:hidden}}
 #lkco{display:none!important}</style>
 <div class="app">
 <nav><button class="nlg" id="nlg" type="button" title="Vereinslogo" aria-label="Vereinslogo"></button><h1>U13 · <span id="sais">2026/27</span></h1><small>Teamzentrale</small>
@@ -6736,29 +6738,27 @@ const kindOf=(fn,kind)=>{const o=window[fn];if(typeof o!=="function")return;wind
 })();
 /* Handy: Menüs mit „Mehr“ statt verstecktem Wischen */
 (function(){
-  const W=window;const ph=()=>W.innerWidth<=760;let sigB="";
+  const W=window;const ph=()=>W.innerWidth<=760;let sigB="",lastH="";
   const mk=(id)=>{let e=document.getElementById(id);if(!e){e=document.createElement("div");e.id=id;e.className="mobsheet";e.hidden=true;document.body.appendChild(e)}return e};
   function bottom(){
     const nav=document.querySelector("body > .app > nav")||document.querySelector("nav");if(!nav)return;
-    const bs=[...nav.querySelectorAll("button[data-s]")];bs.forEach((b)=>b.classList.remove("mobx"));
-    /* Handy: „Mehr“ einmal anlegen und behalten – das iPhone malte einen frisch eingefügten Knopf in der Leiste oft nicht (leerer Platz) */
+    const bs=[...nav.querySelectorAll("button[data-s]")],H=document.documentElement;
     let more0=nav.querySelector("#mobmore");if(more0&&(!ph()||more0.classList.contains("tabmore"))){more0.remove();more0=null}
     const sh=mk("mobsheetB");
-    sh.style.top=sh.style.left="";
-    if(!ph()){document.documentElement.classList.remove("mobnav");wide(nav,bs,sh);return}
-    const vis=bs.filter((b)=>b.offsetParent!==null||getComputedStyle(b).display!=="none");
-    document.documentElement.classList.add("mobnav");
-    const pnt=()=>requestAnimationFrame(()=>{try{paint(true)}catch(e){}});
-    if(vis.length<=5){if(more0)more0.remove();pnt();return}
-    const act=vis.find((b)=>b.classList.contains("on"));let keep=vis.slice(0,4);if(act&&keep.indexOf(act)<0)keep[3]=act;
-    const rest=vis.filter((b)=>keep.indexOf(b)<0);rest.forEach((b)=>b.classList.add("mobx"));
-    let m=more0;if(!m){m=document.createElement("button");m.type="button";m.id="mobmore";m.innerHTML='<span class="em">⋯</span><span>Mehr</span>'}
+    if(!ph()){lastH="";bs.forEach((b)=>b.classList.remove("mobx"));sh.style.top=sh.style.left="";H.classList.remove("mobnav");wide(nav,bs,sh);return}
+    /* Handy: die Leiste nur anfassen, wenn sich wirklich etwas ändert – jedes Umbauen/Ummalen ließ auf dem iPhone Knöpfe leer und die Leiste flackern */
+    if(!H.classList.contains("mobnav"))H.classList.add("mobnav");
+    const was=bs.filter((b)=>b.classList.contains("mobx"));was.forEach((b)=>b.classList.remove("mobx"));   /* nur zum Messen, im selben Schritt zurück */
+    const vis=bs.filter((b)=>getComputedStyle(b).display!=="none");
+    let rest=[];if(vis.length>5){const act=vis.find((b)=>b.classList.contains("on"));const keep=vis.slice(0,4);if(act&&keep.indexOf(act)<0)keep[3]=act;rest=vis.filter((b)=>keep.indexOf(b)<0)}
+    rest.forEach((b)=>b.classList.add("mobx"));
+    if(!rest.length){if(more0)more0.remove();sh.hidden=true;return}
+    let m=more0;if(!m){m=document.createElement("button");m.type="button";m.id="mobmore";m.innerHTML='<span class="em">⋯</span><span>Mehr</span>';m.onclick=(e)=>{e.stopPropagation();sh.hidden=!sh.hidden}}
     if(nav.lastElementChild!==m)nav.appendChild(m);
-    /* Zahl „neu“ von Eingang: nur am „Mehr“, solange Eingang dahinter steht (früher erledigte das das Neuanlegen) */
+    /* Zahl „neu“ von Eingang: nur am „Mehr“, solange Eingang dahinter steht */
     {const fz=nav.querySelector('button.mobx[data-s="fb"] .vbadge'),mz=m.querySelector(".vbadge");if(!fz){if(mz)mz.remove()}else if(!mz)m.appendChild(fz.cloneNode(true));else if(mz.textContent!==fz.textContent)mz.textContent=fz.textContent}
-    pnt();
-    sh.innerHTML=rest.map((b)=>'<button type="button" data-mb="'+b.dataset.s+'">'+((W.__dz&&W.__dz.icon)?W.__dz.icon(b.dataset.s):"")+'<span>'+[...b.childNodes].filter((n)=>n.nodeType===3).map((n)=>n.nodeValue).join("").trim().replace(/\s+/g," ")+'</span></button>').join("");
-    m.onclick=(e)=>{e.stopPropagation();sh.hidden=!sh.hidden};
+    const htm=rest.map((b)=>'<button type="button" data-mb="'+b.dataset.s+'">'+((W.__dz&&W.__dz.icon)?W.__dz.icon(b.dataset.s):"")+'<span>'+[...b.childNodes].filter((n)=>n.nodeType===3).map((n)=>n.nodeValue).join("").trim().replace(/\s+/g," ")+'</span></button>').join("");
+    if(lastH!==htm){sh.innerHTML=htm;lastH=htm}
     sh.onclick=(e)=>{const x=e.target.closest("[data-mb]");if(!x)return;sh.hidden=true;const b=nav.querySelector('button[data-s="'+x.dataset.mb+'"]');if(b)b.click()};
   }
   /* Tablet/Computer: was nicht in die Zeile passt, kommt hinter „Mehr ▾“ (die aktive Seite bleibt sichtbar) */
@@ -6773,23 +6773,15 @@ const kindOf=(fn,kind)=>{const o=window[fn];if(typeof o!=="function")return;wind
     m.onclick=(e)=>{e.stopPropagation();const r=m.getBoundingClientRect();sh.style.top=Math.round(r.bottom+6)+"px";sh.hidden=!sh.hidden;if(!sh.hidden)sh.style.left=Math.max(8,Math.round(Math.min(r.right,W.innerWidth-8)-sh.offsetWidth))+"px"};
     sh.onclick=(e)=>{const x=e.target.closest("[data-mb]");if(!x)return;sh.hidden=true;const b=nav.querySelector('button[data-s="'+x.dataset.mb+'"]');if(b)b.click()};
   }
-    const tick=()=>{try{const nav=document.querySelector("body > .app > nav")||document.querySelector("nav");
-    const sb=ph()+"|"+W.innerWidth+"|"+(document.documentElement.dataset.design||"")+"|"+(nav?[...nav.querySelectorAll("button[data-s]:not(.mobx)")].map((b)=>b.dataset.s+(b.classList.contains("on")?"*":"")+(b.hidden?"-":"")).join(","):"")+"|"+(nav?nav.querySelectorAll("button.mobx").length+(nav.scrollWidth>nav.clientWidth+1?"!":""):0)+"|"+(document.body.className||"");
-    if(sb!==sigB){bottom();sigB=sb}}catch(e){}};
+  const sig=()=>{const nav=document.querySelector("body > .app > nav")||document.querySelector("nav");
+    return ph()+"|"+W.innerWidth+"|"+(document.documentElement.dataset.design||"")+"|"+(nav?[...nav.querySelectorAll("button[data-s]:not(.mobx)")].map((b)=>b.dataset.s+(b.classList.contains("on")?"*":"")+(b.hidden?"-":"")).join(","):"")+"|"+(nav?nav.querySelectorAll("button.mobx").length+(nav.scrollWidth>nav.clientWidth+1?"!":""):0)+"|"+(document.body.className||"")};
+  const tick=()=>{try{if(sig()!==sigB){bottom();sigB=sig()}}catch(e){}};
   W.addEventListener("resize",()=>{sigB="";tick()});
   document.addEventListener("click",(e)=>{if(!e.target.closest(".mobsheet,#mobmore"))document.querySelectorAll(".mobsheet").forEach((x)=>x.hidden=true)});
   setInterval(tick,600);setTimeout(tick,300);try{document.fonts.ready.then(()=>{sigB="";tick()})}catch(e){}
-  /* iPhone: Leiste nach Zurückkehren, Fenstern und Wechseln neu malen (sonst blieben Menüknöpfe leer, bis man erneut tippte) */
-  const paint=(hard)=>{try{document.querySelectorAll("nav").forEach((n)=>{if(hard){n.style.visibility="hidden";void n.offsetHeight;requestAnimationFrame(()=>{n.style.visibility=""})}else{n.querySelectorAll("button").forEach((b)=>{b.style.opacity=".99"});void n.offsetHeight;requestAnimationFrame(()=>{n.querySelectorAll("button").forEach((b)=>{b.style.opacity=""})})}})}catch(e){}};
-  const rp=()=>{try{sigB="";tick()}catch(e){}paint(true)};
-  const back=()=>{setTimeout(rp,60);setTimeout(rp,700)};
-  /* Beim Start nachmalen (Schrift und Reiter kommen erst nach und nach) */
-  const ap=()=>{if(ph())paint(true)};setTimeout(ap,1000);setTimeout(ap,2500);try{document.fonts.ready.then(ap)}catch(e){}
-  document.addEventListener("visibilitychange",()=>{if(!document.hidden)back()});W.addEventListener("pageshow",back);
-  let pt=0;const soft=()=>{if(!ph())return;clearTimeout(pt);pt=setTimeout(()=>{paint(false);setTimeout(()=>paint(false),450)},120)};
-  document.addEventListener("click",soft,true);document.addEventListener("touchend",soft,{capture:true,passive:true});W.addEventListener("popstate",soft);
-  try{new MutationObserver(soft).observe(document.body,{childList:true})}catch(e){}
-
+  /* Zurück in die App: nur nachsehen, ob sich etwas geändert hat (keine Neumal-Tricks mehr – die ließen die Leiste flackern) */
+  const back=()=>{sigB="";tick()};
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)setTimeout(back,60)});W.addEventListener("pageshow",()=>setTimeout(back,60));
 })();
 </script><script>/* ---------- Kalender-Abgleich: Termine -> eigener Google-Kalender (erscheint in Apple Kalender) ---------- */
 const GC_TZ="Europe/Berlin",GC_API="https://www.googleapis.com/calendar/v3",GC_SCOPE="https://www.googleapis.com/auth/calendar.app.created";
