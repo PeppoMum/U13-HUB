@@ -198,14 +198,14 @@ html[data-design="kobalt"] .btn[style*="background:var(--ac)"]{border-color:var(
 html[data-design="kobalt"] nav{background:#000;border-bottom:1px solid #000}
 html[data-design="kobalt"] nav h1{color:#fff}
 html[data-design="kobalt"] nav button{color:#C9CEDA;font-weight:600}
-html[data-design="kobalt"] nav button:hover{color:#fff}
+@media(hover:hover){html[data-design="kobalt"] nav button:hover{color:#fff}}   /* nur mit Maus: auf dem iPhone blieb der zuletzt angetippte Knopf sonst weiß auf weiß */
 html[data-design="kobalt"] nav button.on{background:#004AAD;color:#fff;font-weight:600}
 @media(prefers-color-scheme:dark){html[data-design="kobalt"]:not([data-theme="light"]) nav{border-bottom-color:var(--ln)}}
 html[data-design="kobalt"][data-theme="dark"] nav{border-bottom-color:var(--ln)}
 html.vclub[data-design="kobalt"] nav{background:var(--card);border:1px solid var(--ln);border-radius:99px;padding:5px}
 html.vclub[data-design="kobalt"] nav h1{color:var(--tx);padding-left:14px}
 html.vclub[data-design="kobalt"] nav button{color:var(--mu)}
-html.vclub[data-design="kobalt"] nav button:hover{color:var(--tx)}
+@media(hover:hover){html.vclub[data-design="kobalt"] nav button:hover{color:var(--tx)}}   /* nur mit Maus: auf dem iPhone blieb der zuletzt angetippte Knopf sonst weiß auf weiß */
 html.vclub[data-design="kobalt"] nav button.on{background:#004AAD;color:#fff}
 @media(max-width:760px){
  html[data-design="kobalt"] nav,html.vclub[data-design="kobalt"] nav{background:var(--card);border:0;border-top:1px solid var(--ln);border-radius:0}
@@ -5233,7 +5233,7 @@ document.addEventListener("change",(e)=>{const t=e.target;if(!L||!t.dataset||!t.
 /* Reparatur: falsch gespeicherter Status „a“ (abwesend) heißt intern „t“ */
 const fx=new Set();window.__fixA=function(){(D.spiele||[]).forEach((g)=>{const sp=g.spieler||{};if(!Object.values(sp).some((s)=>s&&s.status==="a")||fx.has(g.id))return;fx.add(g.id);const n={};Object.keys(sp).forEach((k)=>{n[k]=sp[k]&&sp[k].status==="a"?{...sp[k],status:"t"}:sp[k]});(window.ccQuiet||((f)=>f()))(()=>save("games",g.id,{...g,spieler:n}))})};
 const css=document.createElement("style");
-css.textContent='#lv{position:fixed;inset:0;z-index:200;background:var(--bg);overflow:auto;-webkit-overflow-scrolling:touch}#lv[hidden]{display:none}#lv .lvb{max-width:1000px;margin:0 auto;padding:12px 14px calc(90px + env(safe-area-inset-bottom))}'
+css.textContent='#lv{position:fixed;inset:0;z-index:200;background:var(--bg);overflow:auto;-webkit-overflow-scrolling:touch}#lv[hidden]{display:none}html:has(#lv:not([hidden])) #gd:not([hidden]){z-index:190}#lv .lvb{max-width:1000px;margin:0 auto;padding:12px 14px calc(90px + env(safe-area-inset-bottom))}'
 +'#lv .lvbar{display:flex;align-items:center;gap:10px;position:sticky;top:0;background:var(--bg);padding:6px 0 10px;z-index:3;flex-wrap:wrap}#lv .lvtop{display:flex;gap:18px;align-items:center;flex-wrap:wrap}'
 +'#lv .lvck{display:flex;align-items:center;gap:14px;flex-wrap:wrap}#lv #lvclk{font-size:44px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}#lv .lvcb{display:flex;gap:8px;flex-wrap:wrap}#lv .lvf{display:flex;gap:14px;align-items:center;flex-wrap:wrap}#lv .lvadj{display:flex;gap:6px;align-items:center;flex-wrap:wrap;flex-basis:100%}#lv .lvadj .btn{padding:7px 10px}'
 +'#lv .lvg{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:8px}#lv .lvr{background:var(--card);border:1px solid var(--ln);border-radius:12px;padding:9px 10px;display:flex;flex-direction:column;gap:7px}#lv .lvr.lvx{opacity:.7}#lv .lvr.lvx .lvn{text-decoration:line-through}'
