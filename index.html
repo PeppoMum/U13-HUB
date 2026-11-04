@@ -1856,7 +1856,7 @@ async function hnFrist(n){const Q=window.__pushQ,L=window.__links||{};if(!Q||!wi
   for(const p of an)Q.add("a_"+n.id+"_"+p.id,{art:"afrist",an:[p.id],s:await hnSig(n.id,p.id,L[p.id].key),t,tx:"Deine Aufgabe läuft am "+n.bis.slice(8)+"."+n.bis.slice(5,7)+". ab. Bitte denk daran, sie abzuhaken."})}
 window.__hnFristAlle=()=>hnList().filter((n)=>n.art==="c").forEach(hnFrist);
 /* Einstellungen → Spieler & Eltern: welche Benachrichtigungen an Spieler und Eltern gehen (nur Web-Version, Voreinstellung in videos.js) */
-var PZL={hinweis:"Neue Hinweise und Aufgaben",notiz:"Neue Notizen im Profil",termin:"Abgesagte oder verlegte Termine",afrist:"Erinnerung an Aufgaben mit Abhaken",dienst:"Erinnerung an Dienste (montags 10 Uhr)",clip:"Neue Clips",frist:"Erinnerung an Clips",antwort:"Antworten vom Trainer"};
+var PZL={hinweis:"Neue Hinweise und Aufgaben",notiz:"Neue Notizen im Profil",termin:"Abgesagte oder verlegte Termine",afrist:"Erinnerung an Aufgaben mit Abhaken",dienst:"Erinnerung an Dienste (montags 10 Uhr)",etplan:"Neue Eigentrainingspläne",clip:"Neue Clips",frist:"Erinnerung an Clips",antwort:"Antworten vom Trainer"};
 function renderPz(){const c=$("#pzc");if(!c)return;const an=!!(window.__WEB&&window.__pushOn);c.style.display=an?"":"none";if(!an)return;
   $("#pzl").innerHTML=Object.keys(PZL).map((k)=>'<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-pz="'+k+'"'+(window.__pushOn(k)?" checked":"")+(hnCan()?"":" disabled")+"> "+PZL[k]+"</label>").join("")}
 $("#pzl").addEventListener("change",(e)=>{const i=e.target.closest("[data-pz]");if(!i)return;const P={};Object.keys(PZL).forEach((k)=>{P[k]=window.__pushOn(k)});P[i.dataset.pz]=i.checked;
@@ -2724,7 +2724,7 @@ const msg=(t,bad)=>{const m=document.getElementById(fsec()&&!fsec().hidden?"fbm"
 /* Benachrichtigungen vormerken (verschickt ein Zeitplan bei GitHub, Texte ohne Namen, siehe push/LIESMICH.md). Nur Web-Version. */
 /* Was an Spieler und Eltern geht, stellt der Trainer unter Einstellungen → Spieler & Eltern ein (Termin-Änderungen und Aufgaben-Erinnerung anfangs aus).
    Die Antwort auf einen Clip-Kommentar zählt zu „Antworten vom Trainer“. */
-const PUSH_STD={hinweis:true,notiz:true,termin:false,afrist:false,dienst:true,clip:true,frist:true,antwort:true};
+const PUSH_STD={hinweis:true,notiz:true,termin:false,afrist:false,dienst:true,etplan:true,clip:true,frist:true,antwort:true};
 const pushOn=(k)=>{const c=(D.config&&D.config.push)||{};return k in c?!!c[k]:!!PUSH_STD[k]};window.__pushOn=pushOn;window.__PUSH_STD=PUSH_STD;
 const pushQ=(id,o)=>{const g=o.art==="kom"||o.art==="aufant"?"antwort":o.art;if(g in PUSH_STD&&!pushOn(g))return;if(window.__WEB&&db)db.doc("pushq/"+id).set({t:Date.now(),...o}).catch(()=>{})};
 const pushQdel=(id)=>{if(window.__WEB&&db)db.doc("pushq/"+id).delete().catch(()=>{})};
@@ -3350,7 +3350,7 @@ async function zSave(){
   if(f.von<s0||f.bis>e0){note("Der Zeitraum muss in der Saison liegen ("+dmy(s0)+" bis "+dmy(e0)+").",true);return}
   if(!f.tage.length){note("Bitte mindestens einen Wunschtag ankreuzen.",true);return}
   try{for(const pid of f.pids){const id=f.id||nid("z"),old=ET.zu.find((z)=>z.id===id);
-      await save("etzu",id,{pid,plan:f.plan,st:f.st||0,von:f.von,bis:f.bis,tage:f.tage.slice().sort(),ab:old&&old.plan===f.plan?old.ab||null:null,am:new Date().toISOString()})}
+      await save("etzu",id,{pid,plan:f.plan,st:f.st||0,von:f.von,bis:f.bis,tage:f.tage.slice().sort(),ab:old&&old.plan===f.plan?old.ab||null:null,am:new Date().toISOString(),...(old&&old.plan===f.plan&&old.pn?{pn:1}:{})})}
     note(f.id?"Freigabe gespeichert.":f.pids.length===1?"Plan für "+pName(f.pids[0])+" freigegeben.":"Plan für "+f.pids.length+" Spieler freigegeben.");UI.zf=null;pubSoon()}
   catch(e){note("Das hat nicht geklappt.",true)}
   UI.force=true;render()}
@@ -3405,11 +3405,17 @@ function profCard(){
     return'<div class="row"><span><b>'+E(p.titel)+"</b>"+(n>1?" · "+E(stName(p,Math.min(+z.st||0,n-1)))+" von "+n:"")+'<br><span class="note">'+E(tageTxt(z.tage))+" · bis "+E(dmy(z.bis))+(nx?" · Nächstes Mal: "+E(dsh(nx)):"")+"</span></span></div>"}).join("")+'<div class="bar" style="margin:8px 0 0"><button class="btn" data-etgo>Zum Eigentraining</button></div>';
   const host=pn.closest(".card")||pn;host.insertAdjacentElement("beforebegin",c)}
 
+/* Benachrichtigung „Neuer Trainingsplan für dich“: einmal je Freigabe (neu oder anderer Plan), Merker pn in der Freigabe.
+   Auch für Freigaben der letzten 2 Tage, die vor dieser Funktion entstanden sind. Kommt 2 Minuten später, damit der Link schon neu veröffentlicht ist. */
+function etPush(){const Q=window.__pushQ;if(!window.__WEB||!Q||ET.pushBusy)return;const t=tdy(),jung=Date.now()-2*864e5;
+  const L=ET.zu.filter((z)=>!z.pn&&z.pid&&(!z.bis||z.bis>=t)&&Date.parse(z.am||"")>jung&&ET.plans.some((p)=>p.id===z.plan));if(!L.length)return;ET.pushBusy=true;
+  (async()=>{for(const z of L){try{await save("etzu",z.id,{...strip(z),pn:1});Q.add("e_"+z.id,{art:"etplan",an:[z.pid],t:Date.now()+2*6e4})}catch(e){}}ET.pushBusy=false})()}
+
 /* --- Start (Trainer) --- */
 function startTrainer(){
   if(ET.started||typeof db==="undefined"||!db||window.__VIEWER||window.__SCOUT||window.__ROLE==="scout")return;ET.started=true;css();seg();
-  db.collection("etplan").onSnapshot((s)=>{ET.plans=s.docs.map((d)=>({id:d.id,...d.data()}));ET.gotP=true;ET.refresh()},()=>{ET.gotP=true});
-  db.collection("etzu").onSnapshot((s)=>{ET.zu=s.docs.map((d)=>({id:d.id,...d.data()}));ET.gotZ=true;ET.refresh()},()=>{ET.gotZ=true});
+  db.collection("etplan").onSnapshot((s)=>{ET.plans=s.docs.map((d)=>({id:d.id,...d.data()}));ET.gotP=true;ET.refresh();etPush()},()=>{ET.gotP=true});
+  db.collection("etzu").onSnapshot((s)=>{ET.zu=s.docs.map((d)=>({id:d.id,...d.data()}));ET.gotZ=true;ET.refresh();etPush()},()=>{ET.gotZ=true});
   if(typeof renderStart==="function"){const o=renderStart;renderStart=function(){const r=o.apply(this,arguments);try{startRows()}catch(e){}return r}}
   if(typeof renderProfile==="function"){const o=renderProfile;renderProfile=function(){const r=o.apply(this,arguments);try{profCard()}catch(e){}return r}}
   ET.refresh();

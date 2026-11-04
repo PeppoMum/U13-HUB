@@ -21,6 +21,7 @@ const TX = {
   termin: { t: "Termin geändert", b: "Ein Termin wurde abgesagt oder verlegt. Schau in den Terminplan.", u: "./?link" },
   afrist: { t: "Erinnerung: Aufgabe", b: "Bitte denk an deine Aufgabe in der App.", u: "./?link" },
   dienst: { t: "Dein Dienst diese Woche", b: "Schau in die App.", u: "./?link" },
+  etplan: { t: "Neuer Trainingsplan für dich", b: "Dein Trainer hat dir einen Eigentrainingsplan gegeben. Schau in die App.", u: "./?link" },
   aantw: { t: "Antwort auf eine Aufgabe", b: "Ein Spieler hat auf eine Aufgabe geantwortet.", u: "./" },
   skom: { t: "Neuer Clip-Kommentar", b: "Ein Spieler hat einen Clip kommentiert.", u: "./" },
   kanfr: { t: "Neue Konto-Anfrage", b: "Bitte in der App freigeben oder ablehnen.", u: "./" },
@@ -37,6 +38,8 @@ export function passt(q, s) {
   if (q.art === "hinweis") return s.ro !== "t" && !(q.a && s.ro === "e") && (!Array.isArray(q.an) || (!!s.pid && q.an.includes(s.pid)));   /* Hinweis an einzelne Spieler: nur deren Geräte */
   /* Dienst der Woche: fuer "s" an Spieler (und Geräte ohne gewählte Rolle), "e" nur an Eltern – jeweils nur Geräte des eingeteilten Spielers */
   if (q.art === "dienst") return s.ro !== "t" && !!s.pid && Array.isArray(q.an) && q.an.includes(s.pid) && (q.fuer === "e" ? s.ro === "e" : s.ro !== "e");
+  /* neuer Eigentrainingsplan: nur Spieler (und Geräte ohne gewählte Rolle) des freigegebenen Spielers */
+  if (q.art === "etplan") return s.ro !== "t" && s.ro !== "e" && !!s.pid && Array.isArray(q.an) && q.an.includes(s.pid);
   if (q.art === "antwort") return !!q.r && s.r === q.r && s.ro !== "t";
   if (q.art === "clip" || q.art === "frist" || q.art === "kom" || q.art === "aufant") return s.ro !== "t" && s.ro !== "e" && !!s.pid && (q.an === "alle" || (Array.isArray(q.an) && q.an.includes(s.pid)));
   return false;
