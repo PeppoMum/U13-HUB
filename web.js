@@ -128,7 +128,7 @@ const SHARED=(()=>{try{return localStorage.getItem("u13shared")==="1"}catch(e){r
 async function wipeLocal(){
   try{await fs.terminate()}catch(e){}
   try{await fs.clearPersistence()}catch(e){}
-  try{Object.keys(localStorage).filter((k)=>/^(u13v:|u13rolle$|u13role$|u13kz\.|u13wer\.|u13kpid$|u13ktok$)/.test(k)).forEach((k)=>localStorage.removeItem(k))}catch(e){}
+  try{Object.keys(localStorage).filter((k)=>/^(u13v:|u13rolle$|u13role$|u13kz\.|u13wer\.|u13kpid$|u13kplanr$|u13ktok$)/.test(k)).forEach((k)=>localStorage.removeItem(k))}catch(e){}
 }
 async function signOutClean(){try{await auth.signOut()}catch(e){}await wipeLocal();location.reload()}
 
@@ -185,11 +185,13 @@ const needsVerify=(u)=>u&&!u.emailVerified&&(u.providerData||[]).every((p)=>p&&p
 function firstUser(){return new Promise((res)=>{const un=auth.onAuthStateChanged((u)=>{un();res(u)})})}
 
 /* ---------- Datenbank-Hülle: gleiche Aufrufe wie in der Artifact-Umgebung ---------- */
-const noWrite=()=>window.__ROLE==="lesen"?Promise.reject({code:"permission-denied"}):null;
+const noWrite=()=>window.__ROLE==="lesen"||(window.__KPLAN&&!window.__KPLAN.edit)?Promise.reject({code:"permission-denied"}):null;
 function docW(ref){return{get:()=>ref.get(),set:(d)=>noWrite()||ref.set(clean(d)),update:(d)=>noWrite()||ref.update(clean(d)),delete:()=>noWrite()||ref.delete(),onSnapshot:(a,b)=>ref.onSnapshot(a,b),collection:(n)=>colW(ref.collection(n))}}
-function colW(ref){return{get:()=>ref.get(),onSnapshot:(a,b)=>ref.onSnapshot(a,b),doc:(id)=>docW(ref.doc(id)),where:(f,o,v)=>({get:()=>ref.where(f,o,v).get()})}}
+function colW(ref){return{get:()=>ref.get(),onSnapshot:(a,b)=>ref.onSnapshot(a,b),doc:(id)=>docW(ref.doc(id)),where:(f,o,v)=>({get:()=>ref.where(f,o,v).get(),onSnapshot:(a,b)=>ref.where(f,o,v).onSnapshot(a,b)})}}
 const wrap=()=>({collection:(n)=>colW(fs.collection(n)),doc:(p)=>docW(fs.doc(p))});
 
+/* Zugang nur zu einer Kaderplanung: die Person darf die Einstellungen nicht lesen, nur ihren eigenen Eintrag in der Zugangsliste */
+async function kplanRole(u){try{const me=await fs.doc("trainer/"+String((u&&u.email)||"").toLowerCase()).get();return!!(me.exists&&/^plan(lesen|bearb)$/.test((me.data()||{}).rolle||""))}catch(e){return false}}
 async function start(){
   if(!cfgOk()){showSetup();return new Promise(()=>{})}
   try{
@@ -206,7 +208,7 @@ async function start(){
     const c=await fs.doc("config/main").get();
     if(!c.exists){await fs.doc("config/main").set({saison:"2026/27"})}
   }catch(e){
-    if(e&&/permission|denied|insufficient/i.test(String(e.code)+" "+String(e.message))){
+    if(e&&/permission|denied|insufficient/i.test(String(e.code)+" "+String(e.message))&&!(await kplanRole(u))){
       /* Kein Trainer: hat die Person ein Konto für Spieler/Eltern (verknüpft oder Anfrage offen), geht es zu ihrer Ansicht */
       if(await kontoHas()){location.replace(location.pathname+location.search+"#konto");setTimeout(()=>location.reload(),50);return new Promise(()=>{})}
       showDenied(u&&u.email);return new Promise(()=>{})}
@@ -225,17 +227,19 @@ async function afterLogin(){
   try{await fs.doc("ownercheck/x").get();owner=true}catch(e){if(denied(e))owner=false}
   try{if(owner===null)owner=localStorage.getItem("u13role")==="owner";else if(!SHARED)localStorage.setItem("u13role",owner?"owner":"co")}catch(e){if(owner===null)owner=false}
   window.__webOwner=owner;
-  let role="voll";
+  let role="voll",kpid="";
   if(!owner){
-    try{const em=((auth.currentUser&&auth.currentUser.email)||"").toLowerCase(),me=await fs.doc("trainer/"+em).get();role=(me.exists&&me.data()&&me.data().rolle)||"voll";if(!SHARED)try{localStorage.setItem("u13rolle",role)}catch(e){}}
-    catch(e){try{role=localStorage.getItem("u13rolle")||"lesen"}catch(x){role="lesen"}}
+    try{const em=((auth.currentUser&&auth.currentUser.email)||"").toLowerCase(),me=await fs.doc("trainer/"+em).get();role=(me.exists&&me.data()&&me.data().rolle)||"voll";kpid=(me.exists&&me.data()&&me.data().plan)||"";if(!SHARED)try{localStorage.setItem("u13rolle",role);localStorage.setItem("u13kplanr",kpid)}catch(e){}}
+    catch(e){try{role=localStorage.getItem("u13rolle")||"lesen";kpid=localStorage.getItem("u13kplanr")||""}catch(x){role="lesen"}}
+    /* Nur eine Kaderplanung: in der App wie „Nur Scouting“ (nur der Kader), dazu welche Planung und ob bearbeitet werden darf */
+    if(role==="planlesen"||role==="planbearb"){window.__KPLAN={id:kpid,edit:role==="planbearb"};role="scout"}
   }
   window.__ROLE=owner?"voll":role;window.__ACCT=(((auth.currentUser&&auth.currentUser.email)||"")+"").toLowerCase().replace(/[^a-z0-9@._-]/g,"_")||"main";
   if(!owner)document.body.classList.add("co");
   instCard();
   if(window.__ROLE!=="scout")pushCard();
   if(window.__ROLE==="scout"){document.body.classList.add("scoutonly");const o=document.getElementById("u13out"),t=document.querySelector(".top .note");if(o&&t)t.appendChild(o)}   /* Scouts sehen keine Einstellungen: Abmelden bleibt oben */
-  if(window.__ROLE==="lesen"||window.__ROLE==="scout"){const t=document.querySelector(".top .note");if(t){const sp=document.createElement("span");sp.style.marginLeft="8px";sp.textContent=window.__ROLE==="lesen"?"· Nur Ansicht":"· Scouting-Zugang";t.appendChild(sp)}}
+  if(window.__ROLE==="lesen"||window.__ROLE==="scout"){const t=document.querySelector(".top .note");if(t){const sp=document.createElement("span");sp.style.marginLeft="8px";sp.textContent=window.__ROLE==="lesen"?"· Nur Ansicht":window.__KPLAN?(window.__KPLAN.edit?"· Nur Kaderplanung":"· Nur Kaderplanung (ansehen)"):"· Scouting-Zugang";t.appendChild(sp)}}
   if(window.__ROLE==="scout"){window.__scoutLink=()=>"(nur für Trainer sichtbar)";return}
   if(window.__ROLE==="lesen"){try{const r=await fs.doc("config/scout").get();scoutKey=(r.exists&&r.data()&&r.data().k)||""}catch(e){}window.__scoutLink=()=>scoutKey?window.__WEB_BASE+"#scout."+scoutKey:"(nicht verfügbar)";return}
   try{const r=await fs.doc("config/scout").get();let k=r.exists&&r.data()&&r.data().k;if(!k){k=rndKey();await fs.doc("config/scout").set({k})}scoutKey=k}catch(e){}
@@ -334,10 +338,10 @@ const pushApi={
 };
 /* Wofür dieses Gerät Bescheid bekommt: abgewählte Arten stehen im Feld x der Anmeldung (durch Komma getrennt, siehe push/senden.mjs).
    Spieler/Eltern sehen nur, was der Trainer für die Mannschaft eingeschaltet hat (pz im Link), Clips nur Spieler. */
-const PW={hinweis:"Neue Hinweise und Aufgaben",notiz:"Neue Notizen im Profil",termin:"Abgesagte oder verlegte Termine",afrist:"Erinnerung an Aufgaben",dienst:"Erinnerung an Dienste (montags)",clip:"Neue Clips",frist:"Erinnerung an Clips",antwort:"Antworten vom Trainer",
+const PW={hinweis:"Neue Hinweise und Aufgaben",notiz:"Neue Notizen im Profil",termin:"Abgesagte oder verlegte Termine",afrist:"Erinnerung an Aufgaben",dienst:"Erinnerung an Dienste (montags)",etplan:"Neue Eigentrainingspläne",clip:"Neue Clips",frist:"Erinnerung an Clips",antwort:"Antworten vom Trainer",
   fb:"Nachrichten von Spielern und Eltern",aantw:"Antworten auf Aufgaben",skom:"Clip-Kommentare von Spielern",kanfr:"Neue Konto-Anfragen"};
 const pwAus=()=>(pls.get("u13pushw")||"").split(",").filter((k)=>k in PW);
-function pwHtml(c){const A=pwAus(),L=c.ro==="t"?["fb","aantw","skom","kanfr"]:String(c.pz!=null?c.pz:"hinweis,notiz,clip,frist,antwort").split(",").filter((k)=>k in PW&&!(c.ro==="e"&&(k==="clip"||k==="frist")));
+function pwHtml(c){const A=pwAus(),L=c.ro==="t"?["fb","aantw","skom","kanfr"]:String(c.pz!=null?c.pz:"hinweis,notiz,clip,frist,antwort").split(",").filter((k)=>k in PW&&!(c.ro==="e"&&(k==="clip"||k==="frist"||k==="etplan")));
   return L.length?'<div class="pwl" style="display:flex;flex-direction:column;gap:6px;margin:10px 0 0">'+L.map((k)=>'<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-pw="'+k+'"'+(A.includes(k)?"":" checked")+"> "+PW[k]+"</label>").join("")+"</div>":""}
 document.addEventListener("change",(e)=>{const i=e.target.closest&&e.target.closest("input[data-pw]");if(!i)return;const A=new Set(pwAus());if(i.checked)A.delete(i.dataset.pw);else A.add(i.dataset.pw);pls.set("u13pushw",[...A].join(",")||null);
   const c=i.closest("#u13pushc")?{k:(window.__vid&&window.__vid.fbKey)||"",ro:"t"}:window.__pushCtx&&window.__pushCtx();if(c&&c.k)pushApi.sync(c)});
@@ -396,24 +400,33 @@ function pushCard(){
   const syn=()=>{if(!key()){setTimeout(syn,1500);return}pushApi.sync({k:key(),ro:"t"}).then(()=>{const c=document.getElementById("u13pushc");if(c)c.dataset.st="";put()})};if(PUSH_OK())syn();
 }
 let instEv=null;   /* Installations-Angebot des Browsers (Chrome/Edge/Android), siehe unten */
+/* Zugang zu genau einer Kaderplanung: Auswahl „pl:<Planung>:l“ (ansehen) oder „pl:<Planung>:b“ (bearbeiten) */
+const accPlans=()=>{const K=window.__kader;return(K&&K.KD&&K.KD.plans)||[]};
+const accVal=(r,p)=>r==="planlesen"||r==="planbearb"?"pl:"+p+":"+(r==="planbearb"?"b":"l"):r;
+function accOpt(v){const o=[["voll","Voller Zugriff"],["lesen","Nur lesen"],["scout","Nur Scouting"]];
+  accPlans().forEach((p)=>{const n=p.name||((p.stufe||"")+" "+(p.saison||""));o.push(["pl:"+p.id+":l","Nur Planung „"+n+"“ ansehen"],["pl:"+p.id+":b","Nur Planung „"+n+"“ bearbeiten"])});
+  if(!o.some((x)=>x[0]===v))o.push([v,/^pl:/.test(v)?"Nur eine Planung (gelöscht oder im Archiv)":v]);
+  return o.map((x)=>'<option value="'+E(x[0])+'"'+(x[0]===v?" selected":"")+">"+E(x[1])+"</option>").join("")}
+const accDoc=(mail,v)=>{const m=/^pl:(.+):([lb])$/.exec(v),d={email:mail,rolle:v,am:new Date().toISOString()};if(m){d.rolle=m[2]==="b"?"planbearb":"planlesen";d.plan=m[1]}return d};
+document.addEventListener("u13kplans",()=>{document.querySelectorAll("#u13accr,[data-acr]").forEach((s)=>{s.innerHTML=accOpt(s.value)})});
 function cards(){
   const put=()=>{
     const m=document.getElementById("etp-m"),sv=document.getElementById("etp-s");if(!m||!sv){setTimeout(put,500);return}
     if(!document.getElementById("u13acc")){
       const c=document.createElement("div");c.className="card";c.id="u13acc";
-      c.innerHTML='<h3>Zugang zur App</h3><p class="note" style="margin-top:0">Wer die App nach der Anmeldung (Google oder E-Mail) öffnen darf. Du und Mathis sind fest eingetragen. Weitere Personen trägst du hier ein. Sie müssen sich mit genau dieser E-Mail-Adresse anmelden und sehen die Mannschafts- und Sicherungs-Einstellungen nicht.</p><p class="note"><b>Voller Zugriff:</b> sehen und ändern wie ein Co-Trainer. <b>Nur lesen:</b> alles ansehen, nichts ändern. <b>Nur Scouting:</b> sieht und bearbeitet nur den Kader (Beobachtungen, Eingang, Spieler), nicht die Mannschaft.</p><div id="u13accl"></div><div class="bar" style="margin:8px 0 0"><input id="u13acce" type="email" placeholder="E-Mail-Adresse" autocomplete="off" style="flex:1;min-width:200px"><select id="u13accr" aria-label="Zugriff"><option value="voll">Voller Zugriff</option><option value="lesen">Nur lesen</option><option value="scout">Nur Scouting</option></select><button class="btn" id="u13acca">Hinzufügen</button></div><div class="note" id="u13accm"></div>';
+      c.innerHTML='<h3>Zugang zur App</h3><p class="note" style="margin-top:0">Wer die App nach der Anmeldung (Google oder E-Mail) öffnen darf. Du und Mathis sind fest eingetragen. Weitere Personen trägst du hier ein. Sie müssen sich mit genau dieser E-Mail-Adresse anmelden und sehen die Mannschafts- und Sicherungs-Einstellungen nicht.</p><p class="note"><b>Voller Zugriff:</b> sehen und ändern wie ein Co-Trainer. <b>Nur lesen:</b> alles ansehen, nichts ändern. <b>Nur Scouting:</b> sieht und bearbeitet nur den Kader (Beobachtungen, Eingang, Spieler), nicht die Mannschaft. <b>Nur Planung … ansehen / bearbeiten:</b> sieht nur diese eine Kaderplanung mit ihren Spielern (auch Beobachtungen und Notizen), sonst nichts.</p><div id="u13accl"></div><div class="bar" style="margin:8px 0 0"><input id="u13acce" type="email" placeholder="E-Mail-Adresse" autocomplete="off" style="flex:1;min-width:200px"><select id="u13accr" aria-label="Zugriff">'+accOpt("voll")+'</select><button class="btn" id="u13acca">Hinzufügen</button></div><div class="note" id="u13accm"></div>';
       {const sa=document.getElementById("esa"),k=sa&&sa.closest(".card");if(k&&k.parentNode===m)k.insertAdjacentElement("afterend",c);else m.appendChild(c)}
       const L=c.querySelector("#u13accl"),M=c.querySelector("#u13accm");
-      fs.collection("trainer").onSnapshot((q)=>{const rows=q.docs.map((d)=>({id:d.id,r:(d.data()&&d.data().rolle)||"voll"})).sort((a,b)=>a.id<b.id?-1:1);
-        L.innerHTML=rows.length?rows.map((x)=>'<div class="bar" style="margin:4px 0"><span style="flex:1;min-width:0;overflow-wrap:anywhere">'+E(x.id)+'</span><select data-acr="'+E(x.id)+'" aria-label="Zugriff"><option value="voll"'+(x.r==="voll"?" selected":"")+'>Voller Zugriff</option><option value="lesen"'+(x.r==="lesen"?" selected":"")+'>Nur lesen</option><option value="scout"'+(x.r==="scout"?" selected":"")+'>Nur Scouting</option></select><button class="btn" data-acd="'+E(x.id)+'">Entfernen</button></div>').join(""):'<div class="note">Noch keine weiteren Personen.</div>'},()=>{L.innerHTML='<div class="note">Liste konnte nicht geladen werden.</div>'});
+      fs.collection("trainer").onSnapshot((q)=>{const rows=q.docs.map((d)=>({id:d.id,r:(d.data()&&d.data().rolle)||"voll",p:(d.data()&&d.data().plan)||""})).sort((a,b)=>a.id<b.id?-1:1);
+        L.innerHTML=rows.length?rows.map((x)=>'<div class="bar" style="margin:4px 0"><span style="flex:1;min-width:0;overflow-wrap:anywhere">'+E(x.id)+'</span><select data-acr="'+E(x.id)+'" aria-label="Zugriff">'+accOpt(accVal(x.r,x.p))+'</select><button class="btn" data-acd="'+E(x.id)+'">Entfernen</button></div>').join(""):'<div class="note">Noch keine weiteren Personen.</div>'},()=>{L.innerHTML='<div class="note">Liste konnte nicht geladen werden.</div>'});
       c.addEventListener("change",async(ev)=>{const r=ev.target.closest&&ev.target.closest("[data-acr]");if(!r)return;
-        try{await fs.doc("trainer/"+r.dataset.acr).set({email:r.dataset.acr,rolle:r.value,am:new Date().toISOString()});M.className="note";M.textContent="Zugriff geändert. Gilt beim nächsten Öffnen der App durch die Person."}catch(e){M.className="note warn";M.textContent="Das konnte nicht gespeichert werden (nur der Besitzer darf das)."}});
+        try{await fs.doc("trainer/"+r.dataset.acr).set(accDoc(r.dataset.acr,r.value));M.className="note";M.textContent="Zugriff geändert. Gilt beim nächsten Öffnen der App durch die Person."}catch(e){M.className="note warn";M.textContent="Das konnte nicht gespeichert werden (nur der Besitzer darf das)."}});
       c.addEventListener("click",async(ev)=>{
         const d=ev.target.closest("[data-acd]");
         if(d){if(!d.dataset.arm){d.dataset.arm="1";d.textContent="Wirklich entfernen?";return}try{await fs.doc("trainer/"+d.dataset.acd).delete();M.className="note";M.textContent="Entfernt. Die Person kommt ab sofort nicht mehr hinein."}catch(e){M.className="note warn";M.textContent="Das konnte nicht gespeichert werden (nur der Besitzer darf das)."}return}
         if(ev.target.id==="u13acca"){const i=c.querySelector("#u13acce"),mail=i.value.trim().toLowerCase();
           if(!/^[^\s@\/]+@[^\s@\/]+\.[^\s@\/]+$/.test(mail)){M.className="note warn";M.textContent="Bitte eine gültige E-Mail-Adresse eintragen.";return}
-          try{await fs.doc("trainer/"+mail).set({email:mail,rolle:c.querySelector("#u13accr").value,am:new Date().toISOString()});i.value="";M.className="note";M.textContent="Hinzugefügt. Die Person kann sich jetzt anmelden."}catch(e){M.className="note warn";M.textContent="Das konnte nicht gespeichert werden (nur der Besitzer darf das)."}}});
+          try{await fs.doc("trainer/"+mail).set(accDoc(mail,c.querySelector("#u13accr").value));i.value="";M.className="note";M.textContent="Hinzugefügt. Die Person kann sich jetzt anmelden."}catch(e){M.className="note warn";M.textContent="Das konnte nicht gespeichert werden (nur der Besitzer darf das)."}}});
     }
     if(!document.getElementById("u13upd")){
       const c=document.createElement("div");c.className="card";c.id="u13upd";
