@@ -991,7 +991,7 @@ function renderTrain(){
   const cols=foc.map((t)=>({t,f:1})).concat(ts.map((t)=>({t}))),sepI=foc.length&&ts.length?foc.length:-1,bl=(i)=>i===sepI?' style="border-left:3px solid var(--mu)"':"";
   const zl0=(D.config&&D.config.zaehlendeAbwesenheiten)||{e:true,u:true,v:false,t:false},QS=P.map((p)=>U13.trainStats(p.id,ts,zl0,cm)),pl=(v,c)=>'<span class="pl'+(c?" p"+c:"")+'">'+pc(v)+"</span>";
   let h='<tr><th>#</th><th style="text-align:left">Spieler</th>'+cols.map((c,i)=>{const t=c.t;return "<th"+bl(i)+">"+(c.f?'<span style="color:var(--ac);font-weight:700">'+(t.datum<td0?"vorher":"nächstes")+"</span><br>":"")+wd(t.datum)+"<br>"+t.datum.slice(8)+"."+t.datum.slice(5,7)+'.<br><button class="rm" data-bwopen="'+t.id+'" title="Training bewerten" aria-label="Training bewerten">'+(typeof bwRated==="function"&&bwRated(t.id)?"★":"☆")+'</button><button class="rm'+(armed===t.id?" arm":"")+'" data-del="'+t.id+'" title="Training löschen">'+(armed===t.id?"Löschen?":"✕")+"</button></th>"}).join("")+'<th>Teilgen.</th><th title="Teilnahmequote gewichtet in diesem Monat">Quote gew.</th><th title="Teilnahmequote absolut in diesem Monat">Quote abs.</th></tr>';
-  h+=P.map((p,i)=>{const st=ts.map((t)=>(t.spieler||{})[p.id]||""),st2=cols.map((c)=>(c.t.spieler||{})[p.id]||""),q=QS[i];return"<tr><td>"+esc(p.nr||"")+"</td><td>"+esc(nm(p))+"</td>"+st2.map((c,j)=>'<td'+bl(j)+'><button class="s '+(c||"o")+'" data-t="'+cols[j].t.id+'" data-p="'+p.id+'" aria-label="'+nm(p)+", "+cols[j].t.datum+'">'+(c==="K"?"k":c||"·")+"</button></td>").join("")+"<td>"+q.x+"/"+q.einheiten+"</td><td>"+pl(q.gewichtet,U13.farbeTraining(q.gewichtet))+"</td><td>"+pl(q.abs,0)+"</td></tr>"}).join("");
+  h+=P.map((p,i)=>{const st=ts.map((t)=>(t.spieler||{})[p.id]||""),st2=cols.map((c)=>(c.t.spieler||{})[p.id]||""),q=QS[i];return"<tr><td>"+esc(p.nr||"")+"</td><td>"+(window.__RO?esc(nm(p)):'<button type="button" class="lxn" data-lxp="'+p.id+'">'+esc(nm(p))+"</button>")+"</td>"+st2.map((c,j)=>'<td'+bl(j)+'><button class="s '+(c||"o")+'" data-t="'+cols[j].t.id+'" data-p="'+p.id+'" aria-label="'+nm(p)+", "+cols[j].t.datum+'">'+(c==="K"?"k":c||"·")+"</button></td>").join("")+"<td>"+q.x+"/"+q.einheiten+"</td><td>"+pl(q.gewichtet,U13.farbeTraining(q.gewichtet))+"</td><td>"+pl(q.abs,0)+"</td></tr>"}).join("");
   const av=(f)=>{const v=QS.map(f).filter((x)=>x!=null);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null},cnt=cols.map((cc)=>{const t=cc.t,a=anw(P,t);return[a.c,a.tot,a.f+"+"+a.g,a.k]});
   h+='<tr style="font-weight:600"><td></td><td>Anwesend</td>'+cnt.map((c,i)=>'<td style="text-align:center;white-space:nowrap'+(i===sepI?';border-left:3px solid var(--mu)':'')+'">'+'<span style="display:block;text-align:center">'+c[2]+"/"+c[1]+'</span><span style="display:block;height:1px;width:60%;margin:3px auto;background:var(--mu);opacity:.45"></span><span style="display:block;text-align:center">'+c[0]+"/"+c[1]+"</span></td>").join("")+'<td></td><td>Ø '+pc(av((q)=>q.gewichtet))+"</td><td>Ø "+pc(av((q)=>q.abs))+'</td></tr><tr><td></td><td class="note" style="font-weight:400">Quote</td>'+cnt.map((c,i)=>'<td style="text-align:center'+(i===sepI?';border-left:3px solid var(--mu)':'')+'" class="note">'+(c[1]?Math.round(c[0]/c[1]*100)+" %":"–")+"</td>").join("")+"<td></td><td></td><td></td></tr>";
   const scW=$("#tg").closest(".tw"),scX=scW?scW.scrollLeft:0,scY=window.scrollY;
@@ -1018,7 +1018,7 @@ function trList(cols,P,ts){
   const a=anw(P,cur);
   let h='<div class="tlhd"><div class="seg tlseg" role="group" aria-label="Darstellung"><button type="button" data-tltab="1"'+(tlTab?' class="on"':"")+'>Tabelle</button><button type="button" data-tltab="0"'+(tlTab?"":' class="on"')+'>Liste</button></div><button type="button" class="btn lgq" data-lgq="l1" aria-label="Legende" aria-expanded="false">?</button></div>';
   if(!tlTab)h+='<div class="card tlist"><div class="tlh"><select id="tls" aria-label="Training wählen">'+list.map((t)=>'<option value="'+t.id+'"'+(t.id===cur.id?" selected":"")+">"+fd(t)+(t.datum===td0?" (heute)":t.datum>td0?" (kommt)":"")+"</option>").join("")+'</select><span class="note">'+(a.tot?a.c+" von "+a.tot+" dabei":"noch keine Angaben")+'</span></div>'
-    +P.map((p)=>{const c=(cur.spieler||{})[p.id]||"";return'<div class="tlr"><span class="tln">'+esc(p.nr||"")+'</span><span class="tlm">'+esc(nm(p))+'</span><button class="s '+(c||"o")+'" data-t="'+cur.id+'" data-p="'+p.id+'" aria-label="'+esc(nm(p))+", "+cur.datum+'">'+(c==="K"?"k":c||"·")+"</button></div>"}).join("")+"</div>";
+    +P.map((p)=>{const c=(cur.spieler||{})[p.id]||"";return'<div class="tlr"><span class="tln">'+esc(p.nr||"")+'</span><span class="tlm">'+(window.__RO?esc(nm(p)):'<button type="button" class="lxn" data-lxp="'+p.id+'">'+esc(nm(p))+"</button>")+'</span><button class="s '+(c||"o")+'" data-t="'+cur.id+'" data-p="'+p.id+'" aria-label="'+esc(nm(p))+", "+cur.datum+'">'+(c==="K"?"k":c||"·")+"</button></div>"}).join("")+"</div>";
   L.innerHTML=h;
 }
 $("#ms").onchange=(e)=>{cm=e.target.value;armed=null;renderTrain()};
@@ -4882,6 +4882,82 @@ document.addEventListener("click",(e)=>{const t=e.target.closest&&e.target.close
   +".tp-k{display:flex;align-items:center;gap:10px;padding:8px 10px 8px 14px;border-radius:12px;font:inherit;font-size:15px;font-weight:600;text-align:left;border:1px solid;background:transparent;color:var(--tx);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}"
   +".tp-kn{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tp-k .s{flex:none;width:26px;height:26px;line-height:26px;font-size:13px;cursor:inherit}"
   +"#hg [data-tp]{cursor:pointer}#hg [data-tp]:hover{background:var(--grs)}";document.head.appendChild(st)}
+</script><script>/* ---------- Lange Ausfälle: im Training auf den Namen tippen, Zeitraum einmal eintragen ----------
+   Gespeichert in config/main.ausfaelle[pid] = {g, von, bis} (g = Trainings-Status v/e/t). Die Config geht nicht in Spielerlinks.
+   Eintragen setzt alle Trainings und Spiele im Zeitraum (Spiel: v bleibt v, e/t wird „abwesend“ t). Später angelegte Trainings/Spiele im Zeitraum bekommen den Status automatisch.
+   „Ab heute wieder dabei“: ab heute Trainings wieder x, Spiele wieder im Kader (bzw. ohne Eintrag, wenn noch kein Kader steht). Vergangenes bleibt. */
+const LX_G={v:"Verletzt",e:"Entschuldigt",t:"Terminlich verhindert"},LX_SP={v:"v",e:"t",t:"t"};
+let lxCur=null;
+const lxAll=()=>(D.config&&D.config.ausfaelle)||{};
+const lxRec=(pid)=>{const r=lxAll()[pid];return r&&r.bis>=today()?r:null};
+const lxAdd=(iso,n)=>{const d=new Date(iso+"T12:00:00");d.setDate(d.getDate()+n);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+const lxD=(iso)=>iso.slice(8)+"."+iso.slice(5,7)+".";
+const lxIn=(x,von,bis)=>x.datum>=von&&x.datum<=bis;
+const lxHits=(von,bis)=>({T:D.trainings.filter((t)=>lxIn(t,von,bis)),G:D.spiele.filter((g)=>lxIn(g,von,bis))});
+function lxSaveCfg(pid,rec){const a={...lxAll()},td=today();Object.keys(a).forEach((k)=>{if(!a[k]||a[k].bis<td)delete a[k]});if(rec)a[pid]=rec;else delete a[pid];
+  const c={...(D.config||{}),ausfaelle:a};D.config=c;save("config","main",c)}
+function lxSetT(t,pid,st){const sp={...(t.spieler||{})};if(sp[pid]===st)return;sp[pid]=st;const o={...t,spieler:sp};qApply("trainings",t.id,o,true);save("trainings",t.id,o)}
+function lxSetG(g,pid,st){const sp={...(g.spieler||{})},old=sp[pid]||{};
+  if(st==="k"){const o={status:"k",minuten:old.mk||0};if(old.fit!=null)o.fit=old.fit;sp[pid]=o}
+  else if(st){if(old.status===st)return;const o={status:st,minuten:0},mk=old.status==="k"?old.minuten:old.mk;if(mk)o.mk=mk;sp[pid]=o}
+  else{if(!sp[pid])return;delete sp[pid]}
+  g.spieler=sp;save("games",g.id,{...g,spieler:sp})}
+function lxApply(pid,rec){const h=lxHits(rec.von,rec.bis);h.T.forEach((t)=>lxSetT(t,pid,rec.g));h.G.forEach((g)=>lxSetG(g,pid,LX_SP[rec.g]))}
+/* nimmt den Ausfall ab „ab“ zurück: Trainings mit diesem Status wieder x, Spiele mit diesem Status ohne Eintrag */
+function lxUndo(pid,rec,ab){const von=ab>rec.von?ab:rec.von,h=lxHits(von,rec.bis);
+  h.T.forEach((t)=>{if((t.spieler||{})[pid]===rec.g)lxSetT(t,pid,"x")});
+  /* Spiel: ist der Kader schon eingetragen, wieder „im Kader“, sonst ohne Eintrag */
+  h.G.forEach((g)=>{const sp=g.spieler||{};if((sp[pid]||{}).status===LX_SP[rec.g])lxSetG(g,pid,Object.keys(sp).some((k)=>k!==pid)?"k":null)})}
+function lxClose(){const o=$("#lxpop");if(o)o.remove();lxCur=null}
+function lxDyn(){const c=lxCur,h=c.von&&c.bis&&c.bis>=c.von?lxHits(c.von,c.bis):null,G=LX_SP[c.g];
+  const L=h?h.T.map((t)=>({d:t.datum,s:c.g})).concat(h.G.map((g)=>({d:g.datum,s:G,sp:1}))).sort((a,b)=>a.d.localeCompare(b.d)):[];
+  return'<div class="lx-wk">'+[1,2,4,6,12].map((n)=>'<button type="button" class="btn'+(c.wk===n?" on":"")+'" data-lxw="'+n+'">'+n+" Wo.</button>").join("")+"</div>"
+   +'<div class="card lx-pv">'+(!h?'<span class="note">Bitte „Bis“ wählen oder Wochen antippen.</span>':!L.length?'<span class="note">Keine Trainings oder Spiele in diesem Zeitraum. Später angelegte bekommen den Ausfall automatisch.</span>'
+     :"<b>"+h.T.length+(h.T.length===1?" Training":" Trainings")+" · "+h.G.length+(h.G.length===1?" Spiel":" Spiele")+'</b><div class="lx-ds">'+L.map((x)=>'<span><span class="s '+x.s+'" style="cursor:default">'+(x.sp&&x.s==="t"?"a":x.s)+"</span>"+lxD(x.d)+(x.sp?" ⚽":"")+"</span>").join("")+"</div>")+"</div>"
+   +'<div class="qa-btns lx-btns"><button type="button" class="btn" data-lxx>Abbrechen</button><button type="button" class="btn qa-ok" data-lxok'+(h?"":" disabled")+">Eintragen</button></div>"}
+function lxForm(){const c=lxCur;
+  return'<h3 id="lxh">'+esc(c.name)+' länger weg</h3>'
+   +'<div><div class="note" style="margin-bottom:6px">Grund</div><div class="seg lx-seg">'+Object.keys(LX_G).map((k)=>'<button type="button" data-lxg="'+k+'"'+(c.g===k?' class="on"':"")+">"+LX_G[k]+"</button>").join("")+"</div></div>"
+   +'<div class="qa-row lx-row"><label><span class="note">Von</span><input type="date" id="lxvon" value="'+c.von+'"></label><label><span class="note">Bis</span><input type="date" id="lxbis" value="'+(c.bis||"")+'"></label></div>'
+   +'<div id="lxdyn" style="display:grid;gap:12px">'+lxDyn()+"</div>"}
+/* nur den unteren Teil neu zeichnen, damit die Datumsfelder beim Tippen nicht verloren gehen */
+function lxDynDraw(){const d=$("#lxdyn");if(d)d.innerHTML=lxDyn()}
+function lxInfo(){const c=lxCur,r=c.rec,h=lxHits(r.von,r.bis);
+  return'<h3 id="lxh">'+esc(c.name)+' länger weg</h3>'
+   +'<div class="card lx-pv" style="display:flex;gap:10px;align-items:center"><span class="s '+r.g+'" style="cursor:default">'+r.g+"</span><span><b>"+LX_G[r.g].toLowerCase()+"</b> · "+lxD(r.von)+" bis "+lxD(r.bis)+'<br><span class="note">'+h.T.length+(h.T.length===1?" Training":" Trainings")+" · "+h.G.length+(h.G.length===1?" Spiel":" Spiele")+"</span></span></div>"
+   +'<div style="display:grid;gap:8px"><button type="button" class="btn lx-big" style="font-weight:600" data-lxback>Ab heute wieder dabei</button><button type="button" class="btn lx-big" data-lxedit>Zeitraum oder Grund ändern</button><button type="button" class="btn lx-big" style="color:var(--r)" data-lxdel>'+(c.arm?"Wirklich löschen? Nochmal tippen":"Ausfall löschen")+"</button></div>"
+   +'<div class="qa-btns" style="justify-content:flex-start"><button type="button" class="btn" data-lxx>Schließen</button></div>'}
+function lxDraw(){const b=$("#lxpop .qa-box");if(!b||!lxCur)return;b.innerHTML=lxCur.rec&&!lxCur.edit?lxInfo():lxForm()}
+function lxOpen(pid){const p=D.spieler.find((x)=>x.id===pid);if(!p||window.__RO)return;lxClose();
+  const rec=lxRec(pid),td=today();lxCur={pid,name:nm(p),rec,g:rec?rec.g:"v",von:rec?rec.von:td,bis:rec?rec.bis:"",wk:0};
+  const w=document.createElement("div");w.id="lxpop";w.className="qa";w.innerHTML='<div class="qa-bg" data-lxx></div><div class="qa-box" role="dialog" aria-modal="true" aria-labelledby="lxh"></div>';document.body.appendChild(w);lxDraw();
+  w.addEventListener("keydown",(e)=>{if(e.key==="Escape"){e.preventDefault();lxClose()}});
+  const onDate=(e)=>{const c=lxCur;if(!c)return;if(e.target.id==="lxvon"){c.von=e.target.value;if(c.wk&&c.von){c.bis=lxAdd(c.von,c.wk*7-1);$("#lxbis").value=c.bis}lxDynDraw()}else if(e.target.id==="lxbis"){c.bis=e.target.value;c.wk=0;lxDynDraw()}};
+  w.addEventListener("input",onDate);w.addEventListener("change",onDate);
+  w.addEventListener("click",(e)=>{const t=e.target,c=lxCur;if(!c)return;
+    if(t.closest("[data-lxx]")){lxClose();return}
+    const g=t.closest("[data-lxg]");if(g){c.g=g.dataset.lxg;t.closest(".lx-seg").querySelectorAll("[data-lxg]").forEach((b)=>b.classList.toggle("on",b===g));lxDynDraw();return}
+    const wk=t.closest("[data-lxw]");if(wk){c.wk=+wk.dataset.lxw;if(!c.von){c.von=today();$("#lxvon").value=c.von}c.bis=lxAdd(c.von,c.wk*7-1);$("#lxbis").value=c.bis;lxDynDraw();return}
+    if(t.closest("[data-lxedit]")){c.edit=true;lxDraw();return}
+    if(t.closest("[data-lxback]")){lxUndo(c.pid,c.rec,today());lxSaveCfg(c.pid,null);lxClose();renderTrain();return}
+    if(t.closest("[data-lxdel]")){if(!c.arm){c.arm=1;lxDraw();return}lxUndo(c.pid,c.rec,c.rec.von);lxSaveCfg(c.pid,null);lxClose();renderTrain();return}
+    if(t.closest("[data-lxok]")){if(!c.von||!c.bis||c.bis<c.von)return;if(c.rec)lxUndo(c.pid,c.rec,c.rec.von);const rec={g:c.g,von:c.von,bis:c.bis};lxApply(c.pid,rec);lxSaveCfg(c.pid,rec.bis>=today()?rec:null);lxClose();renderTrain();return}
+  });
+  const f=w.querySelector("[data-lxg].on");if(f)f.focus();
+}
+/* Später angelegte Trainings und Spiele im Zeitraum: Ausfall gleich mit eintragen (nur neue Dokumente) */
+{const save0=save;save=function(coll,id,data){
+  if(data&&(coll==="trainings"||coll==="games")&&data.datum&&!(coll==="trainings"?D.trainings:D.spiele).some((x)=>x.id===id)){const A=lxAll();let sp=null;
+    Object.keys(A).forEach((pid)=>{const r=A[pid];if(!r||!(data.datum>=r.von&&data.datum<=r.bis))return;if(!sp)sp={...(data.spieler||{})};
+      if(coll==="trainings")sp[pid]=r.g;else if(!sp[pid])sp[pid]={status:LX_SP[r.g],minuten:0}});
+    if(sp)data={...data,spieler:sp}}
+  return save0(coll,id,data)}}
+document.addEventListener("click",(e)=>{const b=e.target.closest&&e.target.closest("[data-lxp]");if(b){e.preventDefault();e.stopPropagation();lxOpen(b.dataset.lxp)}},true);
+{const st=document.createElement("style");st.textContent=".lxn{background:none;border:0;padding:0;margin:0;font:inherit;color:inherit;cursor:pointer;text-align:left}.lxn:hover{text-decoration:underline}"
+  +".lx-seg{display:flex;flex-wrap:wrap}.qa-row.lx-row{flex-wrap:nowrap;gap:10px}.qa-row.lx-row label{min-width:0;flex:1 1 0}.qa-row.lx-row label>*{max-width:100%;min-width:0;box-sizing:border-box}.qa-row.lx-row input{min-width:0;width:100%;box-sizing:border-box}"
+  +".lx-wk{display:flex;gap:8px;flex-wrap:wrap}.lx-wk .btn.on{background:var(--acs);color:var(--ac);border-color:var(--ac);font-weight:600}"
+  +".lx-pv{margin:0;padding:12px 14px;display:grid;gap:6px}.lx-ds{display:flex;gap:6px 10px;flex-wrap:wrap;align-items:center}.lx-ds>span{display:inline-flex;gap:4px;align-items:center;font-size:12px;white-space:nowrap}"
+  +".qa-btns.lx-btns{justify-content:space-between}.lx-big{min-height:42px}";document.head.appendChild(st)}
 </script>
 <script>/* ---------- A4-Export: Monatsplan, Wochenplan (Eltern / Trainer), Trainingsschwerpunkte (nur Trainer) ---------- */
 const xcut=(t,w,z,b)=>{t=String(t||"");if(xtw(t,z,b)<=w)return t;while(t.length>1&&xtw(t+"…",z,b)>w)t=t.slice(0,-1);return t+"…"};
