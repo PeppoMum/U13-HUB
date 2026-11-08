@@ -647,8 +647,8 @@ function kRender(el){
       :(c.rolle==="spieler"?pr("s",c.pn||"Spieler","Spieler",KS.ed?"":'<button class="btn" data-ks="ed">Ändern</button>'):pEl(KS.ed?"":'<button class="btn" data-ks="ed">Ändern</button>'))
        +(KS.ed?'<div style="margin:10px 0 4px;font-weight:600">Ich bin</div>'+radio("spieler",(c.pn?E(c.pn):"der Spieler")+" selbst")+radio("eltern","Elternteil"+(c.pn?" von "+E(c.pn):""))
          +'<div id="kstn"'+(sp?" hidden":"")+'><label class="note" for="kstni">Dein Vor- und Nachname</label><input id="kstni" maxlength="60" autocomplete="name" value="'+E(KS.n!=null?KS.n:c.rolle==="spieler"?"":c.name)+'" style="width:100%;box-sizing:border-box;margin-top:2px"></div>'
-         +'<div class="bar" style="margin:10px 0 0"><button class="btn" data-ks="save">Speichern</button><button class="btn" data-ks="edx">Abbrechen</button></div>'
-        :KS.zw?'<div style="margin-top:10px"><b>Elternteil hinzufügen</b><label class="note" for="kstz" style="display:block;margin:6px 0 2px">Vor- und Nachname des Elternteils</label><input id="kstz" maxlength="60" autocomplete="name" style="width:100%;box-sizing:border-box"><div class="bar" style="margin:8px 0 0"><button class="btn" data-ks="zwok" style="background:var(--ac);color:#fff;border-color:var(--ac);font-weight:600">Hinzufügen</button><button class="btn" data-ks="zwx">Abbrechen</button></div></div>'
+         +'<div class="bar" style="margin:10px 0 0"><button class="btn" data-ks="edx">Abbrechen</button><button class="btn" data-ks="save">Speichern</button></div>'
+        :KS.zw?'<div style="margin-top:10px"><b>Elternteil hinzufügen</b><label class="note" for="kstz" style="display:block;margin:6px 0 2px">Vor- und Nachname des Elternteils</label><input id="kstz" maxlength="60" autocomplete="name" style="width:100%;box-sizing:border-box"><div class="bar" style="margin:8px 0 0"><button class="btn" data-ks="zwx">Abbrechen</button><button class="btn" data-ks="zwok" style="background:var(--ac);color:#fff;border-color:var(--ac);font-weight:600">Hinzufügen</button></div></div>'
         :'<div class="bar" style="margin:10px 0 0"><button class="btn" data-ks="zw">'+(c.rolle==="spieler"?"+ Elternteil hinzufügen":"+ "+E(kVn(c.pn)||"Spieler")+" als Spieler hinzufügen")+'</button></div>'))
     +'</div>'
     +'<div class="card" style="margin:0 0 12px"><h3 style="margin-top:0">'+(K.links.length>1?"Deine Spieler":"Dein Spieler")+'</h3>'
@@ -708,4 +708,46 @@ window.claude={use:async function(name){
 window.addEventListener("beforeinstallprompt",(e)=>{e.preventDefault();instEv=e;window.dispatchEvent(new Event("u13inst"))});
 window.addEventListener("appinstalled",()=>{instEv=null;const b=document.getElementById("u13instb");if(b)b.style.display="none"});
 if("serviceWorker" in navigator&&/^https:|^http:\/\/localhost/.test(location.protocol+"//"+location.hostname)){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})})}
+})();
+
+
+/* ---------- Zurück-Wischen (iPhone) und Zurück-Taste (Android) wie in anderen Apps ----------
+   Zurück schließt zuerst ein offenes Fenster oder Menü, sonst geht es eine Seite zurück. Auf der ersten Seite verlässt Zurück die App. */
+(function(){
+  const W=window,H=W.history;if(!H||!H.pushState)return;
+  let curK=null,ovPushed=false,ignore=0,busy=false;
+  /* Fremde replaceState(null, …) (Adresse aufräumen) sollen den gemerkten Seitenstand nicht löschen */
+  {const oR=H.replaceState.bind(H);H.replaceState=function(s,t,u){if(s==null&&H.state&&H.state.u13k)s=H.state;return oR(s,t,u)}}
+  const vis=(e)=>{if(!e||e.hidden)return false;const s=getComputedStyle(e);return s.display!=="none"&&s.visibility!=="hidden"};
+  const sheets=()=>[...document.querySelectorAll(".mobsheet")].filter(vis);
+  const SKIP=/^(SCRIPT|STYLE|LINK|META|TITLE|NAV|TEMPLATE)$/;
+  const ovs=()=>{const app=document.querySelector("body > .app");const c=[...document.body.children].concat(app?[...app.children]:[]);
+    return c.filter((e)=>{if(SKIP.test(e.tagName)||e.id==="u13demo"||e.id==="vnav"||e.classList.contains("mobsheet"))return false;if(e.querySelector&&e.querySelector("#li,#u13so"))return false;if(!vis(e))return false;
+      const s=getComputedStyle(e);if(s.position!=="fixed")return false;const r=e.getBoundingClientRect();return r.width>=W.innerWidth*0.9&&r.height>=W.innerHeight*0.85})};
+  const open=()=>sheets().length>0||ovs().length>0;
+  const key=()=>{const vt=document.querySelector("#vtab button.on[data-v]");if(vt&&vis(vt.parentElement))return "l:"+vt.dataset.v;
+    const V=W.__V;if(V&&V.cur)return "v:"+V.cur;
+    const b=document.querySelector("body > .app > nav button[data-s].on")||document.querySelector("nav button[data-s].on");return b?"s:"+b.dataset.s:""};
+  const go=(k)=>{const t=k.slice(0,1),v=k.slice(2),V=W.__V;
+    if(t==="l"){const b=document.querySelector('#vtab button[data-v="'+v+'"]');if(b)b.click();return}
+    if(t==="v"){if(V&&V.open)V.open(v);return}
+    if(V&&V.cur&&V.app){V.app(v);return}
+    const b=document.querySelector('body > .app > nav button[data-s="'+v+'"]')||document.querySelector('nav button[data-s="'+v+'"]');if(b)b.click()};
+  const closeTop=()=>{const sh=sheets();if(sh.length){sh.forEach((x)=>{x.hidden=true});return true}
+    const o=ovs();if(!o.length)return false;const el=o[o.length-1];
+    (el.querySelector(":focus")||el).dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true,cancelable:true}));
+    if(ovs().indexOf(el)<0)return true;
+    const btn=[...el.querySelectorAll("button,[role=button]")].find((b)=>vis(b)&&/^(✕|×|schließen|fenster schließen|abbrechen|zurück|fertig)$/i.test((b.getAttribute("aria-label")||b.textContent||"").trim()));
+    if(btn)btn.click();return true};
+  W.addEventListener("popstate",(e)=>{if(ignore){ignore--;return}const st=e.state||{};busy=true;
+    try{if(closeTop()){ovPushed=false;if(!(st.u13k===curK&&!st.ov))H.pushState({u13k:curK},"");return}
+      if(st.u13k&&st.u13k!==curK){go(st.u13k);curK=st.u13k}}finally{setTimeout(()=>{busy=false},80)}});
+  const tick=()=>{if(busy)return;const k=key();if(!k)return;
+    if(curK===null){curK=k;H.replaceState({u13k:k},"");return}
+    const o=open();
+    if(k!==curK){curK=k;if(ovPushed&&H.state&&H.state.ov)H.replaceState({u13k:k},"");else H.pushState({u13k:k},"");ovPushed=false}
+    if(o&&!ovPushed){H.pushState({u13k:curK,ov:1},"");ovPushed=true}
+    else if(!o&&ovPushed){ovPushed=false;if(H.state&&H.state.ov){ignore++;H.back()}}};
+  setInterval(tick,250);
+  document.addEventListener("click",()=>{setTimeout(tick,60)},true);
 })();
