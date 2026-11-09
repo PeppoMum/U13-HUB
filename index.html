@@ -809,6 +809,7 @@ const qReapply=(k)=>OQ.forEach((it)=>{if(COLKEY[it.coll]===k)qApply(it.coll,it.i
 function save(coll,id,data){ // data=null löscht
   if(!db)return;const key=coll+"/"+id,it={coll,id,data:data?JSON.parse(JSON.stringify(data)):null,ts:Date.now()};if(ccAuto)it.auto=true;
   if(coll==="notes"&&!ccAuto&&window.__vid&&window.__vid.notePush)window.__vid.notePush(D.notizen.find((x)=>x.id===id),data);   /* Benachrichtigung bei neuer sichtbarer Notiz */
+  if(coll==="games"&&!ccAuto&&window.__vid&&window.__vid.gamePush)window.__vid.gamePush(D.spiele.find((x)=>x.id===id),data);   /* Benachrichtigung bei neuem Spielvideo */
   OQ.set(key,it);qStore();ccMine(coll,id,it.data);
   if(navigator.onLine===false){qApply(coll,id,it.data);setSt(qTxt(),"busy");return Promise.resolve()}
   setSt("Speichert …","busy");return qPush(it);
@@ -1887,7 +1888,7 @@ async function hnFrist(n){const Q=window.__pushQ,L=window.__links||{};if(!Q||!wi
   for(const p of an)Q.add("a_"+n.id+"_"+p.id,{art:"afrist",an:[p.id],s:await hnSig(n.id,p.id,L[p.id].key),t,tx:"Deine Aufgabe läuft am "+n.bis.slice(8)+"."+n.bis.slice(5,7)+". ab. Bitte denk daran, sie abzuhaken."})}
 window.__hnFristAlle=()=>hnList().filter((n)=>n.art==="c").forEach(hnFrist);
 /* Einstellungen → Spieler & Eltern: welche Benachrichtigungen an Spieler und Eltern gehen (nur Web-Version, Voreinstellung in videos.js) */
-var PZL={hinweis:"Neue Hinweise und Aufgaben",notiz:"Neue Notizen im Profil",termin:"Abgesagte oder verlegte Termine",afrist:"Erinnerung an Aufgaben mit Abhaken",dienst:"Erinnerung an Dienste (montags 10 Uhr)",etplan:"Neue Eigentrainingspläne",clip:"Neue Clips",frist:"Erinnerung an Clips",antwort:"Antworten vom Trainer"};
+var PZL={hinweis:"Neue Hinweise und Aufgaben",notiz:"Neue Notizen im Profil",termin:"Abgesagte oder verlegte Termine",afrist:"Erinnerung an Aufgaben mit Abhaken",dienst:"Erinnerung an Dienste (montags 10 Uhr)",etplan:"Neue Eigentrainingspläne",clip:"Neue Clips",spielv:"Neue Spielvideos",frist:"Erinnerung an Clips",antwort:"Antworten vom Trainer"};
 function renderPz(){const c=$("#pzc");if(!c)return;const an=!!(window.__WEB&&window.__pushOn);c.style.display=an?"":"none";if(!an)return;
   $("#pzl").innerHTML=Object.keys(PZL).map((k)=>'<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-pz="'+k+'"'+(window.__pushOn(k)?" checked":"")+(hnCan()?"":" disabled")+"> "+PZL[k]+"</label>").join("")}
 $("#pzl").addEventListener("change",(e)=>{const i=e.target.closest("[data-pz]");if(!i)return;const P={};Object.keys(PZL).forEach((k)=>{P[k]=window.__pushOn(k)});P[i.dataset.pz]=i.checked;
@@ -2755,7 +2756,7 @@ const msg=(t,bad)=>{const m=document.getElementById(fsec()&&!fsec().hidden?"fbm"
 /* Benachrichtigungen vormerken (verschickt ein Zeitplan bei GitHub, Texte ohne Namen, siehe push/LIESMICH.md). Nur Web-Version. */
 /* Was an Spieler und Eltern geht, stellt der Trainer unter Einstellungen → Spieler & Eltern ein (Termin-Änderungen und Aufgaben-Erinnerung anfangs aus).
    Die Antwort auf einen Clip-Kommentar zählt zu „Antworten vom Trainer“. */
-const PUSH_STD={hinweis:true,notiz:true,termin:false,afrist:false,dienst:true,etplan:true,clip:true,frist:true,antwort:true};
+const PUSH_STD={hinweis:true,notiz:true,termin:false,afrist:false,dienst:true,etplan:true,clip:true,spielv:true,frist:true,antwort:true};
 const pushOn=(k)=>{const c=(D.config&&D.config.push)||{};return k in c?!!c[k]:!!PUSH_STD[k]};window.__pushOn=pushOn;window.__PUSH_STD=PUSH_STD;
 const pushQ=(id,o)=>{const g=o.art==="kom"||o.art==="aufant"?"antwort":o.art;if(g in PUSH_STD&&!pushOn(g))return;if(window.__WEB&&db)db.doc("pushq/"+id).set({t:Date.now(),...o}).catch(()=>{})};
 const pushQdel=(id)=>{if(window.__WEB&&db)db.doc("pushq/"+id).delete().catch(()=>{})};
@@ -2763,6 +2764,9 @@ window.__pushQ={add:pushQ,del:pushQdel};
 /* Neue Notiz im Profil, die der Spieler sehen darf (oder eine Notiz wird sichtbar): eine Nachricht je Spieler, Links gleich aktualisieren */
 const notizSicht=(n)=>!!n&&n.art==="notiz"&&!!n.sichtbar&&!n.aus&&!!n.pid&&n.pid!=="team";
 V.notePush=(alt,neu)=>{if(!window.__WEB||!notizSicht(neu)||notizSicht(alt))return;pushQ("n_"+neu.pid,{art:"notiz",an:[neu.pid]});pubSoon()};
+/* Neues Spielvideo (Link beim Spiel eingetragen, vorher keiner): eine Nachricht an alle Spieler, Links gleich aktualisieren. Spätere Änderung des Links schickt nichts. */
+V.gamePush=(alt,neu)=>{if(!window.__WEB||!neu||!urlOk(neu.video)||(alt&&urlOk(alt.video)))return;const geg=String(neu.gegner||"").trim().slice(0,60);
+  pushQ("v_"+String(neu.id).slice(0,30),{art:"spielv",an:"alle",tx:(geg?"Das Video vom Spiel gegen "+geg+" ist da.":"Das Video vom letzten Spiel ist da.")+" Schau es dir in der App an."});pubSoon()};
 /* Termin abgesagt (gelöscht) oder verlegt (Datum oder Uhrzeit geändert): eine Nachricht an alle */
 V.terminPush=()=>{if(!window.__WEB)return;pushQ("termin",{art:"termin"});pubSoon()};
 /* Erinnerung an die Frist: einen Tag vorher, bei knapper Zeit 3 Stunden vorher */

@@ -338,10 +338,10 @@ const pushApi={
 };
 /* Wofür dieses Gerät Bescheid bekommt: abgewählte Arten stehen im Feld x der Anmeldung (durch Komma getrennt, siehe push/senden.mjs).
    Spieler/Eltern sehen nur, was der Trainer für die Mannschaft eingeschaltet hat (pz im Link), Clips nur Spieler. */
-const PW={hinweis:"Neue Hinweise und Aufgaben",notiz:"Neue Notizen im Profil",termin:"Abgesagte oder verlegte Termine",afrist:"Erinnerung an Aufgaben",dienst:"Erinnerung an Dienste (montags)",etplan:"Neue Eigentrainingspläne",clip:"Neue Clips",frist:"Erinnerung an Clips",antwort:"Antworten vom Trainer",
+const PW={hinweis:"Neue Hinweise und Aufgaben",notiz:"Neue Notizen im Profil",termin:"Abgesagte oder verlegte Termine",afrist:"Erinnerung an Aufgaben",dienst:"Erinnerung an Dienste (montags)",etplan:"Neue Eigentrainingspläne",clip:"Neue Clips",spielv:"Neue Spielvideos",frist:"Erinnerung an Clips",antwort:"Antworten vom Trainer",
   fb:"Nachrichten von Spielern und Eltern",aantw:"Antworten auf Aufgaben",skom:"Clip-Kommentare von Spielern",kanfr:"Neue Konto-Anfragen"};
 const pwAus=()=>(pls.get("u13pushw")||"").split(",").filter((k)=>k in PW);
-function pwHtml(c){const A=pwAus(),L=c.ro==="t"?["fb","aantw","skom","kanfr"]:String(c.pz!=null?c.pz:"hinweis,notiz,clip,frist,antwort").split(",").filter((k)=>k in PW&&!(c.ro==="e"&&(k==="clip"||k==="frist"||k==="etplan")));
+function pwHtml(c){const A=pwAus(),L=c.ro==="t"?["fb","aantw","skom","kanfr"]:String(c.pz!=null?c.pz:"hinweis,notiz,clip,frist,antwort").split(",").filter((k)=>k in PW&&!(c.ro==="e"&&(k==="clip"||k==="spielv"||k==="frist"||k==="etplan")));
   return L.length?'<div class="pwl" style="display:flex;flex-direction:column;gap:6px;margin:10px 0 0">'+L.map((k)=>'<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-pw="'+k+'"'+(A.includes(k)?"":" checked")+"> "+PW[k]+"</label>").join("")+"</div>":""}
 document.addEventListener("change",(e)=>{const i=e.target.closest&&e.target.closest("input[data-pw]");if(!i)return;const A=new Set(pwAus());if(i.checked)A.delete(i.dataset.pw);else A.add(i.dataset.pw);pls.set("u13pushw",[...A].join(",")||null);
   const c=i.closest("#u13pushc")?{k:(window.__vid&&window.__vid.fbKey)||"",ro:"t"}:window.__pushCtx&&window.__pushCtx();if(c&&c.k)pushApi.sync(c)});
