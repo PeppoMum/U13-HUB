@@ -26,6 +26,7 @@ const TX = {
   aantw: { t: "Antwort auf eine Aufgabe", b: "Ein Spieler hat auf eine Aufgabe geantwortet.", u: "./" },
   skom: { t: "Neuer Clip-Kommentar", b: "Ein Spieler hat einen Clip kommentiert.", u: "./" },
   kanfr: { t: "Neue Konto-Anfrage", b: "Bitte in der App freigeben oder ablehnen.", u: "./" },
+  todo: { t: "To-Do heute fällig", b: "Schau in die App.", u: "./" },
 };
 /* Was ein Gerät abgewählt hat (Feld x, durch Komma getrennt): die Antwort auf einen Clip-Kommentar zählt zu „antwort“ */
 const GRP = { kom: "antwort", aufant: "antwort" };
@@ -33,7 +34,7 @@ const GRP = { kom: "antwort", aufant: "antwort" };
 /* Wer bekommt den Eintrag? s = Anmeldung eines Geräts (ro: s Spieler, e Elternteil, t Trainer, leer = noch nicht gewählt) */
 export function passt(q, s) {
   if (typeof s.x === "string" && s.x.split(",").includes(GRP[q.art] || q.art)) return false;
-  if (q.art === "fb" || q.art === "aantw" || q.art === "skom" || q.art === "kanfr") return s.ro === "t";
+  if (q.art === "fb" || q.art === "aantw" || q.art === "skom" || q.art === "kanfr" || q.art === "todo") return s.ro === "t";   /* fälliges To-Do (fällig am): an die Trainer-Geräte */
   if (q.art === "termin") return s.ro !== "t";
   if (q.art === "notiz" || q.art === "afrist") return s.ro !== "t" && !(q.art === "afrist" && s.ro === "e") && !!s.pid && Array.isArray(q.an) && q.an.includes(s.pid);
   if (q.art === "hinweis") return s.ro !== "t" && !(q.a && s.ro === "e") && (!Array.isArray(q.an) || (!!s.pid && q.an.includes(s.pid)));   /* Hinweis an einzelne Spieler: nur deren Geräte */
@@ -47,7 +48,7 @@ export function passt(q, s) {
 }
 export function nachricht(q, id) {
   const x = TX[q.art];
-  const b = (q.art === "frist" || q.art === "afrist" || q.art === "dienst" || q.art === "spielv") && typeof q.tx === "string" && q.tx.length < 200 ? q.tx : x.b;
+  const b = (q.art === "frist" || q.art === "afrist" || q.art === "dienst" || q.art === "spielv" || q.art === "todo") && typeof q.tx === "string" && q.tx.length < 200 ? q.tx : x.b;
   const viele = q.n > 1, t = q.art === "hinweis" && q.a ? "Neue Aufgabe für dich"
     : q.art === "dienst" ? (q.fuer === "e" ? (viele ? "Dienste für dein Kind diese Woche" : "Dienst für dein Kind diese Woche") : (viele ? "Deine Dienste diese Woche" : x.t)) : x.t;   /* Aufgabe (mit Antwort oder Abhaken) statt Hinweis */
   /* Trainer: Antippen öffnet direkt die Aufgabe bzw. den Clip im Eingang (h = Aufgabe/Clip), Nachrichten den Reiter Nachrichten */
