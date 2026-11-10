@@ -450,7 +450,9 @@ async function publishSnap(snap){
   for(const k of Object.keys(snap.x||{}))await put("x_"+k,snap.x[k]);
   /* Eigentraining-Dateien: ändern sich nie (neue Datei = neue ID), deshalb nur neue hochladen; Liste mit Teilezahl in linkmeta */
   let ff0={};try{const m0=await fs.doc("linkmeta/main").get();ff0=(m0.exists&&m0.data().ff)||{}}catch(e){}
-  const ff={};for(const fid of Object.keys(snap.f||{})){if(ff0[fid]){ff[fid]=ff0[fid];keep.add("f_"+fid);for(let i=1;i<ff0[fid];i++)keep.add("f_"+fid+"~"+i);continue}
+  /* nur überspringen, wenn die Datei auch wirklich (mit allen Teilen) in „pub“ liegt – sonst neu hochladen (Fehler 10.11.: Plan beim Spieler nicht ladbar) */
+  const has=new Set((await fs.collection("pub").get()).docs.map((d)=>d.id)),da=(fid)=>{for(let i=0;i<ff0[fid];i++)if(!has.has("f_"+fid+(i?"~"+i:"")))return false;return true};
+  const ff={};for(const fid of Object.keys(snap.f||{})){if(ff0[fid]&&da(fid)){ff[fid]=ff0[fid];keep.add("f_"+fid);for(let i=1;i<ff0[fid];i++)keep.add("f_"+fid+"~"+i);continue}
     await put("f_"+fid,snap.f[fid]);ff[fid]=Math.max(1,Math.ceil(snap.f[fid].length/CH))}
   if(snap.bg){let bg=clean(snap.bg);if(JSON.stringify(bg).length>900000)bg={L:bg.L||"",D:bg.D||"",i:""};keep.add("bg");await fs.doc("pub/bg").set(bg)}
   keep.add("scout");
@@ -471,6 +473,7 @@ window.__webOwnerSnap=function(cb){
     const raw={};docs.forEach((d)=>{raw[d.id]=d.data()});
     const join=(id)=>{const m=raw[id];if(!m||typeof m.b!=="string")return null;let b=m.b;for(let i=1;i<(m.n||1);i++){const c=raw[id+"~"+i];if(!c)return null;b+=c.b}return b};
     const s={u:meta.u||"",k:meta.k||{},xk:meta.xk||{},fp:meta.fp||"",fa:meta.fa||"",fs:meta.fs||"",dzs:meta.dzs||"",ok:meta.ok|0,p:{},x:{},a:{}};
+    s.fh={};Object.keys(raw).forEach((id)=>{if(id.slice(0,2)==="f_"&&id.indexOf("~")<0&&join(id))s.fh[id.slice(2)]=1});   /* Eigentraining-Dateien, die vollständig online sind */
     Object.keys(raw).forEach((id)=>{if(id.indexOf("~")>=0)return;if(id.slice(0,2)==="a_"){s.a[id]={s:raw[id].s,w:raw[id].w,v:raw[id].v|0};return}if(id.slice(0,2)==="p_"){const b=join(id);if(b)s.p[id.slice(2)]=b}else if(id.slice(0,2)==="x_"){const b=join(id);if(b)s.x[id.slice(2)]=b}});
     window.__webSnapReady=true;cb(s);
   };

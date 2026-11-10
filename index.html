@@ -4206,7 +4206,7 @@ function renderCo(){
 /* ---------- Link-Prüfung: Warnung oben, wenn Links nicht (mehr) funktionieren ---------- */
 let lkErr="",lkTok=0,lkBusy=false,lkQuiet=0;const LK_AUSW_TAGE=3;
 /* „Inhalt beschädigt“ erst melden, wenn es nach 45 Sekunden noch so ist: beim Aktualisieren kommen große Pakete in Stücken an und passen kurz nicht zusammen */
-const lkBadT={},lkBad=(id,bad)=>{if(!bad){delete lkBadT[id];return false}const t=lkBadT[id]||(lkBadT[id]=Date.now());return Date.now()-t>=45e3};
+let lkFTry="";const lkBadT={},lkBad=(id,bad)=>{if(!bad){delete lkBadT[id];return false}const t=lkBadT[id]||(lkBadT[id]=Date.now());return Date.now()-t>=45e3};
 async function lkHealth(){
   const box=document.getElementById("lkw");if(!box||window.__RO||window.__VIEWER||window.__DEMO||!D.ready||(window.__WEB&&!window.__webSnapReady))return;
   const my=++lkTok,E=[],W=[],P=active(),nm=(p)=>p.vorname+" "+p.name,pubIds=Object.keys(SNAP.k||{});
@@ -4224,10 +4224,13 @@ async function lkHealth(){
   if(my!==lkTok)return;
   const off=pubIds.filter((id)=>{const l=L[id]||{};return P.some((p)=>p.id===id)&&!(l.aktiv&&l.key)}).length+pubIds.filter((id)=>!P.some((p)=>p.id===id)).length+xGone();
   if(off&&!window.__WEB)W.push(off+" Link(s) sind noch online, obwohl sie abgeschaltet oder der Spieler nicht mehr aktiv ist – beim nächsten Aktualisieren werden sie entfernt.");
+  /* Eigentraining: freigegebene Plan-Datei fehlt online -> einmal neu veröffentlichen (Fehler 10.11.: „Der Plan konnte nicht geladen werden“) */
+  let fMiss="";if(window.__WEB&&SNAP.fh&&window.__et){const F={};for(const p of P){const l=L[p.id]||{};if(l.aktiv&&l.key)window.__et.pkg(p.id,{},F)}
+    const miss=Object.keys(F).filter((id)=>!SNAP.fh[id]).sort().join();if(miss&&miss!==lkFTry)fMiss=miss}
   const fpp=await fingerprintParts();if(my!==lkTok)return;
   if(window.__WEB){/* Web-Version: automatisch veröffentlichen (Link-Änderungen sofort, neue Daten alle 6 Stunden) */
-    const now=Date.now(),changed=!SNAP.fa||SNAP.fa!==fpp.a||SNAP.fs!==fpp.s,daily=pubIds.length>0&&changed&&now-(Date.parse(SNAP.u||"")||0)>=216e5,dzChg=pubIds.length>0&&SNAP.dzs!==dzSig(),halb=pubIds.length>0&&changed&&!SNAP.ok,struct=nOn.length>0||xMiss>0||off>0||dzChg||halb;
-    if((struct||daily)&&!lkBusy&&now>lkQuiet&&window.__lkPublish&&window.__ROLE!=="lesen"){if(lkReady()){lkQuiet=now+9e4;window.__lkPublish(true)}else setTimeout(lkHealth,3000)}
+    const now=Date.now(),changed=!SNAP.fa||SNAP.fa!==fpp.a||SNAP.fs!==fpp.s,daily=pubIds.length>0&&changed&&now-(Date.parse(SNAP.u||"")||0)>=216e5,dzChg=pubIds.length>0&&SNAP.dzs!==dzSig(),halb=pubIds.length>0&&changed&&!SNAP.ok,struct=nOn.length>0||xMiss>0||off>0||dzChg||halb||!!fMiss;
+    if((struct||daily)&&!lkBusy&&now>lkQuiet&&window.__lkPublish&&window.__ROLE!=="lesen"){if(lkReady()){lkQuiet=now+9e4;if(fMiss)lkFTry=fMiss;window.__lkPublish(true)}else setTimeout(lkHealth,3000)}
     for(let i=E.length-1;i>=0;i--)if(/noch nicht online/.test(E[i]))E.splice(i,1);W.length=0}
   /* Warnung nur, wenn Eltern etwas Veraltetes sehen, das wichtig ist: Termine, Hinweise, Kontakte, Notizen sofort;
      eingetragene Anwesenheit/Minuten erst, wenn der Stand in den Links mehrere Tage alt ist. */
