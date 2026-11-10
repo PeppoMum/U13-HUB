@@ -27,6 +27,7 @@ const TX = {
   skom: { t: "Neuer Clip-Kommentar", b: "Ein Spieler hat einen Clip kommentiert.", u: "./" },
   kanfr: { t: "Neue Konto-Anfrage", b: "Bitte in der App freigeben oder ablehnen.", u: "./" },
   todo: { t: "To-Do heute fällig", b: "Schau in die App.", u: "./" },
+  zusage: { t: "Antwort fehlt noch", b: "Bitte sag in der App zu oder ab.", u: "./?link" },
 };
 /* Was ein Gerät abgewählt hat (Feld x, durch Komma getrennt): die Antwort auf einen Clip-Kommentar zählt zu „antwort“ */
 const GRP = { kom: "antwort", aufant: "antwort" };
@@ -42,13 +43,15 @@ export function passt(q, s) {
   if (q.art === "dienst") return s.ro !== "t" && !!s.pid && Array.isArray(q.an) && q.an.includes(s.pid) && (q.fuer === "e" ? s.ro === "e" : s.ro !== "e");
   /* neuer Eigentrainingsplan: nur Spieler (und Geräte ohne gewählte Rolle) des freigegebenen Spielers */
   if (q.art === "etplan") return s.ro !== "t" && s.ro !== "e" && !!s.pid && Array.isArray(q.an) && q.an.includes(s.pid);
+  /* Erinnerung an fehlende Zusage: Geräte des Spielers (Spieler und Eltern); aw = Spieler, die schon geantwortet haben oder abwesend sind (setzt run) */
+  if (q.art === "zusage") return s.ro !== "t" && !!s.pid && Array.isArray(q.an) && q.an.includes(s.pid) && !(Array.isArray(q.aw) && q.aw.includes(s.pid));
   if (q.art === "antwort") return !!q.r && s.r === q.r && s.ro !== "t";
   if (q.art === "clip" || q.art === "spielv" || q.art === "frist" || q.art === "kom" || q.art === "aufant") return s.ro !== "t" && s.ro !== "e" && !!s.pid && (q.an === "alle" || (Array.isArray(q.an) && q.an.includes(s.pid)));
   return false;
 }
 export function nachricht(q, id) {
   const x = TX[q.art];
-  const b = (q.art === "frist" || q.art === "afrist" || q.art === "dienst" || q.art === "spielv" || q.art === "todo") && typeof q.tx === "string" && q.tx.length < 200 ? q.tx : x.b;
+  const b = (q.art === "frist" || q.art === "afrist" || q.art === "dienst" || q.art === "spielv" || q.art === "todo" || q.art === "zusage") && typeof q.tx === "string" && q.tx.length < 200 ? q.tx : x.b;
   const viele = q.n > 1, t = q.art === "hinweis" && q.a ? "Neue Aufgabe für dich"
     : q.art === "dienst" ? (q.fuer === "e" ? (viele ? "Dienste für dein Kind diese Woche" : "Dienst für dein Kind diese Woche") : (viele ? "Deine Dienste diese Woche" : x.t)) : x.t;   /* Aufgabe (mit Antwort oder Abhaken) statt Hinweis */
   /* Trainer: Antippen öffnet direkt die Aufgabe bzw. den Clip im Eingang (h = Aufgabe/Clip), Nachrichten den Reiter Nachrichten */
@@ -77,6 +80,15 @@ export async function run({ fetch, webpush, env, now = Date.now(), log = console
   const abgehakt = async (sg) => { if (typeof sg !== "string" || !/^[0-9a-f]{64}$/.test(sg)) return false;
     const r = await fetch(base + "/aufg/" + sg + "/m/x", { headers: H }); if (!r.ok) return false; const d = obj(await r.json()); return d.d === true; };
 
+  /* Erinnerung an fehlende Zusage: Wer hat für diesen Termin (ek) schon geantwortet oder ist an dem Tag abwesend? null = nicht prüfbar, dann wird nichts verschickt */
+  const frage = async (coll, f, v) => { const r = await fetch(base + ":runQuery", { method: "POST", headers: H, body: JSON.stringify({ structuredQuery: { from: [{ collectionId: coll }],
+    where: { fieldFilter: { field: { fieldPath: f }, op: "EQUAL", value: { stringValue: v } } }, limit: 500 } }) }); if (!r.ok) return null; return (await r.json()).filter((x) => x.document).map((x) => obj(x.document)); };
+  const beantwortet = async (q) => { const m = /^d(\d{4})(\d{2})(\d{2})_\d+$/.exec(typeof q.ek === "string" ? q.ek : ""); if (!m || !Array.isArray(q.an)) return null;
+    const tag = m[1] + "-" + m[2] + "-" + m[3], eig = (d) => (d.tid || "") === (q.tid || ""), a = await frage("kabm", "k", q.ek); if (!a) return null;
+    const pids = a.filter(eig).map((d) => d.pid), w = [];
+    for (const pid of q.an) { if (pids.includes(pid)) continue; const z = await frage("kabw", "pid", pid); if (!z) return null; if (z.some((d) => eig(d) && d.von <= tag && tag <= d.bis)) w.push(pid); }
+    return pids.concat(w); };
+
   /* fällige Einträge */
   const qr = await call(base + ":runQuery", { method: "POST", body: JSON.stringify({ structuredQuery: { from: [{ collectionId: "pushq" }],
     where: { fieldFilter: { field: { fieldPath: "t" }, op: "LESS_THAN_OR_EQUAL", value: { integerValue: String(now) } } }, limit: 200 } }) });
@@ -93,6 +105,7 @@ export async function run({ fetch, webpush, env, now = Date.now(), log = console
   for (const q of due) {
     if (now - q.t > ALT || !TX[q.art]) alt++;
     else if (q.art === "afrist" && await abgehakt(q.s)) { }
+    else if (q.art === "zusage" && !(q.aw = await beantwortet(q))) { }
     else {
       const msg = JSON.stringify(nachricht(q, q.id)), seen = new Set();
       for (const s of subs) {

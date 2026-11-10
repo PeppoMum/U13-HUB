@@ -5,6 +5,8 @@
 "use strict";
 if(window.__WEBINIT)return;window.__WEBINIT=true;
 const CFG=window.U13_FIREBASE||{};
+/* Vereinsname für die Anmeldeseite: zuletzt in der App gesehen (Einstellungen › Mannschaft › Verein) */
+const nmWeb=()=>{let k="";try{const c=JSON.parse(localStorage.getItem("u13nm")||"null");k=(c&&c.k)||""}catch(e){}if(!k)try{k=vKurz()}catch(e){}return String(k||"TuS Haltern").replace(/[<>&"]/g,"")};
 const SDK=(CFG.sdkBase||"https://www.gstatic.com/firebasejs/10.14.1/");   /* Version auch in sw.js anpassen (Offline-Start) */
 const XIDS=["plan","demo","demosp"];
 window.__WEB=true;
@@ -149,7 +151,7 @@ let ov=null,OVSUB="Nur für das Trainerteam",LINTRO="";
 function overlay(html){
   if(!document.getElementById("u13css")){const st=document.createElement("style");st.id="u13css";st.textContent=CSS;document.head.appendChild(st)}
   if(!ov){ov=document.createElement("div");ov.id="u13login";(document.body||document.documentElement).appendChild(ov)}
-  ov.innerHTML='<div class="lc"><h1>TuS Haltern · Teamzentrale</h1><p class="sb">'+OVSUB+'</p>'+html+"</div>";return ov;
+  ov.innerHTML='<div class="lc"><h1>'+nmWeb()+' · Teamzentrale</h1><p class="sb">'+OVSUB+'</p>'+html+"</div>";return ov;
 }
 const hideOverlay=()=>{if(ov){ov.remove();ov=null}};
 function showSetup(){overlay('<div class="ms er" style="font-size:15px">Die Verbindung zu Firebase ist noch nicht eingerichtet.</div><p class="sb">Bitte die Datei <b>firebase-config.js</b> mit den Werten aus dem Firebase-Projekt ausfüllen (siehe Anleitung) und die Dateien erneut hochladen.</p>')}
@@ -186,7 +188,9 @@ function firstUser(){return new Promise((res)=>{const un=auth.onAuthStateChanged
 
 /* ---------- Datenbank-Hülle: gleiche Aufrufe wie in der Artifact-Umgebung ---------- */
 const noWrite=()=>window.__ROLE==="lesen"||(window.__KPLAN&&!window.__KPLAN.edit)?Promise.reject({code:"permission-denied"}):null;
-function docW(ref){return{get:()=>ref.get(),set:(d)=>noWrite()||ref.set(clean(d)),update:(d)=>noWrite()||ref.update(clean(d)),delete:()=>noWrite()||ref.delete(),onSnapshot:(a,b)=>ref.onSnapshot(a,b),collection:(n)=>colW(ref.collection(n))}}
+/* patch: nur die genannten Stellen ändern (Liste [Pfad, Wert], ohne Wert = entfernen); setm: anlegen und mit Vorhandenem zusammenführen. Gibt es nur mit der echten Firebase-Bibliothek; in der Demo (eigener Nachbau) wird wie bisher das ganze Dokument gespeichert */
+const patchArgs=(ch)=>{const F=fb.firestore,a=[];ch.forEach((c)=>{a.push(new F.FieldPath(...c[0]),c.length>1?clean(c[1]):F.FieldValue.delete())});return a};
+function docW(ref){return{get:()=>ref.get(),set:(d)=>noWrite()||ref.set(clean(d)),update:(d)=>noWrite()||ref.update(clean(d)),...(fb&&fb.firestore.FieldPath?{patch:(ch)=>noWrite()||ref.update(...patchArgs(ch)),setm:(d)=>noWrite()||ref.set(clean(d),{merge:true})}:{}),delete:()=>noWrite()||ref.delete(),onSnapshot:(a,b)=>ref.onSnapshot(a,b),collection:(n)=>colW(ref.collection(n))}}
 function colW(ref){return{get:()=>ref.get(),onSnapshot:(a,b)=>ref.onSnapshot(a,b),doc:(id)=>docW(ref.doc(id)),where:(f,o,v)=>({get:()=>ref.where(f,o,v).get(),onSnapshot:(a,b)=>ref.where(f,o,v).onSnapshot(a,b)})}}
 const wrap=()=>({collection:(n)=>colW(fs.collection(n)),doc:(p)=>docW(fs.doc(p))});
 
@@ -338,7 +342,7 @@ const pushApi={
 };
 /* Wofür dieses Gerät Bescheid bekommt: abgewählte Arten stehen im Feld x der Anmeldung (durch Komma getrennt, siehe push/senden.mjs).
    Spieler/Eltern sehen nur, was der Trainer für die Mannschaft eingeschaltet hat (pz im Link), Clips nur Spieler. */
-const PW={hinweis:"Neue Hinweise und Aufgaben",notiz:"Neue Notizen im Profil",termin:"Abgesagte oder verlegte Termine",afrist:"Erinnerung an Aufgaben",dienst:"Erinnerung an Dienste (montags)",etplan:"Neue Eigentrainingspläne",clip:"Neue Clips",spielv:"Neue Spielvideos",frist:"Erinnerung an Clips",antwort:"Antworten vom Trainer",
+const PW={hinweis:"Neue Hinweise und Aufgaben",notiz:"Neue Notizen im Profil",termin:"Abgesagte oder verlegte Termine",afrist:"Erinnerung an Aufgaben",dienst:"Erinnerung an Dienste (montags)",etplan:"Neue Eigentrainingspläne",clip:"Neue Clips",spielv:"Neue Spielvideos",frist:"Erinnerung an Clips",antwort:"Antworten vom Trainer",zusage:"Erinnerung an fehlende Zusagen",
   fb:"Nachrichten von Spielern und Eltern",aantw:"Antworten auf Aufgaben",skom:"Clip-Kommentare von Spielern",kanfr:"Neue Konto-Anfragen",todo:"Fällige To-Dos (fällig am)"};
 const pwAus=()=>(pls.get("u13pushw")||"").split(",").filter((k)=>k in PW);
 function pwHtml(c){const A=pwAus(),L=c.ro==="t"?["fb","aantw","skom","kanfr","todo"]:String(c.pz!=null?c.pz:"hinweis,notiz,clip,frist,antwort").split(",").filter((k)=>k in PW&&!(c.ro==="e"&&(k==="clip"||k==="spielv"||k==="frist"||k==="etplan")));
