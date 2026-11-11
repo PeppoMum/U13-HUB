@@ -2971,7 +2971,12 @@ V.vidLabel=(d,pid)=>{const n=unseen(d,pid);return"Videos"+(n?" ("+n+")":"")};
 const vidTab=()=>{const b=document.querySelector('#vtab [data-v="v"]');if(b&&VW.d){const i=b.querySelector(".vti");b.textContent=V.vidLabel(VW.d,VW.pid);if(i)b.prepend(i)}};
 const hintOff=(pid,id)=>ls.get("u13vhx."+pid,[]).includes(id);
 const hintsFor=(d,pid)=>(d.vc||[]).filter((c)=>c.f&&!hintOff(pid,c.id)&&fristBald(c.f)&&VW.kom&&VW.kom[c.id]&&!mineTop(VW.kom[c.id],pid));
-function hintHtml(d,pid){return hintsFor(d,pid).map((c)=>'<div class="vd-hint" data-hint="'+esc(c.id)+'">'+SVG.clock+'<div style="flex:1;font-size:14px;line-height:1.4"><b>'+(Date.now()>fristTs(c.f)?"Frist vorbei":"Bis "+esc(fristTxt(c.f)))+":</b> Bitte kommentiere den Clip „"+esc(c.ti)+'“.</div><button type="button" class="xcl" data-hx="'+esc(c.id)+'" aria-label="Ausblenden" title="Ausblenden">✕</button></div>').join("")}
+/* Neue Aufgabe (Clip mit Aufgabe oder Frist): oben in der Übersicht bis zum Wegklicken, höchstens 3 Tage nach dem Anlegen.
+   Weggeklickt merkt sich das Gerät als „n:<Clip>“; die Erinnerung einen Tag vor der Frist kommt trotzdem. */
+const neuAufg=(d,pid)=>{const t3=Date.now()-3*864e5,H=new Set(hintsFor(d,pid).map((c)=>c.id));
+  return(d.vc||[]).filter((c)=>(c.a||c.f)&&!H.has(c.id)&&!hintOff(pid,c.id)&&!hintOff(pid,"n:"+c.id)&&Date.parse(c.at||"")>=t3&&VW.kom&&VW.kom[c.id]&&!mineTop(VW.kom[c.id],pid))};
+function hintHtml(d,pid,ueb){return hintsFor(d,pid).map((c)=>'<div class="vd-hint" data-hint="'+esc(c.id)+'">'+SVG.clock+'<div style="flex:1;font-size:14px;line-height:1.4"><b>'+(Date.now()>fristTs(c.f)?"Frist vorbei":"Bis "+esc(fristTxt(c.f)))+":</b> Bitte kommentiere den Clip „"+esc(c.ti)+'“.</div><button type="button" class="xcl" data-hx="'+esc(c.id)+'" aria-label="Ausblenden" title="Ausblenden">✕</button></div>').join("")
+  +(ueb?neuAufg(d,pid).map((c)=>'<div class="vd-hint" data-hint="'+esc(c.id)+'" data-hneu>'+SVG.clock+'<div data-hgo="'+esc(c.id)+'" role="button" tabindex="0" style="flex:1;font-size:14px;line-height:1.4;cursor:pointer"><b>Neue Aufgabe:</b> Bitte kommentiere den Clip „'+esc(c.ti)+"“"+(c.f?" bis "+esc(fristTxt(c.f)):"")+'.</div><button type="button" class="xcl" data-hx="n:'+esc(c.id)+'" aria-label="Ausblenden" title="Ausblenden">✕</button></div>').join(""):"")}
 /* Wer bist du? (einmal je Gerät und Link) */
 function whoHtml(d){return'<div class="card" id="vwho" style="margin:0 0 14px;border-color:var(--ac)"><h3 style="margin-top:0;text-transform:none;letter-spacing:0;font-size:18px">Wer bist du?</h3><p class="note" style="margin-top:0">Das fragen wir einmal auf diesem Gerät. Du kannst es später unten auf der Seite ändern.</p>'
   +'<div class="bar" style="margin:0 0 8px"><button class="btn" data-who="s" style="min-height:44px;font-weight:600">Ich bin '+esc(d.n||"der Spieler")+'</button><button class="btn" data-who="e" style="min-height:44px">Ich bin Elternteil von '+esc(d.n||"…")+"</button></div>"
@@ -3028,7 +3033,7 @@ function uebHtml(d,pid){
   const danach=dn.length?'<div class="card" style="margin:0 0 12px">'+('<h3 style="margin-top:0">Danach</h3>'+dn.map((o,i)=>'<div class="vd-row vu-row"'+(vuPop(o)?' data-vtp="'+(i+1)+'" role="button" tabindex="0"':"")+'><span class="vu-dot" style="background:'+vuDot(o)+'"></span><div class="vu-d">'+esc(dShort(o.d))+'</div><div style="flex:1;min-width:0">'+esc(o.tl||o.ty)+(vuTitel(o)?' <span class="note">'+esc(vuTitel(o))+"</span>":"")+(vuPop(o)&&o.or?'<div class="vu-o">'+vuPin+esc(o.or.split(",")[0])+"</div>":"")+(o.u?'<div class="note" style="color:var(--o)"><i class=sy data-sy=warn></i> '+esc(o.u)+"</div>":"")+'</div><div class="vu-z">'+(o.g&&o.tr&&o.be?'<span class="vu-zl">'+esc(vuU(o.tr))+"</span><br>"+esc(vuU(o.be)):esc(o.be?vuU(o.be):o.tr?vuU(o.tr):String(o.z||"").replace(/ Uhr$/,"")))+"</div>"+"</div>").join(""))
       +(d.t?'<button type="button" class="vu-all" data-vgo="t">Alle Termine ansehen ›</button>':"")+"</div>":"";
   const tiles=vuLiga(d)+(sp&&clips.length?vuVid(d,pid,open):"");
-  return(sp?hintHtml(d,pid):"")+gross+danach+(window.__KONTO&&d.za?'<div id="vabm"></div>':"")+'<div id="vhaslot"></div>'+wocheHtml(d,pid)
+  return(sp?hintHtml(d,pid,true):"")+gross+danach+(window.__KONTO&&d.za?'<div id="vabm"></div>':"")+'<div id="vhaslot"></div>'+wocheHtml(d,pid)
     +(tiles?'<div class="vu-tiles">'+tiles+"</div>":"")
     +(rep.length?'<div class="card" style="margin:0 0 12px"><h3 style="margin-top:0">Neue Antworten vom Trainer</h3>'+rep.map((x)=>'<div class="vd-row"><div style="flex:1;min-width:0"><b>'+esc(x.wo)+'</b><div class="note">'+esc(x.n)+": "+esc(String(x.t).slice(0,120))+"</div></div><button class=\"btn\" data-vgo=\""+x.go+"\">Ansehen</button></div>").join("")+"</div>":"")
     +(window.__et?window.__et.ueb(d,pid,r):"")}
@@ -3113,6 +3118,7 @@ document.addEventListener("click",async(e)=>{
   if(q("[data-wchg]")){try{localStorage.removeItem("u13wer."+pid)}catch(x){}VW.api.refresh();VW.api.go("u");return}
   if((b=q("[data-vgo]"))){VW.api.go(b.dataset.vgo);return}
   if((b=q("[data-vtp]"))&&!q("a")){vuPopOpen((VW.unx||[])[+b.dataset.vtp]);return}
+  if((b=q("[data-hgo]"))){const id=b.dataset.hgo;VW.open=id;VW.kOpen=null;VW.rep=null;seenAdd(pid,id);VW.api.go("v");vidTab();VW.paint("v");return}
   if((b=q("[data-hx]"))){const L=ls.get("u13vhx."+pid,[]);L.push(b.dataset.hx);ls.set("u13vhx."+pid,L);VW.repaint();return}
   if((b=q("[data-vv]"))){VW.sub=b.dataset.vv;VW.paint("v");return}
   if((b=q("[data-clt]"))){const id=b.dataset.clt;VW.open=VW.open===id?null:id;VW.kOpen=null;VW.rep=null;if(VW.open){seenAdd(pid,id);vidTab();const c=(d.vc||[]).find((x)=>x.id===id);if(c&&n&&!(VW.kom&&VW.kom[id])){VW.paint("v");const K=await loadKom(c);if(K){VW.kom=VW.kom||{};VW.kom[id]=K}}}VW.paint("v");return}
@@ -3557,7 +3563,7 @@ function css(){if(document.getElementById("etcss"))return;const st=document.crea
 const canEdit=()=>typeof db!=="undefined"&&!!db&&window.__ROLE!=="lesen"&&window.__ROLE!=="scout"&&!window.__RO&&!window.__DEMO;
 const players=()=>typeof active==="function"?active():[];
 const pName=(pid)=>{const p=(typeof D!=="undefined"&&D.spieler||[]).find((x)=>x.id===pid);return p?(p.vorname+" "+p.name).trim():"(ausgeschieden)"};
-const UI={mode:"e",pf:null,zf:null,arm:null,busy:false,msg:"",bad:false};
+const UI={mode:"e",pf:null,zf:null,arm:null,busy:false,msg:"",bad:false,no:null,noT:""};
 let pubT=null;const pubSoon=()=>{if(!window.__WEB||!window.__lkPublish||window.__ROLE==="lesen")return;clearTimeout(pubT);pubT=setTimeout(()=>{try{window.__lkPublish(true)}catch(e){}},2500)};
 
 /* Stufen-Anfragen aus dem Feedback-Eingang: id „st-<Freigabe>-<Stufe>-…“, art „Stufe“ */
@@ -3565,14 +3571,21 @@ const parseReq=(x)=>{const m=/^st-([A-Za-z0-9]+)-(\d+)-/.exec(x.id||"");return m
 ET.requests=()=>{const V=window.__vid;return((V&&V.fb)||[]).filter((x)=>x.art==="Stufe"&&!x.et&&parseReq(x)).map((x)=>{const r=parseReq(x),z=ET.zu.find((y)=>y.id===r.zid),p=z&&ET.plans.find((q)=>q.id===z.plan);return{x,z,p,st:r.st}}).filter((o)=>o.z&&o.p&&o.st>=0&&o.st<nS(o.p))};
 const reqText=(o)=>"möchte bei „"+(o.p.titel||"Eigentraining")+"“ "+inSt(stName(o.p,o.st))+" wechseln (jetzt: "+stName(o.p,Math.min(+o.z.st||0,nS(o.p)-1))+").";
 function reqRows(list,small){return list.map((o)=>'<div class="et-row et-req"><div class="et-m"><b>'+E(pName(o.z.pid))+"</b> "+E(reqText(o))+(small?"":'<div class="note">'+E(o.x.von&&o.x.rolle==="e"?"Gesendet von "+o.x.von+" (Elternteil)":"")+"</div>")+"</div>"
-  +(canEdit()?'<button class="btn" data-etok="'+E(o.x.id)+'" style="background:var(--g);color:#fff;border-color:var(--g)">Ja</button><button class="btn" data-etno="'+E(o.x.id)+'">Nein</button>':"")+"</div>").join("")}
-async function answer(fid,yes){
+  +(!canEdit()?"":UI.no===o.x.id?noForm(o):'<button class="btn" data-etok="'+E(o.x.id)+'" style="background:var(--g);color:#fff;border-color:var(--g)">Ja</button><button class="btn" data-etno="'+E(o.x.id)+'">Nein</button>')+"</div>").join("")}
+/* „Nein“: ohne Text nur die Benachrichtigung, dass der Spieler in seiner Stufe bleibt; schreibt der Trainer etwas, geht genau dieser Text als Antwort raus (Phil 11.11.) */
+const altSt=(o)=>stName(o.p,Math.min(+o.z.st||0,nS(o.p)-1));
+const noForm=(o)=>'<div class="et-no" style="flex-basis:100%"><textarea data-etnt rows="2" maxlength="500" placeholder="Nachricht dazu (freiwillig)" style="width:100%;box-sizing:border-box">'+E(UI.noT||"")+'</textarea>'
+  +'<div class="note">Ohne Text bekommt '+E(pName(o.z.pid))+" nur die Benachrichtigung, dass er bei "+E(altSt(o))+" bleibt.</div>"
+  +'<div class="bar" style="margin:6px 0 0"><button class="btn" data-etnc>Abbrechen</button><button class="btn" data-etnj="'+E(o.x.id)+'">Ablehnen</button></div></div>';
+async function answer(fid,yes,txt){
   const o=ET.requests().find((r)=>r.x.id===fid),V=window.__vid;if(!o||!V||!V.fbAnswer||!canEdit())return;
   const plan=o.p.titel||"Eigentraining",neu=stName(o.p,o.st),alt=stName(o.p,Math.min(+o.z.st||0,nS(o.p)-1));
   try{
     if(yes){await save("etzu",o.z.id,{...strip(o.z),st:o.st,ab:null});await V.fbAnswer(o.x,"Passt! Ab jetzt machst du bei „"+plan+"“ "+neu+". Das steht gleich auch in deinem Link.")}
-    else{await save("etzu",o.z.id,{...strip(o.z),ab:{s:o.st,am:new Date().toISOString()}});await V.fbAnswer(o.x,"Noch nicht ganz. Bleib bei „"+plan+"“ erst noch bei "+alt+". Wir sprechen darüber.")}
-    await db.doc("fbin/"+o.x.id).update({et:yes?"ja":"nein"});o.x.et=yes?"ja":"nein";
+    else{await save("etzu",o.z.id,{...strip(o.z),ab:{s:o.st,am:new Date().toISOString()}});txt=String(txt||"").trim();
+      if(txt)await V.fbAnswer(o.x,txt);
+      else{const Q=window.__pushQ;if(Q&&o.x.r)Q.add("q"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),{art:"antwort",r:o.x.r,tx:"Du bleibst bei „"+plan+"“ erst noch bei "+alt+"."})}}
+    await db.doc("fbin/"+o.x.id).update({et:yes?"ja":"nein",gelesen:true});o.x.et=yes?"ja":"nein";if(!yes){UI.no=null;UI.noT=""}
     pubSoon();window.__toast&&window.__toast(yes?pName(o.z.pid)+" ist jetzt in "+neu+".":"Abgelehnt. "+pName(o.z.pid)+" bleibt in "+alt+".")}
   catch(e){window.__toast&&window.__toast("Das hat nicht geklappt. Bitte noch einmal versuchen.",true)}
   ET.refresh()}
@@ -3602,7 +3615,7 @@ function render(){
       +(multi(p)?'<div class="note">Stufen: '+E(p.stufen.map((s,i)=>stName(p,i)).join(" · "))+"</div>":"")
       +'<div class="note"><button type="button" class="rm" data-etv="'+E(p.id)+'" style="text-decoration:underline;color:var(--ac);display:inline;padding-left:0">Plan ansehen</button> · '+(nz?nz+(nz===1?" Spieler":" Spieler"):"noch niemandem freigegeben")+"</div></div>"
       +(ed?'<button class="btn" data-etpe="'+E(p.id)+'">Bearbeiten</button><button class="btn" data-etpd="'+E(p.id)+'">'+(UI.arm==="p"+p.id?(nz?"Plan und "+nz+" Freigabe(n) löschen?":"Wirklich löschen?"):"Löschen")+"</button>":"")+"</div>"};
-  w.innerHTML=(req.length?'<div class="card"><h3>Anfragen für eine neue Stufe</h3>'+reqRows(req)+'<p class="note" style="margin:8px 0 0">Bei „Ja“ bekommt der Spieler sofort die neue Stufe, bei „Nein“ bleibt alles, wie es ist. Er bekommt in beiden Fällen eine kurze Antwort im Link unter „Feedback“.</p></div>':"")
+  w.innerHTML=(req.length?'<div class="card"><h3>Anfragen für eine neue Stufe</h3>'+reqRows(req)+'<p class="note" style="margin:8px 0 0">Bei „Ja“ bekommt der Spieler sofort die neue Stufe, bei „Nein“ bleibt alles, wie es ist. Bei „Ja“ bekommt er eine kurze Antwort im Link, bei „Nein“ nur eine Benachrichtigung, außer du schreibst etwas dazu.</p></div>':"")
     +'<div class="card"><h3>Freigaben</h3><p class="note" style="margin-top:0">Wer welchen Plan macht. Die Tage erscheinen nur im Terminplan dieses Spielers. Ist an einem Wunschtag ein Termin, rutscht das Eigentraining auf den nächsten freien Tag derselben Woche.</p>'
     +(ed&&!UI.zf?'<div class="bar" style="margin:0 0 6px"><button class="btn" data-etzn style="background:var(--ac);color:#fff;border-color:var(--ac)"'+(ET.plans.length?"":" disabled")+">＋ Plan freigeben</button>"+(ET.plans.length?"":'<span class="note">Zuerst unten einen Plan hochladen.</span>')+"</div>":"")
     +(UI.zf?zForm():"")
@@ -3683,7 +3696,10 @@ const note=(t,bad)=>{UI.msg=bad?t:"";UI.bad=!!bad;const m=document.getElementByI
 document.addEventListener("click",async(e)=>{
   if(!e.target.closest)return;const q=(s)=>e.target.closest(s);let b;
   if((b=q("[data-etm]"))){setMode(b.dataset.etm);return}
-  if((b=q("[data-etok]"))||(b=q("[data-etno]"))){b.disabled=true;await answer(b.dataset.etok||b.dataset.etno,!!b.dataset.etok);return}
+  if((b=q("[data-etok]"))){b.disabled=true;await answer(b.dataset.etok,true);return}
+  if((b=q("[data-etno]"))){if(!canEdit())return;UI.no=b.dataset.etno;UI.noT="";UI.force=true;ET.refresh();const r=b.isConnected?null:document.querySelector((document.getElementById("etw")&&!document.getElementById("etw").hidden?"#etw":"#etst")+" [data-etnt]");r&&r.focus();return}
+  if(q("[data-etnc]")){UI.no=null;UI.noT="";UI.force=true;ET.refresh();return}
+  if((b=q("[data-etnj]"))){const t=b.closest(".et-no")&&b.closest(".et-no").querySelector("[data-etnt]");b.disabled=true;await answer(b.dataset.etnj,false,t?t.value:UI.noT);return}
   if((b=q("[data-etgo]"))){ET.show();return}
   const w=document.getElementById("etw");if(!w||!w.contains(e.target))return;
   if((b=q("[data-etv]"))){const p=ET.plans.find((x)=>x.id===b.dataset.etv);if(p&&p.f)openFile(()=>ET.blob(p.f),p.f,p.titel);return}
@@ -3701,6 +3717,7 @@ document.addEventListener("click",async(e)=>{
   if(q("[data-etzs]")){zSave();return}
   if((b=q("[data-etzd]"))){const k="z"+b.dataset.etzd;if(UI.arm!==k){UI.arm=k;render();return}UI.arm=null;const z=ET.zu.find((x)=>x.id===b.dataset.etzd);if(z){await save("etzu",z.id,null);note("Freigabe für "+pName(z.pid)+" beendet.");pubSoon()}return}
 });
+document.addEventListener("input",(e)=>{if(e.target&&e.target.matches&&e.target.matches("[data-etnt]"))UI.noT=e.target.value});
 document.addEventListener("change",(e)=>{
   const w=document.getElementById("etw");if(!w||!w.contains(e.target)||!canEdit())return;const t=e.target;
   if(t.dataset.esf!=null){const f=t.files&&t.files[0];if(!f)return;if(f.size>MAXB){note("Die Datei ist zu groß (höchstens 5 MB). Tipp: als PDF in kleinerer Qualität speichern.",true);t.value="";return}

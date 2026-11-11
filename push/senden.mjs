@@ -51,8 +51,9 @@ export function passt(q, s) {
 }
 export function nachricht(q, id) {
   const x = TX[q.art];
-  const b = (q.art === "frist" || q.art === "afrist" || q.art === "dienst" || q.art === "spielv" || q.art === "todo" || q.art === "zusage") && typeof q.tx === "string" && q.tx.length < 200 ? q.tx : x.b;
-  const viele = q.n > 1, t = q.art === "hinweis" && q.a ? "Neue Aufgabe für dich"
+  const et = q.art === "antwort" && typeof q.tx === "string";   /* Stufenwunsch abgelehnt ohne eigenen Text: nur „Du bleibst bei …“ (sonst hat „antwort“ nie tx; kein neues Feld, damit die Regeln bleiben) */
+  const b = (q.art === "frist" || q.art === "afrist" || q.art === "dienst" || q.art === "spielv" || q.art === "todo" || q.art === "zusage" || et) && typeof q.tx === "string" && q.tx.length < 200 ? q.tx : x.b;
+  const viele = q.n > 1, t = et ? "Eigentraining" : q.art === "hinweis" && q.a ? "Neue Aufgabe für dich"
     : q.art === "dienst" ? (q.fuer === "e" ? (viele ? "Dienste für dein Kind diese Woche" : "Dienst für dein Kind diese Woche") : (viele ? "Deine Dienste diese Woche" : x.t)) : x.t;   /* Aufgabe (mit Antwort oder Abhaken) statt Hinweis */
   /* Trainer: Antippen öffnet direkt die Aufgabe bzw. den Clip im Eingang (h = Aufgabe/Clip), Nachrichten den Reiter Nachrichten */
   const h = typeof q.h === "string" && /^[\w-]{1,40}$/.test(q.h) ? q.h : "";
