@@ -1,19 +1,23 @@
-# Verschickt die Benachrichtigungen der U13-App alle 5 Minuten (GitHub startet oft etwas später).
-# Gehört bei GitHub nach .github/workflows/benachrichtigungen.yml. Geheimnisse: HELFER_PASSWORT und VAPID_PRIVAT.
+# Verschickt die Benachrichtigungen der Mannschafts-App (U13).
+# GitHub startet Zeitpläne oft nur alle paar Stunden. Darum bleibt ein Lauf knapp 6 Stunden wach,
+# schaut alle 5 Minuten nach fälligen Nachrichten und startet zum Schluss selbst den nächsten Lauf.
+# Der Zeitplan unten ist nur die Reserve, falls die Kette einmal reißt.
+# Geheimnisse: HELFER_PASSWORT und VAPID_PRIVAT.
 name: Benachrichtigungen
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "17 * * * *"
   workflow_dispatch:
 concurrency:
   group: benachrichtigungen
   cancel-in-progress: false
 permissions:
   contents: read
+  actions: write
 jobs:
   senden:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 358
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -21,7 +25,19 @@ jobs:
           node-version: 20
       - run: npm install --no-save --no-audit --no-fund web-push@3.6.7
         working-directory: push
-      - run: node push/senden.mjs
+      - name: Alle 5 Minuten senden (knapp 6 Stunden lang)
         env:
           HELFER_PASSWORT: ${{ secrets.HELFER_PASSWORT }}
           VAPID_PRIVAT: ${{ secrets.VAPID_PRIVAT }}
+        run: |
+          ende=$(( $(date +%s) + 345 * 60 ))
+          while [ "$(date +%s)" -lt "$ende" ]; do
+            node push/senden.mjs || echo "Dieser Durchgang ging schief, nächster Versuch in 5 Minuten."
+            sleep 300
+          done
+      - name: Nächsten Lauf starten
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh workflow run benachrichtigungen.yml --ref ${{ github.ref_name }}
