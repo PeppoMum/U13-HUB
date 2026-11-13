@@ -3457,12 +3457,13 @@ async function tick(){
   Z.busy=false}
 setInterval(()=>{tick().catch(()=>{})},2500);
 })();
-</script><script>/* Eigentraining: eigene Trainingspläne (eine Datei je Plan, PDF oder Bild) hochladen und pro Spieler freigeben.
+</script><script>/* Eigentraining: eigene Trainingspläne (eine Datei je Plan, PDF oder Bild, dazu freiwillig ein Video) hochladen und pro Spieler freigeben.
    Stufen sind optional und nur Namen: sie stehen im Plan selbst beschrieben, der Spieler bekommt immer dieselbe Datei.
    Trainer: Reiter „Training“ → Umschalter „Eigentraining“ (Pläne, Freigaben, Stufen-Anfragen), kurz im Profil, Anfragen auf der Startseite.
    Freigabe: Spieler, Plan, Stufe, Zeitraum (nur innerhalb der Saison) und Wunschtage. Liegt an einem Wunschtag ein Termin der Mannschaft,
    rutscht das Eigentraining auf den nächsten freien Tag derselben Woche (nicht auf einen anderen Wunschtag); ist keiner frei, fällt es aus.
-   Spielerlink: Karte in der Übersicht, Einträge im Terminplan, „Ich möchte in Stufe …“ (geht über den Feedback-Eingang, der Trainer sagt Ja oder Nein).
+   Spielerlink: Karte in der Übersicht („PDF öffnen“, „Video ansehen“), Einträge im Terminplan, „Ich möchte in Stufe …“ mit Rückfrage und
+   freiwilliger Begründung (geht über den Feedback-Eingang, der Trainer sagt Ja oder Nein; Phil 13.11.).
    Daten: etplan (Pläne), etzu (Freigaben), etdatei (verschlüsselte Datei in Teilen, nur Trainer). Im Link steht nur der eigene Plan mit dem
    Schlüssel der Datei; die Datei selbst liegt verschlüsselt unter pub/f_<id> (Artifact: SNAP.f). */
 (function(){
@@ -3471,7 +3472,7 @@ const ET={plans:[],zu:[],blobs:{}};window.__et=ET;
 /* Eigentraining nur in Stufe „Voll“ (stufe.js; sonst ausgeblendet, es wird nichts gelöscht) */
 ET.on=()=>!window.__STUFE||window.__STUFE.get()==="voll";
 const WK=["Mo","Di","Mi","Do","Fr","Sa","So"],WT=["So","Mo","Di","Mi","Do","Fr","Sa"];
-const MAXB=5e6,CH=700000;
+const MAXB=5e6,MAXV=10e6,CH=700000;   /* Video höchstens 10 MB (Phil 13.11.: Videos 3 bis 5,5 MB) */
 const P2=(n)=>String(n).padStart(2,"0"),isoD=(d)=>d.getFullYear()+"-"+P2(d.getMonth()+1)+"-"+P2(d.getDate());
 const pd=(s)=>{const a=s.split("-").map(Number);return new Date(a[0],a[1]-1,a[2],12)};
 const add=(s,n)=>{const d=pd(s);d.setDate(d.getDate()+n);return isoD(d)};
@@ -3510,10 +3511,10 @@ const liveZu=(z)=>{const[s0]=season();return(!z.bis||z.bis>=tdy())&&(!z.bis||z.b
 /* Pläne eines Spielers für seinen Link; files sammelt die nötigen Dateien (id -> Kopf) */
 ET.pkg=(pid,days,files)=>!ET.on()?[]:ET.zu.filter((z)=>z.pid===pid&&liveZu(z)).map((z)=>{const p=ET.plans.find((x)=>x.id===z.plan);if(!p||!p.f||!p.f.id)return null;
   const n=nS(p),c=Math.min(Math.max(+z.st||0,0),n-1);
-  if(files)files[p.f.id]=p.f;
-  return{i:z.id,t:p.titel||"Eigentraining",h:p.hinweis||"",f:{id:p.f.id,k:p.f.k,n:p.f.name||"",t:p.f.typ||""},s:Array.from({length:n},(_,i)=>n>1?stName(p,i):""),c,v:z.von||"",b:z.bis||"",w:(z.tage||[]).slice().sort(),d:ET.dates(z,days),ab:z.ab||null}}).filter(Boolean);
+  const vd=p.v&&p.v.id?p.v:null;if(files){files[p.f.id]=p.f;if(vd)files[vd.id]=vd}
+  return{i:z.id,t:p.titel||"Eigentraining",h:p.hinweis||"",f:{id:p.f.id,k:p.f.k,n:p.f.name||"",t:p.f.typ||""},...(vd?{vf:{id:vd.id,k:vd.k,n:vd.name||"",t:vd.typ||""}}:{}),s:Array.from({length:n},(_,i)=>n>1?stName(p,i):""),c,v:z.von||"",b:z.bis||"",w:(z.tage||[]).slice().sort(),d:ET.dates(z,days),ab:z.ab||null}}).filter(Boolean);
 /* Fingerabdruck: ändert sich, wenn Pläne oder Freigaben sich ändern */
-ET.sig=()=>JSON.stringify([ET.plans.map((p)=>[p.id,p.titel,p.hinweis||"",p.f&&p.f.id,(p.stufen||[]).map((s)=>s.n||"")]).sort(),ET.zu.map((z)=>[z.id,z.pid,z.plan,z.st,z.von,z.bis,z.tage,z.ab]).sort()]);
+ET.sig=()=>JSON.stringify([ET.plans.map((p)=>[p.id,p.titel,p.hinweis||"",p.f&&p.f.id,p.v&&p.v.id||"",(p.stufen||[]).map((s)=>s.n||"")]).sort(),ET.zu.map((z)=>[z.id,z.pid,z.plan,z.st,z.von,z.bis,z.tage,z.ab]).sort()]);
 /* verschlüsselte Datei aus der Datenbank (in Teilen), einmal je Sitzung */
 ET.blob=async(f)=>{if(ET.blobs[f.id])return ET.blobs[f.id];
   const parts=await Promise.all(Array.from({length:f.parts||1},(_,i)=>db.collection("etdatei").doc(f.id+"_"+i).get()));
@@ -3529,24 +3530,28 @@ function fileView(o,msg){
   let body;
   if(!o)body='<p class="note" style="margin:8px 0">'+E(msg||"Wird geladen …")+"</p>";
   else{const bin=atob(o.d.split(",")[1]||""),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
-    ovUrl=URL.createObjectURL(new Blob([u],{type:o.t||"application/octet-stream"}));
-    body=(/^image\//.test(o.t)?'<img alt="" src="'+ovUrl+'" style="display:block;max-width:100%;max-height:68vh;margin:0 auto 10px;border-radius:8px">':'<p class="note" style="margin:6px 0 12px">Der Plan ist eine PDF-Datei. Tippe auf „Öffnen“.</p>')
+    const vid=/^video\//.test(o.t||"")||/\.(mp4|m4v|mov)$/i.test(o.n||"");
+    ovUrl=URL.createObjectURL(new Blob([u],{type:vid&&!/^video\/(mp4|webm)/.test(o.t||"")?"video/mp4":o.t||"application/octet-stream"}));
+    /* Video: spielt direkt hier; quer gedreht nimmt es fast den ganzen Bildschirm, Vollbild über den Knopf im Video (Phil 13.11.) */
+    if(vid)body='<video controls playsinline preload="metadata" src="'+ovUrl+'"></video>'+(o.sx?'<div class="note et-vn">'+o.sx+"</div>":"");
+    else body=(/^image\//.test(o.t)?'<img alt="" src="'+ovUrl+'" style="display:block;max-width:100%;max-height:68vh;margin:0 auto 10px;border-radius:8px">':'<p class="note" style="margin:6px 0 12px">Der Plan ist eine PDF-Datei. Tippe auf „Öffnen“.</p>')
       +'<div class="bar" style="margin:0"><a class="btn" href="'+ovUrl+'" target="_blank" rel="noopener" style="text-decoration:none">Öffnen</a><a class="btn" href="'+ovUrl+'" download="'+E(o.n||"Plan")+'" style="text-decoration:none">Speichern</a></div>'}
-  ov.innerHTML='<div class="etov-c card"><div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><b style="flex:1;min-width:0;overflow-wrap:anywhere">'+E((o&&o.ti)||"Trainingsplan")+'</b><button type="button" class="btn" data-etx aria-label="Schließen">✕</button></div>'+body+"</div>";
+  const isV=!!(o&&/<video/.test(body));
+  ov.innerHTML='<div class="etov-c card'+(isV?" et-v":"")+'"><div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><b style="flex:1;min-width:0;overflow-wrap:anywhere">'+E((o&&o.ti)||"Trainingsplan")+'</b><button type="button" class="btn" data-etx aria-label="Schließen">✕</button></div>'+body+"</div>";
   ov.hidden=false;
 }
-function fileClose(){const ov=document.getElementById("etov");if(ov)ov.hidden=true;if(ovUrl){URL.revokeObjectURL(ovUrl);ovUrl=""}}
-async function openFile(getBlob,f,ti){
-  fileView(null);
-  try{const b=await getBlob();if(!b)throw new Error("fehlt");const o=await window.__lk.unseal(f.k,b);o.ti=ti;fileView(o)}
-  catch(e){fileView(null,"Der Plan konnte nicht geladen werden. Bitte später noch einmal versuchen.")}
+function fileClose(){const ov=document.getElementById("etov");if(ov){const v=ov.querySelector("video");if(v)try{v.pause()}catch(e){}ov.hidden=true}if(ovUrl){URL.revokeObjectURL(ovUrl);ovUrl=""}}
+async function openFile(getBlob,f,ti,sx){
+  fileView(null,/^video\//.test(f.t||f.typ||"")?"Video wird geladen …":"");
+  try{const b=await getBlob();if(!b)throw new Error("fehlt");const o=await window.__lk.unseal(f.k,b);o.ti=ti;o.sx=sx||"";fileView(o)}
+  catch(e){fileView(null,/^video\//.test(f.t||f.typ||"")?"Das Video konnte nicht geladen werden. Bitte später noch einmal versuchen.":"Der Plan konnte nicht geladen werden. Bitte später noch einmal versuchen.")}
 }
 document.addEventListener("click",(e)=>{if(!e.target.closest)return;const ov=document.getElementById("etov");if(!ov||ov.hidden)return;if(e.target.closest("[data-etx]")||e.target===ov)fileClose()});
 document.addEventListener("keydown",(e)=>{if(e.key==="Escape")fileClose()});
 
 /* ---------- CSS ---------- */
 function css(){if(document.getElementById("etcss"))return;const st=document.createElement("style");st.id="etcss";
-  st.textContent="#etov{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px}#etov[hidden]{display:none}"
+  st.textContent="#etov{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px}#etov[hidden]{display:none}"
   +".etov-c{width:100%;max-width:640px;max-height:92vh;overflow:auto;margin:0!important}"
   +"#t.etm>:not(h2):not(#etseg):not(#etw){display:none!important}#etseg{margin:0 0 12px}#etseg .et-n{display:inline-block;min-width:18px;margin-left:6px;padding:0 6px;border-radius:9px;background:var(--o);color:#fff;font-size:12px;line-height:18px;text-align:center}"
   +".et-row{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--ln)}.et-row:last-child{border-bottom:0}.et-row>.et-m{flex:1;min-width:200px}"
@@ -3554,7 +3559,12 @@ function css(){if(document.getElementById("etcss"))return;const st=document.crea
   +".et-days{display:flex;flex-wrap:wrap;gap:6px}.et-days label{display:inline-flex!important;gap:4px;align-items:center;margin:0!important;border:1px solid var(--ln);border-radius:9px;padding:4px 8px}"
   +".et-pl{display:flex;flex-wrap:wrap;gap:6px 14px;max-height:220px;overflow:auto}.et-pl label{display:inline-flex!important;gap:6px;align-items:center;margin:0!important}"
   +".et-st{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 8px}.et-st input[type=text]{flex:1;min-width:140px;width:auto}"
-  +".et-req{border-left:4px solid var(--o);padding-left:10px}";
+  +".et-req{border-left:4px solid var(--o);padding-left:10px}.et-grund{margin-top:4px;white-space:pre-wrap;overflow-wrap:anywhere}"
+  +".etov-c.et-v{max-width:960px}.et-v video{display:block;width:100%;max-height:72vh;background:#000;border-radius:8px}.et-vn{margin:8px 0 0}"
+  +"#etov textarea{width:100%;box-sizing:border-box}"
+  /* Handy oder Tablet quer: Video so groß wie möglich (Rand und Text weg) */
+  +"@media (orientation:landscape) and (max-height:820px){#etov:has(.et-v){padding:0;background:#000}.etov-c.et-v{max-width:none;width:100%;height:100%;max-height:none;border-radius:0;border:0;padding:4px 8px calc(4px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;box-sizing:border-box}"
+  +".etov-c.et-v>div:first-child{margin-bottom:4px!important;padding:0 env(safe-area-inset-right,0px) 0 env(safe-area-inset-left,0px)}.et-v video{flex:1;min-height:0;max-height:none;height:100%;border-radius:0}.et-vn{display:none}}";
   document.head.appendChild(st)}
 
 /* =====================================================================
@@ -3569,8 +3579,10 @@ let pubT=null;const pubSoon=()=>{if(!window.__WEB||!window.__lkPublish||window._
 /* Stufen-Anfragen aus dem Feedback-Eingang: id „st-<Freigabe>-<Stufe>-…“, art „Stufe“ */
 const parseReq=(x)=>{const m=/^st-([A-Za-z0-9]+)-(\d+)-/.exec(x.id||"");return m?{zid:m[1],st:+m[2]}:null};
 ET.requests=()=>{const V=window.__vid;return((V&&V.fb)||[]).filter((x)=>x.art==="Stufe"&&!x.et&&parseReq(x)).map((x)=>{const r=parseReq(x),z=ET.zu.find((y)=>y.id===r.zid),p=z&&ET.plans.find((q)=>q.id===z.plan);return{x,z,p,st:r.st}}).filter((o)=>o.z&&o.p&&o.st>=0&&o.st<nS(o.p))};
+const GR="\n\nWarum: ";   /* Begründung des Spielers steht hinter diesem Trenner im Text der Anfrage */
+const grund=(o)=>{const t=String((o.x&&o.x.text)||""),i=t.indexOf(GR);return i<0?"":t.slice(i+GR.length).trim()};
 const reqText=(o)=>"möchte bei „"+(o.p.titel||"Eigentraining")+"“ "+inSt(stName(o.p,o.st))+" wechseln (jetzt: "+stName(o.p,Math.min(+o.z.st||0,nS(o.p)-1))+").";
-function reqRows(list,small){return list.map((o)=>'<div class="et-row et-req"><div class="et-m"><b>'+E(pName(o.z.pid))+"</b> "+E(reqText(o))+(small?"":'<div class="note">'+E(o.x.von&&o.x.rolle==="e"?"Gesendet von "+o.x.von+" (Elternteil)":"")+"</div>")+"</div>"
+function reqRows(list,small){return list.map((o)=>'<div class="et-row et-req"><div class="et-m"><b>'+E(pName(o.z.pid))+"</b> "+E(reqText(o))+(grund(o)?'<div class="et-grund"><span class="note">Warum:</span> „'+E(grund(o))+"“</div>":"")+(small?"":'<div class="note">'+E(o.x.von&&o.x.rolle==="e"?"Gesendet von "+o.x.von+" (Elternteil)":"")+"</div>")+"</div>"
   +(!canEdit()?"":UI.no===o.x.id?noForm(o):'<button class="btn" data-etok="'+E(o.x.id)+'" style="background:var(--g);color:#fff;border-color:var(--g)">Ja</button><button class="btn" data-etno="'+E(o.x.id)+'">Nein</button>')+"</div>").join("")}
 /* „Nein“: ohne Text nur die Benachrichtigung, dass der Spieler in seiner Stufe bleibt; schreibt der Trainer etwas, geht genau dieser Text als Antwort raus (Phil 11.11.) */
 const altSt=(o)=>stName(o.p,Math.min(+o.z.st||0,nS(o.p)-1));
@@ -3613,7 +3625,7 @@ function render(){
   const pRow=(p)=>{const nz=ET.zu.filter((z)=>z.plan===p.id&&(!z.bis||z.bis>=t)).length;
     return'<div class="et-row"><div class="et-m"><b>'+E(p.titel)+"</b>"+(p.hinweis?'<div class="note">'+E(p.hinweis)+"</div>":"")
       +(multi(p)?'<div class="note">Stufen: '+E(p.stufen.map((s,i)=>stName(p,i)).join(" · "))+"</div>":"")
-      +'<div class="note"><button type="button" class="rm" data-etv="'+E(p.id)+'" style="text-decoration:underline;color:var(--ac);display:inline;padding-left:0">Plan ansehen</button> · '+(nz?nz+(nz===1?" Spieler":" Spieler"):"noch niemandem freigegeben")+"</div></div>"
+      +'<div class="note"><button type="button" class="rm" data-etv="'+E(p.id)+'" style="text-decoration:underline;color:var(--ac);display:inline;padding-left:0">Plan ansehen</button>'+(p.v&&p.v.id?' · <button type="button" class="rm" data-etvv="'+E(p.id)+'" style="text-decoration:underline;color:var(--ac);display:inline;padding-left:0">Video ansehen</button>':"")+' · '+(nz?nz+(nz===1?" Spieler":" Spieler"):"noch niemandem freigegeben")+"</div></div>"
       +(ed?'<button class="btn" data-etpe="'+E(p.id)+'">Bearbeiten</button><button class="btn" data-etpd="'+E(p.id)+'">'+(UI.arm==="p"+p.id?(nz?"Plan und "+nz+" Freigabe(n) löschen?":"Wirklich löschen?"):"Löschen")+"</button>":"")+"</div>"};
   w.innerHTML=(req.length?'<div class="card"><h3>Anfragen für eine neue Stufe</h3>'+reqRows(req)+'<p class="note" style="margin:8px 0 0">Bei „Ja“ bekommt der Spieler sofort die neue Stufe, bei „Nein“ bleibt alles, wie es ist. Bei „Ja“ bekommt er eine kurze Antwort im Link, bei „Nein“ nur eine Benachrichtigung, außer du schreibst etwas dazu.</p></div>':"")
     +'<div class="card"><h3>Freigaben</h3><p class="note" style="margin-top:0">Wer welchen Plan macht. Die Tage erscheinen nur im Terminplan dieses Spielers. Ist an einem Wunschtag ein Termin, rutscht das Eigentraining auf den nächsten freien Tag derselben Woche.</p>'
@@ -3635,11 +3647,13 @@ function pForm(){const f=UI.pf;
   return'<div class="et-f" id="etpf"><label>Name des Plans<br><input type="text" id="etpt" maxlength="80" placeholder="z. B. Stabi-Plan" value="'+E(f.titel)+'"></label>'
     +'<label>Hinweis für die Spieler (freiwillig)<br><textarea id="etph" rows="2" maxlength="300" placeholder="z. B. Jede Übung 3 × 30 Sekunden">'+E(f.hinweis)+"</textarea></label>"
     +'<div class="note" style="margin:0 0 6px">Datei</div><div class="et-st"><span class="note">'+(f.file?E(f.file.name):f.f?E(f.f.name||"Datei vorhanden"):"Noch keine Datei")+'</span><label class="btn" style="margin:0!important;cursor:pointer">'+(f.f||f.file?"Austauschen":"Datei wählen")+'<input type="file" data-esf accept="application/pdf,image/*" hidden></label></div>'
+    +'<div class="note" style="margin:0 0 6px">Video (freiwillig, höchstens 10 MB)</div><div class="et-st"><span class="note">'+(f.vfile?E(f.vfile.name)+" · "+mb(f.vfile.size):f.v?E(f.v.name||"Video vorhanden")+(f.v.size?" · "+mb(f.v.size):""):"Noch kein Video")+'</span><label class="btn" style="margin:0!important;cursor:pointer">'+(f.v||f.vfile?"Austauschen":"Video wählen")+'<input type="file" data-esv accept="video/mp4,video/quicktime,video/*" hidden></label>'+(f.v||f.vfile?'<button type="button" class="btn" data-esvx aria-label="Video entfernen">✕</button>':"")+"</div>"
     +'<div class="note" style="margin:10px 0 6px">'+(f.st.length?"Stufen, wie sie im Plan stehen (Reihenfolge = Stufe 1, 2, 3 …)":"Stufen (freiwillig): Stehen im Plan mehrere Stufen, trag hier ihre Namen ein.")+"</div>"
     +f.st.map((n,i)=>'<div class="et-st"><input type="text" data-esn="'+i+'" maxlength="60" placeholder="Stufe '+(i+1)+'" value="'+E(n)+'"><button type="button" class="btn" data-esx="'+i+'" aria-label="Stufe entfernen">✕</button></div>').join("")
     +'<div class="bar" style="margin:4px 0 10px"><button type="button" class="btn" data-esa>＋ '+(f.st.length?"Weitere Stufe":"Plan hat Stufen")+"</button></div>"
     +'<div class="bar" style="margin:0"><button type="button" class="btn" data-etpc>Abbrechen</button><button type="button" class="btn" data-etps style="background:var(--ac);color:#fff;border-color:var(--ac)"'+(UI.busy?" disabled":"")+">"+(UI.busy?"Lädt hoch …":"Speichern")+'</button></div></div>'}
 function pRead(){const f=UI.pf;if(!f)return;const t=document.getElementById("etpt"),h=document.getElementById("etph");if(t)f.titel=t.value;if(h)f.hinweis=h.value;document.querySelectorAll("[data-esn]").forEach((i)=>{const k=+i.dataset.esn;if(k<f.st.length)f.st[k]=i.value})}
+const mb=(n)=>(n||0)<1e5?"unter 0,1 MB":(Math.round(n/1e5)/10).toLocaleString("de-DE")+" MB";
 async function readFile(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result));r.onerror=()=>rej(r.error);r.readAsDataURL(file)})}
 async function upload(file){
   const fid=hex(12),k=newKey(),d=await readFile(file),blob=await window.__lk.seal(k,{n:file.name,t:file.type||"",d}),parts=[];
@@ -3654,16 +3668,18 @@ async function pSave(){
   const st=f.st.map((n,i)=>n.trim()||"Stufe "+(i+1));
   if(st.length===1){note("Eine einzelne Stufe ist keine Stufe: bitte mindestens zwei eintragen oder die Stufe entfernen.",true);return}
   UI.busy=true;UI.force=true;render();
-  try{const old=f.id?ET.plans.find((p)=>p.id===f.id):null;let fi=f.f;
+  try{const old=f.id?ET.plans.find((p)=>p.id===f.id):null;let fi=f.f,vi=f.v||null;
     if(f.file)fi=await upload(f.file);
-    const id=f.id||nid("ep");await save("etplan",id,{titel,hinweis:f.hinweis.trim(),f:fi,stufen:st.map((n)=>({n})),am:new Date().toISOString()});
+    if(f.vfile)vi=await upload(f.vfile);
+    const id=f.id||nid("ep");await save("etplan",id,{titel,hinweis:f.hinweis.trim(),f:fi,v:vi,stufen:st.map((n)=>({n})),am:new Date().toISOString()});
     if(f.file&&f.f)dropFile(f.f);
+    if(old&&old.v&&old.v.id&&(!vi||vi.id!==old.v.id))dropFile(old.v);
     const n=Math.max(1,st.length);if(old&&n<nS(old))ET.zu.filter((z)=>z.plan===id&&(+z.st||0)>=n).forEach((z)=>save("etzu",z.id,{...strip(z),st:n-1}));
     UI.pf=null;UI.busy=false;note("Plan „"+titel+"“ gespeichert.");pubSoon()}
   catch(e){UI.busy=false;note("Das Hochladen hat nicht geklappt. Bitte noch einmal versuchen.",true)}
   UI.force=true;render()}
 async function pDelete(id){const p=ET.plans.find((x)=>x.id===id);if(!p)return;
-  try{for(const z of ET.zu.filter((z)=>z.plan===id))await save("etzu",z.id,null);await save("etplan",id,null);dropFile(p.f);note("Plan „"+p.titel+"“ gelöscht.");pubSoon()}catch(e){note("Das hat nicht geklappt.",true)}}
+  try{for(const z of ET.zu.filter((z)=>z.plan===id))await save("etzu",z.id,null);await save("etplan",id,null);dropFile(p.f);if(p.v)dropFile(p.v);note("Plan „"+p.titel+"“ gelöscht.");pubSoon()}catch(e){note("Das hat nicht geklappt.",true)}}
 
 /* --- Formular Freigabe --- */
 function zForm(){const f=UI.zf,P=players(),[s0,e0]=season(),p=ET.plans.find((x)=>x.id===f.plan);
@@ -3703,11 +3719,13 @@ document.addEventListener("click",async(e)=>{
   if((b=q("[data-etgo]"))){ET.show();return}
   const w=document.getElementById("etw");if(!w||!w.contains(e.target))return;
   if((b=q("[data-etv]"))){const p=ET.plans.find((x)=>x.id===b.dataset.etv);if(p&&p.f)openFile(()=>ET.blob(p.f),p.f,p.titel);return}
+  if((b=q("[data-etvv]"))){const p=ET.plans.find((x)=>x.id===b.dataset.etvv);if(p&&p.v)openFile(()=>ET.blob(p.v),p.v,p.titel+" · Video");return}
   if(!canEdit())return;
-  if(q("[data-etpn]")){UI.pf={id:null,titel:"",hinweis:"",f:null,file:null,st:[]};UI.msg="";UI.force=true;render();const t=document.getElementById("etpt");t&&t.focus();return}
-  if((b=q("[data-etpe]"))){const p=ET.plans.find((x)=>x.id===b.dataset.etpe);if(!p)return;UI.pf={id:p.id,titel:p.titel||"",hinweis:p.hinweis||"",f:p.f||null,file:null,st:multi(p)?p.stufen.map((s,i)=>stName(p,i)):[]};UI.msg="";UI.force=true;render();return}
+  if(q("[data-etpn]")){UI.pf={id:null,titel:"",hinweis:"",f:null,file:null,v:null,vfile:null,st:[]};UI.msg="";UI.force=true;render();const t=document.getElementById("etpt");t&&t.focus();return}
+  if((b=q("[data-etpe]"))){const p=ET.plans.find((x)=>x.id===b.dataset.etpe);if(!p)return;UI.pf={id:p.id,titel:p.titel||"",hinweis:p.hinweis||"",f:p.f||null,file:null,v:p.v&&p.v.id?p.v:null,vfile:null,st:multi(p)?p.stufen.map((s,i)=>stName(p,i)):[]};UI.msg="";UI.force=true;render();return}
   if(q("[data-etpc]")){UI.pf=null;UI.force=true;render();return}
   if(q("[data-esa]")){pRead();const f=UI.pf;if(!f.st.length)f.st.push("Stufe 1");f.st.push("Stufe "+(f.st.length+1));UI.force=true;render();return}
+  if(q("[data-esvx]")){pRead();UI.pf.v=null;UI.pf.vfile=null;UI.force=true;render();return}
   if((b=q("[data-esx]"))){pRead();UI.pf.st.splice(+b.dataset.esx,1);UI.force=true;render();return}
   if(q("[data-etps]")){if(!UI.busy)pSave();return}
   if((b=q("[data-etpd]"))){const k="p"+b.dataset.etpd;if(UI.arm!==k){UI.arm=k;render();return}UI.arm=null;await pDelete(b.dataset.etpd);return}
@@ -3723,6 +3741,9 @@ document.addEventListener("change",(e)=>{
   if(t.dataset.esf!=null){const f=t.files&&t.files[0];if(!f)return;if(f.size>MAXB){note("Die Datei ist zu groß (höchstens 5 MB). Tipp: als PDF in kleinerer Qualität speichern.",true);t.value="";return}
     if(!/^(application\/pdf|image\/)/.test(f.type||"")&&!/\.pdf$/i.test(f.name)){note("Bitte eine PDF-Datei oder ein Bild wählen.",true);t.value="";return}
     pRead();UI.pf.file=f;UI.force=true;render();return}
+  if(t.dataset.esv!=null){const f=t.files&&t.files[0];if(!f)return;if(f.size>MAXV){note("Das Video ist zu groß (höchstens 10 MB). Tipp: am Handy kürzer oder in kleinerer Qualität aufnehmen.",true);t.value="";return}
+    if(!/^video\//.test(f.type||"")&&!/\.(mp4|m4v|mov)$/i.test(f.name)){note("Bitte ein Video wählen (am besten MP4).",true);t.value="";return}
+    pRead();UI.pf.vfile=f;UI.force=true;render();return}
   if(t.id==="ezpl"){zRead();UI.zf.st=0;UI.force=true;render();return}
   if(t.dataset.etst!=null){const z=ET.zu.find((x)=>x.id===t.dataset.etst);if(!z)return;save("etzu",z.id,{...strip(z),st:+t.value,ab:null});const p=ET.plans.find((x)=>x.id===z.plan);note(pName(z.pid)+" ist jetzt in "+(p?stName(p,+t.value):"Stufe "+(+t.value+1))+".");pubSoon()}
 });
@@ -3786,19 +3807,31 @@ ET.ueb=(d,pid,r)=>{if(!d||!d.et||!d.et.length)return"";VX.d=d;VX.pid=pid;css();c
     return'<div class="vd-row" style="display:block"><b>'+E(x.t)+"</b>"+(n>1?' <span class="pill">'+E(x.s[x.c])+" von "+n+"</span>":"")
       +'<div class="note">'+E(tageTxt(x.w))+(x.b?" · bis "+E(dm(x.b)):"")+"</div>"+(x.h?'<div style="margin-top:4px;white-space:pre-wrap">'+E(x.h)+"</div>":"")
       +'<div style="margin-top:4px">'+(nx?"Nächstes Mal: <b>"+E(dsh(nx))+"</b>":"Keine weiteren Tage geplant.")+"</div>"
-      +'<div class="bar" style="margin:6px 0 0">'+(x.f?'<button class="btn" data-eto="'+E(x.i)+'" style="background:var(--ac);color:#fff;border-color:var(--ac)">Plan öffnen</button>':"")+"</div>"
+      +'<div class="bar" style="margin:6px 0 0">'+(x.f?'<button class="btn" data-eto="'+E(x.i)+'" style="background:var(--ac);color:#fff;border-color:var(--ac)">'+(/^image\//.test(x.f.t||"")?"🖼 Plan öffnen":"📄 PDF öffnen")+"</button>":"")+(x.vf?'<button class="btn" data-etvo="'+E(x.i)+'" style="background:var(--ac);color:#fff;border-color:var(--ac)">▶ Video ansehen</button>':"")+"</div>"
       +(n>1?'<div class="note" style="margin-top:6px">Stufen im Plan: '+x.s.map((s,i)=>i===x.c?"<b>"+E(s)+" (du)</b>":E(s)).join(" · ")+"</div>":"")
       +ask+"</div>"}).join("")+"</div>"};
 const fileBlob=(id)=>window.__webFile?window.__webFile(id):Promise.resolve(((window.__lk&&window.__lk.getSnap().f)||{})[id]||null);
 document.addEventListener("click",async(e)=>{
-  const root=document.getElementById("vw2");if(!root||!VX.d||!e.target.closest||!root.contains(e.target))return;let b;
+  const root=document.getElementById("vw2"),ovx=document.getElementById("etov");if(!root||!VX.d||!e.target.closest||!(root.contains(e.target)||(ovx&&ovx.contains(e.target))))return;let b;
   if((b=e.target.closest("[data-eto]"))){const x=VX.d.et.find((y)=>y.i===b.dataset.eto);if(x&&x.f)openFile(()=>fileBlob(x.f.id),x.f,x.t+(x.s.length>1?" · du bist in "+x.s[x.c]:""));return}
-  if((b=e.target.closest("[data-etw]"))){const x=VX.d.et.find((y)=>y.i===b.dataset.etw),V=window.__vid;if(!x||!V||!V.fbSend)return;const s=x.c+1;if(s>=x.s.length)return;
+  if((b=e.target.closest("[data-etvo]"))){const x=VX.d.et.find((y)=>y.i===b.dataset.etvo);if(x&&x.vf)openFile(()=>fileBlob(x.vf.id),x.vf,x.t+" · Video",x.s.length>1?"Du bist in <b>"+E(x.s[x.c])+"</b>.":"");return}
+  if((b=e.target.closest("[data-etw]"))){const x=VX.d.et.find((y)=>y.i===b.dataset.etw);if(!x)return;const s=x.c+1;if(s>=x.s.length)return;askView(x,s);return}
+  if((b=e.target.closest("[data-etwy]"))){const x=VX.d.et.find((y)=>y.i===b.dataset.etwy),V=window.__vid;if(!x||!V||!V.fbSend)return;const s=x.c+1;if(s>=x.s.length)return;
+    const ta=document.getElementById("etwg"),grund=(ta?ta.value:"").trim().slice(0,1500);
     b.disabled=true;const at=new Date().toISOString();
-    try{await V.fbSend(VX.d,VX.pid,"Stufe","Ich möchte bei „"+x.t+"“ "+inSt(x.s[s])+" wechseln.","st-"+x.i+"-"+s+"-"+hex(3));ls.set("u13etw."+VX.pid+"."+x.i,{s,at});
+    try{await V.fbSend(VX.d,VX.pid,"Stufe","Ich möchte bei „"+x.t+"“ "+inSt(x.s[s])+" wechseln."+(grund?GR+grund:""),"st-"+x.i+"-"+s+"-"+hex(3));ls.set("u13etw."+VX.pid+"."+x.i,{s,at});fileClose();
       const c=document.getElementById("vetc"),r=ls.get("u13wer."+VX.pid,null);if(c)c.outerHTML=ET.ueb(VX.d,VX.pid,r);window.__toast&&window.__toast("Anfrage gesendet. Dein Trainer meldet sich bei dir.")}
     catch(x2){b.disabled=false;window.__toast&&window.__toast("Das hat nicht geklappt. Bitte später noch einmal versuchen.",true)}}
 });
+/* Rückfrage vor der Stufen-Anfrage, mit freiwilliger Begründung (Phil 13.11.); liegt im selben Fenster wie Plan und Video */
+function askView(x,s){css();let ov=document.getElementById("etov");
+  if(!ov){ov=document.createElement("div");ov.id="etov";ov.setAttribute("role","dialog");ov.setAttribute("aria-modal","true");document.body.appendChild(ov)}
+  if(ovUrl){URL.revokeObjectURL(ovUrl);ovUrl=""}
+  ov.innerHTML='<div class="etov-c card" style="max-width:460px"><div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><b style="flex:1;min-width:0;overflow-wrap:anywhere">'+E(/^stufe\b/i.test(x.s[s])?"In "+x.s[s]+" wechseln?":"In „"+x.s[s]+"“ wechseln?")+'</b><button type="button" class="btn" data-etx aria-label="Schließen">✕</button></div>'
+    +'<p style="margin:4px 0 10px">Dein Trainer bekommt deine Anfrage und sagt Ja oder Nein. Bis dahin bleibst du in <b>'+E(x.s[x.c])+"</b>.</p>"
+    +'<label class="note" style="display:block">Warum möchtest du wechseln? (freiwillig)<br><textarea id="etwg" rows="3" maxlength="1500" style="margin-top:4px"></textarea></label>'
+    +'<div class="bar" style="margin:10px 0 0;justify-content:flex-end"><button type="button" class="btn" data-etx>Abbrechen</button><button type="button" class="btn" data-etwy="'+E(x.i)+'" style="background:var(--g);color:#fff;border-color:var(--g)">Ja, Anfrage senden</button></div></div>';
+  ov.hidden=false;const ta=document.getElementById("etwg");if(ta&&window.matchMedia&&matchMedia("(pointer:fine)").matches)ta.focus()}
 })();
 </script>
 <script>/* Kurze Rückmeldung nach einer Aktion (6 bis 8 Sekunden, antippen schließt) */
@@ -4356,7 +4389,8 @@ async function buildSnap(){
   const LI=ligaSnap(),TP=planSnap(),HN=((D.config&&D.config.hinweise)||[]).filter(Boolean),out={v:1,u:new Date().toISOString(),p:{},k:{}},logo=lgR(),sa=(D.config&&D.config.saison)||"",ETF={};
   for(const p of active()){const l=L[p.id];if(!l||!l.aktiv||!l.key)continue;const et=window.__et?window.__et.pkg(p.id,TP.days,ETF):[];out.p[p.id]=await seal(l.key,{...(window.__vid?window.__vid.pkg(p.id):{}),h:profExt()?profileHtml(p.id):"",l:logo,s:sa,m:mann(),v:vName(),u:out.u,t:TP,n:p.vorname,f:p.foto||"",hn:await hnFor(HN,p.id,l.key),...(D.config&&D.config.aufgQuote?{aq:1}:{}),li:LI,dz:"kobalt",...(et.length?{et}:{})});out.k[p.id]=await sha8(l.key)}
   /* Eigentraining: Dateien der freigegebenen Pläne (verschlüsselt mit eigenem Schlüssel, der nur im Link des Spielers steht) */
-  for(const id of Object.keys(ETF)){try{(out.f=out.f||{})[id]=await window.__et.blob(ETF[id])}catch(e){}}
+  /* Web: erst beim Hochladen laden (nur Dateien, die noch nicht online sind; spart bei Videos viel Datenvolumen) */
+  for(const id of Object.keys(ETF)){if(window.__WEB){(out.f=out.f||{})[id]=()=>window.__et.blob(ETF[id]);continue}try{(out.f=out.f||{})[id]=await window.__et.blob(ETF[id])}catch(e){}}
   out.bg=await bgSnap();out.dzs=dzSig();out.x={};out.xk={};
   for(const k of XK){const l=L["x"+k];if(!l||!l.aktiv||!l.key)continue;out.x[k]=await seal(l.key,k==="demosp"?{...demoPlayer(),k,u:out.u,l:logo,s:sa,m:mann(),v:vName(),dz:"kobalt"}:k==="plan"?{k,u:out.u,t:TP,l:logo,s:sa,m:mann(),v:vName(),hn:HN.filter((n)=>n.fuer!=="s"&&n.art!=="a"&&n.art!=="c"&&!Array.isArray(n.an)).map((n)=>{const x={...n};delete x.rp;delete x.rs;delete x.rk;return x}),dz:"kobalt"}:{k,u:out.u,db:extData(k),dz:"kobalt"});out.xk[k]=await sha8(l.key)}
   {const f=await fingerprintParts();out.fp=f.a+f.s;out.fa=f.a;out.fs=f.s}if(lkReady())out.ok=1;return out;
@@ -4379,6 +4413,7 @@ const saveLink=(pid,o)=>{
   return save("links",pid,d)};
 /* ---------- Kurzlinks (Trainer) ---------- */
 const kzVid=(pid)=>XOPEN.includes(pid)?pid.slice(1):pid,kzA={};
+window.__kzAids=()=>Object.values(kzA);
 async function kzPre(){await Promise.all(Object.keys(L).filter((k)=>L[k].alias&&!kzA[L[k].alias]).map(async(k)=>{kzA[L[k].alias]=await kzId(L[k].alias)}))}
 async function kzSet(pid,alias,key,aktiv,open,pw0){
   const Tr=window.__kurzTr,aid=await kzId(alias),t=newKey();

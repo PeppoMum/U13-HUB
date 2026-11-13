@@ -455,17 +455,25 @@ async function publishSnap(snap){
     for(let i=1;i<parts.length;i++){keep.add(id+"~"+i);await fs.doc("pub/"+id+"~"+i).set({b:parts[i]})}};
   for(const pid of Object.keys(snap.p||{}))await put("p_"+pid,snap.p[pid]);
   for(const k of Object.keys(snap.x||{}))await put("x_"+k,snap.x[k]);
-  /* Eigentraining-Dateien: ändern sich nie (neue Datei = neue ID), deshalb nur neue hochladen; Liste mit Teilezahl in linkmeta */
-  let ff0={};try{const m0=await fs.doc("linkmeta/main").get();ff0=(m0.exists&&m0.data().ff)||{}}catch(e){}
-  /* nur überspringen, wenn die Datei auch wirklich (mit allen Teilen) in „pub“ liegt – sonst neu hochladen (Fehler 10.11.: Plan beim Spieler nicht ladbar) */
-  const has=new Set((await fs.collection("pub").get()).docs.map((d)=>d.id)),da=(fid)=>{for(let i=0;i<ff0[fid];i++)if(!has.has("f_"+fid+(i?"~"+i:"")))return false;return true};
-  const ff={};for(const fid of Object.keys(snap.f||{})){if(ff0[fid]&&da(fid)){ff[fid]=ff0[fid];keep.add("f_"+fid);for(let i=1;i<ff0[fid];i++)keep.add("f_"+fid+"~"+i);continue}
-    await put("f_"+fid,snap.f[fid]);ff[fid]=Math.max(1,Math.ceil(snap.f[fid].length/CH))}
+  /* Eigentraining-Dateien (auch Videos): Teile zuerst, dann ein kleiner Kopf {b:"",n} – liegt der Kopf da, ist die Datei vollständig.
+     So lässt sich „ist online?“ mit einem winzigen Lesezugriff prüfen, ohne die ganze Datei zu laden (Phil 13.11.: Videos). */
+  const putF=async(id,b)=>{const parts=[];for(let i=0;i<b.length;i+=CH)parts.push(b.slice(i,i+CH));if(!parts.length)parts.push("");
+    for(let i=0;i<parts.length;i++){keep.add(id+"~"+(i+1));await fs.doc("pub/"+id+"~"+(i+1)).set({b:parts[i]})}
+    keep.add(id);await fs.doc("pub/"+id).set({b:"",n:parts.length+1});return parts.length+1};
+  const kopf=async(id)=>{try{const d=await fs.doc("pub/"+id).get();const x=d.exists?d.data():null;return x&&x.b===""&&(x.n|0)>1?x.n|0:0}catch(e){return 0}};
+  const blobOf=async(v)=>{try{return typeof v==="function"?await v():v}catch(e){return null}};
+  /* Eigentraining-Dateien: ändern sich nie (neue Datei = neue ID), deshalb nur neue hochladen; Liste mit Teilezahl in linkmeta.
+     Überspringen nur, wenn der Kopf online liegt (Fehler 10.11.: Plan beim Spieler nicht ladbar); Dateien im alten Format werden einmal neu hochgeladen. */
+  let m0=null;try{const m=await fs.doc("linkmeta/main").get();m0=m.exists?m.data():null}catch(e){}
+  const ff={};for(const fid of Object.keys(snap.f||{})){const id="f_"+fid,n=await kopf(id);if(n){ff[fid]=n;keep.add(id);for(let i=1;i<n;i++)keep.add(id+"~"+i);continue}
+    const b=await blobOf(snap.f[fid]);if(typeof b!=="string")continue;ff[fid]=await putF(id,b)}
   if(snap.bg){let bg=clean(snap.bg);if(JSON.stringify(bg).length>900000)bg={L:bg.L||"",D:bg.D||"",i:""};keep.add("bg");await fs.doc("pub/bg").set(bg)}
   keep.add("scout");
-  const all=await fs.collection("pub").get();
-  for(const d of all.docs){if(!keep.has(d.id)&&d.id.slice(0,2)!=="a_")await fs.doc("pub/"+d.id).delete()}
-  await fs.doc("linkmeta/main").set({u:snap.u,k:snap.k||{},xk:snap.xk||{},fp:snap.fp||"",fa:snap.fa||"",fs:snap.fs||"",dzs:snap.dzs||"",ok:snap.ok?1:0,ff});
+  /* Alte Fächer aufräumen: die Liste vom letzten Mal steht in linkmeta (die ganze Sammlung nur beim ersten Mal lesen, sie enthält auch alle Dateien) */
+  let prev=m0&&Array.isArray(m0.ids)?m0.ids:null;
+  if(!prev)prev=(await fs.collection("pub").get()).docs.map((d)=>d.id);
+  for(const id of prev)if(!keep.has(id)&&id.slice(0,2)!=="a_")await fs.doc("pub/"+id).delete();
+  await fs.doc("linkmeta/main").set({u:snap.u,k:snap.k||{},xk:snap.xk||{},fp:snap.fp||"",fa:snap.fa||"",fs:snap.fs||"",dzs:snap.dzs||"",ok:snap.ok?1:0,ff,ids:[...keep].filter((id)=>id!=="scout")});
 }
 /* Kurzlinks (Trainer): Passwort-Paket veröffentlichen/entfernen; das geheime Zeichen liegt nur für Trainer lesbar in „aliasauth“ */
 if(!isViewerHash&&!isScout)window.__kurzTr={
@@ -480,13 +488,29 @@ window.__webOwnerSnap=function(cb){
     const raw={};docs.forEach((d)=>{raw[d.id]=d.data()});
     const join=(id)=>{const m=raw[id];if(!m||typeof m.b!=="string")return null;let b=m.b;for(let i=1;i<(m.n||1);i++){const c=raw[id+"~"+i];if(!c)return null;b+=c.b}return b};
     const s={u:meta.u||"",k:meta.k||{},xk:meta.xk||{},fp:meta.fp||"",fa:meta.fa||"",fs:meta.fs||"",dzs:meta.dzs||"",ok:meta.ok|0,p:{},x:{},a:{}};
-    s.fh={};Object.keys(raw).forEach((id)=>{if(id.slice(0,2)==="f_"&&id.indexOf("~")<0&&join(id))s.fh[id.slice(2)]=1});   /* Eigentraining-Dateien, die vollständig online sind */
+    s.fh={...fhC};   /* Eigentraining-Dateien, die vollständig online sind */
     Object.keys(raw).forEach((id)=>{if(id.indexOf("~")>=0)return;if(id.slice(0,2)==="a_"){s.a[id]={s:raw[id].s,w:raw[id].w,v:raw[id].v|0};return}if(id.slice(0,2)==="p_"){const b=join(id);if(b)s.p[id.slice(2)]=b}else if(id.slice(0,2)==="x_"){const b=join(id);if(b)s.x[id.slice(2)]=b}});
     window.__webSnapReady=true;cb(s);
   };
   const later=()=>{clearTimeout(tm);tm=setTimeout(build,150)};
-  fs.collection("pub").onSnapshot((s)=>{docs=s.docs;later()},()=>{});
-  fs.doc("linkmeta/main").onSnapshot((s)=>{meta=s.exists?s.data():{};later()},()=>{});
+  /* Sparsam (13.11., wegen Videos): nicht die ganze Sammlung „pub“ beobachten (darin liegen alle Dateien), sondern nur die Link-Fächer laut linkmeta
+     (je Fach ein Beobachter, damit „Inhalt beschädigt“ weiter auffällt) und die Kurzlink-Fächer einzeln. */
+  const own={},al={},alU={},fhC={},ownU={};let bases=[];
+  const merge=()=>{docs=Object.keys(own).concat(Object.keys(al)).map((id)=>{const v=own[id]||al[id];return{id,data:()=>v}});later()};
+  const one=async(id)=>{try{const s=await fs.doc("pub/"+id).get();return s.exists?s.data():null}catch(e){return null}};
+  const syncOwn=()=>{const want=new Set(bases);bases.forEach((id)=>{const d=own[id];for(let i=1;i<((d&&d.n)||1);i++)want.add(id+"~"+i)});
+    Object.keys(ownU).forEach((id)=>{if(!want.has(id)){ownU[id]();delete ownU[id];delete own[id]}});
+    want.forEach((id)=>{if(ownU[id])return;ownU[id]=fs.doc("pub/"+id).onSnapshot((s)=>{if(s.exists)own[id]=s.data();else delete own[id];syncOwn();merge()},()=>{})});merge()};
+  const fetchOwn=async(m)=>{bases=Object.keys(m.k||{}).map((k)=>"p_"+k).concat(Object.keys(m.xk||{}).map((k)=>"x_"+k));syncOwn();
+    /* Eigentraining-Dateien: nur der kleine Kopf wird gelesen (altes Format zählt als fehlend und wird beim nächsten Veröffentlichen neu hochgeladen) */
+    for(const fid of Object.keys(m.ff||{})){if(fhC[fid])continue;const h=await one("f_"+fid);if(h&&h.b===""&&(h.n|0)>1)fhC[fid]=1}
+    merge()};
+  const watchA=()=>{const want=new Set(((window.__kzAids&&window.__kzAids())||[]).filter(Boolean));
+    Object.keys(alU).forEach((id)=>{if(!want.has(id)){alU[id]();delete alU[id];delete al[id];merge()}});
+    want.forEach((id)=>{if(alU[id])return;alU[id]=fs.doc("pub/"+id).onSnapshot((s)=>{if(s.exists)al[id]=s.data();else delete al[id];merge()},()=>{})})};
+  watchA();setInterval(watchA,3000);
+  let lastU=null;
+  fs.doc("linkmeta/main").onSnapshot((s)=>{meta=s.exists?s.data():{};const u=JSON.stringify([meta.u,meta.k,meta.xk,meta.ff]);if(u===lastU){later();return}lastU=u;fetchOwn(meta).catch(()=>{})},()=>{});
 };
 
 /* ---------- Konten für Spieler und Eltern ----------
