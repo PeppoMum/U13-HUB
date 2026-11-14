@@ -2698,9 +2698,21 @@ const myName=()=>{const v=ls.get("u13vname","");if(v)return v;const st=((D.confi
 const canW=()=>!!db&&window.__ROLE!=="lesen"&&window.__ROLE!=="scout"&&!window.__RO;
 /* Für die Spielerlinks (links.js): Clips je Spieler, ganze Spiele mit Video, Feedback-Schlüssel */
 V.clipsFor=(pid)=>V.clips.filter((c)=>sichtbar(c)&&c.s&&c.ck&&(c.an==="alle"||(Array.isArray(c.an)&&c.an.includes(pid))))
-  .map((c)=>({id:c.id,ti:c.titel||"",u:c.url||"",a:c.aufgabe||"",f:c.frist||"",at:c.at||"",s:c.s,ck:c.ck,n:c.an==="alle"?0:c.an.length}));
+  .map((c)=>({id:c.id,ti:c.titel||"",u:c.url||"",a:c.aufgabe||"",f:c.frist||"",at:c.at||"",s:c.s,ck:c.ck,n:c.an==="alle"?0:c.an.length,...(cvOk(c)?{vf:{id:c.v.id,k:c.v.k,n:c.v.name||"",t:c.v.typ||""}}:{})}));
+/* Video zum Clip (nur Mannschafts-App, Phil 13.11.): liegt verschlüsselt wie die Eigentraining-Dateien (etdatei, im Link pub/f_<id>),
+   wird nach 30 Tagen automatisch gelöscht (der Veo-Link bleibt). */
+const CV_TAGE=30,CV_MAX=10e6;
+const cvAlt=(c)=>c&&c.v&&c.v.am?Math.floor((Date.now()-Date.parse(c.v.am))/864e5):0;
+const cvOk=(c)=>!!(c&&c.v&&c.v.id&&c.v.k&&cvAlt(c)<CV_TAGE);
+V.files=(F)=>{if(!window.__et)return;V.clips.filter((c)=>sichtbar(c)&&c.s&&c.ck&&cvOk(c)).forEach((c)=>{F[c.v.id]=c.v})};
+let cvBusy=false;
+async function cvAufraeumen(){if(cvBusy||!canW()||!window.__WEB||!window.__et)return;const L=V.clips.filter((c)=>c.v&&c.v.id&&cvAlt(c)>=CV_TAGE);if(!L.length)return;cvBusy=true;
+  for(const c of L){try{const o={...c};delete o.id;delete o.v;await save("clips",c.id,o);window.__et.drop(c.v)}catch(e){}}cvBusy=false;pubSoon()}
+const CVF={file:null,del:false};
+const mbT=(n)=>(n||0)<1e5?"unter 0,1 MB":(Math.round(n/1e5)/10).toLocaleString("de-DE")+" MB";
+const cvTxt=(c)=>CVF.file?CVF.file.name+" · "+mbT(CVF.file.size):!CVF.del&&c.v&&c.v.id?(c.v.name||"Video")+" · noch "+Math.max(1,CV_TAGE-cvAlt(c))+" Tage":"Noch kein Video";
 V.games=()=>D.spiele.filter((g)=>urlOk(g.video)).map((g)=>({d:g.datum||"",g:g.gegner||"",ha:g.ha||"",a:g.art||"",e:g.tore!=null&&g.gt!=null?g.tore+":"+g.gt:"",v:g.video})).sort((a,b)=>a.d<b.d?1:-1);
-V.sig=()=>JSON.stringify([V.clips.filter(sichtbar).map((c)=>[c.id,c.titel,c.url,c.aufgabe,c.an,c.frist,c.bis,c.s]),V.games(),V.fbKey]);
+V.sig=()=>JSON.stringify([V.clips.filter(sichtbar).map((c)=>[c.id,c.titel,c.url,c.aufgabe,c.an,c.frist,c.bis,c.s,cvOk(c)?c.v.id:""]),V.games(),V.fbKey]);
 /* Dienste für die Übersicht im Spielerlink: alle (Materialdienst, Leibchen, Obst & Gemüse) nur im Link des eingeteilten Spielers – gilt auch für die Eltern-Ansicht.
    Welche gerade gelten, entscheidet der Spielerlink beim Anzeigen nach dem heutigen Datum (dsNow). */
 const DS_EIG=["Leibchen","Obst & Gemüse"];
@@ -2715,7 +2727,7 @@ V.pkg=(pid)=>({...(V.on()?{vc:V.clipsFor(pid),vg:V.games()}:{}),...(stufe()!=="b
 
 function startTrainer(){
   if(V.started||!db||window.__VIEWER||window.__SCOUT||window.__ROLE==="scout")return;V.started=true;addCss();gsLoad();
-  db.collection("clips").onSnapshot((s)=>{V.clips=s.docs.map((d)=>({id:d.id,...d.data()})).sort((a,b)=>(a.at||"")<(b.at||"")?1:-1);V.clipsGot=true;watchKom();render();typeof renderLinks==="function"&&renderLinks();window.__abView&&window.__abView()},()=>{V.clipsGot=true});
+  db.collection("clips").onSnapshot((s)=>{V.clips=s.docs.map((d)=>({id:d.id,...d.data()})).sort((a,b)=>(a.at||"")<(b.at||"")?1:-1);V.clipsGot=true;watchKom();render();cvAufraeumen();typeof renderLinks==="function"&&renderLinks();window.__abView&&window.__abView()},()=>{V.clipsGot=true});
   db.collection("fbin").onSnapshot((s)=>{V.fb=s.docs.map((d)=>({id:d.id,...d.data()})).sort((a,b)=>(a.at||"")<(b.at||"")?1:-1);badge();render();window.__et&&window.__et.fbChanged()},()=>{});
   (async()=>{try{const r=await db.doc("config/feedback").get();let k=r&&r.exists!==false&&r.data&&r.data()&&r.data().k;if(!k&&canW()&&window.__ROLE==="voll"){k=b64u(crypto.getRandomValues(new Uint8Array(18)));await db.doc("config/feedback").set({k})}V.fbKey=k||"";V.fbGot=true;typeof renderLinks==="function"&&renderLinks()}catch(e){V.fbGot=true}})();
 }
@@ -2811,6 +2823,7 @@ function formHtml(){
   const fd=c.frist?c.frist.slice(0,10):"",ft=c.frist&&c.frist.length>10?c.frist.slice(11,16):"18:00";
   return'<div class="card" id="vdform"><h3 style="margin-top:0">'+(c.id?"Clip bearbeiten":"Neuer Clip")+'</h3>'
     +'<label class="note" style="display:block;margin:0 0 8px">Link zum Clip (z. B. Veo-Teilen-Link)<br><input id="vdu" type="url" inputmode="url" placeholder="https://…" value="'+esc(c.url||"")+'" style="width:100%"></label>'
+    +'<div class="note" style="margin:0 0 4px">Video (freiwillig, höchstens 10 MB, wird nach '+CV_TAGE+' Tagen gelöscht)</div><div class="bar" style="margin:0 0 8px;align-items:center"><span class="note" id="vdvn">'+esc(cvTxt(c))+'</span><label class="btn" style="margin:0!important;cursor:pointer">'+(c.v||CVF.file?"Austauschen":"Video wählen")+'<input type="file" id="vdvf" accept="video/mp4,video/quicktime,video/*" hidden></label><button type="button" class="btn" id="vdvx" aria-label="Video entfernen"'+((c.v&&!CVF.del)||CVF.file?"":" hidden")+'>✕</button></div>'
     +'<label class="note" style="display:block;margin:0 0 8px">Titel<br><input id="vdt" maxlength="120" value="'+esc(c.titel||"")+'" style="width:100%"></label>'
     +'<label class="note" style="display:block;margin:0 0 8px">Aufgabe (freiwillig)<br><textarea id="vda" rows="3" maxlength="1500" style="width:100%;box-sizing:border-box">'+esc(c.aufgabe||"")+"</textarea></label>"
     +'<div class="note" style="margin:0 0 4px">Wer bekommt den Clip?</div><div class="seg" id="vdan" style="margin:0 0 6px"><button type="button" data-an="alle" class="'+(alle?"on":"")+'">Ganze Mannschaft</button><button type="button" data-an="ein" class="'+(alle?"":"on")+'">Einzelne Spieler</button></div>'
@@ -2834,7 +2847,7 @@ function detailHtml(){
   const c=V.clips.find((x)=>x.id===V.sel);if(!c)return'<div class="card"><div class="note">Wähle links einen Clip, um die Kommentare zu sehen und zu antworten.</div></div>';
   const R=recips(c),K=V.kom[c.id]||[],done=new Set(K.filter((k)=>!k.tr&&!k.r).map((k)=>k.p)),ro=!canW(),armed=V.armed==="d"+c.id;
   return'<div class="card" id="vddet"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start"><div style="flex:1;min-width:200px"><h3 style="margin:0;font-size:18px;text-transform:none;letter-spacing:0">'+esc(c.titel||"(ohne Titel)")+'</h3><div class="note">'+(c.an==="alle"?"Ganze Mannschaft":"An "+esc(R.map((p)=>p.vorname).join(", ")))+(c.frist?" · kommentieren bis "+esc(fristTxt(c.frist)):"")+"</div></div>"
-    +'<div class="bar" style="margin:0">'+(urlOk(c.url)?'<a class="btn" href="'+esc(c.url)+'" target="_blank" rel="noopener noreferrer">Ansehen</a>':"")+(ro?"":'<button class="btn" data-vce="'+esc(c.id)+'">Bearbeiten</button><button class="btn'+(armed?" arm":"")+'" data-vcd="'+esc(c.id)+'">'+(armed?"Wirklich löschen?":"Löschen")+"</button>")+"</div></div>"
+    +'<div class="bar" style="margin:0">'+(urlOk(c.url)?'<a class="btn" href="'+esc(c.url)+'" target="_blank" rel="noopener noreferrer">Ansehen</a>':"")+(cvOk(c)?'<button class="btn" data-vcv="'+esc(c.id)+'">▶ Video</button>':"")+(ro?"":'<button class="btn" data-vce="'+esc(c.id)+'">Bearbeiten</button><button class="btn'+(armed?" arm":"")+'" data-vcd="'+esc(c.id)+'">'+(armed?"Wirklich löschen?":"Löschen")+"</button>")+"</div></div>"
     +(c.aufgabe?'<div class="vd-auf" style="margin:10px 0"><b>Aufgabe</b><div style="white-space:pre-wrap">'+esc(c.aufgabe)+"</div></div>":"")
     +'<div class="vd-miss" style="margin:8px 0 12px">'+R.map((p)=>'<span class="'+(done.has(p.id)?"":"no")+'">'+esc(p.vorname)+(done.has(p.id)?" ✓":" fehlt noch")+"</span>").join("")+"</div>"
     +'<div style="display:flex;flex-direction:column;gap:8px" id="vdk">'+(K.length?treeHtml(K,{reply:!ro,del:!ro}):'<div class="note">Noch keine Kommentare.</div>')+"</div>"
@@ -2906,12 +2919,15 @@ async function saveClip(){
   if(b===null){msg("Das Datum bei „Für Spieler sichtbar bis“ stimmt nicht (z. B. 26.10.2026).",true);return}
   const old=V.edit&&V.edit!=="neu"?V.clips.find((x)=>x.id===V.edit):null;
   const c={id:old?old.id:nid("cl"),titel:t,url:u,aufgabe:a,an:alle?"alle":sel,frist:fd?fd+"T"+(ft||"18:00"):"",bis:b||"",at:old&&old.at||new Date().toISOString(),s:old&&old.s||hex(32),ck:old&&old.ck||b64u(crypto.getRandomValues(new Uint8Array(16)))};
-  try{if(!old)await db.doc("clipauth/"+c.s).set({c:c.id});await save("clips",c.id,c);V.edit=null;V.sel=c.id;draw();msg(old?"Gespeichert.":"Clip gespeichert. Er erscheint in den Spielerlinks der Empfänger.");pubSoon();
+  let cvAlt0=null;if(old&&old.v&&old.v.id&&!CVF.del&&!CVF.file)c.v=old.v;else if(old&&old.v&&old.v.id)cvAlt0=old.v;
+  if(CVF.file){const sv=$("#vdsave");if(sv){sv.disabled=true;sv.textContent="Video lädt hoch …"}
+    try{c.v={...(await window.__et.upload(CVF.file)),am:new Date().toISOString()}}catch(e){if(sv){sv.disabled=false;sv.textContent="Speichern"}msg("Das Video konnte nicht hochgeladen werden. Bitte noch einmal versuchen.",true);return}}
+  try{if(!old)await db.doc("clipauth/"+c.s).set({c:c.id});await save("clips",c.id,c);if(cvAlt0)window.__et.drop(cvAlt0);CVF.file=null;CVF.del=false;V.edit=null;V.sel=c.id;draw();msg(old?"Gespeichert.":"Clip gespeichert. Er erscheint in den Spielerlinks der Empfänger.");pubSoon();
     if(!old)pushQ(nid("q"),{art:"clip",an:c.an});if(!old||old.frist!==c.frist||JSON.stringify(old.an)!==JSON.stringify(c.an))fristQ(c)}catch(e){msg("Das konnte nicht gespeichert werden.",true)}
 }
 async function delClip(id){const c=V.clips.find((x)=>x.id===id);if(!c)return;
   try{if(window.__WEB&&c.s){try{const s=await db.collection("kom").doc(c.s).collection("m").get();for(const d of s.docs)await db.collection("kom").doc(c.s).collection("m").doc(d.id).delete()}catch(e){}await db.doc("clipauth/"+c.s).delete().catch(()=>{})}
-    await save("clips",id,null);pushQdel("f_"+id);V.sel=null;draw();msg("Clip gelöscht.");pubSoon()}catch(e){msg("Das konnte nicht gelöscht werden.",true)}}
+    await save("clips",id,null);if(c.v&&window.__et)window.__et.drop(c.v);pushQdel("f_"+id);V.sel=null;draw();msg("Clip gelöscht.");pubSoon()}catch(e){msg("Das konnte nicht gelöscht werden.",true)}}
 async function postKom(){
   const c=V.clips.find((x)=>x.id===V.sel),ta=$("#vdrt");if(!c||!ta)return;const t=ta.value.trim();if(!t)return;
   const id=nid("k"),o={p:"T",n:myName(),t,r:V.repTo||"",tr:true},an=V.repTo&&(V.kom[c.id]||[]).find((k)=>k.id===V.repTo&&!k.tr&&k.p);
@@ -2928,12 +2944,14 @@ document.addEventListener("click",async(e)=>{
   if((b=q("[data-vt]"))){V.tab=b.dataset.vt;draw();return}
   if((b=q("[data-ft]"))){V.ftab=b.dataset.ft;V.armed=null;drawFb();return}
   if((b=q("[data-vco]"))){V.sel=b.dataset.vco;V.seen("c",V.sel);V.tab="c";V.repTo=null;V.armed=null;const n=document.querySelector('nav button[data-s="v"]');n&&n.click();setTimeout(()=>{const d=$("#vddet");if(d&&window.innerWidth<900)d.scrollIntoView({block:"start"})},50);return}
-  if(q("#vdnew")){V.edit="neu";draw();const u=$("#vdu");u&&u.focus();return}
-  if(q("#vdcancel")){V.edit=null;draw();return}
+  if(q("#vdnew")){V.edit="neu";CVF.file=null;CVF.del=false;draw();const u=$("#vdu");u&&u.focus();return}
+  if(q("#vdcancel")){V.edit=null;CVF.file=null;CVF.del=false;draw();return}
+  if(q("#vdvx")){CVF.file=null;CVF.del=true;const n=$("#vdvn"),x=$("#vdvx");if(n)n.textContent="Noch kein Video";if(x)x.hidden=true;return}
+  if((b=q("[data-vcv]"))){const c=V.clips.find((x)=>x.id===b.dataset.vcv);if(c&&cvOk(c))window.__et.openFile(()=>window.__et.blob(c.v),c.v,(c.titel||"Clip")+" · Video");return}
   if(q("#vdsave")){saveClip();return}
   if((b=q("#vdan button"))){document.querySelectorAll("#vdan button").forEach((x)=>x.classList.toggle("on",x===b));$("#vdps").hidden=b.dataset.an==="alle";return}
   if((b=q("[data-vc]"))){V.sel=b.dataset.vc;V.seen("c",V.sel);V.repTo=null;V.armed=null;draw();const d=$("#vddet");if(d&&window.innerWidth<900)d.scrollIntoView({behavior:"smooth",block:"start"});return}
-  if((b=q("[data-vce]"))){V.edit=b.dataset.vce;draw();const f=$("#vdform");f&&f.scrollIntoView({block:"start"});return}
+  if((b=q("[data-vce]"))){V.edit=b.dataset.vce;CVF.file=null;CVF.del=false;draw();const f=$("#vdform");f&&f.scrollIntoView({block:"start"});return}
   if((b=q("[data-vcd]"))){const k="d"+b.dataset.vcd;if(V.armed!==k){V.armed=k;draw();return}V.armed=null;delClip(b.dataset.vcd);return}
   if((b=q("[data-krep]"))){V.repTo=b.dataset.krep;draw();const t=$("#vdrt");t&&t.focus();return}
   if(q("[data-vrx]")){V.repTo=null;draw();return}
@@ -2946,6 +2964,10 @@ document.addEventListener("click",async(e)=>{
     if(q("[data-fbd]")){const k="f"+x.id;if(V.armed!==k){V.armed=k;drawFb();return}V.armed=null;save("fbin",x.id,null);return}}
 });
 document.addEventListener("keydown",(e)=>{if(e.key==="Enter"&&(e.metaKey||e.ctrlKey)&&e.target&&e.target.id==="vdrt")postKom()});
+document.addEventListener("change",(e)=>{const t=e.target;if(!t||t.id!=="vdvf")return;const f=t.files&&t.files[0];if(!f)return;
+  if(f.size>CV_MAX){msg("Das Video ist zu groß (höchstens 10 MB).",true);t.value="";return}
+  if(!/^video\//.test(f.type||"")&&!/\.(mp4|m4v|mov)$/i.test(f.name||"")){msg("Bitte ein Video wählen (am besten MP4).",true);t.value="";return}
+  CVF.file=f;CVF.del=false;const n=$("#vdvn"),x=$("#vdvx");if(n)n.textContent=cvTxt({});if(x)x.hidden=false});
 /* Sichtbarkeit: Reiter nur für Trainer; zeichnen, wenn er geöffnet wird */
 document.addEventListener("click",(e)=>{const b=e.target.closest&&e.target.closest('nav button[data-s="v"],nav button[data-s="fb"]');if(b)setTimeout(()=>{b.dataset.s==="v"?draw():drawFb();badge()},0)});
 const boot=()=>{if(window.__VIEWER||window.__SCOUT)return;if(typeof db!=="undefined"&&db&&window.__dbUp)startTrainer();else setTimeout(boot,400)};
@@ -3065,7 +3087,7 @@ function clipHtml(c,pid){
   let body="";
   if(open){
     const others=K?K.filter((k)=>!(k.p===pid&&!k.tr)&&!k.r).length:0;
-    body='<div class="vd-bd">'+veoBtn(c.u,"Clip bei Veo ansehen")
+    body='<div class="vd-bd">'+veoBtn(c.u,"Clip bei Veo ansehen")+(c.vf&&window.__et?'<button type="button" class="vd-veo" data-cvo="'+esc(c.id)+'" style="font:inherit;cursor:pointer;width:100%">'+SVG.play+"Video hier ansehen</button>":"")
       +(c.a?'<div class="vd-auf"><b>Deine Aufgabe</b><div style="font-size:15px;margin-top:3px;white-space:pre-wrap">'+esc(c.a)+"</div>"+(c.f?'<div class="note" style="margin-top:6px">Kommentieren bis '+esc(fristTxt(c.f))+"</div>":"")+"</div>":"")
       +(!net()?'<div class="note">Kommentieren ist in dieser Ansicht nicht möglich.</div>':K==null?'<div class="note">Kommentare werden geladen …</div>':!done
         ?'<label class="note" for="vkt" style="font-weight:600;color:var(--tx)">Deine Meinung</label><textarea id="vkt" class="vd-ta" rows="3" maxlength="2000" placeholder="Was siehst du in der Szene?"></textarea><button class="vd-go" data-ksend="'+esc(c.id)+'">Abschicken</button><div class="note">Du kannst deinen Kommentar '+EDIT_MIN+" Minuten lang ändern.</div>"+(others?'<div class="vd-hint" style="background:var(--grs);border-color:var(--ln);margin:0">'+SVG.lock+'<div style="font-size:13px">'+others+(others===1?" Kommentar":" Kommentare")+" der anderen siehst du, sobald du deine eigene Meinung geschrieben hast.</div></div>":"")
@@ -3122,6 +3144,7 @@ document.addEventListener("click",async(e)=>{
   if((b=q("[data-hx]"))){const L=ls.get("u13vhx."+pid,[]);L.push(b.dataset.hx);ls.set("u13vhx."+pid,L);VW.repaint();return}
   if((b=q("[data-vv]"))){VW.sub=b.dataset.vv;VW.paint("v");return}
   if((b=q("[data-clt]"))){const id=b.dataset.clt;VW.open=VW.open===id?null:id;VW.kOpen=null;VW.rep=null;if(VW.open){seenAdd(pid,id);vidTab();const c=(d.vc||[]).find((x)=>x.id===id);if(c&&n&&!(VW.kom&&VW.kom[id])){VW.paint("v");const K=await loadKom(c);if(K){VW.kom=VW.kom||{};VW.kom[id]=K}}}VW.paint("v");return}
+  if((b=q("[data-cvo]"))){const c=(d.vc||[]).find((x)=>x.id===b.dataset.cvo);if(c&&c.vf&&window.__et)window.__et.openFile(()=>window.__webFile?window.__webFile(c.vf.id):Promise.resolve(((window.__lk&&window.__lk.getSnap().f)||{})[c.vf.id]||null),c.vf,(c.ti||"Clip")+" · Video");return}
   if((b=q("[data-kshow]"))){const id=b.dataset.kshow;VW.kOpen=VW.kOpen===id?null:id;VW.rep=null;if(VW.kOpen){const c=(d.vc||[]).find((x)=>x.id===id),K=await loadKom(c);if(K)VW.kom[id]=K;markReplies(pid,(VW.kom[id]||[]).filter((k)=>k.tr).map((k)=>k.id))}VW.paint("v");return}
   if((b=q("[data-krep]"))){VW.rep={c:VW.open,k:b.dataset.krep};VW.paint("v");const t=document.getElementById("vkr");t&&t.focus();return}
   if(q("[data-krx]")){VW.rep=null;VW.paint("v");return}
@@ -3546,6 +3569,7 @@ async function openFile(getBlob,f,ti,sx){
   try{const b=await getBlob();if(!b)throw new Error("fehlt");const o=await window.__lk.unseal(f.k,b);o.ti=ti;o.sx=sx||"";fileView(o)}
   catch(e){fileView(null,/^video\//.test(f.t||f.typ||"")?"Das Video konnte nicht geladen werden. Bitte später noch einmal versuchen.":"Der Plan konnte nicht geladen werden. Bitte später noch einmal versuchen.")}
 }
+ET.openFile=(g,f,ti,sx)=>{css();return openFile(g,f,ti,sx)};
 document.addEventListener("click",(e)=>{if(!e.target.closest)return;const ov=document.getElementById("etov");if(!ov||ov.hidden)return;if(e.target.closest("[data-etx]")||e.target===ov)fileClose()});
 document.addEventListener("keydown",(e)=>{if(e.key==="Escape")fileClose()});
 
@@ -3661,6 +3685,7 @@ async function upload(file){
   for(let i=0;i<parts.length;i++)await db.collection("etdatei").doc(fid+"_"+i).set({b:parts[i]});
   ET.blobs[fid]=blob;return{id:fid,k,name:file.name,typ:file.type||"",size:file.size,parts:parts.length}}
 const dropFile=(f)=>{if(!f||!f.id)return;for(let i=0;i<(f.parts||1);i++)db.collection("etdatei").doc(f.id+"_"+i).delete().catch(()=>{});delete ET.blobs[f.id]};
+ET.upload=upload;ET.drop=dropFile;    /* auch für Videos zu Clips (videos.js) */
 async function pSave(){
   pRead();const f=UI.pf,titel=f.titel.trim();
   if(!titel){note("Bitte einen Namen für den Plan eintragen.",true);return}
@@ -4390,6 +4415,7 @@ async function buildSnap(){
   for(const p of active()){const l=L[p.id];if(!l||!l.aktiv||!l.key)continue;const et=window.__et?window.__et.pkg(p.id,TP.days,ETF):[];out.p[p.id]=await seal(l.key,{...(window.__vid?window.__vid.pkg(p.id):{}),h:profExt()?profileHtml(p.id):"",l:logo,s:sa,m:mann(),v:vName(),u:out.u,t:TP,n:p.vorname,f:p.foto||"",hn:await hnFor(HN,p.id,l.key),...(D.config&&D.config.aufgQuote?{aq:1}:{}),li:LI,dz:"kobalt",...(et.length?{et}:{})});out.k[p.id]=await sha8(l.key)}
   /* Eigentraining: Dateien der freigegebenen Pläne (verschlüsselt mit eigenem Schlüssel, der nur im Link des Spielers steht) */
   /* Web: erst beim Hochladen laden (nur Dateien, die noch nicht online sind; spart bei Videos viel Datenvolumen) */
+  if(window.__vid&&window.__vid.files)window.__vid.files(ETF);   /* Mannschafts-App: Videos zu Clips (13.11.) */
   for(const id of Object.keys(ETF)){if(window.__WEB){(out.f=out.f||{})[id]=()=>window.__et.blob(ETF[id]);continue}try{(out.f=out.f||{})[id]=await window.__et.blob(ETF[id])}catch(e){}}
   out.bg=await bgSnap();out.dzs=dzSig();out.x={};out.xk={};
   for(const k of XK){const l=L["x"+k];if(!l||!l.aktiv||!l.key)continue;out.x[k]=await seal(l.key,k==="demosp"?{...demoPlayer(),k,u:out.u,l:logo,s:sa,m:mann(),v:vName(),dz:"kobalt"}:k==="plan"?{k,u:out.u,t:TP,l:logo,s:sa,m:mann(),v:vName(),hn:HN.filter((n)=>n.fuer!=="s"&&n.art!=="a"&&n.art!=="c"&&!Array.isArray(n.an)).map((n)=>{const x={...n};delete x.rp;delete x.rs;delete x.rk;return x}),dz:"kobalt"}:{k,u:out.u,db:extData(k),dz:"kobalt"});out.xk[k]=await sha8(l.key)}
@@ -4532,7 +4558,7 @@ async function lkHealth(){
   const off=pubIds.filter((id)=>{const l=L[id]||{};return P.some((p)=>p.id===id)&&!(l.aktiv&&l.key)}).length+pubIds.filter((id)=>!P.some((p)=>p.id===id)).length+xGone();
   if(off&&!window.__WEB)W.push(off+" Link(s) sind noch online, obwohl sie abgeschaltet oder der Spieler nicht mehr aktiv ist – beim nächsten Aktualisieren werden sie entfernt.");
   /* Eigentraining: freigegebene Plan-Datei fehlt online -> einmal neu veröffentlichen (Fehler 10.11.: „Der Plan konnte nicht geladen werden“) */
-  let fMiss="";if(window.__WEB&&SNAP.fh&&window.__et){const F={};for(const p of P){const l=L[p.id]||{};if(l.aktiv&&l.key)window.__et.pkg(p.id,{},F)}
+  let fMiss="";if(window.__WEB&&SNAP.fh&&window.__et){const F={};for(const p of P){const l=L[p.id]||{};if(l.aktiv&&l.key)window.__et.pkg(p.id,{},F)}if(window.__vid&&window.__vid.files)window.__vid.files(F);
     const miss=Object.keys(F).filter((id)=>!SNAP.fh[id]).sort().join();if(miss&&miss!==lkFTry)fMiss=miss}
   const fpp=await fingerprintParts();if(my!==lkTok)return;
   if(window.__WEB){/* Web-Version: automatisch veröffentlichen (Link-Änderungen sofort, neue Daten alle 6 Stunden) */
